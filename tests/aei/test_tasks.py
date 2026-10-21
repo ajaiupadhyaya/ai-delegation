@@ -73,3 +73,20 @@ def test_is_canonical():
     assert not schema.is_canonical("bogus_pct")
     assert set(schema.PANEL_COLUMNS) >= {"release", "metric", "value"}
     assert len(schema.PANEL_COLUMNS) == 13
+
+
+def test_occupations_for_text_unions_all_ids(tmp_path):
+    idx = TaskIndex.from_onet(
+        _onet(tmp_path, [("11-1011.00", 9, "Same text."), ("11-1021.00", 3, "Same text.")])
+    )
+    assert idx.occupations_for(3) == ["11-1021.00"]
+    assert idx.occupations_for_text("  SAME text ") == ["11-1011.00", "11-1021.00"]
+    assert idx.occupations_for_text("nope") == []
+
+
+def test_null_name_kept(tmp_path):
+    idx = TaskIndex.from_onet(_onet(tmp_path, [("11-1011.00", 1, "Do a thing.")]))
+    out = match_tasks(pl.Series("task_name", [None, "do a thing"], dtype=pl.String), idx)
+    assert out.height == 2
+    assert out["task_id"][0] is None and out["n_candidates"][0] == 0
+    assert out["task_id"][1] == 1

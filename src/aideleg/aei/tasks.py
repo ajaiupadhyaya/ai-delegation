@@ -46,10 +46,20 @@ class TaskIndex:
     def occupations_for(self, task_id: int) -> list[str]:
         return list(self._occ_by_id.get(task_id, []))
 
+    def occupations_for_text(self, text: str) -> list[str]:
+        """Sorted union of O*NET-SOC codes over every Task ID carrying this statement."""
+        return sorted({o for i in self.task_ids_for(text) for o in self.occupations_for(i)})
+
 
 def match_tasks(names: pl.Series, index: TaskIndex) -> pl.DataFrame:
-    """One row per input name; task_id is the smallest candidate ID, null when unmatched."""
-    cands = [index.task_ids_for(n) for n in names.to_list()]
+    """One row per input name; task_id is the smallest candidate ID, null when unmatched.
+
+    `task_id` is a representative ID only. The same statement can carry different Task IDs
+    in different occupations, so occupation allocation must use
+    `TaskIndex.occupations_for_text`, not `occupations_for(task_id)`.
+    Null names are kept, with null task_id and n_candidates 0.
+    """
+    cands = [index.task_ids_for(n) if n is not None else [] for n in names.to_list()]
     return pl.DataFrame(
         {
             "task_name": names.to_list(),
