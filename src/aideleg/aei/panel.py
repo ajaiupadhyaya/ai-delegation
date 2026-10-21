@@ -39,8 +39,9 @@ def _path(raw: Path, key: str) -> Path:
     return raw / by_key(key).dest
 
 
-def build_panel(raw: Path = RAW) -> pl.DataFrame:
-    """Parse r1-r6 under `raw`, stack them, and write `DERIVED/aei_panel.parquet`."""
+def build_panel(raw: Path = RAW, write: bool = True) -> pl.DataFrame:
+    """Parse r1-r6 under `raw`, stack them, and write `DERIVED/aei_panel.parquet`
+    (unless `write=False`)."""
     index = TaskIndex.from_onet(_path(raw, "aei_onet_tasks"))
     frames = [
         parse_r1(_path(raw, "aei_r1_task_pct").parent, index),
@@ -53,9 +54,19 @@ def build_panel(raw: Path = RAW) -> pl.DataFrame:
     for key, source in SOURCES.items():
         frames.append(parse_r6(_path(raw, f"aei_r6_{key}"), source, index))
     df = pl.concat([f.select(PANEL_COLUMNS) for f in frames]).sort(_KEY)
-    DERIVED.mkdir(parents=True, exist_ok=True)
-    df.write_parquet(DERIVED / "aei_panel.parquet")
+    if write:
+        write_panel(df)
     return df
+
+
+def write_panel(df: pl.DataFrame) -> Path:
+    """Write the panel atomically (temp file, then rename)."""
+    DERIVED.mkdir(parents=True, exist_ok=True)
+    dest = DERIVED / "aei_panel.parquet"
+    tmp = dest.with_suffix(".parquet.tmp")
+    df.write_parquet(tmp)
+    tmp.replace(dest)
+    return dest
 
 
 @dataclass

@@ -99,6 +99,7 @@ def test_report_markdown_lists_every_check():
     assert "unmatched" in md
 
 
+@pytest.mark.data
 @pytest.mark.skipif(not PANEL_PATH.exists(), reason="run `make panel` first")
 def test_panel_row_counts_pinned():
     df = pl.read_parquet(PANEL_PATH)

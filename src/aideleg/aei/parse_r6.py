@@ -32,6 +32,10 @@ Metrics:
 - `usage_pct` for subregions is a share of the parent country, as published; it is not
   rescaled.
 
+r6 publishes no `not_classified_pct` (only `collaboration_none_pct`), so `none_pct` here is a
+share of conversations whose denominator differs slightly from r3-r5, where AEI folds
+suppressed cells into `not_classified`.
+
 Rows are never imputed: a cell AEI did not publish has no row.
 """
 
@@ -74,17 +78,17 @@ _SCHEMA = {
 
 def _read(path: Path) -> pl.DataFrame:
     con = duckdb.connect()
-    return con.sql(f"""
+    return con.sql("""
         SELECT date_start AS period_start, date_end AS period_end, geo_id, geo_level,
                category_name, hierarchy_level, metric_id, value, node_name, node_external_id
-        FROM read_csv('{path}', header=true, delim=',', quote='"', escape='"', nullstr='',
-            columns={{'date_start': 'DATE', 'date_end': 'DATE', 'geo_id': 'VARCHAR',
+        FROM read_csv(?, header=true, delim=',', quote='"', escape='"', nullstr='',
+            columns={'date_start': 'DATE', 'date_end': 'DATE', 'geo_id': 'VARCHAR',
                       'geo_level': 'VARCHAR', 'category_name': 'VARCHAR',
                       'hierarchy_level': 'BIGINT', 'metric_id': 'VARCHAR',
                       'value': 'DOUBLE', 'node_name': 'VARCHAR',
-                      'node_external_id': 'VARCHAR'}})
+                      'node_external_id': 'VARCHAR'})
         WHERE value IS NOT NULL
-    """).pl()
+    """, params=[str(path)]).pl()
 
 
 def _task_ids(raw: pl.DataFrame, index: TaskIndex) -> dict[str, str]:

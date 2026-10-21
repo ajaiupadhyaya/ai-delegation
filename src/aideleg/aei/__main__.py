@@ -2,19 +2,23 @@
 
 import sys
 
-from aideleg.aei.panel import build_panel, check_panel
+from aideleg.aei.panel import build_panel, check_panel, write_panel
 from aideleg.config import ROOT
 
 REPORT = ROOT / "docs/audit/tables/panel_quality.md"
 
 
 def main() -> int:
-    df = build_panel()
+    df = build_panel(write=False)
     rep = check_panel(df)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(rep.to_markdown())
+    if not rep.ok:
+        print(f"quality checks FAILED, panel not written; report {REPORT}")
+        return 1
+    write_panel(df)
     print(f"{df.height} rows -> data/derived/aei_panel.parquet; report {REPORT}")
-    return 0 if rep.ok else 1
+    return 0
 
 
 if __name__ == "__main__":

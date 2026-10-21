@@ -31,3 +31,4 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["data: needs built data under data/ (e.g. `make panel`)"]
