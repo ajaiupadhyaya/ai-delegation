@@ -1,0 +1,362 @@
+{
+  "aei_geo_gdp_country": {
+    "key": "aei_geo_gdp_country",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/gdp_2024_country.csv",
+    "dest": "aei/r3/gdp_2024_country.csv",
+    "retrieved_utc": "2026-10-21T21:13:17Z",
+    "bytes": 4115,
+    "sha256": "e0618d6ba634a612b97b1c82f521ab38a387216069818a86f50c9aaf8e2bda6c"
+  },
+  "aei_geo_gdp_us_state": {
+    "key": "aei_geo_gdp_us_state",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/gdp_2024_us_state.csv",
+    "dest": "aei/r3/gdp_2024_us_state.csv",
+    "retrieved_utc": "2026-10-21T21:13:18Z",
+    "bytes": 2179,
+    "sha256": "cb1573e8143bd407c2ea7c43f5a6822852568c596dbde843fc5d8692c9e967ec"
+  },
+  "aei_geo_iso": {
+    "key": "aei_geo_iso",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/iso_country_codes.csv",
+    "dest": "aei/r3/iso_country_codes.csv",
+    "retrieved_utc": "2026-10-21T21:13:18Z",
+    "bytes": 4564,
+    "sha256": "eee318d4ab2c2c30f5a7da11f2bc7e0e36c246f6be5bb9b323fdb12b8e4809e0"
+  },
+  "aei_geo_wap_country": {
+    "key": "aei_geo_wap_country",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/working_age_pop_2024_country.csv",
+    "dest": "aei/r3/working_age_pop_2024_country.csv",
+    "retrieved_utc": "2026-10-21T21:13:17Z",
+    "bytes": 6321,
+    "sha256": "3a9e0edc0453702e8efb63d7cab57e5b1a689bc09e070626bbf513e37edd5dd3"
+  },
+  "aei_geo_wap_us_state": {
+    "key": "aei_geo_wap_us_state",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/working_age_pop_2024_us_state.csv",
+    "dest": "aei/r3/working_age_pop_2024_us_state.csv",
+    "retrieved_utc": "2026-10-21T21:13:17Z",
+    "bytes": 1079,
+    "sha256": "e2d0fb7239934f4f6d0ae3444ab12ad8ff1dd323b71ccfc4295d074b537f17ec"
+  },
+  "aei_job_exposure": {
+    "key": "aei_job_exposure",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/labor_market_impacts/job_exposure.csv",
+    "dest": "aei/labor_market_impacts/job_exposure.csv",
+    "retrieved_utc": "2026-10-21T21:13:16Z",
+    "bytes": 37176,
+    "sha256": "4f0a3adf5feeb2ec5f5d02ab18cc5e851a2a4b8470bde84c0c9335017be12d68"
+  },
+  "aei_onet_tasks": {
+    "key": "aei_onet_tasks",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_03_27/onet_task_statements.csv",
+    "dest": "aei/r2/onet_task_statements.csv",
+    "retrieved_utc": "2026-10-21T21:12:42Z",
+    "bytes": 3592256,
+    "sha256": "82e4c418dc08475ef1263ad1e8c66ffa3357291370cd35ee1065ecea590597ec"
+  },
+  "aei_r1_collab": {
+    "key": "aei_r1_collab",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_02_10/automation_vs_augmentation.csv",
+    "dest": "aei/r1/automation_vs_augmentation.csv",
+    "retrieved_utc": "2026-10-21T21:12:41Z",
+    "bytes": 197,
+    "sha256": "d1e264882b17618db4f4a00b6f87f48134222bc5c15eefb3d46aae9519e89d11"
+  },
+  "aei_r1_task_pct": {
+    "key": "aei_r1_task_pct",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_02_10/onet_task_mappings.csv",
+    "dest": "aei/r1/onet_task_mappings.csv",
+    "retrieved_utc": "2026-10-21T21:12:41Z",
+    "bytes": 461306,
+    "sha256": "8de89c99f762146c9e46b2202c3501e2a14f11c5b44c61c8007021127b6c676e"
+  },
+  "aei_r1_wage": {
+    "key": "aei_r1_wage",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_02_10/wage_data.csv",
+    "dest": "aei/r1/wage_data.csv",
+    "retrieved_utc": "2026-10-21T21:12:41Z",
+    "bytes": 128047,
+    "sha256": "4453fc56402c94306e4749ad62b6f7c313f63d884ca99bab767a52e7d627b15f"
+  },
+  "aei_r2_collab_by_task": {
+    "key": "aei_r2_collab_by_task",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_03_27/automation_vs_augmentation_by_task.csv",
+    "dest": "aei/r2/automation_vs_augmentation_by_task.csv",
+    "retrieved_utc": "2026-10-21T21:12:42Z",
+    "bytes": 561368,
+    "sha256": "f6570714a9af31ae783fd91bd7ee3b2e9cfabcbf522a30ba1aa9b1f230665e79"
+  },
+  "aei_r2_task_pct": {
+    "key": "aei_r2_task_pct",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_03_27/task_pct_v2.csv",
+    "dest": "aei/r2/task_pct_v2.csv",
+    "retrieved_utc": "2026-10-21T21:12:42Z",
+    "bytes": 435372,
+    "sha256": "0c20f184cd4a1e3d8ef3d77f500b32b62431ce61a3c2f133c3af7fa8429f97db"
+  },
+  "aei_r2_thinking": {
+    "key": "aei_r2_thinking",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_03_27/task_thinking_fractions.csv",
+    "dest": "aei/r2/task_thinking_fractions.csv",
+    "retrieved_utc": "2026-10-21T21:12:42Z",
+    "bytes": 372332,
+    "sha256": "35a78bc803b610e4dcc654391e87e33e124021115fce2ffa4b6488230e2be357"
+  },
+  "aei_r3_api": {
+    "key": "aei_r3_api",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/aei_raw_1p_api_2025-08-04_to_2025-08-11.csv",
+    "dest": "aei/r3/aei_raw_1p_api_2025-08-04_to_2025-08-11.csv",
+    "retrieved_utc": "2026-10-21T21:12:44Z",
+    "bytes": 7027019,
+    "sha256": "c0fc061ea7d4feb71a7bd88c528d54e2d3a11e2045574f1e1fb2d594eebffd0f"
+  },
+  "aei_r3_claude_ai": {
+    "key": "aei_r3_claude_ai",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data/intermediate/aei_raw_claude_ai_2025-08-04_to_2025-08-11.csv",
+    "dest": "aei/r3/aei_raw_claude_ai_2025-08-04_to_2025-08-11.csv",
+    "retrieved_utc": "2026-10-21T21:12:43Z",
+    "bytes": 18894517,
+    "sha256": "c8ef9c5eee0c42febc73e358ecc7d2358e0a0ce3b50122c0c15ae8ec569aceff"
+  },
+  "aei_r3_docs": {
+    "key": "aei_r3_docs",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_09_15/data_documentation.md",
+    "dest": "aei/r3/data_documentation.md",
+    "retrieved_utc": "2026-10-21T21:12:44Z",
+    "bytes": 20133,
+    "sha256": "d7e23aa0888628fdeb27f49a14e151c41ea99d47bd5dd65e84383b203c23464a"
+  },
+  "aei_r4_api": {
+    "key": "aei_r4_api",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_01_15/data/intermediate/aei_raw_1p_api_2025-11-13_to_2025-11-20.csv",
+    "dest": "aei/r4/aei_raw_1p_api_2025-11-13_to_2025-11-20.csv",
+    "retrieved_utc": "2026-10-21T21:12:52Z",
+    "bytes": 41518256,
+    "sha256": "432f8d14348ba384dd9c659fa7fdc85754cbae3b5a480c14a344ac4823d0e861"
+  },
+  "aei_r4_claude_ai": {
+    "key": "aei_r4_claude_ai",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_01_15/data/intermediate/aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv",
+    "dest": "aei/r4/aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv",
+    "retrieved_utc": "2026-10-21T21:12:49Z",
+    "bytes": 94086309,
+    "sha256": "70dc16780061b84d3f34ddf7fe5c978d65c99a5ef58afd78f9315f886a6a5873"
+  },
+  "aei_r4_docs": {
+    "key": "aei_r4_docs",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_01_15/data_documentation.md",
+    "dest": "aei/r4/data_documentation.md",
+    "retrieved_utc": "2026-10-21T21:12:52Z",
+    "bytes": 18721,
+    "sha256": "50f117f8f995606004680749fc43012d2bd83c5fc9dab6044a935f601643ef6f"
+  },
+  "aei_r5_api": {
+    "key": "aei_r5_api",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_03_24/data/aei_raw_1p_api_2026-02-05_to_2026-02-12.csv",
+    "dest": "aei/r5/aei_raw_1p_api_2026-02-05_to_2026-02-12.csv",
+    "retrieved_utc": "2026-10-21T21:13:00Z",
+    "bytes": 43957174,
+    "sha256": "b3bcd68e7f6d820ffbb50a3c53d71ec2a122556fc2a38226cd86951a054bd4c8"
+  },
+  "aei_r5_claude_ai": {
+    "key": "aei_r5_claude_ai",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_03_24/data/aei_raw_claude_ai_2026-02-05_to_2026-02-12.csv",
+    "dest": "aei/r5/aei_raw_claude_ai_2026-02-05_to_2026-02-12.csv",
+    "retrieved_utc": "2026-10-21T21:12:58Z",
+    "bytes": 103287181,
+    "sha256": "69ebf6f9afc1e3be45caab172a84ae09e78bf41b97e1c310100d81c8a35a7433"
+  },
+  "aei_r5_docs": {
+    "key": "aei_r5_docs",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_03_24/data_documentation.md",
+    "dest": "aei/r5/data_documentation.md",
+    "retrieved_utc": "2026-10-21T21:13:01Z",
+    "bytes": 17739,
+    "sha256": "0a194ff1e317567e8b5d68d581fa2e5f8a1d3112f71aa209d2caa408ee12a779"
+  },
+  "aei_r6_api": {
+    "key": "aei_r6_api",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_06_26/data/aei_1p_api_2026-06-26.csv",
+    "dest": "aei/r6/aei_1p_api_2026-06-26.csv",
+    "retrieved_utc": "2026-10-21T21:13:16Z",
+    "bytes": 77282477,
+    "sha256": "62197f003e001945ad130c2f26f5e07f3fda45ff41644df91444b04fd524a19f"
+  },
+  "aei_r6_claude_ai": {
+    "key": "aei_r6_claude_ai",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_06_26/data/aei_claude_ai_2026-06-26.csv",
+    "dest": "aei/r6/aei_claude_ai_2026-06-26.csv",
+    "retrieved_utc": "2026-10-21T21:13:12Z",
+    "bytes": 219174671,
+    "sha256": "f974b358bce0e5a8417510c61da4342234cd0de9d9d0b62acf4c6dbcf8ec7b68"
+  },
+  "aei_r6_docs": {
+    "key": "aei_r6_docs",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2026_06_26/data_documentation.md",
+    "dest": "aei/r6/data_documentation.md",
+    "retrieved_utc": "2026-10-21T21:13:16Z",
+    "bytes": 7397,
+    "sha256": "1a01eeb7d34250b192aa9c906098bea1db971644e6bdb04497d87b7a4ed141a5"
+  },
+  "aei_soc_structure": {
+    "key": "aei_soc_structure",
+    "url": "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main/release_2025_02_10/SOC_Structure.csv",
+    "dest": "aei/r1/SOC_Structure.csv",
+    "retrieved_utc": "2026-10-21T21:12:41Z",
+    "bytes": 77176,
+    "sha256": "05eb5e689fb471b7a66962b57bba6666dee2c3e6a6854f0f84faf423af68dd17"
+  },
+  "aioe": {
+    "key": "aioe",
+    "url": "https://raw.githubusercontent.com/AIOE-Data/AIOE/main/AIOE_DataAppendix.xlsx",
+    "dest": "benchmarks/AIOE_DataAppendix.xlsx",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 170359,
+    "sha256": "c123b4c64840aff3568ae6c97256678719b88a74d45b6362dbefb5af34667b95"
+  },
+  "census_naics02_07": {
+    "key": "census_naics02_07",
+    "url": "https://www.census.gov/naics/concordances/2002_to_2007_NAICS.xls",
+    "dest": "census/2002_to_2007_NAICS.xls",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 161280,
+    "sha256": "a4b00b2195e318420962ba52b77f3c3122e83d893a9f804e820c151847ec85b1"
+  },
+  "census_naics07_12": {
+    "key": "census_naics07_12",
+    "url": "https://www.census.gov/naics/concordances/2007_to_2012_NAICS.xls",
+    "dest": "census/2007_to_2012_NAICS.xls",
+    "retrieved_utc": "2026-10-21T21:13:25Z",
+    "bytes": 171520,
+    "sha256": "302b8abcd78881f1ea5aa4c6c9104811bf8fa10d57b48d492939de5cacc8cfc5"
+  },
+  "census_naics12_17": {
+    "key": "census_naics12_17",
+    "url": "https://www.census.gov/naics/concordances/2012_to_2017_NAICS.xlsx",
+    "dest": "census/2012_to_2017_NAICS.xlsx",
+    "retrieved_utc": "2026-10-21T21:13:25Z",
+    "bytes": 58543,
+    "sha256": "17f463f7e8385df1cc762fadf0dd5c25910aa27034ca96275a906608399188f5"
+  },
+  "census_naics17_22": {
+    "key": "census_naics17_22",
+    "url": "https://www.census.gov/naics/concordances/2017_to_2022_NAICS.xlsx",
+    "dest": "census/2017_to_2022_NAICS.xlsx",
+    "retrieved_utc": "2026-10-21T21:13:25Z",
+    "bytes": 59656,
+    "sha256": "4662cc7ed9e7f3fb8a968e9504a7d06e448f5b65a349996a5627439df193eb30"
+  },
+  "census_naics97_02": {
+    "key": "census_naics97_02",
+    "url": "https://www.census.gov/naics/concordances/1997_NAICS_to_2002_NAICS.xls",
+    "dest": "census/1997_NAICS_to_2002_NAICS.xls",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 1282560,
+    "sha256": "c9940c1236a033026acc2c05f0bd75e6ae6d8b716ac6e3f8d3453488d1e74a10"
+  },
+  "census_sic87_naics97": {
+    "key": "census_sic87_naics97",
+    "url": "https://www.census.gov/naics/concordances/1987_SIC_to_1997_NAICS.xls",
+    "dest": "census/1987_SIC_to_1997_NAICS.xls",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 367616,
+    "sha256": "ba04e2332bbe5d56eec834908f7d0e253b377b59d906dbc3053088a0aa09701d"
+  },
+  "eloundou_occ": {
+    "key": "eloundou_occ",
+    "url": "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occ_level.csv",
+    "dest": "benchmarks/occ_level.csv",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 126022,
+    "sha256": "40c74f53de40aec91c0017d80690cbba915f83a8bb414bcf2f884692f1749acb"
+  },
+  "ff49_daily": {
+    "key": "ff49_daily",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/49_Industry_Portfolios_daily_CSV.zip",
+    "dest": "french/49_Industry_Portfolios_daily_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:23Z",
+    "bytes": 4173817,
+    "sha256": "8f394fe34bea54d41b9aafed410425ee8f8e252ede3c71a7c1cd20bab83040de"
+  },
+  "ff49_monthly": {
+    "key": "ff49_monthly",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/49_Industry_Portfolios_CSV.zip",
+    "dest": "french/49_Industry_Portfolios_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:23Z",
+    "bytes": 489433,
+    "sha256": "16b3f20bf5bd1db8f5cd7a1b29f5cab1350eb0d5106c5309f77a6629590b1c0e"
+  },
+  "ff5_daily": {
+    "key": "ff5_daily",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip",
+    "dest": "french/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:23Z",
+    "bytes": 150292,
+    "sha256": "7881223b51929ee0d6d23b8a28524aaec478a2c3d4eeca47224955cc845c5186"
+  },
+  "ff5_monthly": {
+    "key": "ff5_monthly",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_CSV.zip",
+    "dest": "french/F-F_Research_Data_5_Factors_2x3_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:23Z",
+    "bytes": 11964,
+    "sha256": "36756c5c2559648519ac4b22913d860c6afd865cfebce920e3e8927f8e2d10b7"
+  },
+  "ff_siccodes49": {
+    "key": "ff_siccodes49",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes49.zip",
+    "dest": "french/Siccodes49.zip",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 9587,
+    "sha256": "36761b4009107e11cd15cff0eb75f8837ef49f024524b7378634629bf90905d5"
+  },
+  "mom_daily": {
+    "key": "mom_daily",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_daily_CSV.zip",
+    "dest": "french/F-F_Momentum_Factor_daily_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:23Z",
+    "bytes": 85269,
+    "sha256": "ecf82b116e6ec56d2b79a2f27bd1d1598c217b5c6c25caa55b945bdd8a2c0b78"
+  },
+  "mom_monthly": {
+    "key": "mom_monthly",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_CSV.zip",
+    "dest": "french/F-F_Momentum_Factor_CSV.zip",
+    "retrieved_utc": "2026-10-21T21:13:24Z",
+    "bytes": 5600,
+    "sha256": "c06d1c2e9a5e4f6985879722f23c6bb585f46b34eaf3fcb681d4de887e353f3e"
+  },
+  "oews_2024_ind": {
+    "key": "oews_2024_ind",
+    "url": "https://www.bls.gov/oes/special-requests/oesm24in4.zip",
+    "dest": "bls/oesm24in4.zip",
+    "retrieved_utc": "2026-10-21T21:13:20Z",
+    "bytes": 32425931,
+    "sha256": "0d76287e92de226c0a142873e41f6fe84191e588f0c562d685e12e63ad3f4f72"
+  },
+  "oews_2024_nat": {
+    "key": "oews_2024_nat",
+    "url": "https://www.bls.gov/oes/special-requests/oesm24nat.zip",
+    "dest": "bls/oesm24nat.zip",
+    "retrieved_utc": "2026-10-21T21:13:18Z",
+    "bytes": 282052,
+    "sha256": "5fa368aa034ca784f0a4f67f0f1bac67072c5a07992ac3e3de92db10a2821043"
+  },
+  "oews_2025_ind": {
+    "key": "oews_2025_ind",
+    "url": "https://www.bls.gov/oes/special-requests/oesm25in4.zip",
+    "dest": "bls/oesm25in4.zip",
+    "retrieved_utc": "2026-10-21T21:13:22Z",
+    "bytes": 31514940,
+    "sha256": "3ef0e42fab1b42a7dac8a3a9b3e7024f5d7a07eff308bff5fc91808061ec08e1"
+  },
+  "sec_tickers": {
+    "key": "sec_tickers",
+    "url": "https://www.sec.gov/files/company_tickers_exchange.json",
+    "dest": "sec/company_tickers_exchange.json",
+    "retrieved_utc": "2026-10-21T21:13:25Z",
+    "bytes": 523851,
+    "sha256": "6c29e2e3db973d4479875164603c2434f81ad22e14c9f1694999aca9cca246cb"
+  }
+}

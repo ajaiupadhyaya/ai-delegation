@@ -1,4 +1,4 @@
-.PHONY: all test lint
+.PHONY: all test lint data
 
 all: lint test
 
@@ -7,3 +7,6 @@ test:
 
 lint:
 	uv run ruff check
+
+data:
+	uv run python -m aideleg.acquire
