@@ -1,0 +1,8 @@
+ 1 Agric  Agriculture
+          0100-0199 Agricultural production - crops
+          0200-0299 Agricultural production - livestock
+          2048-2048 Prepared feeds for animals
+
+ 2 Food   Food Products
+          2000-2009 Food and kindred products
+          2010-2019 Meat products

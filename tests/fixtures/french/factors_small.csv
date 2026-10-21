@@ -1,0 +1,9 @@
+Header text of an untitled factor file.
+
+,Mkt-RF,SMB,HML,RMW,CMA,RF
+20200102,   1.00,   0.20,  -0.30,   0.10,   0.05,   0.01
+20200103,  -0.50,  -99.99,   0.10,   0.00,   0.02,   0.01
+
+ Annual Factors: January-December
+,Mkt-RF,SMB,HML,RMW,CMA,RF
+  2020,   12.59,    0.52,    9.72,   -2.76,    6.49,    3.54
