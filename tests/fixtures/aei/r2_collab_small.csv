@@ -1,0 +1,4 @@
+task_name,feedback_loop,directive,task_iteration,validation,learning,filtered
+act as advisers to student organizations.,0.0,0.3829787,0.3617021,0.0,0.0,0.2553191
+write reports.,0.0,0.0,0.0,0.0,0.0,1.0
+unknown task text.,0.1,0.2,0.3,0.1,0.1,0.2
