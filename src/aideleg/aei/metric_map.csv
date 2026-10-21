@@ -1,0 +1,180 @@
+release_set,facet,variable,cluster_name_pattern,taxonomy,metric,action,reason
+r4;r5,ai_autonomy,ai_autonomy_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,ai_autonomy,ai_autonomy_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_mean,(null),overall,ai_autonomy_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,ai_autonomy,ai_autonomy_mean_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_mean_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_median,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_median_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_median_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_autonomy,ai_autonomy_stdev,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,ai_education_years,ai_education_years_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_mean,(null),overall,ai_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,ai_education_years,ai_education_years_mean_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_mean_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_median,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_median_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_median_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,ai_education_years,ai_education_years_stdev,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r3;r4;r5,collaboration,collaboration_count,<pattern>,overall,<pattern>_pct,map,pattern counts -> <pattern>_pct renormalised over published classified patterns; automation_pct/augmentation_pct derived; none_pct/not_classified_pct as share of all
+r3;r4;r5,collaboration,collaboration_pct,<pattern>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3;r4;r5,country,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r3;r4;r5,country,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r4;r5,country-state,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r4;r5,country-state,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r4;r5,human_education_years,human_education_years_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,human_education_years,human_education_years_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_mean,(null),overall,human_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,human_education_years,human_education_years_mean_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_mean_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_median,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_median_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_median_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_education_years,human_education_years_stdev,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_ability,human_only_ability_count,<category>,overall,human_only_ability_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,human_only_ability,human_only_ability_pct,<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r4;r5,human_only_time,human_only_time_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,human_only_time,human_only_time_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_mean,(null),overall,human_only_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,human_only_time,human_only_time_mean_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_mean_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_median,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_median_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_median_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_only_time,human_only_time_stdev,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,human_with_ai_time,human_with_ai_time_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_mean,(null),overall,human_with_ai_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,human_with_ai_time,human_with_ai_time_mean_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_mean_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_median,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_median_ci_lower,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_median_ci_upper,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,human_with_ai_time,human_with_ai_time_stdev,(null),,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,multitasking,multitasking_count,<category>,overall,multitasking_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,multitasking,multitasking_pct,<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3;r4;r5,onet_task,onet_task_count,<task>,onet_task,count,map,conversations matched to this node
+r3;r4;r5,onet_task,onet_task_pct,<task>,onet_task,pct,map,share of the geography's conversations (percent)
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_count,<task>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_mean,<task>[::value],onet_task,ai_autonomy_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_mean_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_mean_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_median,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_median_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_median_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_pct,<task>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,onet_task::ai_autonomy,onet_task_ai_autonomy_stdev,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_count,<task>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_mean,<task>[::value],onet_task,ai_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_mean_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_mean_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_median,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_median_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_median_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_pct,<task>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,onet_task::ai_education_years,onet_task_ai_education_years_stdev,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r3;r4;r5,onet_task::collaboration,onet_task_collaboration_count,<task>::<pattern>,onet_task,<pattern>_pct,map,pattern counts -> <pattern>_pct renormalised over published classified patterns; automation_pct/augmentation_pct derived; none_pct/not_classified_pct as share of all
+r3;r4;r5,onet_task::collaboration,onet_task_collaboration_pct,<task>::<pattern>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3,onet_task::completion_tokens,completion_tokens_count,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r3;r4;r5,onet_task::completion_tokens,completion_tokens_index,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r3,onet_task::cost,cost_count,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r3;r4;r5,onet_task::cost,cost_index,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_count,<task>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_mean,<task>[::value],onet_task,human_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_mean_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_mean_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_median,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_median_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_median_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_pct,<task>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,onet_task::human_education_years,onet_task_human_education_years_stdev,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_ability,onet_task_human_only_ability_count,<task>::<category>,onet_task,human_only_ability_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,onet_task::human_only_ability,onet_task_human_only_ability_pct,<task>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_count,<task>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_mean,<task>[::value],onet_task,human_only_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_mean_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_mean_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_median,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_median_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_median_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_pct,<task>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,onet_task::human_only_time,onet_task_human_only_time_stdev,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_count,<task>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_mean,<task>[::value],onet_task,human_with_ai_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_mean_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_mean_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_median,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_median_ci_lower,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_median_ci_upper,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_pct,<task>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,onet_task::human_with_ai_time,onet_task_human_with_ai_time_stdev,<task>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,onet_task::multitasking,onet_task_multitasking_count,<task>::<category>,onet_task,multitasking_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,onet_task::multitasking,onet_task_multitasking_pct,<task>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3,onet_task::prompt_tokens,prompt_tokens_count,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r3;r4;r5,onet_task::prompt_tokens,prompt_tokens_index,<task>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r4;r5,onet_task::task_success,onet_task_task_success_count,<task>::<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,onet_task::task_success,onet_task_task_success_pct,<task>::<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,onet_task::use_case,onet_task_use_case_count,<task>::<category>,onet_task,use_case_<category>_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,onet_task::use_case,onet_task_use_case_pct,<task>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3;r4;r5,request,request_count,<request>,request,count,map,conversations matched to this node
+r3;r4;r5,request,request_pct,<request>,request,pct,map,share of the geography's conversations (percent)
+r4;r5,request::ai_autonomy,request_ai_autonomy_count,<request>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,request::ai_autonomy,request_ai_autonomy_mean,<request>[::value],request,ai_autonomy_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,request::ai_autonomy,request_ai_autonomy_mean_ci_lower,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_autonomy,request_ai_autonomy_mean_ci_upper,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_autonomy,request_ai_autonomy_median,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_autonomy,request_ai_autonomy_pct,<request>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,request::ai_autonomy,request_ai_autonomy_stdev,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_education_years,request_ai_education_years_count,<request>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,request::ai_education_years,request_ai_education_years_mean,<request>[::value],request,ai_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,request::ai_education_years,request_ai_education_years_mean_ci_lower,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_education_years,request_ai_education_years_mean_ci_upper,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_education_years,request_ai_education_years_median,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::ai_education_years,request_ai_education_years_pct,<request>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,request::ai_education_years,request_ai_education_years_stdev,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r3;r4;r5,request::collaboration,request_collaboration_count,<request>::<pattern>,request,<pattern>_pct,map,pattern counts -> <pattern>_pct renormalised over published classified patterns; automation_pct/augmentation_pct derived; none_pct/not_classified_pct as share of all
+r3;r4;r5,request::collaboration,request_collaboration_pct,<request>::<pattern>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r4;r5,request::completion_tokens,completion_tokens_index,<request>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r4;r5,request::cost,cost_index,<request>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r4;r5,request::human_education_years,request_human_education_years_count,<request>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,request::human_education_years,request_human_education_years_mean,<request>[::value],request,human_education_years_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,request::human_education_years,request_human_education_years_mean_ci_lower,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_education_years,request_human_education_years_mean_ci_upper,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_education_years,request_human_education_years_median,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_education_years,request_human_education_years_pct,<request>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,request::human_education_years,request_human_education_years_stdev,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_only_ability,request_human_only_ability_count,<request>::<category>,request,human_only_ability_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,request::human_only_ability,request_human_only_ability_pct,<request>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r4;r5,request::human_only_time,request_human_only_time_count,<request>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,request::human_only_time,request_human_only_time_mean,<request>[::value],request,human_only_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,request::human_only_time,request_human_only_time_mean_ci_lower,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_only_time,request_human_only_time_mean_ci_upper,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_only_time,request_human_only_time_median,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_only_time,request_human_only_time_pct,<request>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,request::human_only_time,request_human_only_time_stdev,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_count,<request>[::value],,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_mean,<request>[::value],request,human_with_ai_time_mean,map,mean of the numeric facet (as published in r6)
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_mean_ci_lower,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_mean_ci_upper,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_median,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_pct,<request>[::value],,,ignore,share of the node's conversations with a classified value (complement in ::not_classified); not used in Plans 1-4
+r4;r5,request::human_with_ai_time,request_human_with_ai_time_stdev,<request>[::value],,,ignore,distribution statistic; the panel keeps the mean only; not used in Plans 1-4
+r4;r5,request::multitasking,request_multitasking_count,<request>::<category>,request,multitasking_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,request::multitasking,request_multitasking_pct,<request>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r4;r5,request::prompt_tokens,prompt_tokens_index,<request>::index|count|value,,,ignore,1P API token or cost index; no canonical metric; not used in Plans 1-4
+r4;r5,request::task_success,request_task_success_count,<request>::<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,request::task_success,request_task_success_pct,<request>::<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,request::use_case,request_use_case_count,<request>::<category>,request,use_case_<category>_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,request::use_case,request_use_case_pct,<request>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
+r3,state_us,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r3,state_us,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r4;r5,task_success,task_success_count,<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,task_success,task_success_pct,<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
+r4;r5,use_case,use_case_count,<category>,overall,use_case_<category>_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
+r4;r5,use_case,use_case_pct,<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts

@@ -1,0 +1,73 @@
+geo_id,geography,date_start,date_end,platform_and_product,facet,level,variable,cluster_name,value
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_count,,500
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_pct,,50.0
+CA,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_count,,100
+CA,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_pct,,10.0
+NA,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_count,,30
+NA,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_pct,,3.0
+not_classified,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_count,,20
+not_classified,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country,0,usage_pct,,2.0
+US-CA,country-state,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country-state,0,usage_count,,120
+US-CA,country-state,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",country-state,0,usage_pct,,24.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,directive,15
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,directive,15
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,feedback loop,5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,feedback loop,5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,task iteration,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,task iteration,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,none,10
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,none,10
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,not_classified,50
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,not_classified,50
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,directive,30
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,directive,66.66666666666666
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,learning,10
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,learning,22.22222222222222
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_count,not_classified,5
+US,country,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",collaboration,0,collaboration_pct,not_classified,11.11111111111111
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_count,act as advisers to student organizations.,80
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_pct,act as advisers to student organizations.,80.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_count,juggle flaming torches for an audience.,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_pct,juggle flaming torches for an audience.,20.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,act as advisers to student organizations.::directive,30
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,act as advisers to student organizations.::directive,37.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,act as advisers to student organizations.::task iteration,15
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,act as advisers to student organizations.::task iteration,18.75
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,act as advisers to student organizations.::validation,15
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,act as advisers to student organizations.::validation,18.75
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,act as advisers to student organizations.::none,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,act as advisers to student organizations.::none,25.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,juggle flaming torches for an audience.::not_classified,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,juggle flaming torches for an audience.::not_classified,100.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,0,request_count,"Write code, tests, and docs",70
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,0,request_pct,"Write code, tests, and docs",70.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_count,Software development,90
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_pct,Software development,90.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_count,Software development::directive,40
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_pct,Software development::directive,50.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_count,Software development::feedback loop,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_pct,Software development::feedback loop,25.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_count,Software development::learning,20
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_pct,Software development::learning,25.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",ai_autonomy,0,ai_autonomy_mean,,3.25
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",ai_autonomy,0,ai_autonomy_median,,3.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",ai_autonomy,0,ai_autonomy_histogram_count,"[1.0, 2.0)",12
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::ai_autonomy,0,onet_task_ai_autonomy_mean,act as advisers to student organizations.::value,2.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::ai_autonomy,0,onet_task_ai_autonomy_count,act as advisers to student organizations.::value,60
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_count,yes,30
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_pct,yes,15.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_count,no,90
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_pct,no,45.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_count,not_classified,80
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",multitasking,0,multitasking_pct,not_classified,40.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,work,60
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,work,30.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,personal,30
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,personal,15.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,coursework,10
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,coursework,5.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,none,5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,none,2.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,not_classified,95
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,not_classified,47.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",task_success,0,task_success_count,yes,50
