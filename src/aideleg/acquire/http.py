@@ -10,20 +10,24 @@ USER_AGENT = "Ajai Upadhyaya research ajaiupad@gmail.com"
 SEC_MIN_INTERVAL = 0.1  # seconds between requests: at most 10 per second
 
 
+# Shared across every throttled session, so separate fetches and retries are paced together.
+_throttle_lock = threading.Lock()
+_last_request: float | None = None
+
+
 class _ThrottledSession(requests.Session):
     def __init__(self, min_interval: float):
         super().__init__()
         self._min_interval = min_interval
-        self._last = None
-        self._lock = threading.Lock()
 
     def request(self, *args, **kwargs):
-        with self._lock:
-            if self._last is not None:
-                wait = self._min_interval - (time.monotonic() - self._last)
+        global _last_request
+        with _throttle_lock:
+            if _last_request is not None:
+                wait = self._min_interval - (time.monotonic() - _last_request)
                 if wait > 0:
                     time.sleep(wait)
-            self._last = time.monotonic()
+            _last_request = time.monotonic()
         return super().request(*args, **kwargs)
 
 

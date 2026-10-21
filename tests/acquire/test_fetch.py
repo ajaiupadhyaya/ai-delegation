@@ -3,6 +3,7 @@ import io
 import zipfile
 
 import pytest
+import requests
 
 from aideleg.acquire import fetch, http
 
@@ -10,15 +11,20 @@ UA = "Ajai Upadhyaya research ajaiupad@gmail.com"
 
 
 class FakeResponse:
-    def __init__(self, body: bytes, status: int = 200):
+    def __init__(self, body: bytes, status: int = 200, headers=None, fail_after=None):
         self.body = body
         self.status_code = status
+        self.headers = headers or {}
+        self.fail_after = fail_after
 
     def raise_for_status(self):
         if self.status_code >= 400:
             raise RuntimeError(f"HTTP {self.status_code}")
 
     def iter_content(self, chunk_size=1 << 16):
+        if self.fail_after is not None:
+            yield self.body[: self.fail_after]
+            raise requests.exceptions.ChunkedEncodingError("connection broken")
         for i in range(0, len(self.body), chunk_size):
             yield self.body[i : i + chunk_size]
 
@@ -113,6 +119,7 @@ def test_bls_and_sec_get_contact_user_agent():
 
 
 def test_sec_session_throttles_to_ten_per_second(monkeypatch):
+    monkeypatch.setattr(http, "_last_request", None)
     clock = {"t": 100.0}
     slept = []
     monkeypatch.setattr(http.time, "monotonic", lambda: clock["t"])
@@ -147,3 +154,45 @@ def test_manifest_roundtrip(tmp_path):
     fetch.write_manifest(tmp_path, {"k": rec})
     assert fetch.load_manifest(tmp_path) == {"k": rec}
     assert fetch.load_manifest(tmp_path / "missing") == {}
+
+
+def test_sec_throttle_is_shared_across_sessions(monkeypatch):
+    monkeypatch.setattr(http, "_last_request", None)
+    clock = {"t": 100.0}
+    slept = []
+
+    def fake_sleep(s):
+        slept.append(s)
+        clock["t"] += s
+
+    monkeypatch.setattr(http.time, "monotonic", lambda: clock["t"])
+    monkeypatch.setattr(http.time, "sleep", fake_sleep)
+    monkeypatch.setattr(http.requests.Session, "request", lambda self, *a, **k: "ok")
+    http.session_for("https://data.sec.gov/a").get("https://data.sec.gov/a")
+    http.session_for("https://data.sec.gov/b").get("https://data.sec.gov/b")
+    assert len(slept) == 1
+    assert slept[0] >= 0.1 - 1e-9
+
+
+def test_fetch_retries_midstream_failure_then_succeeds(tmp_path, patch_session):
+    session = patch_session(FakeResponse(b"abcdef", fail_after=3), FakeResponse(b"abcdef"))
+    rec = fetch.fetch(fetch.Source("k", "https://x.test/a", "a.bin"), raw_dir=tmp_path)
+    assert session.calls == 2
+    assert (tmp_path / "a.bin").read_bytes() == b"abcdef"
+    assert rec.bytes == 6
+
+
+def test_fetch_midstream_failure_every_time_raises_fetch_error(tmp_path, patch_session):
+    patch_session(*[FakeResponse(b"abcdef", fail_after=3) for _ in range(3)])
+    with pytest.raises(fetch.FetchError):
+        fetch.fetch(fetch.Source("k", "https://x.test/a", "a.bin"), raw_dir=tmp_path)
+    assert not list(tmp_path.rglob("*.part"))
+
+
+def test_fetch_truncated_body_raises_fetch_error(tmp_path, patch_session):
+    hdr = {"Content-Length": "10"}
+    session = patch_session(*[FakeResponse(b"abc", headers=hdr) for _ in range(3)])
+    with pytest.raises(fetch.FetchError, match="truncated"):
+        fetch.fetch(fetch.Source("k", "https://x.test/a", "a.bin"), raw_dir=tmp_path)
+    assert session.calls == 3
+    assert not (tmp_path / "a.bin").exists()

@@ -80,23 +80,31 @@ def _download(src: Source, part: Path) -> None:
             time.sleep(BACKOFF_SECONDS * 2 ** (attempt - 1))
         try:
             resp = http.session_for(src.url).get(src.url, stream=True, timeout=TIMEOUT)
-        except OSError as exc:  # requests exceptions subclass OSError
-            last = repr(exc)
-            continue
-        try:
-            if resp.status_code >= 500 or resp.status_code == 429:
-                last = f"HTTP {resp.status_code}"
-                continue
             try:
-                resp.raise_for_status()
-            except Exception as exc:
-                raise FetchError(f"{src.url}: {exc}") from exc
-            with part.open("wb") as f:
-                for chunk in resp.iter_content(1 << 16):
-                    f.write(chunk)
-            return
-        finally:
-            resp.close()
+                if resp.status_code >= 500 or resp.status_code == 429:
+                    last = f"HTTP {resp.status_code}"
+                    continue
+                try:
+                    resp.raise_for_status()
+                except Exception as exc:
+                    raise FetchError(f"{src.url}: {exc}") from exc
+                written = 0
+                with part.open("wb") as f:
+                    for chunk in resp.iter_content(1 << 16):
+                        f.write(chunk)
+                        written += len(chunk)
+                headers = getattr(resp, "headers", None) or {}
+                expected = headers.get("Content-Length")
+                # A compressed body is decoded on the fly, so its length cannot be compared.
+                if expected is not None and not headers.get("Content-Encoding"):
+                    if written != int(expected):
+                        last = f"truncated body ({written} of {expected} bytes)"
+                        continue
+                return
+            finally:
+                resp.close()
+        except OSError as exc:  # requests exceptions, including mid-stream ones, subclass OSError
+            last = repr(exc)
     raise FetchError(f"{src.url}: gave up after {ATTEMPTS} attempts ({last})")
 
 
