@@ -1,0 +1,33 @@
+[project]
+name = "aideleg"
+version = "0.1.0"
+description = "Delegating to the Machine: AEI conversations matched to tasks, joined to BLS and Fama-French data"
+readme = "README.md"
+authors = [
+    { name = "ajaiupadhyaya", email = "ajaiupadhyaya@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=2.0.0",
+    "numpy>=2.5.4",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.6",
+    "polars>=2.0.0",
+    "pyarrow>=26.0.0",
+    "requests>=2.34.2",
+    "statsmodels>=0.15.0",
+    "xlrd>=2.0.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.4,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

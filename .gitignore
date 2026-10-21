@@ -1,0 +1,7 @@
+data/raw/*
+!data/raw/MANIFEST.json
+data/derived/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
