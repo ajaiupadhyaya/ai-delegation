@@ -9,7 +9,7 @@ from typing import Literal
 import polars as pl
 
 from aideleg.acquire import sources
-from aideleg.config import RAW
+from aideleg.config import RAW, SEAL_DATE
 from aideleg.market import seal
 
 _MISSING = {-99.99, -999.0}
@@ -47,18 +47,30 @@ def read_french_table(path: Path, title_startswith: str) -> pl.DataFrame:
     names = [c.strip() for c in lines[header_idx].split(",")[1:]]
     dates: list[date] = []
     cols: list[list[float | None]] = [[] for _ in names]
-    for line in lines[header_idx + 1 :]:
+    for offset, line in enumerate(lines[header_idx + 1 :]):
+        lineno = header_idx + 2 + offset
         parts = [p.strip() for p in line.split(",")]
-        if not _DATE_RE.match(parts[0]) or len(parts) != len(names) + 1:
+        if not _DATE_RE.match(parts[0]):
             break
+        if len(parts) != len(names) + 1:
+            raise ValueError(
+                f"{path}:{lineno}: expected {len(names) + 1} fields, got {len(parts)}"
+            )
         dates.append(_parse_date(parts[0]))
         for j, v in enumerate(parts[1:]):
-            x = float(v) if v else None
+            try:
+                x = float(v) if v else None
+            except ValueError:
+                raise ValueError(f"{path}:{lineno}: non-numeric cell {v!r}") from None
             cols[j].append(None if x in _MISSING else x)
     data: dict[str, object] = {"date": pl.Series("date", dates, dtype=pl.Date)}
     for n, c in zip(names, cols, strict=True):
         data[n] = pl.Series(n, c, dtype=pl.Float64)
-    return pl.DataFrame(data)
+    df = pl.DataFrame(data)
+    if not seal.pap_frozen():
+        # the reader itself never hands out sealed rows before pap-v1
+        df = df.filter(pl.col("date") < SEAL_DATE)
+    return df
 
 
 def _single_file(key: str) -> Path:

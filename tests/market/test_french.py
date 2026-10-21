@@ -28,7 +28,8 @@ def test_second_table_is_distinct():
     assert df["Agric"].to_list() == [0.40, 0.30]
 
 
-def test_monthly_dates_parse_to_month_end():
+def test_monthly_dates_parse_to_month_end(monkeypatch):
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: True)
     df = french.read_french_table(
         FX / "ind_monthly_small.csv", "Average Value Weighted Returns -- Monthly"
     )
@@ -77,3 +78,81 @@ def test_siccodes_ranges():
     assert row["ff49_short"].to_list() == ["Agric"]
     assert row["ff49_name"].to_list() == ["Agriculture"]
     assert df.filter(df["ff49"] == 2).height == 2
+
+
+def test_sealed_rows_dropped_unless_frozen(monkeypatch):
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: False)
+    df = french.read_french_table(
+        FX / "ind_monthly_small.csv", "Average Value Weighted Returns -- Monthly"
+    )
+    assert df.height == 0
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: True)
+    df = french.read_french_table(
+        FX / "ind_monthly_small.csv", "Average Value Weighted Returns -- Monthly"
+    )
+    assert df.height == 2
+
+
+def test_wrong_column_count_raises_with_line(tmp_path):
+    f = tmp_path / "bad.csv"
+    f.write_text("  T\n,A,B\n20200102, 1.0, 2.0\n20200103, 1.0\n")
+    with pytest.raises(ValueError, match=r"bad\.csv:4"):
+        french.read_french_table(f, "T")
+
+
+def test_non_numeric_cell_raises_with_line(tmp_path):
+    f = tmp_path / "bad.csv"
+    f.write_text("  T\n,A,B\n20200102, 1.0, 2.0\n20200103, x, 1.0\n")
+    with pytest.raises(ValueError, match=r"bad\.csv:4"):
+        french.read_french_table(f, "T")
+
+
+def _point_at_fixtures(monkeypatch, mapping):
+    monkeypatch.setattr(french, "_single_file", lambda key: FX / mapping[key])
+
+
+def test_load_factors_join_rename_order_and_filter(monkeypatch, tmp_path):
+    ff5 = tmp_path / "ff5.csv"
+    ff5.write_text(
+        "\n,Mkt-RF,SMB,HML,RMW,CMA,RF\n"
+        "20220101, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0\n"
+        "20220102, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5\n"
+        "20220103, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0\n"
+    )
+    mom = tmp_path / "mom.csv"
+    mom.write_text("\n,Mom\n20220101, 7.0\n20220102, -99.99\n20220103, 8.0\n")
+    monkeypatch.setattr(
+        french, "_single_file", lambda key: ff5 if key.startswith("ff5") else mom
+    )
+    df = french.load_factors("D", date(2022, 1, 2))
+    assert df.columns == ["date", "mkt_rf", "smb", "hml", "rmw", "cma", "rf", "umd"]
+    assert df["date"].to_list() == [date(2022, 1, 1), date(2022, 1, 2)]
+    assert df.row(0) == (date(2022, 1, 1), 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)
+    assert df["umd"][1] is None
+
+
+def test_load_industry_returns_happy_path(monkeypatch):
+    _point_at_fixtures(monkeypatch, {"ff49_daily": "ind_daily_small.csv"})
+    df = french.load_industry_returns("D", "EW", date(2020, 1, 2))
+    assert df.columns == ["date", "Agric", "Food"]
+    assert df.height == 1
+    assert df["Agric"].to_list() == [0.40]
+    vw = french.load_industry_returns("D", "VW", date(2020, 1, 31))
+    assert vw.height == 3
+
+
+@pytest.mark.parametrize("n", [0, 2])
+def test_single_file_requires_exactly_one(monkeypatch, tmp_path, n):
+    from aideleg.acquire import sources
+
+    class S:
+        dest = "french/x.zip"
+
+    monkeypatch.setattr(sources, "by_key", lambda key: S())
+    monkeypatch.setattr(french, "RAW", tmp_path)
+    d = tmp_path / "french" / "x"
+    d.mkdir(parents=True)
+    for i in range(n):
+        (d / f"f{i}.csv").write_text("")
+    with pytest.raises(FileNotFoundError):
+        french._single_file("k")
