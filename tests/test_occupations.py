@@ -52,11 +52,16 @@ def test_equal_allocation_conserves_usage():
         ("3", "plan budgets", "pct", 2), ("unmatched:none", "none", "pct", 4),
     ])
     t = occupation_table(panel, "r3", INDEX)
-    assert t["usage_share"].sum() == pytest.approx(6.0)
-    assert _row(t, "15-1253")["usage_share"] == pytest.approx(0.5)
+    # raw pct (percent of all conversations) is conserved over the allocated tasks
+    assert t["usage_pct_all"].sum() == pytest.approx(6.0)
+    assert _row(t, "15-1253")["usage_pct_all"] == pytest.approx(0.5)
     # "plan budgets" carries IDs 3 and 4: the union of their occupations shares it
-    assert _row(t, "13-2011")["usage_share"] == pytest.approx(1.0)
-    assert _row(t, "11-3031")["usage_share"] == pytest.approx(1.0)
+    assert _row(t, "13-2011")["usage_pct_all"] == pytest.approx(1.0)
+    assert _row(t, "11-3031")["usage_pct_all"] == pytest.approx(1.0)
+    # usage_share: percent of task-matched conversations, 100 per key despite sentinel mass
+    assert t["usage_share"].sum() == pytest.approx(100.0)
+    assert _row(t, "15-1253")["usage_share"] == pytest.approx(0.5 / 6 * 100)
+    assert t["allocated_pct_total"].unique().to_list() == [pytest.approx(6.0)]
     un = unallocated_mass(panel, "r3", INDEX)
     assert un.row(0, named=True)["pct"] == pytest.approx(4.0)
 
@@ -64,7 +69,31 @@ def test_equal_allocation_conserves_usage():
 def test_full_allocation_gives_each_occupation_full_pct():
     panel = _panel([("2", "review code", "pct", 1)])
     t = occupation_table(panel, "r3", INDEX, allocation="full")
-    assert t["usage_share"].to_list() == [1.0, 1.0]
+    assert t["usage_share"].to_list() == [1.0, 1.0]  # not a share in "full" mode
+    assert t["usage_pct_all"].to_list() == [1.0, 1.0]
+
+
+def test_shares_sum_to_100_per_key():
+    panel = pl.concat([
+        _panel([("1", "write code", "pct", 3), ("unmatched:none", "none", "pct", 7)],
+               release="r6"),
+        _panel([("2", "review code", "pct", 1), ("unmatched:not_classified", "x", "pct", 9)],
+               release="r6", source="1p_api"),
+        _panel([("3", "plan budgets", "pct", 4)], release="r6", start=P1),
+    ])
+    t = occupation_table(panel, "r6", INDEX, basis="tasks")
+    sums = t.group_by("period_start", "source").agg(pl.col("usage_share").sum())
+    assert sums["usage_share"].to_list() == [pytest.approx(100.0)] * 3
+    assert t["usage_pct_all"].sum() == pytest.approx(8.0)
+
+
+def test_codes_sharing_a_soc6_count_once():
+    idx = TaskIndex({"write code": [1]}, {1: ["15-1252.00", "15-1252.01"]})
+    panel = _panel([("1", "write code", "pct", 3), ("unmatched:none", "none", "pct", 1)])
+    for allocation in ("equal", "full"):
+        t = occupation_table(panel, "r3", idx, allocation=allocation)
+        assert t["soc6"].to_list() == ["15-1252"]
+        assert t["usage_pct_all"].to_list() == [pytest.approx(3.0)]
 
 
 def test_weighted_pattern_mean():
@@ -86,7 +115,7 @@ def test_null_pattern_tasks_excluded_from_mean():
     ])
     r = _row(occupation_table(panel, "r3", INDEX), "15-1252")
     assert r["automation_pct"] == pytest.approx(50.0)
-    assert r["usage_share"] == pytest.approx(14.0)
+    assert r["usage_pct_all"] == pytest.approx(14.0)
     assert r["directive_pct"] is None
 
 
@@ -129,7 +158,7 @@ def test_table_keyed_by_period_and_source():
     t = occupation_table(panel, "r6", INDEX, basis="tasks")
     assert t.height == 3
     assert t.select("period_start", "source", "soc6").is_unique().all()
-    assert sorted(t["usage_share"].to_list()) == [1.0, 2.0, 4.0]
+    assert sorted(t["usage_pct_all"].to_list()) == [1.0, 2.0, 4.0]
 
 
 def test_r6_default_uses_published_soc_rows():
@@ -142,23 +171,25 @@ def test_r6_default_uses_published_soc_rows():
     t = occupation_table(pl.concat([tasks, soc]), "r6", INDEX)
     r = _row(t, "15-1252")
     assert t["basis"].unique().to_list() == ["published"]
-    assert r["usage_share"] == pytest.approx(4.0)
+    assert r["usage_pct_all"] == pytest.approx(4.0)
+    assert r["usage_share"] == pytest.approx(100.0)  # renormalised over published SOC mass
+    assert r["allocated_pct_total"] == pytest.approx(4.0)
     assert r["automation_pct"] == pytest.approx(50.0)
     t2 = occupation_table(pl.concat([tasks, soc]), "r6", INDEX, basis="tasks")
-    assert _row(t2, "15-1252")["usage_share"] == pytest.approx(9.0)
+    assert _row(t2, "15-1252")["usage_pct_all"] == pytest.approx(9.0)
 
 
 def test_only_global_rows_used():
     panel = _panel([("1", "write code", "pct", 3)])
     country = panel.with_columns(geo_level=pl.lit("country"), geo_id=pl.lit("US"))
     t = occupation_table(pl.concat([panel, country]), "r3", INDEX)
-    assert t["usage_share"].sum() == pytest.approx(3.0)
+    assert t["usage_pct_all"].sum() == pytest.approx(3.0)
 
 
 def test_null_node_name_still_allocated_by_node_id():
     panel = _panel([("1", None, "pct", 2)])
     t = occupation_table(panel, "r3", INDEX)
-    assert _row(t, "15-1252")["usage_share"] == pytest.approx(2.0)
+    assert _row(t, "15-1252")["usage_pct_all"] == pytest.approx(2.0)
     assert unallocated_mass(panel, "r3", INDEX).is_empty()
 
 

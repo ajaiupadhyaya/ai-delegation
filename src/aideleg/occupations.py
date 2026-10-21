@@ -23,8 +23,19 @@ Bases
   r6 default; the task-allocated r6 table is a check on it.
 
 Columns
-- `usage_share`: the sum of allocated pct, in percent of all conversations in that release,
-  period and source (as published; not renormalised over matched or published mass).
+- `usage_pct_all`: the sum of allocated pct, in percent of ALL conversations in that
+  release, period and source, as published (task basis: denominator includes the
+  `none` / `not_classified` sentinel mass and unmatched texts; published basis: includes the
+  mass AEI did not publish at SOC level).
+- `usage_share`: in `"equal"` mode, `usage_pct_all` renormalised to sum to 100 per
+  (release, period_start, source). Task basis: percent of task-matched (allocated)
+  conversations. Published basis: percent of published SOC mass (the shortfall is privacy
+  suppression). In `"full"` mode `usage_share` equals `usage_pct_all`, double-counts shared
+  tasks, is NOT a share, and must not feed usage-to-employment ratios (U_o).
+- `allocated_pct_total`: the pre-renormalisation denominator per key, i.e. the summed pct of
+  the allocated tasks (each counted once) or of the published SOC rows. It is constant
+  within a key and keeps the excluded mass visible (100 - it, for a release whose task pct
+  sums to 100).
 - Pattern shares `automation_pct, augmentation_pct, directive_pct, feedback_loop_pct,
   task_iteration_pct, validation_pct, learning_pct`: usage-weighted means over the
   occupation's tasks with a non-null value of that metric, weights = the tasks' allocated
@@ -68,7 +79,8 @@ SUPPRESSION: dict[str, tuple[str, ...] | None] = {
 }
 BOUNDS = ["suppressed_pct", "automation_share_all_lb", "automation_share_all_ub"]
 MEASURES = PATTERNS + BOUNDS
-COLUMNS = KEY + ["basis", "soc6", "usage_share", *MEASURES, "n_tasks"]
+COLUMNS = KEY + ["basis", "soc6", "usage_share", "usage_pct_all", "allocated_pct_total",
+                 *MEASURES, "n_tasks"]
 _SUPP_METRICS = ("filtered_pct", "none_pct", "not_classified_pct")
 
 
@@ -117,9 +129,13 @@ def _task_occupations(nodes: pl.DataFrame, index: TaskIndex) -> pl.DataFrame:
 _MATCHED = ~pl.col("node_id").str.starts_with("unmatched:") & pl.col("pct").is_not_null()
 
 
-def _aggregate(contrib: pl.DataFrame, basis: str, count_tasks: bool) -> pl.DataFrame:
-    """contrib: KEY, soc6, node_id, w, measures -> one row per KEY, soc6."""
-    aggs = [pl.col("w").sum().alias("usage_share")]
+def _aggregate(contrib: pl.DataFrame, totals: pl.DataFrame, basis: str, count_tasks: bool,
+               renormalise: bool) -> pl.DataFrame:
+    """contrib: KEY, soc6, node_id, w, measures -> one row per KEY, soc6.
+
+    totals: KEY, allocated_pct_total (each node's pct counted once).
+    """
+    aggs = [pl.col("w").sum().alias("usage_pct_all")]
     for m in MEASURES:
         has = pl.col(m).is_not_null()
         den = pl.col("w").filter(has).sum()
@@ -127,7 +143,11 @@ def _aggregate(contrib: pl.DataFrame, basis: str, count_tasks: bool) -> pl.DataF
                     .alias(m))
     aggs.append(pl.col("node_id").n_unique().cast(pl.Int64).alias("n_tasks") if count_tasks
                 else pl.lit(None, pl.Int64).alias("n_tasks"))
-    out = contrib.group_by(*KEY, "soc6").agg(aggs).with_columns(basis=pl.lit(basis))
+    out = (contrib.group_by(*KEY, "soc6").agg(aggs).with_columns(basis=pl.lit(basis))
+           .join(totals, on=KEY, how="left"))
+    share = (pl.col("usage_pct_all") / pl.col("allocated_pct_total") * 100 if renormalise
+             else pl.col("usage_pct_all"))
+    out = out.with_columns(usage_share=share)
     return out.select(COLUMNS).sort(KEY + ["soc6"])
 
 
@@ -141,13 +161,19 @@ def _from_tasks(panel: pl.DataFrame, release: str, index: TaskIndex,
     k = pl.col("soc6").list.len()
     w = pl.col("pct") / k if allocation == "equal" else pl.col("pct")
     contrib = rows.with_columns(w=w).explode("soc6")
-    return _aggregate(contrib, "tasks", count_tasks=True)
+    return _aggregate(contrib, _totals(rows), "tasks", count_tasks=True,
+                      renormalise=allocation == "equal")
 
 
-def _from_published(panel: pl.DataFrame, release: str) -> pl.DataFrame:
+def _totals(nodes: pl.DataFrame) -> pl.DataFrame:
+    return nodes.group_by(*KEY).agg(allocated_pct_total=pl.col("pct").sum())
+
+
+def _from_published(panel: pl.DataFrame, release: str, allocation: str) -> pl.DataFrame:
     wide = _wide(panel, release, "soc_detailed").filter(pl.col("pct").is_not_null())
     contrib = wide.with_columns(soc6=pl.col("node_id").str.slice(0, 7), w=pl.col("pct"))
-    return _aggregate(contrib, "published", count_tasks=False)
+    return _aggregate(contrib, _totals(wide), "published", count_tasks=False,
+                      renormalise=allocation == "equal")
 
 
 def occupation_table(
@@ -160,14 +186,15 @@ def occupation_table(
     """Occupation table for one release; columns `COLUMNS` (see the module docstring).
 
     `basis="auto"` uses the published soc_detailed rows for r6 and task allocation otherwise.
-    `allocation` applies to the task basis only.
+    `allocation` sets the task split; on the published basis it only selects whether
+    `usage_share` is renormalised (`"equal"`) or left equal to `usage_pct_all` (`"full"`).
     """
     if allocation not in ("equal", "full"):
         raise ValueError(f"allocation must be 'equal' or 'full', not {allocation!r}")
     if basis == "auto":
         basis = "published" if release == "r6" else "tasks"
     if basis == "published":
-        return _from_published(panel, release)
+        return _from_published(panel, release, allocation)
     if basis == "tasks":
         return _from_tasks(panel, release, index, allocation)
     raise ValueError(f"basis must be 'auto', 'tasks' or 'published', not {basis!r}")
