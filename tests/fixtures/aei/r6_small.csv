@@ -1,0 +1,43 @@
+date_start,date_end,geo_id,geo_level,category_name,hierarchy_level,metric_id,value,node_name,node_external_id
+2026-04-01,2026-05-01,GLOBAL,global,overall,0,usage_pct,100.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,usage_pct,100.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_directive_pct,30.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_feedback_loop_pct,18.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_task_iteration_pct,30.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_validation_pct,3.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_learning_pct,16.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_none_pct,3.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_bucket_automation_pct,49.48,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,overall,0,collaboration_bucket_augmentation_pct,50.52,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,pct,40.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_directive_pct,20.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_feedback_loop_pct,10.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_task_iteration_pct,40.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_validation_pct,10.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_learning_pct,15.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_none_pct,5.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_bucket_automation_pct,31.58,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,collaboration_bucket_augmentation_pct,68.42,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,artifact_blog_or_article_pct,12.5,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,ai_autonomy_mean,3.2,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,human_only_time_mean,2.5,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,pct,30.0,Write reports.,99999
+2026-05-01,2026-06-01,GLOBAL,global,onet,0,pct,20.0,Juggle flaming torches for an audience.,77777
+2026-05-01,2026-06-01,GLOBAL,global,onet,1,pct,60.0,Prepare financial documents,4.A.3.b.6.I01.D01
+2026-05-01,2026-06-01,GLOBAL,global,onet,2,pct,55.0,Prepare financial documents or reports,4.A.3.b.6.I01
+2026-05-01,2026-06-01,GLOBAL,global,onet,3,pct,50.0,Processing information,4.A.2
+2026-04-01,2026-05-01,GLOBAL,global,soc_occupation,0,pct,5.0,Business Operations Specialists,13-1011.00
+2026-04-01,2026-05-01,GLOBAL,global,soc_occupation,0,pct,8.0,Software Developers,15-1252.00
+2026-05-01,2026-06-01,GLOBAL,global,soc_occupation,0,pct,7.0,Software Developers,15-1252.00
+2026-05-01,2026-06-01,GLOBAL,global,soc_occupation,1,pct,30.0,Computer and Mathematical,15
+2026-05-01,2026-06-01,GLOBAL,global,request,0,pct,3.0,HR software analysis,fbfbf330-56ec-5632-b8da-c77bbfc1c87d
+2026-05-01,2026-06-01,GLOBAL,global,request,1,pct,9.0,Trend tracking,2edf7da0-8606-50b9-b367-6c9273cb960e
+2026-05-01,2026-06-01,USA,country,overall,0,usage_pct,20.0,Overall,-
+2026-05-01,2026-06-01,USA,country,overall,0,usage_per_capita_index,1.4,Overall,-
+2026-05-01,2026-06-01,USA,country,onet,0,pct,50.0,Act as advisers to student organizations.,101
+2026-05-01,2026-06-01,US-CA,subregion,overall,0,usage_pct,30.0,Overall,-
+2026-05-01,2026-06-01,GLOBAL,global,request,2,collaboration_directive_pct,0.0,Other / Unclear,aaaaaaaa-0000-5000-8000-000000000001
+2026-05-01,2026-06-01,GLOBAL,global,request,2,collaboration_feedback_loop_pct,0.0,Other / Unclear,aaaaaaaa-0000-5000-8000-000000000001
+2026-05-01,2026-06-01,GLOBAL,global,request,2,collaboration_task_iteration_pct,0.0,Other / Unclear,aaaaaaaa-0000-5000-8000-000000000001
+2026-05-01,2026-06-01,GLOBAL,global,request,2,collaboration_validation_pct,0.0,Other / Unclear,aaaaaaaa-0000-5000-8000-000000000001
+2026-05-01,2026-06-01,GLOBAL,global,request,2,collaboration_learning_pct,0.0,Other / Unclear,aaaaaaaa-0000-5000-8000-000000000001

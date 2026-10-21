@@ -10,3 +10,9 @@ lint:
 
 data:
 	uv run python -m aideleg.acquire
+
+.PHONY: panel
+panel: data/derived/aei_panel.parquet
+
+data/derived/aei_panel.parquet:
+	uv run python -m aideleg.aei

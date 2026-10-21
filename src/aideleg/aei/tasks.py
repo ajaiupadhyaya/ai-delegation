@@ -43,6 +43,9 @@ class TaskIndex:
     def task_ids_for(self, text: str) -> list[int]:
         return list(self._ids_by_text.get(normalise_task_text(text), []))
 
+    def has_task_id(self, task_id: int) -> bool:
+        return task_id in self._occ_by_id
+
     def occupations_for(self, task_id: int) -> list[str]:
         return list(self._occ_by_id.get(task_id, []))
 
