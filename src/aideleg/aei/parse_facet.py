@@ -19,6 +19,9 @@ Shares from category counts (collaboration, multitasking, human-only ability, us
   conversations of the node. Null, not zero, when nothing is classified.
 - Cells under the privacy threshold (15 conversations in the intersections) are folded into
   `not_classified` by AEI. An unpublished pattern gets no row; it is never set to 0.
+- In intersections, an absent `none` / `not_classified` cell is an explicit 0, because the
+  node's category counts reconcile exactly with its base count (checked; see
+  `_explicit_zeros`). The base `collaboration` facet has no such check, so no zeros there.
 - yes/no facets give the `yes` share of published `yes` + `no`; use case gives each of
   work/personal/coursework over their published sum.
 """
@@ -167,11 +170,43 @@ def _collab(rows: pl.DataFrame) -> pl.DataFrame:
         buckets.select(*_GROUP, metric=pl.lit("augmentation_pct"),
                        value=aug.otherwise(pl.lit(None))),
     ])
-    return pl.concat([shares, buckets])
+    return pl.concat([shares, buckets, _explicit_zeros(rows, c)])
+
+
+def _explicit_zeros(rows: pl.DataFrame, c: pl.DataFrame) -> pl.DataFrame:
+    """`none_pct` / `not_classified_pct` = 0 where an intersection node publishes no such cell.
+
+    These zeros are derived from the published totals, not imputed: for every intersection
+    node the category counts must sum exactly to the node's base count (`onet_task_count` or
+    `request_count`, same geography and level), which holds on all r3-r5 files. When they
+    do, an absent `none` or `not_classified` cell means no conversations, so 0 is a
+    published fact. A mismatch raises; a node with no base count gets no zero rows.
+    """
+    cross = c.filter(pl.col("facet").str.contains("::", literal=True))
+    sums = cross.group_by(_GROUP).agg(
+        s=pl.col("value").sum(),
+        has_none=(pl.col("category") == "none").any(),
+        has_nc=(pl.col("category") == "not_classified").any(),
+    )
+    base = rows.filter((pl.col("metric") == "count") & pl.col("taxonomy").is_in(
+        ["onet_task", "request"])).select(*_GROUP, base=pl.col("value"))
+    j = sums.join(base, on=_GROUP, how="left")
+    bad = j.filter(pl.col("base").is_not_null() & ((pl.col("s") - pl.col("base")).abs() > 1e-6))
+    if bad.height:
+        r = bad.row(0, named=True)
+        raise ValueError(f"collaboration counts for {r['node_name']!r} sum to {r['s']}, "
+                         f"base count is {r['base']}: {bad.height} nodes do not reconcile")
+    ok = j.filter(pl.col("base").is_not_null())
+    return pl.concat([
+        ok.filter(~pl.col("has_none")).select(*_GROUP, metric=pl.lit("none_pct"),
+                                              value=pl.lit(0.0)),
+        ok.filter(~pl.col("has_nc")).select(*_GROUP, metric=pl.lit("not_classified_pct"),
+                                            value=pl.lit(0.0)),
+    ])
 
 
 def _category_shares(rows: pl.DataFrame, metric: str, targets: list[str],
-                     classified: list[str], allowed: set[str], name) -> pl.DataFrame:
+                     classified: list[str], allowed: set[str], name: pl.Expr) -> pl.DataFrame:
     """Share of each published target category over the published `classified` ones."""
     c = rows.filter(pl.col("metric") == metric)
     _check_categories(c, metric, allowed)

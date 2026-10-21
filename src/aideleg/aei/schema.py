@@ -15,6 +15,8 @@ TAXONOMIES = {
     "soc_detailed", "soc_major", "request",
 }
 
+# Units as published: human_only_time_mean in hours, human_with_ai_time_mean in minutes
+# (r6 documentation; r4/r5 files carry the same scale), ai_autonomy_mean on a 1-5 scale.
 CANONICAL_METRICS = frozenset({
     "usage_pct", "pct", "automation_pct", "augmentation_pct", "directive_pct",
     "feedback_loop_pct", "task_iteration_pct", "validation_pct", "learning_pct",

@@ -146,7 +146,7 @@ def test_onet_task_cluster_names_matched_to_ids(df):
 
 
 def test_request_level_and_collaboration(df):
-    assert _v(df, "pct", "Software development", taxonomy="request", level=1) == 90.0
+    assert _v(df, "pct", "Software development", taxonomy="request", level=1) == 80.0
     assert _v(df, "count", "Write code, tests, and docs", taxonomy="request", level=0) == 70
     sd = "Software development"
     assert _v(df, "automation_pct", sd, taxonomy="request", level=1) == pytest.approx(75.0)
@@ -183,3 +183,33 @@ def test_unmapped_variable_raises(index, iso, tmp_path):
                  'GLOBAL,global,2026-02-05,2026-02-12,"1P API",mystery,0,mystery_count,x,1\n')
     with pytest.raises(ValueError, match="mystery"):
         parse_facet_release(p, "r5", "1p_api", index, iso=iso)
+
+
+def test_reconciled_intersection_gives_explicit_zero_none_and_unclassified(df):
+    # task 202 publishes patterns only; its counts (25 + 15) equal its base count (40),
+    # so the absent none / not_classified cells are published zeros
+    assert _v(df, "none_pct", "202", taxonomy="onet_task") == 0.0
+    assert _v(df, "not_classified_pct", "202", taxonomy="onet_task") == 0.0
+    assert _v(df, "directive_pct", "202", taxonomy="onet_task") == pytest.approx(62.5)
+    # task 101 has none (20) but no not_classified cell
+    assert _v(df, "not_classified_pct", "101", taxonomy="onet_task") == 0.0
+    assert _v(df, "none_pct", "101", taxonomy="onet_task") == pytest.approx(25.0)
+    # request node reconciles too (40 + 20 + 20 = 80)
+    sd = "Software development"
+    assert _v(df, "not_classified_pct", sd, taxonomy="request", level=1) == 0.0
+    # the base collaboration facet has no reconciliation, so no zero is derived there
+    usa = df.filter((pl.col("geo_id") == "USA") & (pl.col("metric") == "none_pct"))
+    assert usa.height == 0
+
+
+def test_unreconciled_intersection_raises(index, iso, tmp_path):
+    p = tmp_path / "bad.csv"
+    s = (FIX / "facet_small.csv").read_text()
+    p.write_text(s.replace("onet_task_count,write reports,40", "onet_task_count,write reports,41"))
+    with pytest.raises(ValueError, match="do not reconcile"):
+        parse_facet_release(p, "r5", "claude_ai", index, iso=iso)
+
+
+def test_r4_bare_node_numeric_intersection(df):
+    # r4 numeric intersections carry the bare task name (category "") instead of `::value`
+    assert _v(df, "human_only_time_mean", "202", taxonomy="onet_task") == 1.75

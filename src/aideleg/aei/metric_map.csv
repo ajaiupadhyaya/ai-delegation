@@ -22,9 +22,9 @@ r4;r5,ai_education_years,ai_education_years_stdev,(null),,,ignore,distribution s
 r3;r4;r5,collaboration,collaboration_count,<pattern>,overall,<pattern>_pct,map,pattern counts -> <pattern>_pct renormalised over published classified patterns; automation_pct/augmentation_pct derived; none_pct/not_classified_pct as share of all
 r3;r4;r5,collaboration,collaboration_pct,<pattern>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
 r3;r4;r5,country,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
-r3;r4;r5,country,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r3;r4;r5,country,usage_pct,(null),overall,usage_pct,map,"country share of global conversations (percent); geo_id ISO-3"
 r4;r5,country-state,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
-r4;r5,country-state,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r4;r5,country-state,usage_pct,(null),overall,usage_pct,map,"subregion share of its parent country's conversations (percent); geo_id ISO 3166-2"
 r4;r5,human_education_years,human_education_years_count,(null),,,ignore,"observations behind the numeric statistic, not a node conversation count; would duplicate the node's count"
 r4;r5,human_education_years,human_education_years_histogram_count,<bin>,,,ignore,histogram bins; not used in Plans 1-4
 r4;r5,human_education_years,human_education_years_histogram_pct,<bin>,,,ignore,histogram bins; not used in Plans 1-4
@@ -173,7 +173,7 @@ r4;r5,request::task_success,request_task_success_pct,<request>::<category>,,,ign
 r4;r5,request::use_case,request_use_case_count,<request>::<category>,request,use_case_<category>_pct,map,category counts -> share of published classified categories (none and not_classified excluded)
 r4;r5,request::use_case,request_use_case_pct,<request>::<category>,,,ignore,redundant with the matching *_count rows (same cells); shares are recomputed from counts
 r3,state_us,usage_count,(null),overall,count,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
-r3,state_us,usage_pct,(null),overall,usage_pct,map,"geography total; geo_id normalised (ISO-3 country, ISO 3166-2 subregion)"
+r3,state_us,usage_pct,(null),overall,usage_pct,map,"US state share of US conversations (parent country, percent); geo_id US-<state>"
 r4;r5,task_success,task_success_count,<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
 r4;r5,task_success,task_success_pct,<category>,,,ignore,no canonical metric for task success; not used in Plans 1-4
 r4;r5,use_case,use_case_count,<category>,overall,use_case_<category>_pct,map,category counts -> share of published classified categories (none and not_classified excluded)

@@ -41,8 +41,8 @@ GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,juggle flaming torches for an audience.::not_classified,100.0
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,0,request_count,"Write code, tests, and docs",70
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,0,request_pct,"Write code, tests, and docs",70.0
-GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_count,Software development,90
-GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_pct,Software development,90.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_count,Software development,80
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request,1,request_pct,Software development,80.0
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_count,Software development::directive,40
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_pct,Software development::directive,50.0
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",request::collaboration,1,request_collaboration_count,Software development::feedback loop,20
@@ -71,3 +71,10 @@ GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_count,not_classified,95
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",use_case,0,use_case_pct,not_classified,47.5
 GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",task_success,0,task_success_count,yes,50
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_count,write reports,40
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task,0,onet_task_pct,write reports,25.0
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,write reports::directive,25
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,write reports::directive,62.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_count,write reports::learning,15
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::collaboration,0,onet_task_collaboration_pct,write reports::learning,37.5
+GLOBAL,global,2026-02-05,2026-02-12,"Claude AI (Free, Pro, and Max)",onet_task::human_only_time,0,onet_task_human_only_time_mean,write reports,1.75
