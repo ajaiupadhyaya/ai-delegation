@@ -22,15 +22,21 @@ Layouts (inspected 2026-10-21; header rows differ, so codes are found by pattern
 FF49. A SIC maps to an industry only if it lies inside one of the ranges listed in
 `Siccodes49.txt`. In that file industry 49 is `Other` ("Almost Nothing": SIC 4950-4959,
 4960-4961, 4970-4971, 4990-4991); 48 is `Fin` ("Trading"). A SIC outside every listed range,
-`Other`'s included, is unmapped: it is never pushed into `Other`.
+`Other`'s included, is unmapped: it is never pushed into `Other`. (The task brief called
+Other "#48"; the file numbers it 49, and #48 is `Fin`.)
 
 OEWS. The 4-digit OEWS file pads codes to six characters (`511200`) and publishes some BLS
 aggregates with letters (`3250A1`). Padded codes map by their first 4 digits. A letter
 aggregate is the equal-weight union of the 4-digit industries its title lists, e.g. "Chemical
 Manufacturing (3251, 3252, 3253, and 3259 only)". The component list is in the title, not in
 `file_descriptions.xlsx` (that file only lists the workbooks). NAICS `99xxxx` (OEWS federal,
-state and local government designations) is the "government: no public equity" bucket,
-outside both "mapped" and "unmapped" and outside the private-employment denominator.
+state and local government designations) and the explicit list `NO_PUBLIC_EQUITY` (`491100`
+Postal Service, Federal Government) form the "government: no public equity" bucket, outside
+both "mapped" and "unmapped" and outside the private-employment denominator. NAICS 5511
+(Management of Companies) is a separate bucket by default; see `naics_to_ff49`.
+
+The nat4d codes are mutually exclusive: no letter aggregate co-exists with its own
+components and no 3-digit code with its 4-digit children (checked in `_oews_ff49`).
 """
 
 import re
@@ -169,41 +175,111 @@ def _siccodes() -> pl.DataFrame:
     return read_siccodes(_single_file("ff_siccodes49"))
 
 
-@cache
-def naics_to_ff49(method: Literal["split", "majority"] = "split",
-                  digits: Literal[4, 6] = 4) -> pl.DataFrame:
-    """NAICS 2022 -> FF49: `naics, ff49, weight`. `ff49` is null for the weight that reaches
-    no FF49 industry, so weights sum to 1 per NAICS code.
+HQ_NAICS = "5511"  # Management of Companies and Enterprises
+NO_PUBLIC_EQUITY = frozenset({"491100"})  # OEWS codes outside 99xxxx with no listed equity
+Status = Literal["private", "government", "management_of_companies"]
 
-    `digits=4` gives each 4-digit industry the equal-weight mean of its 6-digit codes.
-    `"majority"`: see `majority`.
-    """
-    if method not in ("split", "majority"):
-        raise ValueError(f"method must be 'split' or 'majority', not {method!r}")
+
+@cache
+def _split6() -> pl.DataFrame:
+    """6-digit NAICS 2022 -> FF49 split, every NAICS 2022 code in the 2017->2022 target list
+    included: a code the chain never reaches (no SIC 1987 source: 112130, 481219, 541120,
+    551114) gets one null-`ff49` row at weight 1, i.e. it is wholly unmapped."""
     lookup = sic_to_ff49(_siccodes())
     xw = naics_to_sic(2022).with_columns(
         ff49=pl.col("sic").map_elements(lookup, return_dtype=pl.Int64)
     )
     out = xw.group_by("naics", "ff49").agg(pl.col("weight").sum())
-    if digits == 4:
-        n6 = out.select("naics").unique().with_columns(n4=pl.col("naics").str.slice(0, 4))
-        n6 = n6.with_columns(k=pl.len().over("n4"))
-        out = (out.join(n6, on="naics")
-               .group_by(naics="n4", ff49="ff49")
-               .agg(weight=(pl.col("weight") / pl.col("k")).sum()))
-    elif digits != 6:
+    every = _link(2022).select(naics="dst").unique()
+    orphan = every.join(out, on="naics", how="anti").with_columns(
+        ff49=pl.lit(None, pl.Int64), weight=pl.lit(1.0))
+    return pl.concat([out, orphan.select(out.columns)]).sort("naics", "ff49", nulls_last=True)
+
+
+def _to_digits(df6: pl.DataFrame, digits: int) -> pl.DataFrame:
+    if digits == 6:
+        return df6
+    if digits != 4:
         raise ValueError(f"digits must be 4 or 6, not {digits!r}")
+    n6 = df6.select("naics").unique().with_columns(n4=pl.col("naics").str.slice(0, 4))
+    n6 = n6.with_columns(k=pl.len().over("n4"))
+    return (df6.join(n6, on="naics")
+            .group_by(naics="n4", ff49="ff49")
+            .agg(weight=(pl.col("weight") / pl.col("k")).sum()))
+
+
+@cache
+def _excluded(method: str, digits: int) -> pl.DataFrame:
+    out = _to_digits(_split6(), digits).filter(~pl.col("naics").str.starts_with(HQ_NAICS))
     if method == "majority":
         out = majority(out)
     return out.select("naics", "ff49", "weight").sort("naics", "ff49", nulls_last=True)
 
 
+@cache
+def _default_employment() -> pl.DataFrame:
+    from aideleg.bls.oews import load_industry_matrix
+
+    return load_industry_matrix(2024, 4)
+
+
+def hq_shares(employment: pl.DataFrame, method: Literal["split", "majority"] = "split"
+              ) -> pl.DataFrame:
+    """`ff49, weight`: each FF49 industry's share of mapped private employment (OEWS codes
+    outside government, `NO_PUBLIC_EQUITY` and 5511), under the 5511-excluded crosswalk."""
+    by = _oews_ff49(employment, _excluded(method, 4), "exclude")
+    emp = (by.filter((pl.col("status") == "private") & pl.col("ff49").is_not_null())
+           .group_by("ff49").agg(e=pl.col("emp").sum()))
+    return emp.select("ff49", weight=pl.col("e") / pl.col("e").sum()).sort("ff49")
+
+
+def naics_to_ff49(method: Literal["split", "majority"] = "split",
+                  digits: Literal[4, 6] = 4,
+                  hq: Literal["exclude", "redistribute"] = "exclude", *,
+                  employment: pl.DataFrame | None = None) -> pl.DataFrame:
+    """NAICS 2022 -> FF49: `naics, ff49, weight`. `ff49` is null for the weight that reaches
+    no FF49 industry, so weights sum to 1 per NAICS code.
+
+    `digits=4` gives each 4-digit industry the equal-weight mean of all its 6-digit codes
+    (source-less ones included, as unmapped). `"majority"`: see `majority`.
+
+    NAICS 5511 (Management of Companies: head offices, mostly of non-financial firms) maps
+    through SIC 6712/6719 to `Fin` by the concordance, which would put about 2.8M HQ jobs in
+    Trading. `hq="exclude"` (default) leaves 5511 out of this table altogether: it is its own
+    `management_of_companies` bucket, neither FF49 nor unmapped. `hq="redistribute"` (a
+    robustness check, the SIC 1987 treatment of auxiliary establishments) gives every 5511
+    code the FF49 mix of mapped private employment, `hq_shares(employment, method)`.
+    `employment` is an industry-occupation matrix like `load_industry_matrix`'s output; when
+    omitted it is `load_industry_matrix(2024, 4)` (May 2024 OEWS). Under `"majority"` the
+    5511 rows stay proportional: the redistribution is not a concordance share to round.
+
+    Equal-split artifacts. Weights are structural, not employment-based: the inversion gives
+    each SIC equal mass, so a SIC that maps to a single NAICS outweighs one spread over
+    several. E.g. 488111 (Air Traffic Control) is 2/3 SIC 9621 (government regulation of
+    transportation, unmapped) and 1/3 SIC 4581 (airports, `Trans`), because 4581 is split
+    over three NAICS codes and 9621 is not.
+    """
+    if method not in ("split", "majority"):
+        raise ValueError(f"method must be 'split' or 'majority', not {method!r}")
+    if hq not in ("exclude", "redistribute"):
+        raise ValueError(f"hq must be 'exclude' or 'redistribute', not {hq!r}")
+    out = _excluded(method, digits)
+    if hq == "redistribute":
+        shares = hq_shares(employment if employment is not None else _default_employment(),
+                           method)
+        codes = (_to_digits(_split6(), digits).select("naics").unique()
+                 .filter(pl.col("naics").str.starts_with(HQ_NAICS)))
+        out = pl.concat([out, codes.join(shares, how="cross").select(out.columns)])
+    return out.sort("naics", "ff49", nulls_last=True)
+
+
 def majority(split: pl.DataFrame) -> pl.DataFrame:
     """Assign each NAICS code wholly (weight 1) to its largest-weight FF49 industry. The
     unmapped share (null `ff49`) competes too: a code whose largest share reaches no FF49
-    industry stays unmapped rather than going to a minor FF49 slice (Postal Service, 97%
-    SIC 4311, is not made Business Services by its 3% SIC 7389). Ties go to a mapped
-    industry, then to the lowest industry number."""
+    industry stays unmapped. Ties go to a mapped industry, then to the lowest industry
+    number. The literal reading ("largest FF49 industry", unmapped not competing) would
+    instead send 4911 Postal Service (97% SIC 4311, unmapped) wholly to `BusSv` on its 3% SIC
+    7389 slice, and would leave no private employment unmapped under majority."""
     best = (split.sort(["naics", "weight", "ff49"], descending=[False, True, False],
                        nulls_last=True)
             .group_by("naics", maintain_order=True).first()
@@ -220,8 +296,9 @@ def oews_components(code: str, title: str) -> list[str] | None:
     if code.startswith("99"):
         return None
     if code.isdigit():
-        # NAICS pads with zeros: no 2022 4-digit industry ends in 0, so `455000` is the
-        # 3-digit industry 455 and `511200` the 4-digit 5112.
+        # NAICS pads with zeros: no 2022 4-digit industry ends in 0 (`_weights_for` checks
+        # this against the crosswalk), so `455000` is the 3-digit industry 455 and `511200`
+        # the 4-digit 5112.
         return [code[:3]] if code[3] == "0" else [code[:4]]
     m = _COMPONENT_RE.search(title)
     parts = re.findall(r"\b\d{4}\b", m.group(1)) if m else []
@@ -230,50 +307,112 @@ def oews_components(code: str, title: str) -> list[str] | None:
     return parts
 
 
-def _prefix_frac(frac: dict[str, float], comp: str) -> float:
-    """Mapped fraction of a component: its own entry, or the equal-weight mean over the
-    crosswalk codes it prefixes (a 3-digit component); 0 when the crosswalk has none."""
-    if comp in frac:
-        return frac[comp]
-    hits = [v for k, v in frac.items() if k.startswith(comp)]
-    return sum(hits) / len(hits) if hits else 0.0
+def oews_status(code: str, hq: Literal["exclude", "redistribute"] = "exclude") -> Status:
+    """`government` for 99xxxx and `NO_PUBLIC_EQUITY` (no listed equity: excluded from FF49
+    indices and from the private denominator); `management_of_companies` for 5511 when it
+    is excluded; otherwise `private`."""
+    if code.startswith("99") or code in NO_PUBLIC_EQUITY:
+        return "government"
+    if hq == "exclude" and code.startswith(HQ_NAICS):
+        return "management_of_companies"
+    return "private"
 
 
-def coverage_by_code(matrix: pl.DataFrame, method: Literal["split", "majority"] = "split", *,
-                     crosswalk: pl.DataFrame | None = None) -> pl.DataFrame:
-    """Per OEWS industry: `naics, naics_title, status ("government" | "private"), tot_emp,
-    mapped_emp, unmapped_emp`. `tot_emp` sums the non-suppressed detailed employment. A
-    letter aggregate's mapped fraction is the mean over its components; a component missing
-    from the crosswalk counts as unmapped."""
-    xw = crosswalk if crosswalk is not None else naics_to_ff49(method)
-    frac = dict(xw.group_by("naics")
-                .agg(pl.col("weight").filter(pl.col("ff49").is_not_null()).sum())
-                .iter_rows())
+def _weights_for(comps: list[str], table: dict[str, list[tuple[int | None, float]]]
+                 ) -> dict[int | None, float]:
+    """FF49 weights of an OEWS code: the equal-weight mean over its components; a 3-digit
+    component is the equal-weight mean over the 4-digit crosswalk codes it prefixes; a
+    component the crosswalk lacks is wholly unmapped."""
+    out: dict[int | None, float] = {}
+    for comp in comps:
+        if len(comp) == 3:
+            if comp + "0" in table:
+                raise ValueError(f"crosswalk has 4-digit code {comp}0: the xxx000 rule fails")
+            kids = [k for k in table if k.startswith(comp)]
+        else:
+            kids = [comp] if comp in table else []
+        rows = [r for k in kids for r in table[k]] if kids else [(None, 1.0)]
+        n = len(kids) or 1
+        for ff, w in rows:
+            out[ff] = out.get(ff, 0.0) + w / n / len(comps)
+    return out
+
+
+def _leaves(comps: list[str], keys: set[str]) -> set[str]:
+    return {k for c in comps for k in keys if k.startswith(c)} or set(comps)
+
+
+def _oews_ff49(matrix: pl.DataFrame, xw: pl.DataFrame,
+               hq: Literal["exclude", "redistribute"]) -> pl.DataFrame:
+    """Long form: `naics, naics_title, status, tot_emp, ff49, emp` (`emp` = the code's
+    employment times its FF49 weight; one null-`ff49` row for non-private codes)."""
+    if not xw.is_empty() and set(xw["naics"].str.len_chars().unique()) != {4}:
+        raise ValueError("the OEWS crosswalk must be keyed by 4-digit NAICS")
+    table: dict[str, list[tuple[int | None, float]]] = {}
+    for n, ff, w in xw.select("naics", "ff49", "weight").iter_rows():
+        table.setdefault(n, []).append((ff, w))
+    keys = set(table)
     ind = (matrix.group_by("naics", "naics_title")
            .agg(tot_emp=pl.col("tot_emp").sum().cast(pl.Float64)).sort("naics"))
-    rows = []
+    rows, seen = [], {}
     for code, title, emp in ind.iter_rows():
-        comps = oews_components(code, title)
-        if comps is None:
-            rows.append((code, title, "government", emp, 0.0, 0.0))
+        status = oews_status(code, hq)
+        if status != "private":
+            rows.append((code, title, status, emp, None, 0.0))
             continue
-        f = sum(_prefix_frac(frac, c) for c in comps) / len(comps)
-        rows.append((code, title, "private", emp, emp * f, emp * (1 - f)))
+        comps = oews_components(code, title)
+        assert comps is not None
+        for leaf in _leaves(comps, keys):  # nat4d codes must not overlap
+            if leaf in seen:
+                raise ValueError(f"OEWS codes {seen[leaf]} and {code} both cover NAICS {leaf}")
+            seen[leaf] = code
+        for ff, w in _weights_for(comps, table).items():
+            rows.append((code, title, status, emp, ff, emp * w))
     return pl.DataFrame(rows, orient="row", schema={
         "naics": pl.String, "naics_title": pl.String, "status": pl.String,
-        "tot_emp": pl.Float64, "mapped_emp": pl.Float64, "unmapped_emp": pl.Float64})
+        "tot_emp": pl.Float64, "ff49": pl.Int64, "emp": pl.Float64})
 
 
-def coverage_report(matrix: pl.DataFrame, method: Literal["split", "majority"] = "split", *,
-                    crosswalk: pl.DataFrame | None = None) -> pl.DataFrame:
-    """Employment by mapping status: `status (mapped | unmapped | government), tot_emp,
-    share_of_total, share_of_private`. `share_of_private` is null for government."""
-    by = coverage_by_code(matrix, method, crosswalk=crosswalk)
-    gov = by.filter(pl.col("status") == "government")["tot_emp"].sum()
+def coverage_by_code(matrix: pl.DataFrame, method: Literal["split", "majority"] = "split",
+                     hq: Literal["exclude", "redistribute"] = "exclude", *,
+                     crosswalk: pl.DataFrame | None = None,
+                     employment: pl.DataFrame | None = None) -> pl.DataFrame:
+    """Per OEWS industry: `naics, naics_title, status, tot_emp, mapped_emp, unmapped_emp`.
+    `status` is `private`, `government` (99xxxx and `NO_PUBLIC_EQUITY`) or
+    `management_of_companies` (5511, when `hq="exclude"`); only private codes have mapped or
+    unmapped employment. `tot_emp` sums the non-suppressed detailed employment. Values are
+    rounded to 6 decimals (float residuals of ~1e-10 become 0). Raises if two OEWS codes
+    cover the same 4-digit NAICS (nothing is counted twice)."""
+    if crosswalk is None:
+        crosswalk = naics_to_ff49(method, 4, hq, employment=employment)
+    long = _oews_ff49(matrix, crosswalk, hq)
+    priv = pl.col("status") == "private"
+    return (long.group_by("naics", "naics_title", "status", "tot_emp", maintain_order=True)
+            .agg(mapped_emp=pl.col("emp").filter(priv & pl.col("ff49").is_not_null()).sum(),
+                 unmapped_emp=pl.col("emp").filter(priv & pl.col("ff49").is_null()).sum())
+            .with_columns(pl.col("mapped_emp", "unmapped_emp").round(6))
+            .sort("naics"))
+
+
+def coverage_report(matrix: pl.DataFrame, method: Literal["split", "majority"] = "split",
+                    hq: Literal["exclude", "redistribute"] = "exclude", *,
+                    crosswalk: pl.DataFrame | None = None,
+                    employment: pl.DataFrame | None = None) -> pl.DataFrame:
+    """Employment by mapping status: `status (mapped | unmapped | management_of_companies |
+    government), tot_emp, share_of_total, share_of_private`. The private denominator is
+    mapped + unmapped; `share_of_private` is null for the two excluded buckets. With
+    `hq="redistribute"` 5511 is mapped and its bucket is 0."""
+    by = coverage_by_code(matrix, method, hq, crosswalk=crosswalk, employment=employment)
+
+    def bucket(s: str) -> float:
+        return by.filter(pl.col("status") == s)["tot_emp"].sum()
+
     mapped, unmapped = by["mapped_emp"].sum(), by["unmapped_emp"].sum()
-    total, private = mapped + unmapped + gov, mapped + unmapped
+    hq_emp, gov = bucket("management_of_companies"), bucket("government")
+    total, private = mapped + unmapped + hq_emp + gov, mapped + unmapped
     rows = [("mapped", mapped, mapped / total, mapped / private),
             ("unmapped", unmapped, unmapped / total, unmapped / private),
+            ("management_of_companies", hq_emp, hq_emp / total, None),
             ("government", gov, gov / total, None)]
     return pl.DataFrame(rows, orient="row", schema={
         "status": pl.String, "tot_emp": pl.Float64, "share_of_total": pl.Float64,

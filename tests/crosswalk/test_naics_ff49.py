@@ -3,13 +3,16 @@ import pytest
 
 from aideleg.config import RAW
 from aideleg.crosswalk.naics_ff49 import (
+    NO_PUBLIC_EQUITY,
     chain_links,
+    coverage_by_code,
     coverage_report,
     invert,
     majority,
     naics_to_ff49,
     naics_to_sic,
     oews_components,
+    oews_status,
     sic_to_ff49,
 )
 
@@ -95,19 +98,53 @@ def test_government_excluded_not_unmapped():
     m = _matrix([
         ("511200", "Software Publishers", "15-1252", 100),
         ("522100", "Depository", "43-3071", 40),
-        ("491100", "Postal Service (Federal Government)", "43-5052", 60),
+        ("491100", "Postal Service (Federal Government)", "43-5052", 60),  # NO_PUBLIC_EQUITY
         ("455000", "General Merchandise Retailers", "41-2031", 20),  # 4551 mapped, 4552 not
+        ("551100", "Management of Companies and Enterprises", "11-1021", 50),
         ("999100", "Federal Executive Branch (OEWS Designation)", "13-1071", 300),
         ("999300", "Local Government (OEWS Designation)", "33-3051", None),
     ])
     rep = {r["status"]: r for r in coverage_report(m, crosswalk=XW).iter_rows(named=True)}
-    assert set(rep) == {"mapped", "unmapped", "government"}
-    assert rep["government"]["tot_emp"] == 300
+    assert set(rep) == {"mapped", "unmapped", "government", "management_of_companies"}
+    assert rep["government"]["tot_emp"] == 360  # 99xxxx + USPS
     assert rep["government"]["share_of_private"] is None
+    assert rep["management_of_companies"]["tot_emp"] == 50
+    assert rep["management_of_companies"]["share_of_private"] is None
     assert rep["mapped"]["tot_emp"] == pytest.approx(140)
-    assert rep["unmapped"]["tot_emp"] == pytest.approx(80)  # 10 banks + 60 postal + 10 retail
-    assert rep["unmapped"]["share_of_private"] == pytest.approx(80 / 220)
-    assert rep["mapped"]["share_of_total"] == pytest.approx(140 / 520)
+    assert rep["unmapped"]["tot_emp"] == pytest.approx(20)  # 10 banks + 10 retail
+    assert rep["unmapped"]["share_of_private"] == pytest.approx(20 / 160)
+    assert rep["mapped"]["share_of_total"] == pytest.approx(140 / 570)
+
+
+def test_usps_is_no_public_equity():
+    assert "491100" in NO_PUBLIC_EQUITY
+    assert oews_status("491100") == "government"
+    assert oews_status("999200") == "government"
+    assert oews_status("491200") == "private"
+    assert oews_status("551100") == "management_of_companies"
+    assert oews_status("551100", hq="redistribute") == "private"
+
+
+def test_overlapping_oews_codes_raise():
+    m = _matrix([("5220A1", "Credit (5221 and 5223 only)", "43-3071", 10),
+                 ("522100", "Depository", "43-3071", 40)])
+    with pytest.raises(ValueError, match="both cover"):
+        coverage_by_code(m, crosswalk=XW)
+
+
+def test_three_digit_rule_guard():
+    xw = pl.concat([XW, pl.DataFrame({"naics": ["4550"], "ff49": [43], "weight": [1.0]},
+                                     schema=XW.schema)])
+    m = _matrix([("455000", "General Merchandise Retailers", "41-2031", 20)])
+    with pytest.raises(ValueError, match="xxx000"):
+        coverage_by_code(m, crosswalk=xw)
+
+
+def test_residuals_rounded():
+    xw = pl.DataFrame({"naics": ["5112"] * 3, "ff49": [36, 34, 35],
+                       "weight": [0.1, 0.2, 0.7]}, schema=XW.schema)
+    m = _matrix([("511200", "Software Publishers", "15-1252", 1_000_000)])
+    assert coverage_by_code(m, crosswalk=xw)["unmapped_emp"].to_list() == [0.0]
 
 
 # --- real data -------------------------------------------------------------------------
@@ -155,8 +192,6 @@ def test_known_mappings():
 @_needs_raw
 def test_unmapped_private_employment_below_1pct(capsys):
     from aideleg.bls.oews import load_industry_matrix
-    from aideleg.crosswalk.naics_ff49 import coverage_by_code
-
     m = load_industry_matrix(2024, 4)
     rep = coverage_report(m)
     with capsys.disabled():
@@ -165,3 +200,39 @@ def test_unmapped_private_employment_below_1pct(capsys):
               .sort("unmapped_emp", descending=True).head(15))
     share = rep.filter(pl.col("status") == "unmapped")["share_of_private"].sum()
     assert share < 0.01, coverage_by_code(m).sort("unmapped_emp", descending=True).head(20)
+
+
+@pytest.mark.data
+@_needs_raw
+def test_sourceless_codes_kept_unmapped():
+    six = naics_to_ff49("split", digits=6, hq="redistribute",
+                        employment=_matrix([("522100", "Depository", "43-3071", 1)]))
+    assert "551114" in set(six["naics"])
+    for code in ("112130", "481219", "541120"):
+        rows = six.filter(pl.col("naics") == code)
+        assert rows["ff49"].to_list() == [None] and rows["weight"].to_list() == [1.0]
+
+
+@pytest.mark.data
+@_needs_raw
+def test_hq_excluded_by_default():
+    for digits in (4, 6):
+        ff = naics_to_ff49("split", digits=digits)
+        assert ff.filter(pl.col("naics").str.starts_with("5511")).is_empty()
+
+
+@pytest.mark.data
+@_needs_raw
+def test_hq_redistribute_follows_employment():
+    emp = _matrix([("522100", "Depository Credit Intermediation", "43-3071", 300),
+                   ("513200", "Software Publishers", "15-1252", 100),
+                   ("999100", "Federal Executive Branch (OEWS Designation)", "13-1071", 900),
+                   ("491100", "Postal Service (Federal Government)", "43-5052", 900)])
+    for method in ("split", "majority"):
+        ff = naics_to_ff49(method, hq="redistribute", employment=emp)
+        hq = ff.filter(pl.col("naics") == "5511")
+        assert dict(hq.select("ff49", "weight").iter_rows()) == pytest.approx({36: 0.25, 45: 0.75})
+        rep = coverage_report(emp.vstack(_matrix([("551100", "Mgmt", "11-1021", 40)])),
+                              method, "redistribute", employment=emp)
+        rep = dict(rep.select("status", "tot_emp").iter_rows())
+        assert rep["management_of_companies"] == 0 and rep["mapped"] == pytest.approx(440)
