@@ -351,6 +351,22 @@
     "bytes": 31514940,
     "sha256": "3ef0e42fab1b42a7dac8a3a9b3e7024f5d7a07eff308bff5fc91808061ec08e1"
   },
+  "onet_2010_2019_crosswalk": {
+    "key": "onet_2010_2019_crosswalk",
+    "url": "https://www.onetcenter.org/taxonomy/2019/walk/2010_to_2019_Crosswalk.csv?fmt=csv",
+    "dest": "onet/2010_to_2019_Crosswalk.csv",
+    "retrieved_utc": "2026-10-21T21:54:31Z",
+    "bytes": 108052,
+    "sha256": "8f026a33134bfde5770308d1c6117cf70d9dd41c2b3467e6dd271d65bdeecc5a"
+  },
+  "onet_29_3_tasks": {
+    "key": "onet_29_3_tasks",
+    "url": "https://www.onetcenter.org/dl_files/database/db_29_3_text/Task%20Statements.txt",
+    "dest": "onet/db_29_3_task_statements.txt",
+    "retrieved_utc": "2026-10-21T21:54:30Z",
+    "bytes": 2759559,
+    "sha256": "fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a"
+  },
   "sec_tickers": {
     "key": "sec_tickers",
     "url": "https://www.sec.gov/files/company_tickers_exchange.json",

@@ -19,7 +19,7 @@ from aideleg.aei.parse_early import parse_r1, parse_r2
 from aideleg.aei.parse_facet import parse_facet_release
 from aideleg.aei.parse_r6 import parse_r6
 from aideleg.aei.schema import PANEL_COLUMNS, TAXONOMIES, is_canonical
-from aideleg.aei.tasks import TaskIndex
+from aideleg.aei.tasks import default_index
 from aideleg.config import DERIVED, RAW, RELEASES
 
 SOURCES = {"claude_ai": "claude_ai", "api": "1p_api"}
@@ -42,7 +42,7 @@ def _path(raw: Path, key: str) -> Path:
 def build_panel(raw: Path = RAW, write: bool = True) -> pl.DataFrame:
     """Parse r1-r6 under `raw`, stack them, and write `DERIVED/aei_panel.parquet`
     (unless `write=False`)."""
-    index = TaskIndex.from_onet(_path(raw, "aei_onet_tasks"))
+    index = default_index(raw)
     frames = [
         parse_r1(_path(raw, "aei_r1_task_pct").parent, index),
         parse_r2(_path(raw, "aei_r2_task_pct").parent, index),

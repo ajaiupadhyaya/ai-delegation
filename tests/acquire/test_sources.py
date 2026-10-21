@@ -8,7 +8,7 @@ REQUIRED = (
     {
         "aei_r1_task_pct", "aei_r1_collab", "aei_r1_wage", "aei_soc_structure",
         "aei_r2_task_pct", "aei_r2_collab_by_task", "aei_r2_thinking", "aei_onet_tasks",
-        "aei_job_exposure",
+        "aei_job_exposure", "onet_29_3_tasks", "onet_2010_2019_crosswalk",
         "aei_geo_wap_country", "aei_geo_wap_us_state", "aei_geo_gdp_country",
         "aei_geo_gdp_us_state", "aei_geo_iso",
         "oews_2024_nat", "oews_2024_ind", "oews_2025_ind",

@@ -2,6 +2,15 @@
 
 Deliberately excluded: robot_exposure_tasks.csv (99 MB) and the task-penetration files,
 which are out of scope.
+
+O*NET vintage. The study's occupation vintage is O*NET-SOC 2019 / SOC 2018 (OEWS May 2024,
+AEI r6, Felten AIOE). `onet_29_3_tasks` is O*NET 29.3 because that is the release the AEI
+robot-exposure data cite; O*NET 30.0 exists and was deliberately not used. The r2-era
+`aei_onet_tasks` file carries O*NET-SOC 2010 codes and is kept only for its task wordings and
+legacy Task IDs, which `onet_2010_2019_crosswalk` maps to 2019 codes (see aei/tasks.py).
+The crosswalk URL is the CSV download linked from
+https://www.onetcenter.org/taxonomy/2019/walk.html; without `?fmt=csv` the server
+returns an HTML page.
 """
 
 from aideleg.acquire.fetch import Source
@@ -10,6 +19,7 @@ HF = "https://huggingface.co/datasets/Anthropic/EconomicIndex/resolve/main"
 FF = "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp"
 BLS = "https://www.bls.gov/oes/special-requests"
 CENSUS = "https://www.census.gov/naics/concordances"
+ONET = "https://www.onetcenter.org"
 
 
 def _aei(key: str, release: str, path: str, tree: str) -> Source:
@@ -50,6 +60,12 @@ SOURCES: list[Source] = [
     *_pair(5, "release_2026_03_24", "data/", "2026-02-05_to_2026-02-12",
            "aei_raw_{name}_{stamp}.csv"),
     *_pair(6, "release_2026_06_26", "data/", "2026-06-26", "aei_{name}_{stamp}.csv"),
+    # O*NET 29.3 task statements (O*NET-SOC 2019) and the 2010 -> 2019 taxonomy crosswalk
+    Source("onet_29_3_tasks", f"{ONET}/dl_files/database/db_29_3_text/Task%20Statements.txt",
+           "onet/db_29_3_task_statements.txt"),
+    Source("onet_2010_2019_crosswalk",
+           f"{ONET}/taxonomy/2019/walk/2010_to_2019_Crosswalk.csv?fmt=csv",
+           "onet/2010_to_2019_Crosswalk.csv"),
     _aei("aei_job_exposure", "labor_market_impacts", "job_exposure.csv", "labor_market_impacts"),
     # Geography inputs (release 3 intermediates)
     *[
