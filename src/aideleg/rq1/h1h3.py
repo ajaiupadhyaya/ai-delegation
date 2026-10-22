@@ -150,6 +150,7 @@ def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
     fit = _fit(rows, outcome, tested, tested)
     diagnostics = {k: getattr(fit, k) for k in _FIT_FIELDS}
     diagnostics["attenuation_log_wage"] = _attenuation(rows, predictors[1], tested)
+    diagnostics["tested"] = list(tested)
     return HypothesisResult(
         hypothesis="H1", outcome=outcome, coefs=fit.coefs,
         p_family=max(fit.coefs[p].p for p in tested), sample=_sample(rows, fit),
@@ -164,6 +165,7 @@ def estimate_h3(tr: TaskRows, outcome: str = "validation_pct", indicator: str = 
     fit = _fit(rows, outcome, regressors, [indicator])
     coefs, notes = dict(fit.coefs), _psd_note(fit, [indicator])
     diagnostics = {k: getattr(fit, k) for k in _FIT_FIELDS}
+    diagnostics["tested"] = [indicator]
     if covariates:
         cov_fit = _fit(rows, outcome, regressors, list(covariates))
         coefs.update(cov_fit.coefs)

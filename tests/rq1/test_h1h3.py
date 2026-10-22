@@ -194,3 +194,11 @@ def test_non_psd_note_wording(monkeypatch):
     r = h1h3.estimate_h1(synth.task_rows(SEED))
     assert r.notes == [f"non-PSD rule applied to [{EDUC}, {WAGE}]: smallest eigenvalue -0.25; "
                        f"SE of {WAGE} set to the larger one-way cluster SE"]
+
+
+def test_tested_coefficients_are_named_in_diagnostics():
+    tr = synth.task_rows(SEED)
+    assert h1h3.estimate_h1(tr).diagnostics["tested"] == ["human_education_years_mean",
+                                                          "log_wage"]
+    h3 = h1h3.estimate_h3(tr, covariates=("human_education_years_mean",))
+    assert h3.diagnostics["tested"] == ["error_cost"]
