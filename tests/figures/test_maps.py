@@ -84,3 +84,19 @@ def test_all_text_inside_canvas_with_long_label_and_legend():
     w, h = fig.get_size_inches()
     assert box.x0 >= -1e-6 and box.y0 >= -1e-6 and box.x1 <= w + 1e-6 and box.y1 <= h + 1e-6
     plt.close(fig)
+
+
+@pytest.mark.parametrize("lo, hi", [(-1.0, 0.7), (-0.35, 0.2)])
+def test_colourbar_tick_labels_do_not_overlap(lo, hi):
+    import math
+    vals = pl.DataFrame({"iso3": ["AAA", "BBB"], "v": [lo, hi]})
+    ticks = [0.1, 0.25, 0.5, 0.7, 1.0, 1.4, 2.0, 4.0]
+    fig, _ = maps.choropleth(
+        GDF, vals, id_col="iso3", value_col="v", title="t", cmap="PuOr", center=0.0,
+        label="l", ticks=[math.log10(t) for t in ticks], ticklabels=[f"{t:g}" for t in ticks])
+    fig.canvas.draw()
+    labels = [t for t in fig.axes[-1].get_xticklabels() if t.get_text()]
+    assert len(labels) >= 3
+    boxes = sorted((t.get_window_extent() for t in labels), key=lambda b: b.x0)
+    assert all(a.x1 < b.x0 for a, b in zip(boxes, boxes[1:], strict=False))
+    plt.close(fig)

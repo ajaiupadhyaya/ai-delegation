@@ -1,6 +1,7 @@
 """Choropleths of countries (Equal Earth) and US states (Albers, with Alaska and Hawaii insets)."""
 
 import geopandas as gpd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
@@ -18,6 +19,7 @@ EQUAL_EARTH = "EPSG:8857"
 US_ALBERS = "EPSG:5070"
 TERRITORIES = {"PR", "GU", "VI", "AS", "MP"}
 MISSING_LABEL = "not published"
+TICK_GAP = 0.09  # least spacing of kept colourbar ticks, as a fraction of the bar
 
 
 def load_countries() -> gpd.GeoDataFrame:
@@ -82,7 +84,7 @@ def _frame_inset(ax, label: str) -> None:
         sp.set_visible(True)
         sp.set_linewidth(0.4)
         sp.set_color("0.5")
-    ax.text(0.05, 0.92, label, transform=ax.transAxes, fontsize=7, va="top")
+    ax.text(0.95, 0.94, label, transform=ax.transAxes, fontsize=7, va="top", ha="right")
 
 
 def choropleth(gdf: gpd.GeoDataFrame, values: pl.DataFrame, *, id_col: str, value_col: str,
@@ -121,7 +123,7 @@ def choropleth(gdf: gpd.GeoDataFrame, values: pl.DataFrame, *, id_col: str, valu
                 _frame_inset(inset, sid[3:])
     else:
         _paint(ax, frame.to_crs(EQUAL_EARTH), value_col, cmap, norm, edgecolor)
-    ax.set_title(title, pad=6)
+    fig.suptitle(title, y=0.95, fontsize=mpl.rcParams["axes.titlesize"])
     cax = fig.add_axes((0.30, 0.07, 0.40, 0.025))
     below = bool(data) and min(data) < norm.vmin
     above = bool(data) and max(data) > norm.vmax
@@ -129,7 +131,11 @@ def choropleth(gdf: gpd.GeoDataFrame, values: pl.DataFrame, *, id_col: str, valu
     cb = fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), cax=cax, orientation="horizontal",
                       extend=extend)
     if ticks is not None:
-        keep = [i for i, t in enumerate(ticks) if norm.vmin <= t <= norm.vmax]
+        keep: list[int] = []
+        for i, t in enumerate(ticks):  # drop ticks that would crowd the previous one
+            if norm.vmin <= t <= norm.vmax and (
+                    not keep or float(norm(t) - norm(ticks[keep[-1]])) >= TICK_GAP):
+                keep.append(i)
         cb.set_ticks([ticks[i] for i in keep],
                      labels=[ticklabels[i] for i in keep] if ticklabels else None)
     cb.ax.set_title(label, fontsize=8, pad=4)
