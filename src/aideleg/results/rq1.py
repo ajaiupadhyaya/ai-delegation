@@ -1,13 +1,16 @@
-"""RQ1 confirmatory tables, decisions and figures, generated from the committed P-RQ1 JSON only.
+"""RQ1 confirmatory tables, decisions and figures, plus the descriptive anatomy.
 
-AEI data are conversations matched to O*NET tasks. This module reads
+AEI data are conversations matched to O*NET tasks. `report_confirmatory` reads
 `docs/results/rq1/confirmatory_rq1.json` and nothing else: it never loads the panel and never
 re-runs an estimator. Every number it writes is copied or formatted from that JSON.
+`report_anatomy` is different: it loads the AEI panel, the OEWS wages and national employment,
+the O*NET task index and the AEI SOC structure, and computes descriptive tables (no test, no
+p-value).
 
 Reporting (PAP §0.2): every coefficient appears in the same table and in the same figure style
 whether or not its hypothesis is rejected; no stars; a non-rejection names its null.
 
-Outputs of `report_anatomy` (descriptive; no test, no p-value) are listed in its docstring.
+Outputs of `report_anatomy` are listed in its docstring.
 
 Outputs (`report_confirmatory`):
 - `confirmatory_table.csv` / `.md`: one row per coefficient;
