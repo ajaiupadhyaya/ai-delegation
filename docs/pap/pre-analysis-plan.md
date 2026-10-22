@@ -45,8 +45,8 @@ recommendation is adopted unless Ajai writes a different choice into the block.
 18. **D18 H6** (§6). Recommended: exploratory; talk = industry share of 2024 10-K filers with a primary term, by EDGAR full-text search, denominator from the EDGAR full index. Alternative: the primary measure computed on downloaded 10-K text; or promote H6 to confirmatory.
 19. **D19 Exploratory market parameters** (§8.3). Recommended: the objective event rule (14 dates), the event windows, and terciles with monthly cap reweighting. Alternative: buy-and-hold terciles; a different named event source.
 20. **D20 Data after the freeze** (§9.4). Recommended: the listed robustness-only inputs are acquired after the tag, pre-specified here. Alternative: acquire them all before the tag.
-21. **D21 H5/H5b confirmatory null** (§3.3). Recommended: H0: b = b̄, meaning no departure from the frozen 1990–2022 pattern for this exposure vector (`PRIMARY_NULL = "bbar"`); b = 0 is reported as secondary. **This is a narrower claim than the approved H5 wording, so it needs your explicit approval.** Alternative: H0: b = 0 as approved, which rejects 7.1% (H5) and 3.2% (H5b) of historical windows at nominal 2.5%. It needs a one-line script change, after which the blob hash is re-recorded.
-22. **D22 H2 inference and family** (§4.2). Recommended: remove H2 from the RQ1 Holm family, reword it as "measured within-task automation rises", and require a release-level wild bootstrap as a co-condition. Alternative: keep H2 in the {H1–H4} family with task-clustered SEs, as approved.
+21. **D21 H5/H5b confirmatory null** (§3.3). Recommended: H0: b = b̄, meaning no departure from the frozen 1990–2022 pattern for this exposure vector (`PRIMARY_NULL = "bbar"`); b = 0 is reported as secondary. **This is a narrower claim than the approved H5 wording, so it needs your explicit approval.** Alternative: H0: b = 0 as approved, which rejects 7.1% (H5) and 3.2% (H5b) of historical windows at nominal 2.5%. It needs a one-line script change, after which the blob hash is re-recorded. **What each null rejects** (Holm's first step, c = 2.4138, frozen s and b̄): under b̄, H5 rejects iff b̂ > 7.13 or b̂ < −3.83 pp, and H5b iff b̂ > 7.40 or b̂ < −4.96 pp; under b = 0, iff |b̂| > 5.48 pp (H5) or 6.18 pp (H5b). The b̄ null makes a positive finding harder to reach and a negative one easier.
+22. **D22 H2 inference and family** (§4.2). Recommended: remove H2 from the RQ1 Holm family, reword it as "measured within-task automation rises", require a release-level wild bootstrap as a co-condition, and **split RQ1's α = 0.05**: H2 at α = 0.0125, and {H1, H3, H4} by Holm at family-wise 0.0375, so the RQ1 family-wise error stays ≤ 0.05. Alternatives: H2 on its own at a separate 0.05 beside the {H1, H3, H4} Holm at 0.05, which raises the RQ1 family-wise error to about 0.10; or keep H2 in the {H1–H4} family with task-clustered SEs, as approved.
 23. **D23 NAICS → SIC → FF49 crosswalk** (§2.1). Recommended: equal split as built, disclosed as a departure from the spec's "employment-weighted" crosswalk. Alternative: the employment-weighted crosswalk from OEWS `nat5d_6d` as primary (R33 otherwise), which needs the power analysis rerun before the tag.
 
 ---
@@ -114,7 +114,7 @@ pre-registered robustness check (§8) unless the block says otherwise.
 | D19 | Exploratory market parameters | objective event rule, windows, terciles with monthly cap reweighting | §8.3 |
 | D20 | Data acquired after the freeze | robustness-only inputs listed, pre-specified | §9.4 |
 | D21 | H5/H5b confirmatory null | b = b̄ (frozen 1990–2022 mean slope); b = 0 secondary | §3.3 |
-| D22 | H2 inference and family | outside the RQ1 Holm family; release-level wild bootstrap co-condition | §4.2 |
+| D22 | H2 inference and family | outside the RQ1 Holm family; release-level wild bootstrap co-condition; α split: H2 at 0.0125, {H1, H3, H4} Holm at 0.0375 | §4.2 |
 | D23 | NAICS → SIC → FF49 crosswalk | equal split (departure from the spec); employment-weighted as robustness | §2.1 |
 
 ### 0.4 Disclosures
@@ -156,7 +156,9 @@ What was seen before this plan was frozen:
    technology stocks. This is why Design A is exploratory and why the confirmatory test (§3) is fixed
    here, together with its exposure vector, its frozen null values and the script that computes it
    (§9.3), before any post-seal return is read.
-6. **The confirmatory script exists and has been tested on synthetic data only.**
+6. **D19's event-rule exceptions were chosen with the source list in view** (Gemma and Gemini Ultra
+   excluded, ChatGPT added, GPT-4o absent from the source); see §8.3.
+7. **The confirmatory script exists and has been tested on synthetic data only.**
    `aideleg.confirm_h5` was written before the tag. Its tests monkeypatch the seal and use synthetic
    returns. It has not been run on real data, and `docs/results/` does not exist.
 
@@ -166,14 +168,29 @@ These rules apply from the moment `pap-v1` exists.
 
 - **P-H5 (single run of the confirmatory market test).**
   1. The first post-seal read of market data is `uv run python -m aideleg.confirm_h5`, at a commit
-     whose `src/aideleg/confirm_h5.py` has the blob hash in §9.3. It runs once.
-  2. Its output, `docs/results/confirmatory_h5.md`, is committed **unedited**, in a commit that
-     contains only that file. The script writes with exclusive creation and refuses to overwrite.
-  3. Every other post-seal read (robustness, secondary portfolios, Design A, event studies, H6
+     whose `src/aideleg/confirm_h5.py` has the blob hash in §9.2. It runs once.
+  2. **Before it loads anything**, the script enforces its own binding and refuses unless:
+     (a) `pap-v1` is an annotated tag; (b) HEAD descends from `pap-v1`; (c) its own blob, and the
+     working-tree blobs of `src/aideleg/power.py` and every `src/aideleg/market/*.py`, equal their
+     blobs at `pap-v1`; (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock` succeeds. It
+     then checks each French zip's SHA-256 against `git show pap-v1:data/raw/MANIFEST.json` and each
+     extracted member's CRC32 against the zip header (hashes only), and the Design B vector hash.
+  3. **Attempt marker.** Immediately before the first post-seal read, the script creates
+     `docs/results/confirmatory_h5.attempt` (exclusive creation; UTC time and HEAD). From then on,
+     any failure writes its traceback to `docs/results/confirmatory_h5.md` and re-raises. While the
+     marker exists the script refuses to run again.
+  4. Its output (result or traceback) and the marker are committed **unedited**, in a commit that
+     contains only those two files. The script writes with exclusive creation and refuses to
+     overwrite.
+  5. Every other post-seal read (robustness, secondary portfolios, Design A, event studies, H6
      returns) happens in later commits.
-  4. If the script refuses before writing its output (missing tag, hash mismatch, window coverage),
-     no result has been produced. The fix is logged in §11 as a deviation, with its reason and
-     Ajai's approval, before the script is run again. A refusal is not a result.
+  6. If the script refuses **before** the marker (missing or lightweight tag, binding or data-hash
+     mismatch, exposure hash), no market data has been read and no result exists; the fix is logged
+     in §11 as a deviation, with its reason and Ajai's approval, before the script is run again. A
+     refusal or failure **after** the marker (for example window coverage, or a crash) has read
+     post-seal data: it is recorded as an **attempt, not a result**. Any rerun needs a §11 deviation
+     with Ajai's approval, the attempt record stays committed, and the hypothesis is reported with
+     that history.
 - **P-RQ1 (single logged first run of the H1–H4 estimators).** The H1–H4 estimators are written in
   plan 2 (ruling R9), not before the tag. Their first run on real outcomes is a single logged commit
   whose output is committed unedited. Any code change after that commit is a deviation (§11). This is a
@@ -205,8 +222,8 @@ A null on RQ3 is a complete, publishable result and will be reported with the sa
 The approved wording is kept above. Three proposed decisions change how two hypotheses are tested, and
 Ajai must approve each one explicitly:
 - **D21** tests H5/H5b against the historical pattern rather than against zero (§3.3).
-- **D22** rewords H2 as "measured within-task automation rises" and takes it out of the RQ1 Holm
-  family (§4.2).
+- **D22** rewords H2 as "measured within-task automation rises", takes it out of the RQ1 Holm
+  family and splits RQ1's α between them (H2 at 0.0125, {H1, H3, H4} at 0.0375) (§4.2).
 - **D2** restricts H2's primary span to r2–r5 (§5).
 
 ---
@@ -217,8 +234,8 @@ Ajai must approve each one explicitly:
 
 | | Outcome | Predictor / exposure | Sample | Estimator | SEs / inference | Family | Decision rule | Status |
 |---|---|---|---|---|---|---|---|---|
-| **H1** | task `automation_pct` | `human_education_years_mean` (task); log OEWS median wage (occupation) | r6 `claude_ai` global, task × occupation rows, IWA FE (D13, D14) | WLS, weights = allocated usage | two-way clustered (occupation, task), statsmodels; p = max of the two p-values (D17) | {H1, H3, H4}, Holm 0.05 | Holm rejects and both coefficients < 0 | confirmatory |
-| **H2** | task `automation_pct` | years since r2 (linear trend) | r2–r5 `claude_ai` global, tasks published in all four (D2) | WLS with task FE, fixed weights | clustered by task, **and** release-level wild bootstrap (D22) | none (D22) | both p ≤ 0.05 and β > 0 | confirmatory, reworded (D22) |
+| **H1** | task `automation_pct` | `human_education_years_mean` (task); log OEWS median wage (occupation) | r6 `claude_ai` global, task × occupation rows, IWA FE (D13, D14) | WLS, weights = allocated usage | two-way clustered (occupation, task), statsmodels; p = max of the two p-values (D17) | {H1, H3, H4}, Holm 0.0375 (D22) | Holm rejects and both coefficients < 0 | confirmatory |
+| **H2** | task `automation_pct` | years since r2 (linear trend) | r2–r5 `claude_ai` global, tasks published in all four (D2) | WLS with task FE, fixed weights | clustered by task, **and** release-level wild bootstrap (D22) | none; own α = 0.0125 (D22) | both p ≤ 0.0125 and β > 0 | confirmatory, reworded (D22) |
 | **H3** | task `validation_pct` | occupation error-cost indicator (D15) | as H1 | WLS with IWA FE | as H1 | {H1, H3, H4} | Holm rejects and γ > 0 | confirmatory |
 | **H4** | country `automation_pct` (overall) | log AUI; log GDP per working-age person; task-mix control | r6 `claude_ai` countries (D16) | OLS | HC3; joint Wald of the two coefficients (D17) | {H1, H3, H4} | Holm rejects (two-sided) | confirmatory |
 | RQ2 | — | `z_usage`, `z_delegation`, `z_augmentation` vs AIOE, Eloundou | FF49, Design B and A_pooled | Spearman ρ | industry bootstrap CI | none | descriptive | descriptive |
@@ -417,12 +434,14 @@ The spec names randomisation inference: shuffle exposure across industries, ≥ 
 analysis tested that procedure, exactly as specified (10,000 permutations, seed `SEED`), on 378
 overlapping pre-seal 17-month windows, where exposure measured in 2025 can have no causal relation to
 alphas. At a nominal 0.025 it rejects in **13.8%** of windows for H5 and **14.8%** for H5b with `z_aioe`
-held in place; the Freedman–Lane scheme for H5b rejects in **6.1%** [power, size table].
+held in place; the Freedman–Lane scheme for H5b, scored by the pivotal t of the coefficient on
+`z_delegation` (Winkler et al. 2014), rejects in **5.6%** (6.1% when scored by the coefficient itself,
+the statistic used before the final review) [power, size table].
 - **The cause** is documented there. Industries with similar exposure co-move, so the alpha noise is
   correlated along z. Permutation treats industries as exchangeable, so its null spread (median
   within-window OLS SE 1.65 pp for H5) is well below the across-window sd of the slope (2.27 pp).
-- **How large.** 13.8% is **5.5 times** the nominal 2.5% (5.9 times for H5b, 2.4 times for
-  Freedman–Lane). These rates are an **upper bound** on the oversizing from clustering alone, because
+- **How large.** 13.8% is **5.5 times** the nominal 2.5% (5.9 times for H5b, 2.2 times for
+  Freedman–Lane with the pivotal t, 2.4 times with the coefficient). These rates are an **upper bound** on the oversizing from clustering alone, because
   they also count windows in which high-exposure industries happened to earn persistently different
   alphas.
 
@@ -495,7 +514,11 @@ releases for H2 (D22).
 >   "priced in this window in excess of the 1990–2022 pattern for this exposure vector") requires the
 >   hypothesis to be rejected **and** its R13 variant (Softw dropped) to reject under the same null, at
 >   the same Holm level, with R13's own s and critical. If the hypothesis is rejected but R13 does not
->   reject, the fixed wording is: "**the result is driven by Softw**".
+>   reject, the fixed wording is: "**the result is not robust to dropping Softw (R13 not
+>   rejected)**". It does not say the result is driven by Softw: R13 has its own, larger null scale,
+>   and its non-rejection may be a power failure. The co-conditioned claim has 80% power only near
+>   R13's MDE, **10.46 pp (H5) and 12.15 pp (H5b)** per 1 SD at Holm level 0.025 (§7), against
+>   7.43 and 8.38 pp for the primaries; the script prints the R13 MDE beside each result.
 > - **Historical-pattern check (P5; applies when the primary null is b = 0).** If H5 or H5b rejects
 >   b = 0 but |b̂ − b̄|/s < c at its Holm level, the result is described as "**not distinguishable from
 >   the 1990–2022 pattern for this exposure vector**". Under the recommended b̄ null this check is the
@@ -534,12 +557,15 @@ releases for H2 (D22).
 > 2. **H5b, two schemes:**
 >    - permuting `z_delegation` with `z_aioe` held in place, labelled as oversized even under
 >      exchangeability;
->    - Freedman–Lane RI, permuting the residuals of α̂ on [1, z_aioe], 10,000 permutations
->      (`scheme="freedman_lane"`).
+>    - Freedman–Lane RI, permuting the residuals of α̂ on [1, z_aioe], 10,000 permutations, each
+>      draw scored by the pivotal t of the coefficient on `z_delegation` in the refit on
+>      [1, z_aioe, z_delegation] (Winkler et al. 2014; `scheme="freedman_lane"`). The
+>      coefficient-scored p on the same draws (`scheme="freedman_lane_coef"`) is printed beside it.
 >
 >    Draws: one `numpy.random.default_rng(SEED)` generator, consumed in the order H5 (exposure),
->    H5b (exposure), H5b (Freedman–Lane). Each secondary p-value is printed with the pre-seal size
->    documented for its procedure in §3.2 (13.8%, 14.8%, 6.1% at nominal 0.025).
+>    H5b (exposure), H5b (Freedman–Lane, t); the coefficient version reuses the t version's draws.
+>    Each secondary p-value is printed with the pre-seal size documented for its procedure in §3.2
+>    (13.8%, 14.8%, 5.6% with the t and 6.1% with the coefficient, at nominal 0.025).
 > 3. **Conventional OLS with HC3 standard errors**, for reference.
 >
 > *Alternatives (robustness):*
@@ -569,6 +595,20 @@ releases for H2 (D22).
 > b = 0. A b̄-null rejection says the 2025–26 slope differs from what this exposure vector historically
 > showed. A b = 0 rejection with b̂ close to b̄ would say only that the historical pattern persisted.
 > **Ajai must approve this reinterpretation explicitly.**
+> *What each null rejects, in pp of annualised alpha per 1 SD (computed from the frozen s, b̄ and
+> criticals of §9.3: bound = b₀ ± c_v,L·s_v).*
+>
+> | | null | Holm level 0.025 (first step) | Holm level 0.05 (second step) |
+> |---|---|---|---|
+> | H5 | b = b̄ (recommended) | b̂ > 7.13 or b̂ < −3.83 | b̂ > 6.37 or b̂ < −3.07 |
+> | H5 | b = 0 | \|b̂\| > 5.48 | \|b̂\| > 4.72 |
+> | H5b | b = b̄ (recommended) | b̂ > 7.40 or b̂ < −4.96 | b̂ > 6.54 or b̂ < −4.11 |
+> | H5b | b = 0 | \|b̂\| > 6.18 | \|b̂\| > 5.32 |
+>
+> Because the frozen b̄ is not zero, the two nulls do not treat the two directions alike: **the b̄
+> null makes a positive finding harder to reach and a negative one easier** than the b = 0 null
+> does. This is a property of the test's geometry, stated so that a reader can weigh a result in
+> either direction; it is not an interpretation of the sign of b̄.
 > *Rationale:* the historical exposure–alpha slope is not centred at zero. Under the historical null,
 > testing b = 0 with t₂₁ criticals rejects in 7.1% of windows (H5) and 3.2% (H5b) at a nominal 2.5%.
 > Centred on b̄, the same rule rejects in 0.3% and 1.3% [power, own-size table]. For H5 the uncentred
@@ -598,7 +638,8 @@ a second testing family.
 
 ## 4. RQ1 confirmatory hypotheses
 
-**Testing family {H1, H3, H4}, Holm at family-wise α = 0.05.** H2 is tested on its own (D22). The
+**Testing family {H1, H3, H4}, Holm at family-wise α = 0.0375.** H2 is tested on its own at
+α = 0.0125 (D22), so RQ1 as a whole keeps a family-wise error ≤ 0.05. The
 primary delegation measure is `automation_pct` (D1). No H1–H4 relationship has been estimated before
 this plan. The estimators are written in plan 2 under protocol P-RQ1 (§0.5).
 
@@ -680,7 +721,7 @@ this plan. The estimators are written in plan 2 under protocol P-RQ1 (§0.5).
 | Missing values | a row missing the outcome, either predictor, the IWA or an OEWS code is dropped; weights are not renormalised; the dropped share of r6 task usage is reported by reason. `unmatched:*` nodes are never included. H3 applies the same rule to its own variables. |
 | Estimator | WLS: automation = β_e·education + β_w·log wage + IWA FE + ε. |
 | Inference | two-way cluster-robust SEs by occupation (`soc6`) and task statement, exactly as stated at the top of §4. p_educ, p_wage two-sided; p_H1 = max (D17). |
-| Decision | supported if Holm over {H1, H3, H4} rejects at p_H1 and β_e < 0 and β_w < 0. Each coefficient is reported with its CI in pp of automation per year of education and per log point of wage. |
+| Decision | supported if Holm over {H1, H3, H4} at family-wise 0.0375 (D22) rejects at p_H1 and β_e < 0 and β_w < 0. Each coefficient is reported with its CI in pp of automation per year of education and per log point of wage. |
 | Two measures, one decision | H1 names two delegation measures. The decision uses `automation_pct` only. `ai_autonomy_mean` (R23) is reported beside it. If its coefficients have the opposite sign and are significant at nominal 0.05, the report states "the two delegation measures named in H1 disagree", and the decision is unchanged. |
 | Status | confirmatory. |
 
@@ -714,12 +755,16 @@ Specified here and in §5 (the definition-stable list, D2).
 > 1. **Wording.** H2 is tested as "**measured within-task automation rises across releases**". The
 >    approved text says "delegation rises". The rewording makes explicit that the classifier and
 >    platform scope are not held fixed.
-> 2. **Family.** H2 is removed from the RQ1 Holm family. The family becomes {H1, H3, H4}. H2 is tested
->    on its own at α = 0.05, with no family-wise control shared with H1, H3 and H4. The report says so.
+> 2. **Family and α.** H2 is removed from the RQ1 Holm family. The family becomes {H1, H3, H4}.
+>    RQ1's α = 0.05 is split (Bonferroni across the two parts): H2 is tested on its own at
+>    **α = 0.0125**, and {H1, H3, H4} by Holm at family-wise **α = 0.0375**. The RQ1 family-wise
+>    error is then at most 0.0125 + 0.0375 = 0.05. Testing H2 at a separate 0.05 beside a Holm family
+>    at 0.05 would raise the RQ1 family-wise error to about 1 − 0.95² ≈ 0.10; that is the
+>    alternative below, not the recommendation. The report states the split.
 > 3. **Co-condition (release-level inference).** H2 is supported only if all three hold:
->    - the task-clustered p ≤ 0.05;
+>    - the task-clustered p ≤ 0.0125;
 >    - β > 0;
->    - a **wild cluster bootstrap with clusters = releases** gives p ≤ 0.05.
+>    - a **wild cluster bootstrap with clusters = releases** gives p ≤ 0.0125.
 >
 >    The bootstrap is restricted (null β = 0 imposed) and uses Webb six-point weights. All 6⁴ = 1,296
 >    weight vectors are enumerated, so no random draws are used. Its statistic is the task-clustered
@@ -733,6 +778,8 @@ Specified here and in §5 (the definition-stable list, D2).
 >    1/24 ≈ 0.042, so it is reported as descriptive only.
 >
 > *Alternatives:*
+> - H2 on its own at a separate α = 0.05, beside {H1, H3, H4} by Holm at 0.05 (the earlier
+>   recommendation). The RQ1 family-wise error is then about 0.10, not 0.05;
 > - keep H2 in the {H1–H4} Holm family with task-clustered SEs, as approved. Not recommended: that
 >   p-value is not valid at the release level;
 > - use release-label randomisation as the co-condition instead of the wild bootstrap.
@@ -747,7 +794,7 @@ Specified here and in §5 (the definition-stable list, D2).
 | Estimator | WLS with task fixed effects: automation_tr = α_t + β·t_r + ε_tr. |
 | Weights | fixed per task: the mean of its `pct` over the four releases, so weights do not move with release. |
 | Inference | SEs clustered by task (`cov_type="cluster"`, groups = task id, `use_t=True`), two-sided; and the release-level wild bootstrap (D22). |
-| Decision | supported if both p ≤ 0.05 and β > 0 (D22). β is reported as "the change in measured within-task automation", which includes any change in the unstated classifier and in platform scope (§5). |
+| Decision | supported if both p ≤ 0.0125 and β > 0 (D22). β is reported as "the change in measured within-task automation", which includes any change in the unstated classifier and in platform scope (§5). |
 | Also reported | the event-style plot: release fixed effects instead of the trend, r2 as base, with 95% CIs; the within-r6 April vs May check (R37). |
 | Status | confirmatory, stand-alone (D22). |
 
@@ -774,7 +821,7 @@ Specified here and in §5 (the definition-stable list, D2).
 | Predictor | error_cost_o (D15). |
 | Estimator | WLS: validation = γ·error_cost + IWA FE + ε. |
 | Inference | two-way clustered as H1; two-sided p. |
-| Decision | supported if Holm over {H1, H3, H4} rejects and γ > 0. γ is reported in pp of validation share. |
+| Decision | supported if Holm over {H1, H3, H4} at family-wise 0.0375 (D22) rejects and γ > 0. γ is reported in pp of validation share. |
 | Robustness | R31: H3 with H1's covariates (education, log wage) added. |
 | Status | confirmatory. |
 
@@ -804,7 +851,7 @@ Specified here and in §5 (the definition-stable list, D2).
 >   `statsmodels.api.OLS(...).fit(cov_type="HC3")`.
 > - **Inference.** p_H4 = the joint Wald test of b₁ = b₂ = 0 on the HC3 covariance
 >   (`fit.wald_test(R, use_f=True, scalar=True)`, F with (2, n − 4) df) (D17).
-> - **Decision.** Supported if Holm over {H1, H3, H4} rejects; b₁ and b₂ are reported with CIs,
+> - **Decision.** Supported if Holm over {H1, H3, H4} at family-wise 0.0375 (D22) rejects; b₁ and b₂ are reported with CIs,
 >   two-sided.
 > - **Also reported (descriptive).** The shift-share split of each country's gap from the global
 >   delegation share into a task-mix part (M_c − global) and a within-task part, with maps.
@@ -976,8 +1023,9 @@ comparison only.
 - The co-primary variants: MDE t₂₁ for H5-R12 7.24, H5-R13 10.46, H5b-R12 9.76, H5b-R13 12.15 pp
   (§3.3). The R13 co-condition can be met only by an effect that R13 itself can detect.
 - **The 1990-01 start (P6).** The start date was fixed in plan 1 (commit `468feff`) before any slope
-  was computed. It was chosen to keep the history within the last three decades of FF49 industry
-  composition, when the software and semiconductor industries were populated. **It is the least
+  was computed. **No reason for 1990-01 was recorded at the time.** The rationale that follows was
+  supplied afterwards, once the referee asked: to keep the history within the last three decades of
+  FF49 industry composition, when the software and semiconductor industries were populated. **It is the least
   conservative of the three starts.** The 1969-07 and 1963-07 starts give larger s, because Softw is
   missing until 1965-07 and Hlth until 1969-07, and because the earlier decades differ. They are
   pre-registered as robustness inference R34. The 1963-07 rows are not like-for-like: 113
@@ -1050,7 +1098,7 @@ comparison only.
 | R22 | H2 all-releases series, unbalanced panel, other definition-stable metrics, `1p_api` (r3–r5) | H2 | D2 |
 | R23 | `ai_autonomy_mean` as delegation measure (r4–r6). For H2 this series includes r6, against D2's regime caveat, so it is labelled "confounded with the r6 suppression-regime change", like R22's all-releases series. | H1, H2 | spec §5.4.1 |
 | R24 | r4, r5 `claude_ai`; r6 `1p_api` | H1, H3 | D13 |
-| R25 | H1 and H4 coefficients tested separately (five-member Holm family {H1a, H1b, H3, H4a, H4b}) | H1, H4 | D17 |
+| R25 | H1 and H4 coefficients tested separately (five-member Holm family {H1a, H1b, H3, H4a, H4b}, family-wise 0.0375) | H1, H4 | D17 |
 | R26 | GWA and DWA fixed effects | H1, H3 | D14 |
 | R27 | O\*NET "Consequence of Error" (continuous) | H3 | D15 |
 | R28 | US states; r4, r5 countries; usage-weighted; IWA-level mix | H4 | D16 |
@@ -1129,6 +1177,11 @@ T_stud = (b̂ − b₀)/(κ·SE_Σ,2025–26), with b₀ the D21 null value and 
 >   - Gemma and Gemini Ultra.
 >
 >   The draft list (ChatGPT, GPT-4, Claude 3, GPT-4o, DeepSeek-R1) is replaced.
+>
+>   **Disclosure.** The rule's exceptions were chosen with the source's list in view: excluding
+>   Gemma and Gemini Ultra, adding ChatGPT by name, and accepting that GPT-4o is absent from the
+>   source were each decided after the source's rows, and therefore the resulting dates, had been
+>   seen. They are exploratory parameters, and are labelled as chosen with the list in view.
 > - **Event windows.** Abnormal return = industry excess return minus its FF5+UMD fit, estimated over
 >   trading days [−250, −21]. CARs over [0, +5] and [0, +20], and [0, +9] for the Eisfeldt, Schubert &
 >   Zhang (2023) comparison. Each industry CAR is regressed on exposure across industries.
@@ -1165,7 +1218,8 @@ Every block marked GENERATED below is produced from the files by `uv run python 
 run with the code tree at the commit in §9.2. The script:
 - reads `data/raw/MANIFEST.json`;
 - recomputes each raw file's SHA-256 on disk and refuses on a mismatch;
-- reads `git rev-parse` for the commit and the script blob, and refuses if `src/` is uncommitted;
+- reads `git rev-parse` for HEAD at generation and the blobs of `confirm_h5.py` and `power.py`, and
+  refuses if `src/`, `pyproject.toml` or `uv.lock` is uncommitted or a blob differs on disk;
 - copies the Frozen values list of `docs/pap/power.md` verbatim.
 
 Nothing inside those blocks is typed by hand.
@@ -1235,10 +1289,16 @@ appear only in a clearly marked appendix (spec §5.4.1).
 ### 9.2 Code
 
 <!-- BEGIN GENERATED: code binding -->
-- Code commit the plan binds to: **`a06df3d9d12366e2017c15168c7605c91c3c761b`** ("docs(pap): facts -- correct the coverage-check reasoning for 2025-04-01 (review round 2)"), from `git rev-parse HEAD`.
-- `src/aideleg/confirm_h5.py` git blob: **`cf8e050e966967a75d6412bc7fd79e0db4c8c696`** (`git rev-parse HEAD:src/aideleg/confirm_h5.py`), with `PRIMARY_NULL = "bbar"`.
+- Code commit the plan binds to, HEAD at generation: **`2a9e184a5b100786637ea6694bc1f999614c8fee`** ("fix: pre-freeze hardening (final review) -- pap_freeze records HEAD at generation and power.py"), from `git rev-parse HEAD` when this block was generated.
+- `src/aideleg/confirm_h5.py` git blob: **`86a0a25baca394dc6e658e2b93631cb2f0cb111e`** (`git rev-parse HEAD:src/aideleg/confirm_h5.py`), with `PRIMARY_NULL = "bbar"`.
+- `src/aideleg/power.py` git blob: **`a353a7c2683d0cc2e9663e17d3835055b3bb63fc`** (`git rev-parse HEAD:src/aideleg/power.py`).
 <!-- END GENERATED: code binding -->
 
+- The commit above is **HEAD at generation**: the commit `scripts/pap_freeze.py` ran on, after the
+  last code change and before the PAP commit that records it. The tag `pap-v1` is created on a
+  descendant whose code is unchanged. **Signing check**, run before the tag is pushed:
+  `git diff --quiet <bound> pap-v1 -- src pyproject.toml uv.lock`, with `<bound>` the commit above;
+  it must succeed. `confirm_h5` enforces the same binding against `pap-v1` in code (§0.5, P-H5 step 2).
 - The exposure, benchmark, power and confirmatory modules at this commit define every constructed input
   and every computation of the confirmatory market tests.
 - Plan 2 and plan 3 code implements this plan; it does not change these modules' outputs for the
@@ -1254,7 +1314,7 @@ appear only in a clearly marked appendix (spec §5.4.1).
 | `data/derived/exposure_ff49.parquet` | `8d403a702b6a1007b426b510156f6c24e5e7c928e3036bacf247b45973a00c40` |
 | `data/derived/benchmark_ff49.parquet` | `032003801622938c3e7e48d35969ec980cdc0dc02b5279c0874e98f39a289b1f` |
 | Design B vector `(ff49, ff49_short, z_delegation, z_aioe)`, 49 rows, no nulls, CSV with 10-digit floats (command below) | `bddc49d49b9565bba8daa8bc6fdb709043a6007090b9e7faf7dda1001229ac36` |
-| `src/aideleg/confirm_h5.py` (git blob, `PRIMARY_NULL = "bbar"`) | see the generated code block in §9.2 |
+| `src/aideleg/confirm_h5.py` and `src/aideleg/power.py` (git blobs, `PRIMARY_NULL = "bbar"`) | see the generated code block in §9.2 |
 
 The parquet hashes are informational (parquet bytes can differ across library versions); they were
 recomputed at the §9.2 commit and are unchanged from the draft. The binding checks are the vector hash,
@@ -1395,7 +1455,8 @@ listed here with the correction this plan applies.
 - **D-5. §2, H5 null.** H5/H5b are tested against the frozen historical slope b̄ rather than zero
   (D21), which is a narrower claim than the approved wording. This needs Ajai's approval.
 - **D-6. §2 and §5.2, H2.** H2 is reworded as "measured within-task automation rises", tested outside
-  the RQ1 Holm family, with a release-level co-condition (D22). Its primary span is r2–r5 rather than
+  the RQ1 Holm family at α = 0.0125 (the Holm family {H1, H3, H4} at 0.0375), with a release-level
+  co-condition (D22). Its primary span is r2–r5 rather than
   "Dec 2024 → May 2026" (D2).
 - **D-7. §5.4, event dates.** The spec's "pre-registered model-launch dates" are fixed by an objective
   rule over a named source (D19).
