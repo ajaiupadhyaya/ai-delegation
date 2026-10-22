@@ -119,8 +119,19 @@ def _table_md(df: pl.DataFrame) -> str:
     return "\n".join(out)
 
 
+def _h2_note(data: dict) -> list[str]:
+    """Why H2 is not rejected despite a small task-clustered p, when that is the case."""
+    res, dec = data["results"]["H2"], data["decisions"]["H2"]
+    p, level, p_wild = res["coefs"]["trend"]["p"], dec["level"], res["diagnostics"]["p_wild"]
+    if dec["status"] != "not_rejected" or not p <= level or not p_wild > level:
+        return []
+    return [f"- H2 is `not_rejected` although its task-clustered p ({_num(p)}) is below its "
+            f"level {_level(level)}: the release-level wild bootstrap co-condition failed "
+            f"(p = {_num(p_wild)} > {_level(level)}; D22)."]
+
+
 def _table_doc(data: dict, df: pl.DataFrame, path: Path) -> Path:
-    notes = "\n".join([
+    notes = "\n".join(_h2_note(data) + [
         "- One row per coefficient. Rejected and non-rejected hypotheses share this table and "
         "its format (PAP §0.2); there are no stars, and every test is two-sided.",
         "- `family p` is the hypothesis's single p-value (D17); `level` is the level that p was "

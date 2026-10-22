@@ -172,3 +172,25 @@ def test_readme_commit_falls_back_to_the_recorded_run(tmp_path, monkeypatch):
     monkeypatch.setattr(rq1, "_git_log_commit", lambda: "f00d")
     text = rq1.report_index(out, tmp_path / "figs").read_text(encoding="utf-8")
     assert "committed in `f00d`" in text
+
+
+def test_h2_note_when_the_wild_co_condition_fails(json_path, tmp_path):
+    data = json.loads(json_path.read_text(encoding="utf-8"))
+    h2 = data["results"]["H2"]
+    h2["coefs"]["trend"]["p"] = h2["p_family"] = 1e-5
+    h2["coefs"]["trend"]["estimate"] = abs(h2["coefs"]["trend"]["estimate"])
+    h2["diagnostics"]["p_wild"] = 0.9
+    data["decisions"]["H2"]["status"] = "not_rejected"
+    js = tmp_path / "c.json"
+    js.write_text(json.dumps(data), encoding="utf-8")
+    rq1.report_confirmatory(js, tmp_path / "o", fig_dir=tmp_path / "f")
+    md = (tmp_path / "o" / "confirmatory_table.md").read_text(encoding="utf-8")
+    assert ("- H2 is `not_rejected` although its task-clustered p (1.00e-05) is below its level "
+            "0.0125: the release-level wild bootstrap co-condition failed (p = 0.9000 > 0.0125; "
+            "D22).") in md
+    data["results"]["H2"]["diagnostics"]["p_wild"] = 0.001
+    data["decisions"]["H2"]["status"] = "supported"
+    js.write_text(json.dumps(data), encoding="utf-8")
+    rq1.report_confirmatory(js, tmp_path / "o", fig_dir=tmp_path / "f")
+    assert "co-condition failed" not in (tmp_path / "o" / "confirmatory_table.md").read_text(
+        encoding="utf-8")

@@ -22,6 +22,7 @@ RQ1's α = 0.05 is split (D22): H2 is tested on its own at α = 0.0125, and {H1,
 
 ## Notes
 
+- H2 is `not_rejected` although its task-clustered p (1.85e-05) is below its level 0.0125: the release-level wild bootstrap co-condition failed (p = 0.9275 > 0.0125; D22).
 - One row per coefficient. Rejected and non-rejected hypotheses share this table and its format (PAP §0.2); there are no stars, and every test is two-sided.
 - `family p` is the hypothesis's single p-value (D17); `level` is the level that p was compared with: the Holm step level for H1, H3 and H4, and the stand-alone α for H2.
 - `status` is the decision of the hypothesis the row belongs to. `control` rows are not tested, so their family p, level and status are blank (—).

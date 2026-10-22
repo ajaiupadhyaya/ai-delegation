@@ -62,6 +62,11 @@ def _figures_equal(a: Path, b: Path) -> bool:
     return pa.shape == pb.shape and np.array_equal(pa, pb)
 
 
+# Known rare flake (PAP §11 C-32): h4._mix sums over a polars group_by with unfixed row order, so
+# `mix` varies by ~1e-14 between runs. The maps and CSVs round to 10 significant digits, which
+# makes them stable unless a value sits within ~1e-14 of a rounding boundary; then one run can
+# round the other way and a figure or CSV differs in its last digit. Rerun before suspecting a
+# real change.
 def test_figures_regenerate_identically(runs):
     """Figures: two consecutive runs agree byte for byte, and both match the committed files
     (PNG pixel arrays; PDF bytes with the date metadata normalised)."""
