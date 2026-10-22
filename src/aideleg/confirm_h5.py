@@ -169,8 +169,7 @@ def decide(b: dict[str, float], fz: dict[str, float],
             wording[hyp] = (f"{hyp} is not rejected (H0: {h0}). Interval [{lo * 100:.2f}, "
                             f"{hi * 100:.2f}] pp per 1 SD; the test had 80% power only against "
                             f"a departure from H0 of at least {mde * 100:.2f} pp per 1 SD (MDE "
-                            f"at Holm level 0.025; 80% power only against |b| >= "
-                            f"{mde * 100:.2f} pp from the null value).")
+                            f"at Holm level 0.025).")
             continue
         what = ("delegation exposure is priced in this window" if null == "zero" else
                 "delegation exposure is priced in this window in excess of the 1990-2022 "

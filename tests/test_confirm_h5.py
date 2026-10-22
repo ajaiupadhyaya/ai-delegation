@@ -150,7 +150,9 @@ def test_decide_co_condition_and_wording():
     assert "not distinguishable from the 1990-2022 pattern" in d["wording"]["H5"]
     d = ch.decide({k: 0.0 for k in b}, fz, null="zero")
     assert d["primary"] == {"H5": None, "H5b": None}
-    assert "80% power only against |b| >=" in d["wording"]["H5"]
+    w = d["wording"]["H5"]
+    assert "80% power only against a departure from H0 of at least" in w
+    assert w.count("80% power") == 1 and "|b| >=" not in w
 
 
 def test_end_to_end_synthetic_planted_slope(unsealed, tmp_path):
@@ -209,7 +211,8 @@ def test_dropped_industry_rescales_on_pre_seal_history(unsealed, tmp_path, monke
     monkeypatch.setattr(power, "N_PERM", 9)
     pres = power.run_power(out=tmp_path / "p.md")
     want = power.frozen_values(pres)
-    for k in ("s_h5", "s_h5b", "bbar_h5", "s_h5_r13", "s_h5b_r12", "crit_h5_0.025"):
+    for k in ("s_h5", "s_h5b", "bbar_h5", "s_h5_r13", "s_h5b_r12", "crit_h5_0.025",
+              "bbar_h5b", "bbar_h5_r12", "bbar_h5b_r12", "bbar_h5_r13", "bbar_h5b_r13"):
         assert res["frozen_used"][k] == pytest.approx(want[k], rel=1e-12)
 
 
