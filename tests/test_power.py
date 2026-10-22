@@ -116,3 +116,35 @@ def test_power_never_reads_sealed_dates(monkeypatch, tmp_path):
     assert "MDE" in text and "378" in text
     for k in ("mde_h5_overlap", "mde_h5_nonoverlap", "mde_h5b_overlap", "mde_h5b_nonoverlap"):
         assert res[k] > 0
+
+
+def test_slope_null_distribution_validates_control_length():
+    w = [(date(1995, 1, 1), date(1996, 5, 31))]
+    with pytest.raises(ValueError, match="control"):
+        power.slope_null_distribution(np.zeros(49), w, alphas=np.zeros((1, 49)),
+                                      control=np.zeros(48))
+
+
+@pytest.mark.parametrize(("with_control", "scheme"),
+                         [(False, "exposure"), (False, "freedman_lane"), (True, "freedman_lane")])
+def test_ri_size_is_nominal_when_industries_are_exchangeable(with_control, scheme):
+    rng = np.random.default_rng(11)
+    z = rng.normal(size=49)
+    c = 0.7 * z + rng.normal(size=49) if with_control else None
+    alphas = rng.normal(0.0, 0.05, size=(1000, 49))  # iid across industries: exchangeable
+    alphas[0, 4] = np.nan  # a dropped industry is handled
+    p = power.ri_pvalues(alphas, z, c, n_perm=999, rng=np.random.default_rng(12),
+                         scheme=scheme)
+    assert p.shape == (1000,) and ((p > 0) & (p <= 1)).all()
+    assert abs(np.mean(p <= 0.05) - 0.05) < 0.02
+    assert abs(np.mean(p <= 0.025) - 0.025) < 0.015
+
+
+def test_ri_permuting_exposure_alone_is_oversized_with_a_collinear_control():
+    # documents why H5b also gets the Freedman-Lane row: exchangeable alphas, corr(z, c) ~ 0.5
+    rng = np.random.default_rng(11)
+    z = rng.normal(size=49)
+    c = 0.7 * z + rng.normal(size=49)
+    alphas = rng.normal(0.0, 0.05, size=(1000, 49))
+    p = power.ri_pvalues(alphas, z, c, n_perm=999, rng=np.random.default_rng(12))
+    assert np.mean(p <= 0.05) > 0.065

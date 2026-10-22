@@ -30,6 +30,19 @@ Units: annualised alpha, percentage points per 1 SD of exposure. Only the disper
 
 Non-overlapping sd across all 17 start offsets (min / median / max, pp): H5 1.78 / 2.32 / 2.82; H5b 2.17 / 2.57 / 3.22.
 
+## Size of the specified randomisation-inference test under no relation
+
+Each historical window run through the confirmatory RI test as specified: exposure (`z_delegation`) permuted across industries, 10,000 permutations per window and row (seed `SEED` = 20261021), two-sided permutation p-value of the slope; for H5b `z_aioe` stays in place. The spec does not say how H5b's control is handled, so the Freedman-Lane scheme (residuals of alpha on [1, z_aioe] permuted) is shown beside it. Share of windows rejecting (nominal level in the header). Only rejection rates are reported.
+
+| hypothesis | windows | n | reject at 0.025 | reject at 0.05 |
+|---|---|---|---|---|
+| H5 (permute z) | overlapping | 378 | 0.138 | 0.201 |
+| H5 (permute z) | non-overlapping | 23 | 0.087 | 0.174 |
+| H5b (permute z, z_aioe fixed) | overlapping | 378 | 0.148 | 0.204 |
+| H5b (permute z, z_aioe fixed) | non-overlapping | 23 | 0.130 | 0.174 |
+| H5b (Freedman-Lane, permute residuals) | overlapping | 378 | 0.061 | 0.095 |
+| H5b (Freedman-Lane, permute residuals) | non-overlapping | 23 | 0.087 | 0.087 |
+
 Reference only (decided at Task 15): the spec's plausibility threshold is 5 pp per 1 SD for the H5 MDE.
 <!-- END GENERATED -->
 
@@ -37,9 +50,9 @@ Reference only (decided at Task 15): the spec's plausibility threshold is 5 pp p
 
 Written by hand from the generated numbers above (2026-10-21); rerunning the module keeps this section.
 
-- **What is measured.** The exposure vectors are this project's Design B values, held fixed; the alphas come from 1990-2022 windows that cannot carry any relation to them. The spread of the slope across windows is the noise a 17-month confirmatory window has to beat. The level or sign of the historical slopes is not a finding and is not reported.
+- **What is measured.** The exposure vectors are this project's Design B values, held fixed; the alphas come from 1990-2022 windows, which can have no causal relation to exposure measured in 2025. The spread of the slope across windows is the noise a 17-month confirmatory window has to beat. The sd is taken around the across-window mean slope (ddof = 1), not around zero; that mean, like the level or sign of any historical slope, is not a finding and is not reported.
 - **H5.** MDE 7.00 pp (overlapping windows, n = 378) or 8.10 pp (non-overlapping, n = 23) of annualised alpha per 1 SD of delegation exposure, at alpha = 0.025 and 80% power. The non-overlapping sd depends on the start month (1.78 to 2.82 pp across the 17 offsets, MDE 5.5 to 8.7 pp); the overlapping figure averages over that and is the steadier estimate, while the non-overlapping one uses independent windows.
 - **H5b.** Adding `z_aioe` (Pearson 0.671, Spearman 0.763 with `z_delegation`, VIF 1.82) raises the delegation slope's sd by about 13% (overlapping) and 8% (non-overlapping): MDE 7.89 pp and 8.74 pp. H5b is the less powered of the two.
 - **Against the spec's rule.** Every H5 MDE here exceeds the 5 pp per 1 SD plausibility threshold of §5.4. Whether RQ3 is therefore reported as "what the market evidence can and cannot yet say" is Ajai's call at Task 15; this document does not make it.
-- **Why the window sd exceeds the within-window OLS SE** (2.27 vs 1.65 pp for H5). Industry alphas in one window are cross-sectionally correlated (common shocks that FF5 + UMD does not absorb), which the textbook OLS SE ignores. The across-window sd is the empirical figure and the one used.
-- **Caveats.** (1) The historical sd mixes pure sampling noise with any genuine time variation in industry alphas, so it is, if anything, conservative. (2) 2025-2026 volatility may differ from the 1990-2022 average. (3) Planned randomisation inference in the confirmatory test does not change the slope's sampling sd, so these MDEs carry over approximately. (4) The lb/ub variants of `z_delegation` correlate with it at >= 0.9997 and were not run separately.
+- **Why the window sd exceeds the within-window OLS SE** (2.27 vs 1.65 pp for H5). The textbook OLS SE treats the 49 industries' alphas as independent. They are not: related industries with similar exposure co-move, so the alpha noise is correlated in a way that lines up with `z`, and the slope varies more across windows than the iid SE implies. A shock common to all industries would only move the intercept; it is the correlation clustered along `z` that inflates the slope's variance. The across-window sd is the empirical figure and the one used.
+- **Caveats.** (1) The historical sd mixes pure sampling noise with any genuine time variation in industry alphas, so it is, if anything, conservative. (2) 2025-2026 volatility may differ from the 1990-2022 average. (3) **The MDEs above assume a test whose null sd matches the historical across-window sd. The test the spec names does not have that property.** Randomisation inference that permutes exposure across industries treats the industries as exchangeable, so its null spread is close to the iid OLS SE (about 1.65 pp for H5), not the 2.27 pp seen across windows. Run as specified on the 378 historical windows (10,000 permutations each, seed `SEED`), it rejects in 13.8% of windows at a nominal 0.025 and 20.1% at 0.05 for H5; H5b with `z_aioe` held in place gives 14.8% and 20.4%. These rates are an upper bound on the oversizing from clustering alone, because they also count windows where industries with high Design B exposure happened to earn persistently different alphas, an association with no causal content. For H5b, permuting `z` with the control held in place is oversized even when industries are exchangeable (a synthetic test shows this); the Freedman-Lane scheme, which permutes residuals of alpha on [1, z_aioe], gives 6.1% and 9.5%: closer to nominal, but still oversized. How the confirmatory test controls size is Task 15's decision, not made here. Candidates: (a) calibrating the critical value on the historical null slope distribution (the basis of these MDEs); (b) a cluster-robust or Driscoll-Kraay-style SE; (c) keeping RI as the secondary check. (4) The lb/ub variants of `z_delegation` correlate with it at >= 0.9997 and were not run separately.

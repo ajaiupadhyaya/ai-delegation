@@ -29,7 +29,7 @@ from statistics import NormalDist
 import numpy as np
 import polars as pl
 
-from aideleg.config import DERIVED, ROOT, SEAL_DATE
+from aideleg.config import DERIVED, ROOT, SEAL_DATE, SEED
 from aideleg.market.french import load_factors, load_industry_returns
 
 END = date(2022, 11, 29)  # last pre-seal day; never request anything later
@@ -40,6 +40,7 @@ POWER = 0.80
 FACTORS = ["mkt_rf", "smb", "hml", "rmw", "cma", "umd"]
 OUT = ROOT / "docs/pap/power.md"
 BEGIN, FINISH = "<!-- BEGIN GENERATED: python -m aideleg.power -->", "<!-- END GENERATED -->"
+N_PERM = 10_000  # spec §5.4: >= 10,000 draws
 PLAUSIBILITY_PP = 5.0  # spec rule, decided by Ajai at Task 15; reported for reference only
 
 
@@ -133,18 +134,63 @@ def _alpha_matrix(windows, returns, factors, names: list[str]) -> np.ndarray:
 def slope_null_distribution(z: np.ndarray, windows: list[tuple[date, date]], *,
                             returns: pl.DataFrame | None = None,
                             factors: pl.DataFrame | None = None,
-                            control: np.ndarray | None = None) -> np.ndarray:
+                            control: np.ndarray | None = None,
+                            alphas: np.ndarray | None = None) -> np.ndarray:
     """One cross-sectional OLS slope of window alphas on the FIXED exposure vector `z` per
     historical window (coefficient on `z`; with `control`, the regression is on [z, control]).
-    `z` is ordered as the industry columns of `returns`. Defaults load pre-seal French data."""
-    if returns is None or factors is None:
-        returns, factors = _load_returns()
-    names = [c for c in returns.columns if c != "date"]
+    `z` is ordered as the industry columns of `returns`. Defaults load pre-seal French data.
+    `alphas` (windows x industries, as `_alpha_matrix` builds it) skips re-estimation."""
     z = np.asarray(z, dtype=float)
-    if len(z) != len(names):
-        raise ValueError(f"z has {len(z)} values for {len(names)} industries")
-    A = _alpha_matrix(windows, returns, factors, names)
-    return np.array([_cross_section(a, z, control)[0] for a in A])
+    if alphas is None:
+        if returns is None or factors is None:
+            returns, factors = _load_returns()
+        names = [c for c in returns.columns if c != "date"]
+        if len(z) != len(names):
+            raise ValueError(f"z has {len(z)} values for {len(names)} industries")
+        alphas = _alpha_matrix(windows, returns, factors, names)
+    if alphas.shape != (len(windows), len(z)):
+        raise ValueError(f"alphas are {alphas.shape}, expected {(len(windows), len(z))}")
+    if control is not None:
+        control = np.asarray(control, dtype=float)
+        if len(control) != len(z):
+            raise ValueError(f"control has {len(control)} values, z has {len(z)}")
+    return np.array([_cross_section(a, z, control)[0] for a in alphas])
+
+
+def ri_pvalues(alphas: np.ndarray, z: np.ndarray, control: np.ndarray | None = None,
+               n_perm: int = 10_000, rng: np.random.Generator | None = None,
+               scheme: str = "exposure") -> np.ndarray:
+    """Per window (row of `alphas`), the two-sided randomisation-inference p-value of the
+    coefficient on `z`, p = (1 + #{|b_perm| >= |b_obs|}) / (n_perm + 1), over the industries
+    with an alpha. Only p-values are returned.
+
+    - `scheme="exposure"` (the spec's wording, "shuffle exposure across industries"): `z` is
+      permuted, the control (if any) stays in place.
+    - `scheme="freedman_lane"`: alphas are regressed on [1(, control)] and the residuals are
+      permuted (Freedman & Lane 1983). Without a control the two schemes coincide in
+      distribution; with a control correlated with `z`, permuting `z` alone breaks that
+      correlation and is oversized even when industries are exchangeable."""
+    if scheme not in ("exposure", "freedman_lane"):
+        raise ValueError(f"unknown scheme {scheme!r}")
+    rng = np.random.default_rng(SEED) if rng is None else rng
+    z = np.asarray(z, dtype=float)
+    out = np.empty(len(alphas))
+    for i, a in enumerate(alphas):
+        ok = ~np.isnan(a)
+        y, zz = a[ok], z[ok]
+        X0 = np.column_stack([np.ones(ok.sum())] + ([control[ok]] if control is not None
+                                                     else []))
+        M = np.eye(len(y)) - X0 @ np.linalg.pinv(X0)  # annihilator of [1(, control)]
+        if scheme == "exposure":
+            Zp = np.vstack([zz, rng.permuted(np.tile(zz, (n_perm, 1)), axis=1)])
+            R = Zp @ M  # Frisch-Waugh: z residualised on [1(, control)], one row per draw
+            b = (R @ y) / np.einsum("ij,ij->i", R, R)
+        else:
+            rz, e = M @ zz, M @ y  # fitted part of y is orthogonal to rz, so it drops out
+            Ep = np.vstack([e, rng.permuted(np.tile(e, (n_perm, 1)), axis=1)])
+            b = (Ep @ rz) / (rz @ rz)
+        out[i] = (1 + np.sum(np.abs(b[1:]) >= np.abs(b[0]) * (1 - 1e-12))) / (n_perm + 1)
+    return out
 
 
 def mde(null_slopes: np.ndarray, alpha: float = ALPHA, power: float = POWER) -> float:
@@ -196,8 +242,15 @@ def run_power(out: Path = OUT) -> dict:
 
     windows = historical_windows()
     A = _alpha_matrix(windows, returns, factors, keep_names)
-    h5 = np.array([_cross_section(a, z, None) for a in A])
-    h5b = np.array([_cross_section(a, z, c) for a in A])
+    # slopes via the public (tested) function; conventional SEs only as a cross-check
+    h5 = np.column_stack([slope_null_distribution(z, windows, alphas=A),
+                          [_cross_section(a, z, None)[1] for a in A]])
+    h5b = np.column_stack([slope_null_distribution(z, windows, alphas=A, control=c),
+                           [_cross_section(a, z, c)[1] for a in A]])
+    rng = np.random.default_rng(SEED)
+    p_h5 = ri_pvalues(A, z, None, N_PERM, rng)
+    p_h5b = ri_pvalues(A, z, c, N_PERM, rng)
+    p_h5b_fl = ri_pvalues(A, z, c, N_PERM, rng, scheme="freedman_lane")
     missing = np.isnan(A)
     idx_non = list(range(0, len(windows), WINDOW_MONTHS))
 
@@ -229,6 +282,11 @@ def run_power(out: Path = OUT) -> dict:
         "nonoverlap_offset_sd_h5b": (min(offsets_b), float(np.median(offsets_b)),
                                      max(offsets_b)),
     }
+    for hyp, p in (("h5", p_h5), ("h5b", p_h5b), ("h5b_fl", p_h5b_fl)):
+        for scheme, idx in (("overlap", all_idx), ("nonoverlap", idx_non)):
+            for lvl in (0.025, 0.05):
+                res[f"ri_reject_{hyp}_{scheme}_{lvl}"] = float(np.mean(p[idx] <= lvl))
+    res["n_perm"] = N_PERM
     for k, v in r.items():
         res[f"sd_{k}"], res[f"mde_{k}"], res[f"ols_se_{k}"] = v["sd"], v["mde"], v["median_ols_se"]
     _write(out, _block(res, windows, idx_non))
@@ -247,6 +305,14 @@ def _block(res: dict, windows, idx_non) -> str:
             n = res["n_windows_overlap"] if scheme == "overlap" else res["n_windows_nonoverlap"]
             rows.append(f"| {label} | {name} | {n} | {res[f'sd_{key}'] * pp:.2f} | "
                         f"{res[f'mde_{key}'] * pp:.2f} | {res[f'ols_se_{key}'] * pp:.2f} |")
+    label = {"h5": "H5 (permute z)", "h5b": "H5b (permute z, z_aioe fixed)",
+             "h5b_fl": "H5b (Freedman-Lane, permute residuals)"}
+    ri_rows = [f"| {label[hyp]} | {scheme} | "
+               f"{res['n_windows_' + ('overlap' if scheme == 'overlapping' else 'nonoverlap')]}"
+               f" | {res[f'ri_reject_{hyp}_{key}_0.025']:.3f} | "
+               f"{res[f'ri_reject_{hyp}_{key}_0.05']:.3f} |"
+               for hyp in ("h5", "h5b", "h5b_fl")
+               for scheme, key in (("overlapping", "overlap"), ("non-overlapping", "nonoverlap"))]
     lo, med, hi = res["nonoverlap_offset_sd_h5"]
     lob, medb, hib = res["nonoverlap_offset_sd_h5b"]
     nov = [windows[i] for i in idx_non]
@@ -292,6 +358,20 @@ def _block(res: dict, windows, idx_non) -> str:
         f"Non-overlapping sd across all {WINDOW_MONTHS} start offsets (min / median / max, "
         f"pp): H5 {lo * pp:.2f} / {med * pp:.2f} / {hi * pp:.2f}; H5b {lob * pp:.2f} / "
         f"{medb * pp:.2f} / {hib * pp:.2f}.",
+        "",
+        "## Size of the specified randomisation-inference test under no relation",
+        "",
+        f"Each historical window run through the confirmatory RI test as specified: exposure "
+        f"(`z_delegation`) permuted across industries, {res['n_perm']:,} permutations per "
+        f"window and row (seed `SEED` = {SEED}), two-sided permutation p-value of the "
+        f"slope; for H5b `z_aioe` stays in place. The spec does not say how H5b's control "
+        f"is handled, so the Freedman-Lane scheme (residuals of alpha on [1, z_aioe] "
+        f"permuted) is shown beside it. Share of windows rejecting (nominal level in the "
+        f"header). Only rejection rates are reported.",
+        "",
+        "| hypothesis | windows | n | reject at 0.025 | reject at 0.05 |",
+        "|---|---|---|---|---|",
+        *ri_rows,
         "",
         f"Reference only (decided at Task 15): the spec's plausibility threshold is "
         f"{PLAUSIBILITY_PP:.0f} pp per 1 SD for the H5 MDE.",
