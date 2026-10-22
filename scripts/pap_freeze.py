@@ -4,8 +4,9 @@
 
 - MANIFEST table: every key of data/raw/MANIFEST.json; each raw file's SHA-256 is recomputed on
   disk and must equal the recorded one; the SHA-256 of MANIFEST.json itself and the key count.
-- Code binding: `git rev-parse HEAD` and `git rev-parse HEAD:src/aideleg/confirm_h5.py`; the
-  working-tree file must hash to the same blob, and the tree must be clean in src/.
+- Code binding: HEAD at generation (`git rev-parse HEAD`) and the blobs of
+  `src/aideleg/confirm_h5.py` and `src/aideleg/power.py` (`git rev-parse HEAD:<path>`); each
+  working-tree file must hash to the same blob, and src/, pyproject.toml and uv.lock must be clean.
 - Frozen values: the "Frozen values" list of docs/pap/power.md, copied verbatim.
 
 Reads no market data beyond hashing the frozen files' bytes.
@@ -23,6 +24,8 @@ PAP = ROOT / "docs/pap/pre-analysis-plan.md"
 MANIFEST = ROOT / "data/raw/MANIFEST.json"
 POWER = ROOT / "docs/pap/power.md"
 SCRIPT = "src/aideleg/confirm_h5.py"
+POWER_PY = "src/aideleg/power.py"
+BOUND = (SCRIPT, POWER_PY)
 
 
 def git(*args: str) -> str:
@@ -63,15 +66,18 @@ def code_block() -> str:
         sys.exit("src/, pyproject.toml or uv.lock has uncommitted changes")
     head = git("rev-parse", "HEAD")
     subject = git("log", "-1", "--format=%s", head)
-    blob = git("rev-parse", f"HEAD:{SCRIPT}")
-    if git("hash-object", SCRIPT) != blob:
-        sys.exit("confirm_h5.py on disk differs from HEAD")
+    blobs = {}
+    for path in BOUND:
+        blobs[path] = git("rev-parse", f"HEAD:{path}")
+        if git("hash-object", path) != blobs[path]:
+            sys.exit(f"{path} on disk differs from HEAD")
     m = re.search(r'^PRIMARY_NULL: .*= "(\w+)"', (ROOT / SCRIPT).read_text(), re.M)
     return "\n".join([
-        f"- Code commit the plan binds to: **`{head}`** (\"{subject}\"), from "
-        f"`git rev-parse HEAD`.",
-        f"- `{SCRIPT}` git blob: **`{blob}`** (`git rev-parse HEAD:{SCRIPT}`), with "
+        f"- Code commit the plan binds to, HEAD at generation: **`{head}`** (\"{subject}\"), "
+        f"from `git rev-parse HEAD` when this block was generated.",
+        f"- `{SCRIPT}` git blob: **`{blobs[SCRIPT]}`** (`git rev-parse HEAD:{SCRIPT}`), with "
         f"`PRIMARY_NULL = \"{m.group(1) if m else '?'}\"`.",
+        f"- `{POWER_PY}` git blob: **`{blobs[POWER_PY]}`** (`git rev-parse HEAD:{POWER_PY}`).",
     ])
 
 
