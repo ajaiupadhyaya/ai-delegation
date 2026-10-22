@@ -127,6 +127,21 @@ def test_scramble_keeps_nulls_and_nans():
     assert out[0] is None and out[1] != out[1] and out[2] != 40.0 and out[3] == 3.0
 
 
+def test_definition_checks_keep_levels_apart():
+    base = {"release": "r6", "period_start": None, "source": "claude_ai", "geo_level": "global",
+            "geo_id": "GLOBAL", "taxonomy": "onet_task", "node_id": "7",
+            "definition": "collab_v2"}
+    vals = {"directive_pct": 30.0, "feedback_loop_pct": 10.0, "task_iteration_pct": 20.0,
+            "validation_pct": 20.0, "learning_pct": 20.0, "automation_pct": 40.0}
+    rows = [{**base, "level": lv, "metric": k, "value": x}
+            for lv in (0, 1) for k, x in vals.items()]
+    rows += [{**base, "taxonomy": "request", "level": 0, "metric": "directive_pct",
+              "value": 99.0}]
+    out = confirm.definition_checks(pl.DataFrame(rows))
+    assert out["pattern_cells"] == 2
+    assert out["pattern_sum_max_abs_dev"] == 0 and out["automation_bucket_max_abs_dev"] == 0
+
+
 def test_failure_after_marker_writes_traceback(clean, tmp_path, monkeypatch, inputs):
     def broken(*a, **k):
         raise RuntimeError("H2 estimator failed")
