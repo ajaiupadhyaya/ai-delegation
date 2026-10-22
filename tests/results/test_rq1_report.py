@@ -52,9 +52,13 @@ def test_table_numbers_equal_json(json_path, report):
         c = res["coefs"][r["coefficient"]]
         for key in ("estimate", "se", "ci_low", "ci_high", "p"):
             assert float(r[key]) == c[key], (r["coefficient"], key)
-        assert float(r["p_family"]) == res["p_family"]
-        assert float(r["holm_level"]) == data["decisions"][r["hypothesis"]]["level"]
-        assert r["status"] == data["decisions"][r["hypothesis"]]["status"]
+        if r["tested"] == "true":
+            assert float(r["p_family"]) == res["p_family"]
+            assert float(r["holm_level"]) == data["decisions"][r["hypothesis"]]["level"]
+            assert r["status"] == data["decisions"][r["hypothesis"]]["status"]
+        else:  # a control is not tested: no status, level or family p beside it
+            assert (r["p_family"], r["holm_level"], r["status"]) == ("", "", "")
+        assert r["unit"] == rq1.UNITS[r["coefficient"]]
         assert r["df"] == ("" if c["df"] is None else str(c["df"]))
     md = (out / "confirmatory_table.md").read_text(encoding="utf-8")
     assert md.count(data["alpha"]["statement"]) == 1
@@ -111,3 +115,47 @@ def test_figures_written(report):
         for ext in ("pdf", "png"):
             assert (figs / f"{name}.{ext}").is_file()
             assert figs / f"{name}.{ext}" in paths
+
+
+def test_units_and_blank_controls_in_the_markdown(json_path, report):
+    out, _, _ = report
+    assert rq1.UNITS == {
+        "human_education_years_mean": "pp of automation per year of education",
+        "log_wage": "pp of automation per log point of wage",
+        "trend": "pp per year",
+        "error_cost": "pp of validation share",
+        "log_aui": "pp of automation per log point",
+        "log_income": "pp of automation per log point",
+        "mix": "pp per pp",
+    }
+    md = (out / "confirmatory_table.md").read_text(encoding="utf-8")
+    rows = [ln for ln in md.splitlines() if ln.startswith("| H")]
+    for ln in rows:
+        name = ln.split("|")[2].strip()
+        assert f"| {rq1.UNITS[name]} |" in ln
+    mix = next(ln for ln in rows if ln.split("|")[2].strip() == "mix")
+    cells = [c.strip() for c in mix.split("|")]
+    assert "control" in cells and "supported" not in mix and "not_rejected" not in mix
+    dec = (out / "decisions.md").read_text(encoding="utf-8")
+    for name, unit in rq1.UNITS.items():
+        assert f"{name}: {unit}" in dec
+    # the hand-typed unit sentence is gone; the run's own H2 note still carries its wording
+    assert "per year of release time" not in dec
+
+
+def test_unit_missing_raises():
+    with pytest.raises(KeyError):
+        rq1.unit_of("not_a_coefficient")
+
+
+def test_h2_legend_sits_below_the_axes(json_path):
+    data = json.loads(json_path.read_text(encoding="utf-8"))
+    fig = rq1.fig_h2_release_effects(data)
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    ax = fig.axes[0]
+    legs = fig.legends or [ax.get_legend()]
+    assert len(legs) == 1 and legs[0] is not None
+    assert legs[0].get_window_extent(r).y1 <= ax.get_window_extent(r).y0
+    import matplotlib.pyplot as plt
+    plt.close(fig)

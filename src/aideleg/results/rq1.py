@@ -42,10 +42,26 @@ TABLE_CSV, TABLE_MD = "confirmatory_table.csv", "confirmatory_table.md"
 DECISIONS_MD = "decisions.md"
 FIG_COEFS, FIG_H2 = "fig_rq1_coefficients", "fig_rq1_h2_release_effects"
 H2_STATEMENT = "measured within-task automation rises across releases"
-TABLE_COLUMNS = ("hypothesis", "coefficient", "tested", "estimate", "se", "ci_low", "ci_high",
-                 "p", "df", "p_family", "holm_level", "status", "p13_attenuation")
+TABLE_COLUMNS = ("hypothesis", "coefficient", "tested", "unit", "estimate", "se", "ci_low",
+                 "ci_high", "p", "df", "p_family", "holm_level", "status", "p13_attenuation")
+# the unit of each coefficient's estimate. H1, H2 and H3 are the PAP's own (§4); the PAP states
+# none for H4, so its two log regressors are read per log point and the mix control per pp.
+UNITS = {
+    "human_education_years_mean": "pp of automation per year of education",
+    "log_wage": "pp of automation per log point of wage",
+    "trend": "pp per year",
+    "error_cost": "pp of validation share",
+    "log_aui": "pp of automation per log point",
+    "log_income": "pp of automation per log point",
+    "mix": "pp per pp",
+}
 # the coefficients the P13 attenuation factor sits beside (PAP §4.1)
 _ATTENUATION_LABEL = {("H1", "log_wage"): "β_w", ("H3", "error_cost"): "γ"}
+
+
+def unit_of(name: str) -> str:
+    """The unit of coefficient `name`; a coefficient without a unit is an error, not a blank."""
+    return UNITS[name]
 
 
 def _tested(res: dict, h: str) -> list[str]:
@@ -59,16 +75,20 @@ def table_rows(data: dict) -> pl.DataFrame:
         res, dec = data["results"][h], data["decisions"][h]
         tested = _tested(res, h)
         for c in res["coefs"].values():
+            is_tested = c["name"] in tested
             rows.append({
-                "hypothesis": h, "coefficient": c["name"], "tested": c["name"] in tested,
+                "hypothesis": h, "coefficient": c["name"], "tested": is_tested,
+                "unit": unit_of(c["name"]),
                 "estimate": c["estimate"], "se": c["se"], "ci_low": c["ci_low"],
                 "ci_high": c["ci_high"], "p": c["p"], "df": c["df"],
-                "p_family": res["p_family"], "holm_level": dec["level"],
-                "status": dec["status"],
+                # a control is not tested: its row carries no decision
+                "p_family": res["p_family"] if is_tested else None,
+                "holm_level": dec["level"] if is_tested else None,
+                "status": dec["status"] if is_tested else None,
                 "p13_attenuation": res["diagnostics"].get(f"attenuation_{c['name']}"),
             })
     schema = {"hypothesis": pl.String, "coefficient": pl.String, "tested": pl.Boolean,
-              "estimate": pl.Float64, "se": pl.Float64, "ci_low": pl.Float64,
+              "unit": pl.String, "estimate": pl.Float64, "se": pl.Float64, "ci_low": pl.Float64,
               "ci_high": pl.Float64, "p": pl.Float64, "df": pl.Int64, "p_family": pl.Float64,
               "holm_level": pl.Float64, "status": pl.String, "p13_attenuation": pl.Float64}
     return pl.DataFrame(rows, schema=schema).select(TABLE_COLUMNS)
@@ -80,21 +100,22 @@ def _num(x: float | None) -> str:
     return f"{x:.2e}" if x != 0 and abs(x) < 1e-4 else f"{x:.4f}"
 
 
-def _level(x: float) -> str:
-    return f"{x:g}"
+def _level(x: float | None) -> str:
+    return "—" if x is None else f"{x:g}"
 
 
 def _table_md(df: pl.DataFrame) -> str:
-    head = ("| hypothesis | coefficient | tested | estimate | SE | 95% CI | p | df | family p "
-            "| level | status | P13 attenuation |")
-    out = [head, "|" + "---|" * 12]
+    head = ("| hypothesis | coefficient | tested | unit | estimate | SE | 95% CI | p | df "
+            "| family p | level | status | P13 attenuation |")
+    out = [head, "|" + "---|" * 13]
     for r in df.iter_rows(named=True):
         df_cell = "normal" if r["df"] is None else str(r["df"])
         out.append(
             f"| {r['hypothesis']} | {r['coefficient']} | {'yes' if r['tested'] else 'control'} "
-            f"| {_num(r['estimate'])} | {_num(r['se'])} | [{_num(r['ci_low'])}, "
+            f"| {r['unit']} | {_num(r['estimate'])} | {_num(r['se'])} | [{_num(r['ci_low'])}, "
             f"{_num(r['ci_high'])}] | {_num(r['p'])} | {df_cell} | {_num(r['p_family'])} "
-            f"| {_level(r['holm_level'])} | {r['status']} | {_num(r['p13_attenuation'])} |")
+            f"| {_level(r['holm_level'])} | {r['status'] or '—'} "
+            f"| {_num(r['p13_attenuation'])} |")
     return "\n".join(out)
 
 
@@ -104,8 +125,9 @@ def _table_doc(data: dict, df: pl.DataFrame, path: Path) -> Path:
         "its format (PAP §0.2); there are no stars, and every test is two-sided.",
         "- `family p` is the hypothesis's single p-value (D17); `level` is the level that p was "
         "compared with: the Holm step level for H1, H3 and H4, and the stand-alone α for H2.",
-        "- `status` is the decision of the hypothesis the row belongs to; `control` rows are "
-        "not tested.",
+        "- `status` is the decision of the hypothesis the row belongs to. `control` rows are "
+        "not tested, so their family p, level and status are blank (—).",
+        "- `unit` is the unit of the estimate, its SE and its CI; pp = percentage points.",
         "- `df`: the t reference degrees of freedom; `normal` marks a normal reference.",
         "- P13 attenuation: the between-task share of the regressor's identifying "
         "(within-IWA, FWL-residualised) variation, beside β_w (H1, log_wage) and γ (H3, "
@@ -127,6 +149,7 @@ def _decision_section(data: dict, h: str) -> str:
     res, dec = data["results"][h], data["decisions"][h]
     lines = [dec["text"], "",
              f"- Outcome: `{res['outcome']}`; tested: {', '.join(_tested(res, h))}.",
+             "- Units: " + "; ".join(f"{n}: {unit_of(n)}" for n in res["coefs"]) + ".",
              f"- Status: `{dec['status']}`; its p was compared with level {_level(dec['level'])}."]
     for (hh, coef), label in _ATTENUATION_LABEL.items():
         if hh == h:
@@ -137,9 +160,7 @@ def _decision_section(data: dict, h: str) -> str:
     if h == "H2":
         d = res["diagnostics"]
         lines += [
-            f"- H2 is worded as \"{H2_STATEMENT}\" (D22); β is the change in measured "
-            "within-task automation per year of release time, which includes any change in "
-            "the classifier and in platform scope.",
+            f"- H2 is worded as \"{H2_STATEMENT}\" (D22).",
             f"- Release-level wild bootstrap p = {_num(d['p_wild'])} over {d['n_wild_draws']} "
             "Webb vectors (D22 co-condition).",
             f"- Release-label randomisation p = {_num(d['p_release_label'])} over "
@@ -229,7 +250,7 @@ def fig_h2_release_effects(data: dict):
     ax.axhline(0.0, color=PALETTE[0], linewidth=0.6, linestyle=":")
     ax.set_xlabel("release time t_r (years since r2)")
     ax.set_ylabel(f"{res['outcome']} vs r2 (pp)")
-    ax.legend(frameon=False, loc="lower right")
+    fig.legend(frameon=False, loc="outside lower center")  # below the axis, off the zero line
     return fig
 
 
