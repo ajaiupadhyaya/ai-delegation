@@ -35,7 +35,9 @@ Industry level (`aggregate_to_ff49`, `industry_exposure`)
   `E`; FF49 coverage is the same-weighted mean of the codes' coverage (codes with no
   coverage count as 0). Only `private` codes with a non-null FF49 enter: government
   (99xxxx, USPS 491100) and, under `hq="exclude"`, NAICS 5511 are left out.
-- `emp_covered_share` is the coverage of `D` (the primary delegation measure); `z_*` are
+- `emp_covered_share` is the coverage of `D` (the primary delegation measure). It reflects
+  only the loss to null pattern shares (and suppressed OEWS employment); under
+  `unmatched="zero"` the zero-assigned occupations count as covered. `z_*` are
   standardised across the FF49 industries present, population SD (`ddof=0`).
 
 Designs (`build_exposure`, `build_occupation_exposure`)
@@ -47,6 +49,10 @@ Designs (`build_exposure`, `build_occupation_exposure`)
   occupation absent from a period or release counts as `usage_share = 0` (the shares keep
   summing to 100) and pattern shares average over the periods/releases that publish them.
   The R7 bounds are not definition-stable across releases, so `D_lb` / `D_ub` are null.
+  Every release r2-r6 must be present (else ValueError; `allow_missing=True` is for toy
+  inputs). Basis change: r6 uses the published SOC basis, and 43 occupations appear only in
+  r6 (claude_ai), carrying 1.77% of r6 usage (e.g. 25-3031 at 1.36%); they enter A_pooled
+  through r6 alone.
 Every output carries `design` and `exploratory` columns.
 """
 
@@ -239,22 +245,31 @@ def _average(frames: list[pl.DataFrame], by: str) -> pl.DataFrame:
     ).sort("soc6")
 
 
-def design_occupations(design: Design, panel: pl.DataFrame, index) -> pl.DataFrame:
-    """The AEI occupation table a design is built from (one row per AEI soc6)."""
+def design_occupations(design: Design, panel: pl.DataFrame, index, *,
+                       allow_missing: bool = False) -> pl.DataFrame:
+    """The AEI occupation table a design is built from (one row per AEI soc6).
+
+    A_pooled raises unless every release in `POOLED_RELEASES` has claude_ai rows;
+    `allow_missing=True` (toy inputs only) pools over the releases present instead.
+    """
     if design in ("B", "A_r2"):
         occ = _release_occ(panel, "r2", index)
         if occ.is_empty() or occ.select(KEY).unique().height != 1:
             raise ValueError("expected exactly one r2 claude_ai period")
         return occ
     if design == "A_pooled":
-        per_release = []
+        per_release, missing = [], []
         for r in POOLED_RELEASES:
             t = _release_occ(panel, r, index)
             if t.is_empty():
+                missing.append(r)
                 continue
             periods = [t.filter(pl.col("period_start") == p)
                        for p in sorted(t["period_start"].unique())]
             per_release.append(_average(periods, "period") if len(periods) > 1 else t)
+        if missing and not allow_missing:
+            raise ValueError(f"A_pooled needs claude_ai rows for every release in "
+                             f"{POOLED_RELEASES}; missing {missing}")
         if not per_release:
             raise ValueError("no r2-r6 claude_ai rows in the panel")
         return _average(per_release, "release")
@@ -282,25 +297,28 @@ def _label(df: pl.DataFrame, design: str) -> pl.DataFrame:
 
 def build_occupation_exposure(design: Design, *, panel=None, index=None, national=None,
                               soc_structure=DEFAULT,
-                              unmatched: Literal["zero", "drop"] = "zero") -> pl.DataFrame:
+                              unmatched: Literal["zero", "drop"] = "zero",
+                              allow_missing: bool = False) -> pl.DataFrame:
     """`occupation_exposure` for a design, with `design` and `exploratory` columns. Inputs
     default to the study data (panel, `default_index()`, May 2024 OEWS, AEI SOC structure);
     `soc_structure=None` disables OEWS hybrid matching."""
     if design not in DESIGNS:
         raise ValueError(f"design must be one of {DESIGNS}, not {design!r}")
     panel, index, national, soc_structure = _inputs(panel, index, national, soc_structure)
-    occ = design_occupations(design, panel, index)
+    occ = design_occupations(design, panel, index, allow_missing=allow_missing)
     return _label(occupation_exposure(occ, national, unmatched, soc_structure=soc_structure),
                   design)
 
 
 def build_exposure(design: Design, *, panel=None, index=None, national=None, matrix=None,
                    crosswalk=None, names=None, soc_structure=DEFAULT,
-                   unmatched: Literal["zero", "drop"] = "zero") -> pl.DataFrame:
+                   unmatched: Literal["zero", "drop"] = "zero",
+                   allow_missing: bool = False) -> pl.DataFrame:
     """FF49 exposure for a design (`FF49_COLUMNS` + `design`, `exploratory`). Defaults: the
     study inputs, `load_industry_matrix(2024, 4)` and `naics_to_ff49("split", 4, "exclude")`."""
     occ = build_occupation_exposure(design, panel=panel, index=index, national=national,
-                                    soc_structure=soc_structure, unmatched=unmatched)
+                                    soc_structure=soc_structure, unmatched=unmatched,
+                                    allow_missing=allow_missing)
     if matrix is None:
         from aideleg.bls.oews import load_industry_matrix
 

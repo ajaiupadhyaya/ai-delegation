@@ -22,5 +22,8 @@ data/derived/aei_panel.parquet: $(wildcard src/aideleg/aei/*.py) src/aideleg/aei
 exposure: data/derived/exposure_ff49.parquet
 
 # one recipe writes both exposure_occupation.parquet and exposure_ff49.parquet
-data/derived/exposure_ff49.parquet: src/aideleg/exposure.py src/aideleg/occupations.py src/aideleg/bls/oews.py src/aideleg/crosswalk/naics_ff49.py data/derived/aei_panel.parquet
+data/derived/exposure_ff49.parquet: src/aideleg/exposure.py src/aideleg/occupations.py \
+		src/aideleg/aei/tasks.py src/aideleg/acquire/sources.py \
+		$(wildcard src/aideleg/bls/*.py) $(wildcard src/aideleg/crosswalk/*.py) \
+		data/raw/MANIFEST.json data/derived/aei_panel.parquet
 	uv run python -m aideleg.exposure

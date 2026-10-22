@@ -80,8 +80,18 @@ def test_industry_is_employment_weighted():
 
 
 def test_z_scores_have_unit_sd():
-    ind = industry_exposure(occupation_exposure(_occ(), NATIONAL), MATRIX, CROSSWALK,
-                            names=NAMES)
+    # three industries, each one occupation: E_usage = U = [2.0, 1.2, 0.4]
+    matrix = pl.DataFrame({"naics": ["511200", "522100", "236100"],
+                           "naics_title": ["Software", "Banks", "Construction"],
+                           "soc6": SOCS, "tot_emp": [10, 10, 10],
+                           "emp_share_in_industry": [1.0, 1.0, 1.0]})
+    xw = pl.DataFrame({"naics": ["5112", "5221", "2361"], "ff49": [32, 45, 18],
+                       "weight": [1.0, 1.0, 1.0]})
+    names = pl.DataFrame({"ff49": [18, 32, 45], "ff49_short": ["Cnstr", "BusSv", "Banks"]})
+    ind = industry_exposure(occupation_exposure(_occ(), NATIONAL), matrix, xw, names=names)
+    z = dict(zip(ind["ff49"], ind["z_usage"], strict=True))
+    sd = (2 * 0.8**2 / 3) ** 0.5  # population SD of [2.0, 1.2, 0.4] around mean 1.2
+    assert [z[32], z[45], z[18]] == pytest.approx([0.8 / sd, 0.0, -0.8 / sd])
     for c in ("z_usage", "z_delegation", "z_augmentation"):
         assert ind[c].mean() == pytest.approx(0.0, abs=1e-12)
         assert ind[c].std(ddof=0) == pytest.approx(1.0)
@@ -187,7 +197,7 @@ def _design_panel(r6_scale=1.0):
     return pl.concat([r2, r6a, r6b])
 
 
-OCC_KW = dict(index=INDEX, national=NATIONAL, soc_structure=None)
+OCC_KW = dict(index=INDEX, national=NATIONAL, soc_structure=None, allow_missing=True)
 KW = dict(OCC_KW, matrix=MATRIX, crosswalk=CROSSWALK, names=NAMES)
 
 
@@ -220,6 +230,13 @@ def test_a_pooled_equal_release_weights():
     moved = build_exposure("A_pooled", panel=_design_panel(r6_scale=1.7), **KW)
     assert not moved.equals(build_exposure("A_pooled", panel=_design_panel(), **KW))
     assert build_exposure("A_pooled", panel=_design_panel(), **KW)["exploratory"].all()
+
+
+def test_a_pooled_raises_on_missing_release():
+    kw = dict(KW, allow_missing=False)
+    with pytest.raises(ValueError, match=r"missing \['r3', 'r4', 'r5'\]"):
+        build_exposure("A_pooled", panel=_design_panel(), **kw)
+    build_exposure("B", panel=_design_panel(), **kw)  # B needs r2 only
 
 
 def test_unknown_design_raises():
