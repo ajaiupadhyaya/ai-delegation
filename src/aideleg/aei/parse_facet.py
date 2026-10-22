@@ -73,14 +73,14 @@ def _read(path: Path, mapped: pl.DataFrame) -> tuple[pl.DataFrame, set[tuple[str
     """Mapped raw rows joined to their (taxonomy, metric), plus every observed pair."""
     con = duckdb.connect()
     con.register("metric_map", mapped.to_arrow())
-    con.execute(f"""
-        CREATE TEMP VIEW raw AS SELECT * FROM read_csv('{path}', header=true,
-            delim=',', quote='"', escape='"', nullstr='', columns={{
+    con.execute("""
+        CREATE TEMP TABLE raw AS SELECT * FROM read_csv($path, header=true,
+            delim=',', quote='"', escape='"', nullstr='', columns={
                 'geo_id': 'VARCHAR', 'geography': 'VARCHAR', 'date_start': 'DATE',
                 'date_end': 'DATE', 'platform_and_product': 'VARCHAR', 'facet': 'VARCHAR',
                 'level': 'BIGINT', 'variable': 'VARCHAR', 'cluster_name': 'VARCHAR',
-                'value': 'DOUBLE'}})
-    """)
+                'value': 'DOUBLE'})
+    """, {"path": str(path)})
     pairs = set(con.sql("SELECT DISTINCT facet, variable FROM raw").fetchall())
     rows = con.sql("""
         SELECT r.*, m.taxonomy, m.metric FROM raw r

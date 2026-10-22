@@ -156,3 +156,17 @@ def test_single_file_requires_exactly_one(monkeypatch, tmp_path, n):
         (d / f"f{i}.csv").write_text("")
     with pytest.raises(FileNotFoundError):
         french._single_file("k")
+
+
+def test_parsing_stops_at_the_first_sealed_row_unless_frozen(monkeypatch, tmp_path):
+    # K6: rows dated on or after the seal are never parsed before pap-v1, so a malformed
+    # sealed row (wrong field count, non-numeric cell) cannot even raise
+    f = tmp_path / "t.csv"
+    f.write_text("  T\n,A,B\n20221128, 1.0, 2.0\n20221129, 3.0, 4.0\n"
+                 "20221130, x\n20221201, 5.0, 6.0\n")
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: False)
+    df = french.read_french_table(f, "T")
+    assert df["date"].to_list() == [date(2022, 11, 28), date(2022, 11, 29)]
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: True)
+    with pytest.raises(ValueError, match=r"t\.csv:5"):
+        french.read_french_table(f, "T")

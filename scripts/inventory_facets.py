@@ -30,14 +30,14 @@ def _cell(s: str | None) -> str:
 
 
 def inventory(path: Path) -> list[tuple]:
-    sql = f"""
+    sql = """
         SELECT facet, level, variable, count(*) AS n,
                list(DISTINCT cluster_name ORDER BY cluster_name)[1:3] AS ex
-        FROM read_csv('{path}', all_varchar=true, delim=',', quote='"', escape='"')
+        FROM read_csv($path, all_varchar=true, delim=',', quote='"', escape='"')
         GROUP BY facet, level, variable
         ORDER BY facet, level, variable
     """
-    return duckdb.connect().sql(sql).fetchall()
+    return duckdb.connect().execute(sql, {"path": str(path)}).fetchall()
 
 
 def main() -> None:

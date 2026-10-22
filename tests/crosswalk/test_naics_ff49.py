@@ -190,14 +190,10 @@ def test_known_mappings():
 @pytest.mark.data
 @pytest.mark.skipif(not (RAW / "bls/oesm24in4").exists(), reason="needs OEWS 2024")
 @_needs_raw
-def test_unmapped_private_employment_below_1pct(capsys):
+def test_unmapped_private_employment_below_1pct():
     from aideleg.bls.oews import load_industry_matrix
     m = load_industry_matrix(2024, 4)
     rep = coverage_report(m)
-    with capsys.disabled():
-        print("\n", rep)
-        print(coverage_by_code(m).filter(pl.col("unmapped_emp") > 0)
-              .sort("unmapped_emp", descending=True).head(15))
     share = rep.filter(pl.col("status") == "unmapped")["share_of_private"].sum()
     assert share < 0.01, coverage_by_code(m).sort("unmapped_emp", descending=True).head(20)
 

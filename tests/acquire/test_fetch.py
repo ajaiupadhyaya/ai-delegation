@@ -196,3 +196,21 @@ def test_fetch_truncated_body_raises_fetch_error(tmp_path, patch_session):
         fetch.fetch(fetch.Source("k", "https://x.test/a", "a.bin"), raw_dir=tmp_path)
     assert session.calls == 3
     assert not (tmp_path / "a.bin").exists()
+
+
+def test_refetch_clears_the_extracted_directory(tmp_path, patch_session):
+    # K2: a stale member from an earlier archive must not survive a refetch
+    def _zip(**members):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            for name, text in members.items():
+                z.writestr(name, text)
+        return buf.getvalue()
+
+    patch_session(FakeResponse(_zip(**{"old.csv": "1\n"})),
+                  FakeResponse(_zip(**{"new.csv": "2\n"})))
+    src = fetch.Source("k", "https://x.test/d.zip", "ff/d.zip", unzip=True)
+    fetch.fetch(src, raw_dir=tmp_path)
+    assert (tmp_path / "ff/d/old.csv").exists()
+    fetch.fetch(src, raw_dir=tmp_path, force=True)
+    assert sorted(p.name for p in (tmp_path / "ff/d").iterdir()) == ["new.csv"]

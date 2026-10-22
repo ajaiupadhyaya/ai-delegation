@@ -90,5 +90,4 @@ def test_benchmark_ff49_has_49_rows_or_reports_missing():
     if b.height < 49:
         missing = set(range(1, 50)) - set(b["ff49"])
         assert missing, "fewer than 49 rows must be explained by missing codes"
-        print("FF49 codes without a benchmark row:", sorted(missing))
     assert abs(b["z_aioe"].mean()) < 1e-9 and abs(b["z_aioe"].std(ddof=0) - 1) < 1e-9

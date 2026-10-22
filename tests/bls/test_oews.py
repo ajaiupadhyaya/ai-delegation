@@ -138,7 +138,7 @@ PANEL_PATH = DERIVED / "aei_panel.parquet"
 @pytest.mark.data
 @pytest.mark.skipif(not RAW.exists() or not PANEL_PATH.exists(),
                     reason="needs data/raw and `make panel`")
-def test_real_join_coverage(capsys):
+def test_real_join_coverage():
     from aideleg.aei.tasks import default_index
     from aideleg.occupations import occupation_table, soc_rollup
 
@@ -162,15 +162,5 @@ def test_real_join_coverage(capsys):
         emp = nat.filter(pl.col("soc6").is_in(hit))["tot_emp"].sum()
         un = m.filter(pl.col("oews").is_null())
         out[name] = (emp / total_emp, un["u"].sum() / total_use, un.sort("u", descending=True))
-    with capsys.disabled():
-        for name, (e, u, un) in out.items():
-            print(f"\n[OEWS 2024 coverage, {name}] employment {e:.1%}; unmatched usage {u:.2%}; "
-                  f"residual codes {un['soc6'].to_list()}")
-        e_res = nat.filter(~pl.col("soc6").is_in(
-            set(use.with_columns(o=pl.col("soc6").map_elements(
-                lambda s: oews_code_for(s, codes, struct), return_dtype=pl.String))["o"]
-                .drop_nulls())))
-        print(f"residual employment (OEWS codes with no AEI soc6): "
-              f"{e_res['tot_emp'].sum() / total_emp:.1%}")
     assert out["rollup + hybrid"][0] >= 0.80
     assert out["rollup + hybrid"][0] >= out["rollup only"][0]

@@ -213,3 +213,14 @@ def test_unreconciled_intersection_raises(index, iso, tmp_path):
 def test_r4_bare_node_numeric_intersection(df):
     # r4 numeric intersections carry the bare task name (category "") instead of `::value`
     assert _v(df, "human_only_time_mean", "202", taxonomy="onet_task") == 1.75
+
+
+def test_path_is_a_query_parameter_not_sql_text(index, iso, tmp_path):
+    # K8: a quote in the path must not break (or inject into) the DuckDB query
+    d = tmp_path / "it's here"
+    d.mkdir()
+    p = d / "facet.csv"
+    p.write_text((FIX / "facet_small.csv").read_text())
+    got = parse_facet_release(p, "r5", "claude_ai", index, iso=iso)
+    want = parse_facet_release(FIX / "facet_small.csv", "r5", "claude_ai", index, iso=iso)
+    assert got.sort(got.columns).equals(want.sort(want.columns))

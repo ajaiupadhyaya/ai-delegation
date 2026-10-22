@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import shutil
 import time
 import zipfile
 from dataclasses import asdict, dataclass
@@ -131,9 +132,12 @@ def fetch(src: Source, raw_dir: Path = RAW, force: bool = False) -> FetchRecord:
         part.unlink(missing_ok=True)
 
     if src.unzip:
+        out_dir = _unzip_dir(target)
+        if out_dir.exists():  # a refetch never leaves members of an earlier archive behind
+            shutil.rmtree(out_dir)
         try:
             with zipfile.ZipFile(target) as z:
-                z.extractall(_unzip_dir(target))
+                z.extractall(out_dir)
         except zipfile.BadZipFile as exc:
             target.unlink()
             raise FetchError(f"{src.url}: not a valid zip archive") from exc

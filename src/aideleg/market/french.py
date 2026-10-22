@@ -30,7 +30,10 @@ def read_french_table(path: Path, title_startswith: str) -> pl.DataFrame:
     field is YYYYMMDD or YYYYMM. `title_startswith=""` selects the first untitled table
     (the factor files). The table ends at the first line that is not a dated row.
     Annual tables (YYYY dates) never match. -99.99 and -999 become null.
+    Before pap-v1 the table also ends at the first row dated on or after SEAL_DATE: sealed
+    rows are never parsed, not merely filtered out afterwards.
     """
+    frozen = seal.pap_frozen()
     lines = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
     header_idx = None
     for i, line in enumerate(lines):
@@ -52,6 +55,8 @@ def read_french_table(path: Path, title_startswith: str) -> pl.DataFrame:
         parts = [p.strip() for p in line.split(",")]
         if not _DATE_RE.match(parts[0]):
             break
+        if not frozen and _parse_date(parts[0]) >= SEAL_DATE:
+            break
         if len(parts) != len(names) + 1:
             raise ValueError(
                 f"{path}:{lineno}: expected {len(names) + 1} fields, got {len(parts)}"
@@ -67,8 +72,8 @@ def read_french_table(path: Path, title_startswith: str) -> pl.DataFrame:
     for n, c in zip(names, cols, strict=True):
         data[n] = pl.Series(n, c, dtype=pl.Float64)
     df = pl.DataFrame(data)
-    if not seal.pap_frozen():
-        # the reader itself never hands out sealed rows before pap-v1
+    if not frozen:
+        # defence in depth: the reader never hands out sealed rows before pap-v1
         df = df.filter(pl.col("date") < SEAL_DATE)
     return df
 
