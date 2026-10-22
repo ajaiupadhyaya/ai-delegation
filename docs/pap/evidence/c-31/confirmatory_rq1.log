@@ -1,0 +1,13 @@
+2026-10-22T19:47:28Z P-RQ1 run at 2026-10-22T19:47:28Z, HEAD abc, scrambled=False
+2026-10-22T19:47:28Z run failed after the marker (an attempt, not a result):
+Traceback (most recent call last):
+  File "/Users/ajaiupadhyaya/Documents/ai-delegation/src/aideleg/rq1/confirm.py", line 407, in run
+    inputs = _timed_load(log) if inputs is None else inputs
+             ^^^^^^^^^^^^^^^^
+  File "/Users/ajaiupadhyaya/Documents/ai-delegation/src/aideleg/rq1/confirm.py", line 372, in _timed_load
+    inputs = load_inputs()
+             ^^^^^^^^^^^^^
+  File "/Users/ajaiupadhyaya/Documents/ai-delegation/tests/rq1/test_confirm.py", line 25, in boom
+    raise AssertionError("loaded")
+AssertionError: loaded
+
