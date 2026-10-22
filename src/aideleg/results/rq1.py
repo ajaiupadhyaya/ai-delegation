@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 
-from aideleg.describe import anatomy
+from aideleg.describe import anatomy, geography
 from aideleg.figures import FIGSIZE, PALETTE, apply_style, save_figure
 from aideleg.figures.save import FIGURES_DIR
 from aideleg.results.common import write_csv, write_result_doc
@@ -462,6 +462,106 @@ def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=No
     return paths
 
 
+# --- RQ1 geography (descriptive H4 split and maps) --------------------------------------------
+
+GEOGRAPHY_MD = "geography.md"
+GEOGRAPHY_CSVS = {"country": "geography_country.csv", "us_state": "geography_state.csv"}
+
+
+def _geography_doc(path: Path, tables: dict, globals_: dict, excluded: dict,
+                   unmatched: dict[str, dict[str, list[str]]]) -> Path:
+    scope = "\n".join([
+        "- Descriptive only: no test, no p-value and no estimator is attached to anything here. "
+        "The US-state H4 regression is robustness R28 (Plan 4); this section does not run it.",
+        "- Release r6, source `claude_ai`. `automation_pct` is the geography's equal-weighted "
+        "mean over the published months of the share of classified conversations in the "
+        "directive and feedback-loop patterns.",
+        "- AUI is the Anthropic Usage Index: a geography's share of Claude usage divided by its "
+        "share of working-age population.",
+        "- `mix` is the geography's task-mix control M_c (the geography's O*NET general work "
+        "activity shares weighted by the global automation share of each activity).",
+        "- `in_h4_sample` is true iff the geography is in the confirmatory H4 frame (it has a "
+        "GDP per working-age person). A geography without one stays in these tables and maps.",
+        "- A geography the release does not publish (a missing month, or no task mix) is not in "
+        "the table; on the maps it is drawn in grey with the legend entry \"not published\", "
+        "never as zero.",
+    ])
+    sections = [("α split", SPLIT_STATEMENT + " This document tests nothing; the split is "
+                                              "stated because every RQ1 results document "
+                                              "states it."),
+                ("Scope and reading", scope)]
+    for geo, title in (("country", "Countries"), ("us_state", "US states")):
+        g, m = globals_[geo]
+        t = tables[geo]
+        offset = m - g
+        body = "\n".join([
+            "The identity: gap = mix_part + within_part, where gap = automation_pct − "
+            "global_automation, mix_part = mix − global_automation and within_part = "
+            "automation_pct − mix. The mix part includes the common offset "
+            "m_global − global_automation, so it is not centred on zero.",
+            "",
+            f"- global_automation = {g:.4f}",
+            f"- m_global = {m:.4f}",
+            f"- offset m_global − global_automation = {offset:.4f} "
+            "(common to every row's mix_part)",
+            f"- geographies in the table: {t.height}; in the confirmatory H4 frame: "
+            f"{int(t['in_h4_sample'].sum())}",
+            "- not published, by reason: " + "; ".join(
+                f"{r} {len(v)}" + (f" ({', '.join(v)})" if v and len(v) <= 12 else "")
+                for r, v in excluded[geo].items()),
+            "",
+            "Unmatched geography IDs per map (IDs in the table that match no map geometry"
+            + ("; Kosovo is joined as XKX → KOS, the Natural Earth code):"
+               if geo == "country" else "):"),
+            "",
+        ] + [f"- `{n}`: " + (", ".join(f"`{i}`" for i in ids) if ids else "none")
+             for n, ids in unmatched[geo].items()] + [
+            "", f"Full-precision table: `{GEOGRAPHY_CSVS[geo]}`.", "",
+            _md_table(t.sort("gap", descending=True), digits=3)])
+        sections.append((title, body))
+    sections.append(("Figures", "\n".join(
+        f"- `{s.fig_name}` (PDF and PNG)" for geo in geography.MAPS.values() for s in geo)))
+    return write_result_doc(path, "RQ1 geography", GENERATOR, sections)
+
+
+def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=None,
+                     gdp=None, wap=None, names=None, countries=None, states=None
+                     ) -> list[Path]:
+    """Write `geography.md`, `geography_country.csv`, `geography_state.csv` and 8 maps.
+
+    Descriptive (no test): the H4 shift-share split for r6 `claude_ai` countries and US states.
+    The maps are `fig_rq1_map_{country|state}_{automation|aui|mix|within}`. `panel`, `gdp`,
+    `wap` (dicts keyed by geography), `names`, `countries` and `states` are for tests.
+    """
+    from aideleg.figures.maps import choropleth, load_countries, load_us_states
+    from aideleg.rq1.confirm import PANEL_PATH
+
+    panel = pl.read_parquet(PANEL_PATH) if panel is None else panel
+    out = Path(out)
+    gdfs = {"country": countries if countries is not None else load_countries(),
+            "us_state": states if states is not None else load_us_states()}
+    id_col = {"country": "iso3", "us_state": "geo_id"}
+    tables, globals_, excluded, unmatched, paths = {}, {}, {}, {}, []
+    for geo in ("country", "us_state"):
+        kw = {k: (v or {}).get(geo) for k, v in (("gdp", gdp), ("wap", wap), ("names", names))}
+        t, sample = geography.geo_sample_tables(panel, geo, **kw)
+        tables[geo], globals_[geo] = t, (sample.global_automation, sample.m_global)
+        excluded[geo] = sample.excluded
+        paths.append(write_csv(t, out / GEOGRAPHY_CSVS[geo]))
+        vals = geography.map_values(t, geo).with_columns(
+            log10_aui=pl.col("aui").log10())
+        unmatched[geo] = {}
+        for spec in geography.MAPS[geo]:
+            col = "log10_aui" if spec.log else spec.column
+            fig, um = choropleth(gdfs[geo], vals, id_col=id_col[geo], value_col=col,
+                                 title=spec.title, cmap=spec.cmap, center=spec.center,
+                                 label=spec.label)
+            unmatched[geo][spec.fig_name] = geography.unalias(um)
+            paths += save_figure(fig, spec.fig_name, out_dir=fig_dir)
+    paths.insert(0, _geography_doc(out / GEOGRAPHY_MD, tables, globals_, excluded, unmatched))
+    return paths
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog=GENERATOR, description=(
         "RQ1 reporting from the committed P-RQ1 JSON (no estimator is run)."))
@@ -469,12 +569,15 @@ def main(argv: list[str] | None = None) -> int:
                     help="write the confirmatory table, decisions and figures")
     ap.add_argument("--anatomy", action="store_true",
                     help="write the descriptive anatomy (composition, concentration)")
+    ap.add_argument("--geography", action="store_true",
+                    help="write the descriptive shift-share tables and the eight maps")
     a = ap.parse_args(argv)
-    if not (a.confirmatory or a.anatomy):
+    if not (a.confirmatory or a.anatomy or a.geography):
         ap.print_help()
         return 2
     paths = (report_confirmatory() if a.confirmatory else []) + (
-        report_anatomy() if a.anatomy else [])
+        report_anatomy() if a.anatomy else []) + (
+        report_geography() if a.geography else [])
     for p in paths:
         print(p)
     return 0
