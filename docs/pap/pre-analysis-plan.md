@@ -172,7 +172,9 @@ These rules apply from the moment `pap-v1` exists.
   2. **Before it loads anything**, the script enforces its own binding and refuses unless:
      (a) `pap-v1` is an annotated tag; (b) HEAD descends from `pap-v1`; (c) its own blob, and the
      working-tree blobs of `src/aideleg/power.py` and every `src/aideleg/market/*.py`, equal their
-     blobs at `pap-v1`; (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock` succeeds. It
+     blobs at `pap-v1`; (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock` succeeds; (e)
+     `git status --porcelain --untracked-files=all -- src pyproject.toml uv.lock` is empty, so no
+     untracked file (for example a `src/aideleg/power/` package) can shadow bound code. It
      then checks each French zip's SHA-256 against `git show pap-v1:data/raw/MANIFEST.json` and each
      extracted member's CRC32 against the zip header (hashes only), and the Design B vector hash.
   3. **Attempt marker.** Immediately before the first post-seal read, the script creates
@@ -1289,8 +1291,8 @@ appear only in a clearly marked appendix (spec §5.4.1).
 ### 9.2 Code
 
 <!-- BEGIN GENERATED: code binding -->
-- Code commit the plan binds to, HEAD at generation: **`2a9e184a5b100786637ea6694bc1f999614c8fee`** ("fix: pre-freeze hardening (final review) -- pap_freeze records HEAD at generation and power.py"), from `git rev-parse HEAD` when this block was generated.
-- `src/aideleg/confirm_h5.py` git blob: **`86a0a25baca394dc6e658e2b93631cb2f0cb111e`** (`git rev-parse HEAD:src/aideleg/confirm_h5.py`), with `PRIMARY_NULL = "bbar"`.
+- Code commit the plan binds to, HEAD at generation: **`b116edc5faeea940f0c4502c372de1ffca03cc99`** ("fix: pre-freeze hardening (final review) -- no untracked file can shadow bound code"), from `git rev-parse HEAD` when this block was generated.
+- `src/aideleg/confirm_h5.py` git blob: **`f581264ae9c982ff6a84eb1d1e2f465d18544144`** (`git rev-parse HEAD:src/aideleg/confirm_h5.py`), with `PRIMARY_NULL = "bbar"`.
 - `src/aideleg/power.py` git blob: **`a353a7c2683d0cc2e9663e17d3835055b3bb63fc`** (`git rev-parse HEAD:src/aideleg/power.py`).
 <!-- END GENERATED: code binding -->
 
