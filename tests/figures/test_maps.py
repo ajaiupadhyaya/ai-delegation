@@ -72,3 +72,15 @@ def test_real_us_map_draws_with_insets():
                                      cmap="viridis", label="l")
     assert unmatched == ["US-XX"] and len(fig.axes) == 4  # main, AK, HI, colourbar
     plt.close(fig)
+
+
+def test_all_text_inside_canvas_with_long_label_and_legend():
+    vals = pl.DataFrame({"iso3": ["AAA"], "v": [1.0]})  # BBB unpublished -> legend
+    fig, _ = maps.choropleth(
+        GDF, vals, id_col="iso3", value_col="v", title="A long map title, countries",
+        cmap="PuOr", center=0.0, ticks=[0.5, 1.0], ticklabels=["a", "b"], clip=(2, 98),
+        label="AUI (log scale; 1 = share of usage equals share of working-age population)")
+    box = fig.get_tightbbox(fig.canvas.get_renderer())
+    w, h = fig.get_size_inches()
+    assert box.x0 >= -1e-6 and box.y0 >= -1e-6 and box.x1 <= w + 1e-6 and box.y1 <= h + 1e-6
+    plt.close(fig)

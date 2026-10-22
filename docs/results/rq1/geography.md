@@ -15,6 +15,9 @@ RQ1's α = 0.05 is split (D22): H2 is tested on its own at α = 0.0125, and {H1,
 - AUI is the Anthropic Usage Index: a geography's share of Claude usage divided by its share of working-age population.
 - `mix` is the geography's task-mix control M_c (the geography's O*NET general work activity shares weighted by the global automation share of each activity).
 - `in_h4_sample` is true iff the geography is in the confirmatory H4 frame (it has a GDP per working-age person). A geography without one stays in these tables and maps.
+- AUI is drawn on a diverging scale centred at parity (log10 AUI = 0, a usage share equal to the working-age population share), on a log colour scale with ticks in AUI units. This is a presentation choice in a descriptive figure.
+- The diverging maps (AUI, mix part, within part) cut their colour scale at the 2nd and 98th percentiles of the plotted values; values beyond are drawn in the end colour, marked by arrows on the colourbar.
+- Not published is a property of the release, not a zero. Kosovo (XKX) is published in r3–r5 but not in r6, so it is absent from the r6 maps.
 - A geography the release does not publish (a missing month, or no task mix) is not in the table; on the maps it is drawn in grey with the legend entry "not published", never as zero.
 
 ## Countries

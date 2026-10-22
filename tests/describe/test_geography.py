@@ -52,7 +52,7 @@ def test_map_specs_cover_both_geographies():
     assert set(names) == {f"fig_rq1_map_{g}_{v}" for g in ("country", "state")
                           for v in ("automation", "aui", "mix", "within")}
     by_var = {s.column: s for s in geography.MAPS["country"]}
-    assert by_var["aui"].log and by_var["mix_part"].center == 0
+    assert by_var["aui"].log and by_var["aui"].center == 0 and by_var["mix_part"].center == 0
     assert by_var["within_part"].center == 0 and by_var["automation_pct"].center is None
 
 
@@ -76,6 +76,6 @@ def test_choropleth_ids_alias_kosovo():
     t = pl.DataFrame({"geo_id": ["XKX", "ARG"], "v": [1.0, 2.0]})
     out = geography.map_values(t, "country")
     assert out["iso3"].to_list() == ["KOS", "ARG"]
-    assert geography.map_values(t.with_columns(pl.col("geo_id")), "us_state")["geo_id"].to_list() \
-        == ["XKX", "ARG"]
+    assert "iso3" not in geography.map_values(t, "us_state").columns
+    assert geography.unalias(["KOS"]) == ["XKX"]
 

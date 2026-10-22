@@ -28,6 +28,13 @@ TABLE_COLUMNS = ["geo_id", "name", "automation_pct", "aui", "mix", "gap", "mix_p
 NE_ALIAS = {"XKX": "KOS"}
 
 
+# AUI is shown diverging, centred at parity (log10 AUI = 0): a presentation choice.
+AUI_TICKS = (0.1, 0.25, 0.5, 0.7, 1.0, 1.4, 2.0, 4.0)
+AUI_TICKLABELS = ("0.1", "0.25", "0.5", "0.7", "1", "1.4", "2", "4")
+AUI_LABEL = "AUI (log scale; 1 = share of usage equals share of working-age population)"
+CLIP = (2.0, 98.0)  # percentiles at which the diverging colour scales are cut
+
+
 @dataclass(frozen=True)
 class MapSpec:
     column: str  # column of the geography table
@@ -44,8 +51,8 @@ def _specs(prefix: str, where: str) -> tuple[MapSpec, ...]:
         MapSpec("automation_pct", SEQUENTIAL_CMAP, None, False, f"fig_rq1_map_{prefix}_automation",
                 "automation pattern share (% of classified conversations)",
                 f"Automation-pattern share of conversations, {where}"),
-        MapSpec("aui", SEQUENTIAL_CMAP, None, True, f"fig_rq1_map_{prefix}_aui",
-                "Anthropic Usage Index (log10 colour scale)",
+        MapSpec("aui", DIVERGING_CMAP, 0.0, True, f"fig_rq1_map_{prefix}_aui",
+                AUI_LABEL,
                 f"Anthropic Usage Index, {where}"),
         MapSpec("mix_part", DIVERGING_CMAP, 0.0, False, f"fig_rq1_map_{prefix}_mix",
                 "mix part of the gap (pp; includes the common offset)",

@@ -21,6 +21,7 @@ Outputs (`report_confirmatory`):
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -482,6 +483,14 @@ def _geography_doc(path: Path, tables: dict, globals_: dict, excluded: dict,
         "activity shares weighted by the global automation share of each activity).",
         "- `in_h4_sample` is true iff the geography is in the confirmatory H4 frame (it has a "
         "GDP per working-age person). A geography without one stays in these tables and maps.",
+        "- AUI is drawn on a diverging scale centred at parity (log10 AUI = 0, a usage share "
+        "equal to the working-age population share), on a log colour scale with ticks in AUI "
+        "units. This is a presentation choice in a descriptive figure.",
+        "- The diverging maps (AUI, mix part, within part) cut their colour scale at the 2nd and "
+        "98th percentiles of the plotted values; values beyond are drawn in the end colour, "
+        "marked by arrows on the colourbar.",
+        "- Not published is a property of the release, not a zero. Kosovo (XKX) is published in "
+        "r3–r5 but not in r6, so it is absent from the r6 maps.",
         "- A geography the release does not publish (a missing month, or no task mix) is not in "
         "the table; on the maps it is drawn in grey with the legend entry \"not published\", "
         "never as zero.",
@@ -553,9 +562,13 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
         unmatched[geo] = {}
         for spec in geography.MAPS[geo]:
             col = "log10_aui" if spec.log else spec.column
-            fig, um = choropleth(gdfs[geo], vals, id_col=id_col[geo], value_col=col,
-                                 title=spec.title, cmap=spec.cmap, center=spec.center,
-                                 label=spec.label)
+            div = spec.center is not None
+            fig, um = choropleth(
+                gdfs[geo], vals, id_col=id_col[geo], value_col=col, title=spec.title,
+                cmap=spec.cmap, center=spec.center, label=spec.label,
+                ticks=[math.log10(t) for t in geography.AUI_TICKS] if spec.log else None,
+                ticklabels=list(geography.AUI_TICKLABELS) if spec.log else None,
+                clip=geography.CLIP if div else None, edgecolor="0.55" if div else "white")
             unmatched[geo][spec.fig_name] = geography.unalias(um)
             paths += save_figure(fig, spec.fig_name, out_dir=fig_dir)
     paths.insert(0, _geography_doc(out / GEOGRAPHY_MD, tables, globals_, excluded, unmatched))
