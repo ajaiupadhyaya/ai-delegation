@@ -193,3 +193,53 @@ def test_cli_results_seen(pap):
     seen = [ln for e in paplog.entries(pap) for ln in e["body"].split("\n")
             if ln.startswith("- Results seen:")]
     assert seen == ["- Results seen: no", "- Results seen: yes"]
+
+
+POST_TYPE = ("- Type: clarification (post-result); results had been seen; the PAP is silent or "
+             "ambiguous here and no PAP rule or confirmatory code changes")
+
+
+def test_post_result_clarification_type_and_subsection(pap):
+    assert list(paplog.SUBSECTIONS) == ["A", "C", "CP", "D"]
+    assert paplog.SUBSECTIONS["CP"] == "### Clarifications (post-result)"
+    paplog.append(_c(pap, "pre"), pap)
+    post = paplog.clarification("post", rule="r", plan="p", date="2026-10-22", pap=pap,
+                                results_seen="RQ1 confirmatory results seen")
+    assert POST_TYPE in post.split("\n")
+    assert "(pre-result)" not in post
+    paplog.append(post, pap)
+    paplog.append(_c(pap, "pre again"), pap)  # numbering stays one C series
+    paplog.append(paplog.deviation("d", reason="w", before="b", after="a", results_seen="no",
+                                   approved="y", date="2026-10-22", pap=pap), pap)
+    text = pap.read_text(encoding="utf-8")
+    h = paplog.SUBSECTIONS
+    assert (text.index(h["C"]) < text.index("### C-1.") < text.index("### C-3.")
+            < text.index(h["CP"]) < text.index("### C-2.") < text.index(h["D"])
+            < text.index("### D-1."))
+    assert [(e["kind"], e["n"]) for e in paplog.entries(pap)] == [
+        ("C", 1), ("C", 3), ("C", 2), ("D", 1)]
+    assert text.count(h["CP"]) == 1
+
+
+def test_missing_subsection_is_inserted_in_order(pap):
+    old = "\n\n".join(paplog.SUBSECTIONS[k] for k in ("A", "C", "D"))
+    pap.write_text(FIXTURE + "\n" + old.replace(paplog.SUBSECTIONS["D"],
+                   "### C-1. Clarification: x (2026-10-22)\n- Rule: r\n\n"
+                   + paplog.SUBSECTIONS["D"]) + "\n", encoding="utf-8")
+    paplog.append(paplog.clarification("post", rule="r", plan="p", date="2026-10-22", pap=pap,
+                                       results_seen="yes"), pap)
+    text = pap.read_text(encoding="utf-8")
+    i = [text.index(h) for h in paplog.SUBSECTIONS.values()]
+    assert i == sorted(i)
+    assert text.index("### C-1.") < text.index(paplog.SUBSECTIONS["CP"]) < text.index("### C-2.")
+    assert "\n\n\n" not in text
+
+
+def test_deviation_cli_warns_on_unclear_results_seen(pap, capsys):
+    base = ["--pap", str(pap), "--date", "2026-10-22", "deviation", "--title", "T",
+            "--reason", "r", "--before", "b", "--after", "a", "--approved", "y"]
+    assert paplog.main([*base, "--results-seen", "maybe"]) == 0
+    assert "warning" in capsys.readouterr().err.lower()
+    for ok in ("yes", "no", "RQ1 confirmatory results seen"):
+        paplog.main([*base[:5], "--title", ok, *base[7:], "--results-seen", ok])
+        assert capsys.readouterr().err == ""

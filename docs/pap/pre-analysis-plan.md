@@ -1686,8 +1686,10 @@ primary result (§0.5).
 - Results seen: no
 - Rule: On 2026-10-22 at 19:47:28 UTC, while recording a failing test for the panel-hash refusal, a unit test called confirm.run against the real output directory with the clean-tree check stubbed (HEAD recorded as 'abc') and load_inputs stubbed to raise before reading any data. It created an attempt marker, a log and a markdown file under docs/results/rq1 containing only the stub's traceback. No data were loaded and no outcome was read, so it is not a P-RQ1 attempt. The files were never committed; they were removed and a copy is kept outside the repository. The test fixture now redirects the output directory to a temporary path so no test can write the real one.
 
+### Clarifications (post-result)
+
 ### C-32. Clarification: H4 task-mix control reproduces to about 1e-14 (2026-10-22)
-- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
 - Fixed by: Plan 2 final fix wave (I1)
 - Results seen: RQ1 confirmatory results seen
 - Rule: H4's task-mix control (`h4._mix`) sums over a polars group_by whose row order is not fixed, so `mix` reproduces only to about 1e-14 between runs; this is far below any reported precision and does not affect the committed P-RQ1 output; figures are built from values rounded to 10 significant digits.

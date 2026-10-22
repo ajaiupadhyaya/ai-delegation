@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,11 +18,14 @@ from aideleg.config import RAW, ROOT
 
 PAP = ROOT / "docs/pap/pre-analysis-plan.md"
 SECTION_11 = "## 11. Deviations"
+# in document order; "CP" holds the C entries written after results had been seen (one C series)
 SUBSECTIONS = {
     "A": "### Additions (D20)",
     "C": "### Clarifications (pre-result)",
+    "CP": "### Clarifications (post-result)",
     "D": "### Deviations after the freeze",
 }
+POST_RESULT = "(post-result)"
 ENTRY_RE = (
     r"^### ([ACD])-(\d+)\. (Addition|Addition \(set\)|Clarification|Deviation): (.+) "
     r"\((\d{4}-\d{2}-\d{2})\)$"
@@ -117,12 +121,18 @@ def _results_seen(value: str | bool) -> str:
 
 def clarification(title: str, *, rule: str, plan: str, date: str, results_seen: str = "no",
                   pap: Path = PAP) -> str:
+    """A C entry. With `results_seen` other than "no" it is a post-result clarification: its Type
+    line says so and `append` files it under "Clarifications (post-result)"."""
+    seen = _results_seen(results_seen)
+    kind = ("- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP "
+            "rule changes" if seen == "no" else
+            f"- Type: clarification {POST_RESULT}; results had been seen; the PAP is silent or "
+            "ambiguous here and no PAP rule or confirmatory code changes")
     return "\n".join([
         f"### C-{next_number('C', pap)}. Clarification: {title} ({date})",
-        "- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP "
-        "rule changes",
+        kind,
         f"- Fixed by: {plan}",
-        f"- Results seen: {_results_seen(results_seen)}",
+        f"- Results seen: {seen}",
         f"- Rule: {rule}",
     ])
 
@@ -145,12 +155,30 @@ def deviation(title: str, *, reason: str, before: str, after: str, results_seen:
 
 
 def _ensure_subsections(text: str) -> str:
+    """Create the subsections once; later, insert any missing one in its place in the order."""
     head, _, tail = text.partition(SECTION_11 + "\n")
-    if any(h in tail.split("\n") for h in SUBSECTIONS.values()):
-        return text
-    if not text.endswith("\n"):
-        text += "\n"
-    return text + "\n" + "\n\n".join(SUBSECTIONS.values()) + "\n"
+    if not any(h in tail.split("\n") for h in SUBSECTIONS.values()):
+        if not text.endswith("\n"):
+            text += "\n"
+        return text + "\n" + "\n\n".join(SUBSECTIONS.values()) + "\n"
+    lines = text.split("\n")
+    order = list(SUBSECTIONS.values())
+    for i, h in enumerate(order):
+        s11 = lines.index(SECTION_11)
+        sec_end = next((j for j in range(s11 + 1, len(lines)) if lines[j].startswith("## ")),
+                       len(lines))
+        present = {ln: j for j, ln in enumerate(lines[s11:sec_end], s11) if ln in order}
+        if h in present:
+            continue
+        nxt = next((present[g] for g in order[i + 1:] if g in present), None)
+        if nxt is not None:
+            lines[nxt:nxt] = [h, ""]
+        else:
+            k = sec_end
+            while k > s11 + 1 and lines[k - 1] == "":
+                k -= 1
+            lines[k:k] = ["", h]
+    return "\n".join(lines)
 
 
 def append(entry: str, pap: Path = PAP) -> None:
@@ -160,6 +188,7 @@ def append(entry: str, pap: Path = PAP) -> None:
     if m is None:
         raise ValueError("entry heading does not match ENTRY_RE")
     kind, n = m[1], int(m[2])
+    section = "CP" if kind == "C" and POST_RESULT in entry.split("\n", 2)[1] else kind
     if n != next_number(kind, pap):  # type: ignore[arg-type]
         raise ValueError(f"entry is numbered {kind}-{n}; the next is "
                          f"{kind}-{next_number(kind, pap)}")  # type: ignore[arg-type]
@@ -168,7 +197,7 @@ def append(entry: str, pap: Path = PAP) -> None:
     s11 = lines.index(SECTION_11)
     sec_end = next((i for i in range(s11 + 1, len(lines)) if lines[i].startswith("## ")),
                    len(lines))
-    sub = lines.index(SUBSECTIONS[kind], s11, sec_end)
+    sub = lines.index(SUBSECTIONS[section], s11, sec_end)
     heads = {i for i in range(sub + 1, sec_end)
              if lines[i] in SUBSECTIONS.values()}
     end = min(heads, default=sec_end)
@@ -337,6 +366,10 @@ def main(argv: list[str] | None = None) -> int:
                              results_seen=a.results_seen, pap=a.pap), a.pap)
         done = [a.title]
     else:
+        rs = a.results_seen.strip()
+        if rs not in ("yes", "no") and "seen" not in rs.lower():
+            print(f"warning: --results-seen {rs!r} is neither yes nor no and does not say what "
+                  "was seen", file=sys.stderr)
         append(deviation(a.title, reason=a.reason, before=a.before, after=a.after,
                          results_seen=a.results_seen, approved=a.approved,
                          date=a.date, pap=a.pap), a.pap)
