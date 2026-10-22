@@ -105,18 +105,29 @@ def set_addition(source: str, *, count: int, digest: str, first_utc: str, last_u
     ])
 
 
-def clarification(title: str, *, rule: str, plan: str, date: str, pap: Path = PAP) -> str:
+def _results_seen(value: str | bool) -> str:
+    """The "Results seen" field: free text such as "no", "yes" or "RQ1 confirmatory results
+    seen; robustness rows not yet read". A bool is read as yes/no (older callers)."""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if not value.strip() or "\n" in value:
+        raise ValueError(f"results_seen must be one non-empty line, not {value!r}")
+    return value.strip()
+
+
+def clarification(title: str, *, rule: str, plan: str, date: str, results_seen: str = "no",
+                  pap: Path = PAP) -> str:
     return "\n".join([
         f"### C-{next_number('C', pap)}. Clarification: {title} ({date})",
         "- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP "
         "rule changes",
         f"- Fixed by: {plan}",
-        "- Results seen: no",
+        f"- Results seen: {_results_seen(results_seen)}",
         f"- Rule: {rule}",
     ])
 
 
-def deviation(title: str, *, reason: str, before: str, after: str, results_seen: bool,
+def deviation(title: str, *, reason: str, before: str, after: str, results_seen: str | bool,
               approved: str, date: str, pap: Path = PAP) -> str:
     return "\n".join([
         f"### D-{next_number('D', pap)}. Deviation: {title} ({date})",
@@ -125,7 +136,7 @@ def deviation(title: str, *, reason: str, before: str, after: str, results_seen:
         f"- Reason: {reason}",
         f"- Before: {before}",
         f"- After: {after}",
-        f"- Results seen: {'yes' if results_seen else 'no'}",
+        f"- Results seen: {_results_seen(results_seen)}",
         f"- Approved by Ajai: {approved}",
     ])
 
@@ -303,12 +314,16 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--title", required=True)
     p.add_argument("--rule", required=True)
     p.add_argument("--plan", required=True)
+    p.add_argument("--results-seen", default="no",
+                   help='what results had been seen, e.g. "no" (default), "yes", or "RQ1 '
+                        'confirmatory results seen; robustness rows not yet read"')
     p = sub.add_parser("deviation")
     p.add_argument("--title", required=True)
     p.add_argument("--reason", required=True)
     p.add_argument("--before", required=True)
     p.add_argument("--after", required=True)
-    p.add_argument("--results-seen", choices=["yes", "no"], required=True)
+    p.add_argument("--results-seen", required=True,
+                   help='"yes", "no", or a one-line description of what was seen')
     p.add_argument("--approved", required=True)
     a = ap.parse_args(argv)
     a.date = a.date or _today()
@@ -318,11 +333,12 @@ def main(argv: list[str] | None = None) -> int:
     elif a.cmd == "set-addition":
         done = _main_set_addition(a)
     elif a.cmd == "clarification":
-        append(clarification(a.title, rule=a.rule, plan=a.plan, date=a.date, pap=a.pap), a.pap)
+        append(clarification(a.title, rule=a.rule, plan=a.plan, date=a.date,
+                             results_seen=a.results_seen, pap=a.pap), a.pap)
         done = [a.title]
     else:
         append(deviation(a.title, reason=a.reason, before=a.before, after=a.after,
-                         results_seen=a.results_seen == "yes", approved=a.approved,
+                         results_seen=a.results_seen, approved=a.approved,
                          date=a.date, pap=a.pap), a.pap)
         done = [a.title]
     for d in done:

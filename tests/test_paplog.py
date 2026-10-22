@@ -168,3 +168,28 @@ def test_cli_set_addition_for_the_docs_index(pap, tmp_path):
                         "--used-by", "x"]) == 0
     f = paplog.set_entry_fields(paplog.entries(pap)[0])
     assert f["count"] == 3 and f["digest"] == "e" * 64
+
+
+def test_results_seen_field_is_explicit(pap):
+    c = paplog.clarification("T", rule="R", plan="P", date="2026-10-22", pap=pap,
+                             results_seen="RQ1 confirmatory results seen")
+    assert "- Results seen: RQ1 confirmatory results seen" in c.split("\n")
+    assert "- Results seen: no" in _c(pap).split("\n")  # default keeps old callers working
+    d = paplog.deviation("T", reason="w", before="b", after="a", approved="y",
+                         date="2026-10-22", pap=pap,
+                         results_seen="RQ1 confirmatory results seen; robustness rows not read")
+    assert "- Results seen: RQ1 confirmatory results seen; robustness rows not read" in d
+    for bad in ("", "  ", "two\nlines"):
+        with pytest.raises(ValueError):
+            paplog.clarification("T", rule="R", plan="P", date="d", pap=pap, results_seen=bad)
+
+
+def test_cli_results_seen(pap):
+    base = ["--pap", str(pap), "--date", "2026-10-22", "clarification", "--title", "A",
+            "--rule", "r", "--plan", "p"]
+    assert paplog.main(base) == 0
+    assert paplog.main([*base[:-6], "--title", "B", "--rule", "r", "--plan", "p",
+                        "--results-seen", "yes"]) == 0
+    seen = [ln for e in paplog.entries(pap) for ln in e["body"].split("\n")
+            if ln.startswith("- Results seen:")]
+    assert seen == ["- Results seen: no", "- Results seen: yes"]
