@@ -20,8 +20,10 @@ Rules
 - **H3.** p_family = p of the indicator. The tested block of the non-PSD rule is γ alone
   (PAP §4); covariates (R31) are reported from a second call on the same design whose tested
   block is the covariates, so they never change γ's inference.
-- **P13.** `attenuation_factor` is the between-task share of the within-IWA variance of the
-  wage (H1) or the indicator (H3); it is reported beside β_w and γ.
+- **P13.** `attenuation_factor` is the between-task share of the regressor's effective
+  (Frisch-Waugh-Lovell) variation: the wage (H1) or the indicator (H3) residualised by WLS on
+  the IWA FE and on the estimator's other regressors (education in H1; the covariates in H3
+  with covariates). It is reported beside β_w and γ.
 """
 
 import numpy as np
@@ -44,14 +46,25 @@ def _group_mean(x: np.ndarray, w: np.ndarray, labels: np.ndarray) -> np.ndarray:
 
 
 def attenuation_factor(x: np.ndarray, w: np.ndarray, family: np.ndarray,
-                       task: np.ndarray) -> float:
-    """Σ w·r̄² / Σ w·r², with r = x minus its w-weighted family mean and r̄ the w-weighted mean
-    of r within (task, family): the between-task share of the within-family variance (P13)."""
+                       task: np.ndarray, controls: np.ndarray | None = None) -> float:
+    """Σ w·r̄² / Σ w·r², the between-task share of the regressor's effective variation (P13).
+
+    r is the Frisch-Waugh-Lovell residual of x: x residualised by WLS (weights w) on the
+    family fixed effects and on `controls` (the estimator's other regressors, n x k; none by
+    default, when r is x minus its w-weighted family mean). r̄ is the w-weighted mean of r
+    within (task, family). β of x is identified from r alone, so this is the share of its
+    identifying variation that lies between tasks."""
     x, w = np.asarray(x, float), np.asarray(w, float)
     fam = np.unique(np.asarray(family), return_inverse=True)[1].ravel()
     tsk = np.unique(np.asarray(task), return_inverse=True)[1].ravel()
     cell = np.unique(np.column_stack([tsk, fam]), axis=0, return_inverse=True)[1].ravel()
     r = x - _group_mean(x, w, fam)
+    if controls is not None and np.size(controls):
+        c = np.asarray(controls, float).reshape(len(x), -1)
+        c = c - np.column_stack([_group_mean(c[:, j], w, fam) for j in range(c.shape[1])])
+        sw = np.sqrt(w)
+        coef = np.linalg.lstsq(c * sw[:, None], r * sw, rcond=None)[0]
+        r = r - c @ coef
     r_bar = _group_mean(r, w, cell)
     return float(np.sum(w * r_bar**2) / np.sum(w * r**2))
 
@@ -111,14 +124,21 @@ def _psd_note(fit: TwoWayFit, tested: list[str]) -> list[str]:
 
 
 def _sample(rows: pl.DataFrame, fit: TwoWayFit) -> dict[str, int]:
+    n_occ = rows["occ_code"].n_unique()
+    if n_occ != rows["soc6"].n_unique():
+        raise AssertionError("occ_code and soc6 disagree on the number of occupations")
     return {"n_rows": rows.height, "n_tasks": rows["task_code"].n_unique(),
-            "n_occ": rows["soc6"].n_unique(), "n_family": rows["family"].n_unique(),
+            "n_occ": n_occ, "n_family": rows["family"].n_unique(),
             "g_occ": fit.g_occ, "g_task": fit.g_task, "df_inference": fit.df_inference}
 
 
-def _attenuation(rows: pl.DataFrame, col: str) -> float:
+def _attenuation(rows: pl.DataFrame, col: str, regressors: list[str]) -> float:
+    """P13 factor of `col`, residualised on the IWA FE and the other regressors (FWL)."""
+    others = [c for c in regressors if c != col]
+    controls = rows.select(others).to_numpy().astype(float) if others else None
     return attenuation_factor(rows[col].to_numpy().astype(float), rows["weight"].to_numpy(),
-                              rows["family"].to_numpy(), rows["task_code"].to_numpy())
+                              rows["family"].to_numpy(), rows["task_code"].to_numpy(),
+                              controls)
 
 
 def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
@@ -129,7 +149,7 @@ def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
     rows, drops = _apply_drops(tr, [outcome, *tested])
     fit = _fit(rows, outcome, tested, tested)
     diagnostics = {k: getattr(fit, k) for k in _FIT_FIELDS}
-    diagnostics["attenuation_log_wage"] = _attenuation(rows, predictors[1])
+    diagnostics["attenuation_log_wage"] = _attenuation(rows, predictors[1], tested)
     return HypothesisResult(
         hypothesis="H1", outcome=outcome, coefs=fit.coefs,
         p_family=max(fit.coefs[p].p for p in tested), sample=_sample(rows, fit),
@@ -148,9 +168,12 @@ def estimate_h3(tr: TaskRows, outcome: str = "validation_pct", indicator: str = 
         cov_fit = _fit(rows, outcome, regressors, list(covariates))
         coefs.update(cov_fit.coefs)
         notes += _psd_note(cov_fit, list(covariates))
+        diagnostics["covariates_psd"] = {
+            "psd_clipped": cov_fit.psd_clipped, "min_eigenvalue": cov_fit.min_eigenvalue,
+            "zero_variance_fallback": cov_fit.zero_variance_fallback}
         for k in ("se_oneway_occ", "se_oneway_task", "p_oneway_occ"):
             diagnostics[k] = {**getattr(fit, k), **getattr(cov_fit, k)}
-    diagnostics[f"attenuation_{indicator}"] = _attenuation(rows, indicator)
+    diagnostics[f"attenuation_{indicator}"] = _attenuation(rows, indicator, regressors)
     return HypothesisResult(
         hypothesis="H3", outcome=outcome, coefs=coefs, p_family=fit.coefs[indicator].p,
         sample=_sample(rows, fit), drops=drops, diagnostics=diagnostics, notes=notes)

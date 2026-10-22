@@ -37,10 +37,40 @@ def test_h1_recovers_planted_education():
 
 
 def test_h1_wage_coefficient_is_attenuated_as_p13_states():
-    r = h1h3.estimate_h1(synth.task_rows(SEED, beta_wage=-3))
+    r = h1h3.estimate_h1(synth.task_rows(SEED, n_task=2000, beta_wage=-3))
     att = r.diagnostics["attenuation_log_wage"]
     assert 0 < att < 1
-    assert r.coefs[WAGE].estimate / att == pytest.approx(-3, abs=0.4)
+    est = r.coefs[WAGE].estimate / att
+    assert est == pytest.approx(-3, abs=0.4)
+    assert abs(est - -3) < 3 * r.coefs[WAGE].se / att
+
+
+def _wage_correlated_education(tr, rng: np.random.Generator):
+    """Education := 2 x the task's mean log wage + N(0, 2): correlated with the wage."""
+    bar = (tr.rows.group_by("task_code").agg(pl.col(WAGE).mean().fill_null(11.0).alias("_b"))
+           .sort("task_code"))
+    bar = bar.with_columns(_e=2 * pl.col("_b") + pl.Series(rng.normal(0, 2, bar.height)))
+    rows = (tr.rows.join(bar.select("task_code", "_e"), on="task_code", how="left")
+            .with_columns(pl.col("_e").alias(EDUC)).drop("_e"))
+    return dataclasses.replace(tr, rows=rows)
+
+
+def test_attenuation_uses_the_fwl_residual_of_the_wage():
+    """P13 factor: log wage residualised on the IWA FE and on education (FWL)."""
+    tr = _wage_correlated_education(synth.task_rows(SEED, n_task=2000, beta_wage=-3),
+                                    np.random.default_rng(SEED))
+    r = h1h3.estimate_h1(tr)
+    rows = tr.rows.filter(pl.col(WAGE).is_not_null())
+    args = (rows[WAGE].to_numpy(), rows["weight"].to_numpy(), rows["family"].to_numpy(),
+            rows["task_code"].to_numpy())
+    iwa_only = h1h3.attenuation_factor(*args)
+    fwl = h1h3.attenuation_factor(*args, controls=rows[EDUC].to_numpy())
+    assert abs(fwl - iwa_only) > 0.05
+    att = r.diagnostics["attenuation_log_wage"]
+    assert att == pytest.approx(fwl)
+    est = r.coefs[WAGE].estimate / att
+    assert est == pytest.approx(-3, abs=0.4)
+    assert abs(est - -3) < 3 * r.coefs[WAGE].se / att
 
 
 def test_attenuation_factor_hand_case():
@@ -68,10 +98,13 @@ def test_h1_size_under_permuted_outcome():
 
 
 def test_h3_recovers_gamma_and_attenuation_one():
-    r = h1h3.estimate_h3(synth.task_rows(SEED, gamma=5, pure_error_cost_tasks=True))
+    r = h1h3.estimate_h3(synth.task_rows(SEED, n_task=2000, gamma=5,
+                                         pure_error_cost_tasks=True))
     assert r.hypothesis == "H3" and r.outcome == "validation_pct"
     assert set(r.coefs) == {"error_cost"}
-    assert r.coefs["error_cost"].estimate == pytest.approx(5, abs=0.5)
+    g = r.coefs["error_cost"]
+    assert g.estimate == pytest.approx(5, abs=0.5)
+    assert abs(g.estimate - 5) < 3 * g.se
     assert r.p_family == r.coefs["error_cost"].p
     assert r.diagnostics["attenuation_error_cost"] == pytest.approx(1.0)
 
@@ -130,6 +163,9 @@ def test_outcome_is_an_argument():
     r3 = h1h3.estimate_h3(tr, covariates=(EDUC, WAGE))
     assert list(r3.coefs) == ["error_cost", EDUC, WAGE]
     assert r3.p_family == r3.coefs["error_cost"].p
+    assert set(r3.diagnostics["covariates_psd"]) == {"psd_clipped", "min_eigenvalue",
+                                                     "zero_variance_fallback"}
+    assert "covariates_psd" not in h1h3.estimate_h3(tr).diagnostics
 
 
 def test_result_fields_and_json():
