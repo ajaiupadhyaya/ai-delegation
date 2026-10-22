@@ -159,3 +159,20 @@ def test_h2_legend_sits_below_the_axes(json_path):
     assert legs[0].get_window_extent(r).y1 <= ax.get_window_extent(r).y0
     import matplotlib.pyplot as plt
     plt.close(fig)
+
+
+def test_readme_commit_falls_back_to_the_recorded_run(tmp_path, monkeypatch):
+    out = tmp_path / "rq1"
+    out.mkdir()
+    monkeypatch.setattr(rq1, "_git_log_commit", lambda: "")
+    # nothing recorded at all: refuse rather than print an empty commit
+    with pytest.raises(RuntimeError):
+        rq1.report_index(out, tmp_path / "figs")
+    (out / "confirmatory_rq1.attempt").write_text("2026-10-22T20:12:13Z\nabc123\n")
+    assert "`abc123`" in rq1.report_index(out, tmp_path / "figs").read_text(encoding="utf-8")
+    (out / "confirmatory_rq1.json").write_text(json.dumps({"meta": {"head": "def456"}}))
+    text = rq1.report_index(out, tmp_path / "figs").read_text(encoding="utf-8")
+    assert "`def456`" in text and "recorded in the run" in text
+    monkeypatch.setattr(rq1, "_git_log_commit", lambda: "f00d")
+    text = rq1.report_index(out, tmp_path / "figs").read_text(encoding="utf-8")
+    assert "committed in `f00d`" in text

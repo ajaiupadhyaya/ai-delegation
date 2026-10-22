@@ -629,13 +629,35 @@ _DESCRIPTIONS = {
 }
 
 
-def _prrq1_commit() -> str:
+def _git_log_commit() -> str:
+    """The commit that added the P-RQ1 JSON, or "" when git has no record of it."""
     import subprocess
 
     from aideleg.config import ROOT
-    return subprocess.run(
+    r = subprocess.run(
         ["git", "log", "-1", "--format=%H", "--", "docs/results/rq1/confirmatory_rq1.json"],
-        cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip()
+        cwd=ROOT, capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def _prrq1_sentence(out: Path) -> str:
+    """Where the P-RQ1 run is recorded: the git commit of its JSON; failing that, the commit the
+    run recorded itself (JSON `meta.head`, else the attempt marker's second line)."""
+    commit = _git_log_commit()
+    if commit:
+        return f"The confirmatory run was committed in `{commit}`."
+    recorded = ""
+    js, marker = out / JSON_NAME, out / "confirmatory_rq1.attempt"
+    if js.is_file():
+        recorded = json.loads(js.read_text(encoding="utf-8")).get("meta", {}).get("head", "")
+    if not recorded and marker.is_file():
+        lines = marker.read_text(encoding="utf-8").splitlines()
+        recorded = lines[1].strip() if len(lines) > 1 else ""
+    if not recorded:
+        raise RuntimeError("no record of the P-RQ1 run: git log, the JSON meta and the attempt "
+                           "marker are all empty")
+    return (f"The confirmatory run ran at commit `{recorded}` (recorded in the run; git has no "
+            "commit of its JSON here).")
 
 
 def report_index(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR) -> Path:
@@ -647,8 +669,8 @@ def report_index(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR) -> Path:
                       for n in names)
     figs = sorted({p.stem for p in Path(fig_dir).glob("fig_rq1_*.pdf")})
     sections = [
-        ("P-RQ1 run", f"The confirmatory run was committed in `{_prrq1_commit()}`. Its four "
-         "`confirmatory_rq1.*` files are write-once and are never regenerated."),
+        ("P-RQ1 run", _prrq1_sentence(out) + " Its four `confirmatory_rq1.*` files are "
+         "write-once and are never regenerated."),
         ("Alpha split", SPLIT_STATEMENT),
         ("Files in this directory", files),
         ("Figures (`docs/paper/figures/`, PDF and PNG)",
