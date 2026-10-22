@@ -93,6 +93,29 @@ def test_refuses_head_not_descending_from_tag(repo):
         confirm.check_clean(repo)
 
 
+def test_real_run_refuses_supplied_inputs_or_other_dir(clean, tmp_path, inputs):
+    with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
+        confirm.run(tmp_path)
+    with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
+        confirm.run(tmp_path, inputs=inputs)
+    assert list(tmp_path.iterdir()) == []
+    if not confirm.OUT_DIR.exists():  # never create the real output directory
+        with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
+            confirm.run(confirm.OUT_DIR, inputs=inputs)
+        assert not confirm.OUT_DIR.exists()
+
+
+def test_logger_failure_after_marker_writes_traceback(clean, tmp_path, monkeypatch, inputs):
+    def broken(path):
+        raise OSError("log file unavailable")
+
+    monkeypatch.setattr(confirm, "_logger", broken)
+    with pytest.raises(OSError, match="log file unavailable"):
+        confirm.run(tmp_path, scramble_seed=1, inputs=inputs)
+    assert (tmp_path / confirm.MARKER_NAME).exists()
+    assert "Traceback" in (tmp_path / confirm.MD_NAME).read_text()
+
+
 def test_dry_run_refuses_docs_results(clean):
     target = ROOT / "docs/results/rq1-dry-run-test"
     with pytest.raises(confirm.RefusedError, match="docs/results"):
@@ -196,6 +219,11 @@ def test_run_on_synthetic_inputs_writes_schema(clean, tmp_path, inputs):
     assert "Holm at family-wise α = 0.0375" in md and "SCRAMBLED" in md
     for d in data["decisions"].values():
         assert d["text"] in md
+    assert "6/1296" in md and "C-15" in md  # the H2 granularity note (C-15)
+    for h, coef in (("H1", "log_wage"), ("H3", "error_cost")):
+        att = data["results"][h]["diagnostics"][f"attenuation_{coef}"]
+        row = next(x for x in md.splitlines() if x.startswith(f"| {h} | {coef} |"))
+        assert row.rstrip(" |").endswith(f"{att:.4f}")
     log = (tmp_path / confirm.LOG_NAME).read_text()
     assert "H1 fitted in" in log and confirm.RESULTS_LOG_PREFIX in log
     assert (tmp_path / confirm.MARKER_NAME).read_text().split()[-1] == "abc"

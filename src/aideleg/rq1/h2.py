@@ -323,6 +323,9 @@ def estimate_h2(df: pl.DataFrame, outcome: str = "automation_pct", *,
         f"{ALPHA_H2}, β > 0 and the release-level wild bootstrap p ≤ {ALPHA_H2}.",
         f"Release-label randomisation over {n_perm} orderings: descriptive only; smallest "
         f"attainable p = 1/{n_perm}.",
+        f"Release-level wild bootstrap: full enumeration of 6^{r} = {6**r} Webb vectors; the "
+        f"smallest attainable p is 6/{6**r} ≈ {6 / 6**r:.4f}, and near-ties can raise p for "
+        "strong trends (PAP D22 design; C-15).",
     ]
     if "r6" in releases and not r6_indicator:
         notes.append("r6 is included without an r6 indicator: the trend is confounded with "

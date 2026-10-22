@@ -169,6 +169,9 @@ def test_h2_recovers_planted_trend():
     assert "measured within-task automation" in notes
     assert "includes any change in the classifier and in platform scope" in notes
     assert "descriptive only; smallest attainable p = 1/24" in notes
+    assert ("Release-level wild bootstrap: full enumeration of 6^4 = 1296 Webb vectors; the "
+            "smallest attainable p is 6/1296 ≈ 0.0046, and near-ties can raise p for strong "
+            "trends (PAP D22 design; C-15).") in res.notes
     res.to_dict()  # JSON-safe
 
 

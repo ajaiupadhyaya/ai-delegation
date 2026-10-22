@@ -7,7 +7,8 @@ Protocol (each step completes before the next)
 1. `check_clean`: `pap-v1` is an annotated tag, HEAD descends from it, and `git status
    --porcelain --untracked-files=all -- src tests pyproject.toml uv.lock` is empty.
 2. Refuse (`RefusedError`) if the attempt marker or any output exists in `out_dir`. A dry run
-   (`scramble_seed` set) also refuses an `out_dir` inside `docs/results`.
+   (`scramble_seed` set) also refuses an `out_dir` inside `docs/results`; a real run refuses
+   supplied `inputs` and any `out_dir` other than `OUT_DIR`.
 3. The bound blobs and library versions are recorded, then the marker is created with
    exclusive creation (UTC time and HEAD). **Only then** are the inputs loaded.
 4. From the marker on, any exception writes its traceback to `confirmatory_rq1.md` and is
@@ -266,13 +267,20 @@ def _markdown(payload: dict) -> str:
             SPLIT_STATEMENT, "", "## Decisions", ""]
     out += [f"- {decisions[h]['text']}" for h in ("H1", "H2", "H3", "H4")]
     out += ["", "## Coefficients", "",
-            "| hypothesis | coefficient | estimate | 95% CI | p | df |",
-            "|---|---|---|---|---|---|"]
+            "| hypothesis | coefficient | estimate | 95% CI | p | df | P13 attenuation |",
+            "|---|---|---|---|---|---|---|"]
     for h in ("H1", "H2", "H3", "H4"):
+        diag = results[h]["diagnostics"]
         for c in results[h]["coefs"].values():
             df = "normal" if c["df"] is None else c["df"]
+            att = diag.get(f"attenuation_{c['name']}")
+            att = "—" if att is None else _fmt(att)
             out.append(f"| {h} | {c['name']} | {_fmt(c['estimate'])} | "
-                       f"[{_fmt(c['ci_low'])}, {_fmt(c['ci_high'])}] | {_fmt(c['p'])} | {df} |")
+                       f"[{_fmt(c['ci_low'])}, {_fmt(c['ci_high'])}] | {_fmt(c['p'])} | {df} | "
+                       f"{att} |")
+    out += ["", "P13 attenuation: the between-task share of the regressor's identifying "
+            "(within-IWA, FWL-residualised) variation, reported beside β_w (H1) and γ (H3) "
+            "(PAP §4.1)."]
     out += ["", "## Samples and drops", "",
             "Drop shares are in percent of total r6 task usage (H1, H3); weights are not "
             "renormalised. H4 lists excluded countries by first failing reason.", ""]
@@ -378,6 +386,10 @@ def run(out_dir: Path = OUT_DIR, *, scramble_seed: int | None = None,
     if scramble_seed is not None and out_dir.resolve().is_relative_to(
             (ROOT / "docs/results").resolve()):
         raise RefusedError("a dry run never writes under docs/results")
+    if scramble_seed is None and (inputs is not None
+                                  or out_dir.resolve() != OUT_DIR.resolve()):
+        raise RefusedError("a real run takes the study inputs and writes only to "
+                           f"{OUT_DIR}; anything else is outside the P-RQ1 protocol")
     blobs, versions = _blobs(repo), _versions()
     pap = _git(repo, "rev-parse", f"{PAP_TAG}^{{commit}}")
     pap_commit = pap.stdout.strip() if pap.returncode == 0 else None
@@ -385,9 +397,11 @@ def run(out_dir: Path = OUT_DIR, *, scramble_seed: int | None = None,
     out_dir.mkdir(parents=True, exist_ok=True)
     utc = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     _write_x(paths[MARKER_NAME], f"{utc}\n{head}\n")
-    log, record, handlers = _logger(paths[LOG_NAME])
+    log: logging.Logger | None = None
+    handlers: list[logging.Handler] = []
     t_start = time.perf_counter()
     try:
+        log, record, handlers = _logger(paths[LOG_NAME])
         log.info("P-RQ1 run at %s, HEAD %s, scrambled=%s", utc, head, scramble_seed is not None)
         source = "load_inputs" if inputs is None else "supplied"
         inputs = _timed_load(log) if inputs is None else inputs
@@ -423,7 +437,8 @@ def run(out_dir: Path = OUT_DIR, *, scramble_seed: int | None = None,
         return json.loads(text)
     except BaseException:
         tb = traceback.format_exc()
-        log.error("run failed after the marker (an attempt, not a result):\n%s", tb)
+        if log is not None:
+            log.error("run failed after the marker (an attempt, not a result):\n%s", tb)
         mode = "a" if paths[MD_NAME].exists() else "x"
         with open(paths[MD_NAME], mode, encoding="utf-8") as f:
             f.write(f"{GENERATED}\n\n# P-RQ1 attempt: failed after the marker\n\n"
