@@ -58,14 +58,14 @@ s rests on about 22 independent 17-month windows, so the normal criticals are re
 
 ## Own size of the D10 rule on the historical windows
 
-In-sample: each window's slope b is scored against the s of the same window set. Centred: |b - mean(b)| / s > crit. Uncentred: |b| / s > crit, the decision rule as applied. q_0.9875 and q_0.975 are the empirical quantiles of the symmetrised centred distribution +-(b - mean(b)) / s (equivalently the 0.975 and 0.95 quantiles of |b - mean(b)| / s), the empirical counterparts of the 0.025 and 0.05 two-sided criticals. Kurtosis is excess (Fisher, bias-corrected). Only rates, quantiles and kurtosis are reported.
+In-sample: each window's slope b is scored against the s of the same window set. Centred: |b - mean(b)| / s > crit. Uncentred: |b| / s > crit, the decision rule as applied. q_0.9875 and q_0.975 are the empirical quantiles of the symmetrised centred distribution +-(b - mean(b)) / s (equivalently the 0.975 and 0.95 quantiles of |b - mean(b)| / s), the empirical counterparts of the 0.025 and 0.05 two-sided criticals. Kurtosis is excess (Fisher, bias-corrected). Two centrings: 'centred (own mean)' uses the mean of the window set in the row (378 or 23 windows); 'centred on the frozen b-bar' uses the frozen mean of the 378 overlapping windows (the `bbar_*` of the Frozen values) for both rows, so the two coincide for the overlapping rows. s is always the sd of the row's own window set. Only rates, quantiles and kurtosis are reported.
 
-| hypothesis | windows | n | excess kurtosis | q_0.9875 | q_0.975 | centred 0.025 normal | centred 0.025 t_21 | centred 0.05 normal | centred 0.05 t_21 | uncentred 0.025 normal | uncentred 0.025 t_21 | uncentred 0.05 normal | uncentred 0.05 t_21 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| H5 | overlapping | 378 | -0.43 | 2.080 | 1.896 | 0.011 | 0.003 | 0.040 | 0.026 | 0.101 | 0.071 | 0.140 | 0.124 |
-| H5 | non-overlapping | 23 | -0.82 | 1.755 | 1.654 | 0.000 | 0.000 | 0.000 | 0.000 | 0.087 | 0.043 | 0.174 | 0.130 |
-| H5b | overlapping | 378 | -0.36 | 2.131 | 1.863 | 0.024 | 0.013 | 0.034 | 0.029 | 0.058 | 0.032 | 0.090 | 0.074 |
-| H5b | non-overlapping | 23 | -0.70 | 1.760 | 1.730 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.130 | 0.043 |
+| hypothesis | windows | n | excess kurtosis | q_0.9875 | q_0.975 | centred (own mean) 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 | centred on the frozen b-bar 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 | uncentred 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| H5 | overlapping | 378 | -0.43 | 2.080 | 1.896 | 0.011 | 0.003 | 0.040 | 0.026 | 0.011 | 0.003 | 0.040 | 0.026 | 0.101 | 0.071 | 0.140 | 0.124 |
+| H5 | non-overlapping | 23 | -0.82 | 1.755 | 1.654 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.087 | 0.043 | 0.174 | 0.130 |
+| H5b | overlapping | 378 | -0.36 | 2.131 | 1.863 | 0.024 | 0.013 | 0.034 | 0.029 | 0.024 | 0.013 | 0.034 | 0.029 | 0.058 | 0.032 | 0.090 | 0.074 |
+| H5b | non-overlapping | 23 | -0.70 | 1.760 | 1.730 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.130 | 0.043 |
 
 ## Start-date robustness
 
@@ -153,7 +153,7 @@ Same 378 overlapping windows and code as the primary. R12: `z_delegation` replac
 
 ## Frozen values
 
-Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal these (tested). s = sd of the 378 overlapping slopes (ddof = 1); bbar = their mean (frozen for the interpretive check; its sign is not interpreted); q = empirical centred quantiles above; crit = max(t21, q) for the same level.
+Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal these (tested). s = sd of the 378 overlapping slopes (ddof = 1); bbar = their mean (frozen for the b = bbar null and the interpretive check; its sign is not interpreted); q = empirical centred quantiles above; crit = max(t21, q) for the same level.
 
 - `t21_0.025` = 2.413845016599001
 - `t21_0.05` = 2.0796138447276795
@@ -164,9 +164,11 @@ Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal 
 - `s_h5_r12` = 0.02211139470714751
 - `q_h5_r12_0.9875` = 1.9961589827719277
 - `q_h5_r12_0.975` = 1.8109235160395372
+- `bbar_h5_r12` = 0.013167677839651046
 - `s_h5_r13` = 0.03195141979632061
 - `q_h5_r13_0.9875` = 1.9840047664550942
 - `q_h5_r13_0.975` = 1.8881504350635059
+- `bbar_h5_r13` = 0.016659044239269352
 - `s_h5b` = 0.02560409470770698
 - `bbar_h5b` = 0.01216949247017634
 - `q_h5b_0.9875` = 2.13084415252217
@@ -174,9 +176,11 @@ Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal 
 - `s_h5b_r12` = 0.02981733257175669
 - `q_h5b_r12_0.9875` = 2.3039239552905793
 - `q_h5b_r12_0.975` = 1.9664328516491718
+- `bbar_h5b_r12` = 0.005386065025872529
 - `s_h5b_r13` = 0.037132757280610024
 - `q_h5b_r13_0.9875` = 2.166482901101018
 - `q_h5b_r13_0.975` = 1.962325225285184
+- `bbar_h5b_r13` = 0.010684812193646077
 - `crit_h5_0.025` = 2.413845016599001
 - `crit_h5_0.05` = 2.0796138447276795
 - `crit_h5b_0.025` = 2.413845016599001

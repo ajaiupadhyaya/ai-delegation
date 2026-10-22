@@ -227,7 +227,8 @@ def mde_t(null_slopes: np.ndarray, alpha: float = ALPHA, power: float = POWER,
     return (t_crit(alpha, df) + t_quantile(power, df)) * float(np.std(null_slopes, ddof=1))
 
 
-def own_size(slopes: np.ndarray, crits: dict[str, float]) -> dict:
+def own_size(slopes: np.ndarray, crits: dict[str, float], center: float | None = None
+             ) -> dict:
     """In-sample size of the D10 rule on the historical slopes themselves, s = sd(slopes).
 
     For each named critical value c: `centred_<name>` = share with |b - mean(b)| / s > c,
@@ -235,7 +236,9 @@ def own_size(slopes: np.ndarray, crits: dict[str, float]) -> dict:
     kurtosis of b (Fisher, bias-corrected) and the empirical quantiles at 0.9875 and 0.975 of
     the symmetrised centred distribution +-(b - mean(b)) / s, i.e. the 0.975 and 0.95 quantiles
     of |b - mean(b)| / s (numpy's default linear interpolation): the empirical analogues of the
-    two-sided criticals at 0.025 and 0.05. Only rates, quantiles and kurtosis are returned."""
+    two-sided criticals at 0.025 and 0.05. With `center` (the frozen 378-window mean),
+    `centred_frozen_<name>` = share with |b - center| / s > c is added. Only rates, quantiles
+    and kurtosis are returned."""
     b = np.asarray(slopes, dtype=float)
     sd = float(np.std(b, ddof=1))
     cen, unc = np.abs(b - b.mean()) / sd, np.abs(b) / sd
@@ -243,6 +246,8 @@ def own_size(slopes: np.ndarray, crits: dict[str, float]) -> dict:
     for name, c in crits.items():
         out[f"centred_{name}"] = float(np.mean(cen > c))
         out[f"uncentred_{name}"] = float(np.mean(unc > c))
+        if center is not None:
+            out[f"centred_frozen_{name}"] = float(np.mean(np.abs(b - center) / sd > c))
     out["excess_kurtosis"] = float(_st.kurtosis(b, fisher=True, bias=False))
     out["q_0.9875"] = float(np.quantile(cen, 0.975))
     out["q_0.975"] = float(np.quantile(cen, 0.95))
@@ -394,9 +399,10 @@ def _task15b(A, b5, b5b, z, c, names, idx_non, returns, factors) -> dict:
     for hyp, b in (("h5", b5), ("h5b", b5b)):
         out[f"mde_t_{hyp}_overlap"] = mde_t(b)
         out[f"mde_t_{hyp}_nonoverlap"] = mde_t(b[idx_non])
-        out[f"size_{hyp}_overlap"] = own_size(b, crits)
-        out[f"size_{hyp}_nonoverlap"] = own_size(b[idx_non], crits)
-        out[f"bbar_{hyp}"] = float(np.mean(b))  # C3: frozen; its sign is not interpreted
+        bbar = float(np.mean(b))  # C3: frozen; its sign is not interpreted
+        out[f"bbar_{hyp}"] = bbar
+        out[f"size_{hyp}_overlap"] = own_size(b, crits, center=bbar)
+        out[f"size_{hyp}_nonoverlap"] = own_size(b[idx_non], crits, center=bbar)
     # C5: leverage and OLS weights over the industries used
     out["leverage_h5"] = dict(zip(names, map(float, leverage(z)), strict=True))
     out["leverage_h5b"] = dict(zip(names, map(float, leverage(z, c)), strict=True))
@@ -418,6 +424,7 @@ def _task15b(A, b5, b5b, z, c, names, idx_non, returns, factors) -> dict:
         out[f"sd_{key}_overlap"] = float(np.std(b, ddof=1))
         out[f"mde_t_{key}_overlap"] = mde_t(b)
         out[f"q_{key}"] = (sz["q_0.9875"], sz["q_0.975"])
+        out[f"bbar_{key}"] = float(np.mean(b))
     out["rank_corr_r12"] = float(np.corrcoef(zr, z)[0, 1])
     # C4: windows from the first full month of daily FF5 (+ UMD) data, and a row from the first
     # month in which all 49 industries have returns
@@ -544,6 +551,7 @@ def frozen_values(res: dict) -> dict[str, float]:
             key = f"{hyp}_{var}"
             f[f"s_{key}"] = res[f"sd_{key}_overlap"]
             f[f"q_{key}_0.9875"], f[f"q_{key}_0.975"] = res[f"q_{key}"]
+            f[f"bbar_{key}"] = res[f"bbar_{key}"]
     for v in ("h5", "h5b", "h5_r12", "h5b_r12", "h5_r13", "h5b_r13"):
         f[f"crit_{v}_0.025"] = max(f["t21_0.025"], f[f"q_{v}_0.9875"])
         f[f"crit_{v}_0.05"] = max(f["t21_0.05"], f[f"q_{v}_0.975"])
@@ -571,8 +579,7 @@ def null_scales(A: np.ndarray, z: np.ndarray, c: np.ndarray, names: list[str]
         sz = own_size(b, {})
         f[f"s_{v}"] = float(np.std(b, ddof=1))
         f[f"q_{v}_0.9875"], f[f"q_{v}_0.975"] = sz["q_0.9875"], sz["q_0.975"]
-        if v in ("h5", "h5b"):
-            f[f"bbar_{v}"] = float(np.mean(b))
+        f[f"bbar_{v}"] = float(np.mean(b))
         f[f"crit_{v}_0.025"] = max(f["t21_0.025"], f[f"q_{v}_0.9875"])
         f[f"crit_{v}_0.05"] = max(f["t21_0.05"], f[f"q_{v}_0.975"])
     return f
@@ -596,7 +603,8 @@ def _block_15b(res: dict) -> list[str]:
         for sch, name, n in (("overlap", "overlapping", res["n_windows_overlap"]),
                              ("nonoverlap", "non-overlapping", res["n_windows_nonoverlap"])):
             o = res[f"size_{hyp}_{sch}"]
-            rate = " | ".join(f"{o[f'{k}_{c}_{lvl}']:.3f}" for k in ("centred", "uncentred")
+            rate = " | ".join(f"{o[f'{k}_{c}_{lvl}']:.3f}"
+                              for k in ("centred", "centred_frozen", "uncentred")
                               for lvl in HOLM_LEVELS for c in ("n", "t"))
             rows_c2.append(f"| {label} | {name} | {n} | {o['excess_kurtosis']:.2f} | "
                            f"{o['q_0.9875']:.3f} | {o['q_0.975']:.3f} | {rate} |")
@@ -661,14 +669,18 @@ def _block_15b(res: dict) -> list[str]:
         "applied. q_0.9875 and q_0.975 are the empirical quantiles of the symmetrised centred "
         "distribution +-(b - mean(b)) / s (equivalently the 0.975 and 0.95 quantiles of "
         "|b - mean(b)| / s), the empirical counterparts of the 0.025 and 0.05 two-sided "
-        "criticals. Kurtosis is excess (Fisher, bias-corrected). Only rates, quantiles and "
-        "kurtosis are reported.",
+        "criticals. Kurtosis is excess (Fisher, bias-corrected). Two centrings: 'centred "
+        "(own mean)' uses the mean of the window set in the row (378 or 23 windows); 'centred "
+        "on the frozen b-bar' uses the frozen mean of the 378 overlapping windows (the "
+        "`bbar_*` of the Frozen values) for both rows, so the two coincide for the "
+        "overlapping rows. s is always the sd of the row's own window set. Only rates, "
+        "quantiles and kurtosis are reported.",
         "",
         "| hypothesis | windows | n | excess kurtosis | q_0.9875 | q_0.975 | "
-        "centred 0.025 normal | centred 0.025 t_21 | centred 0.05 normal | centred 0.05 t_21 | "
-        "uncentred 0.025 normal | uncentred 0.025 t_21 | uncentred 0.05 normal | "
-        "uncentred 0.05 t_21 |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "centred (own mean) 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 | "
+        "centred on the frozen b-bar 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 | "
+        "uncentred 0.025 normal | 0.025 t_21 | 0.05 normal | 0.05 t_21 |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
         *rows_c2,
         "",
         "## Start-date robustness",
@@ -710,7 +722,8 @@ def _block_15b(res: dict) -> list[str]:
         "",
         "Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal "
         "these (tested). s = sd of the 378 overlapping slopes (ddof = 1); bbar = their mean "
-        "(frozen for the interpretive check; its sign is not interpreted); q = empirical "
+        "(frozen for the b = bbar null and the interpretive check; its sign is not "
+        "interpreted); q = empirical "
         "centred quantiles above; crit = max(t21, q) for the same level.",
         "",
         *[f"- `{k}` = {v!r}" for k, v in fz.items()],

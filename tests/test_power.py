@@ -246,3 +246,23 @@ def test_run_power_reports_t21_size_leverage_variants_and_frozen(monkeypatch, tm
     assert frozen["bbar_h5"] == res["bbar_h5"]
     assert frozen["s_h5"] == res["sd_h5_overlap"]
     assert frozen["s_h5b_r13"] == res["sd_h5b_r13_overlap"]
+    for v in ("h5_r12", "h5b_r12", "h5_r13", "h5b_r13"):
+        assert frozen[f"bbar_{v}"] == res[f"bbar_{v}"]
+    o = res["size_h5_nonoverlap"]
+    assert {"centred_frozen_t_0.025", "centred_frozen_n_0.05"} <= set(o)
+    assert "centred on the frozen" in text
+
+
+def test_own_size_centred_on_a_given_mean():
+    rng = np.random.default_rng(4)
+    b = 10 + rng.normal(size=100_000)
+    o = power.own_size(b, {"n": 1.96}, center=11.0)  # one sd off: |N(-1,1)| > 1.96
+    expect = 1 - (_norm_cdf(2.96) - _norm_cdf(-0.96))
+    assert o["centred_frozen_n"] == pytest.approx(expect, abs=0.005)
+    assert o["centred_n"] == pytest.approx(0.05, abs=0.003)
+    assert "centred_frozen_n" not in power.own_size(b, {"n": 1.96})
+
+
+def _norm_cdf(x):
+    from statistics import NormalDist
+    return NormalDist().cdf(x)
