@@ -1500,4 +1500,178 @@ primary result (§0.5).
 
 ### Clarifications (pre-result)
 
+### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 4 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: The occupation cluster is the soc6 code; two soc6 codes sharing an OEWS code are separate rows and clusters with the same wage.
+
+### C-2. Clarification: Variable-level drops (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 6 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Each estimator drops rows missing its own variables only (outcome, then predictors or indicator, then covariates), reported as percent of total task usage without renormalising; H3 with no covariates needs no OEWS code, wage or education.
+
+### C-3. Clarification: Zero variance after PSD clipping (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 5 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: A tested variance ≤ 1e-12 × the larger one-way variance after clipping is replaced by the larger one-way variance.
+
+### C-4. Clarification: R7 bounds in H1/H3 rows (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 4 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: `automation_share_all_lb/_ub` are computed per period with that release's suppression components, then D13-averaged.
+
+### C-5. Clarification: Wage deciles (descriptive) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 13 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Employment-weighted deciles of `a_median` (top-coded at $239,200; suppressed excluded): decile = clip(ceil(10·(cum_emp − tot_emp/2)/total_emp), 1, 10), occupations sorted ascending.
+
+### C-6. Clarification: Education bins (descriptive) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 13 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Bins <12, 12–14, 14–16, 16–18, ≥18 years, left-closed; tasks without an education value reported as "not published".
+
+### C-7. Clarification: Concentration shares (descriptive) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 13 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: The top-x% share is the usage share of the ⌈x%·n⌉ largest tasks.
+
+### C-8. Clarification: RQ2 bootstrap draws (descriptive) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 15 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Spearman ρ by average-tie ranks then Pearson; a draw with a constant vector is excluded and counted; percentile 95% CI; one `default_rng(SEED)` drawn in design order B, A_pooled.
+
+### C-9. Clarification: Task-to-family union (D14) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 3 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Task-to-family mapping (D14): a conversation matched to a task statement is assigned the sorted, de-duplicated union of IWA/GWA/DWA families over ALL Task IDs carrying that statement text (not only the smallest candidate ID), consistent with the occupation allocation (ruling R6). A task whose candidates have no Tasks-to-DWAs link has no family and is dropped from the family-level analysis, with the dropped weight reported.
+
+### C-10. Clarification: Two-way zero-variance fallback (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 5 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: (i) The fallback to the larger one-way cluster variance also applies when the tested block was not clipped: a tested variance ≤ ZERO_VARIANCE_RTOL × the larger one-way variance, with ZERO_VARIANCE_RTOL = 1e-12, is replaced by the larger one-way variance. (ii) If both one-way variances are also zero, the rule gives no SE and the run raises (STOP).
+
+### C-11. Clarification: P13 attenuation factor (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 6 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: The factor reported beside β_w (H1) and γ (H3) is Σ w·r̄² / Σ w·r². r is the Frisch–Waugh–Lovell residual of the regressor: it is residualised by WLS, with the estimation weights, on the IWA fixed effects and on the estimator's other regressors (education for log wage in H1; the covariates for the indicator in H3 with covariates, R31). r̄ is the weighted mean of r within (task, IWA). It is the between-task share of the variation β is identified from, and E[β̂] = β × factor when the outcome is built on the task's allocation-weighted mean regressor.
+
+### C-12. Clarification: H3 own variables (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 6 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: H3 without covariates drops rows only for a missing `validation_pct` or `error_cost`. It requires no OEWS code, wage or education, because PAP §4.1 says H3 "applies the same rule to its own variables".
+
+### C-13. Clarification: no_wage_row drop reason (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 6 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: `wage_status` determines the drop reason for `log_wage`: `no_oews_code` gives `no_oews_code`; `suppressed` gives `wage_suppressed`; `no_wage_row` (an OEWS code that is not in the May 2024 national wage table) gives `no_wage_row`; any other null gives `missing_log_wage`. Each drop is reported in % of total r6 task usage.
+
+### C-14. Clarification: γ-only non-PSD block under R31 (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 6 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: In H3 with covariates, the PAP §4 non-PSD rule is applied to γ's block alone ("γ for H3"), so the covariates never change γ's inference. The covariate coefficients are reported from a second call on the same design whose tested block is the covariates; point estimates are identical. That call's non-PSD diagnostics are in `diagnostics["covariates_psd"]` and in `notes`.
+
+### C-15. Clarification: H2 wild-bootstrap granularity (disclosure) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 7 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Disclosure, no rule change: with G = 4 releases and Webb six-point weights, full enumeration has 6⁴ = 1,296 draws, and the six constant Webb vectors always reproduce |t|, so p_wild ≥ 6/1296 ≈ 0.0046. Near-ties from vectors that tilt the trend slightly give p_wild of about 0.009–0.042 even for strong synthetic trends, so the 0.0125 co-condition can fail an unambiguous trend. This is a property of the PAP's design (D22); the rule is unchanged and the granularity is reported with the H2 result.
+
+### C-16. Clarification: H4 global share and m_global offset (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 8 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: `global_automation` is AEI's published GLOBAL overall `automation_pct`, as the equal-weighted two-month mean. `m_global` (the mix formula applied to the global shares) ≠ `global_automation` in general, so `mix_part` carries the common offset (m_global − global_automation). The shift-share output prints that offset alongside.
+
+### C-17. Clarification: H4 carried variables (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 8 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: `usage_pct`, `validation_pct` and `ai_autonomy_mean` are averaged over the published months, with no completeness rule. R28's `usage_pct` weight may therefore come from a single month.
+
+### C-18. Clarification: H4 exclusion reason (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 8 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: A geography failing several tests is listed under the first one, in the order missing_month, missing_income (only when `require_income`), missing_mix.
+
+### C-19. Clarification: H4 income and AUI (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 8 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Income is null when GDP or the working-age population is missing or ≤ 0. A non-positive AUI raises `ValueError`, and there is no new exclusion reason for it.
+
+### C-20. Clarification: H4 mix (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 8 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Negative `pct` rows are ignored. `missing_mix` applies when no node the geography publishes has a published ā.
+
+### C-21. Clarification: H1 mixed-sign wording (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: H1 is Holm-rejected, but one coefficient has the wrong sign (> 0). Status `rejected_mixed_sign`, rejected=True, not supported. Text: "H1: the null is rejected, but {name} has the opposite sign, which contradicts the hypothesis, so H1 is not supported ({coef_lines})." If more than one coefficient is named: "{a} and {b} have the opposite sign". With both coefficients of the wrong sign the status is `contradicts`.
+
+### C-22. Clarification: Zero estimate (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: H1 or H3 is Holm-rejected, or H2 meets both p conditions, but a tested estimate is exactly 0. Status `rejected_zero_estimate`, rejected=True, not supported. Text: "{H}: the null is rejected, but the estimate of {name} is exactly 0, so the hypothesis is not supported ({coef_lines})."
+
+### C-23. Clarification: H2 failed conditions (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Each failed p condition is appended to the not-rejected template: "H2 is not rejected (H0: β = 0). {coef_lines}. Not met: {fail1}; {fail2}." A non-finite p is worded "task-clustered p is not finite" or "release-level wild bootstrap p is not finite".
+
+### C-24. Clarification: Exact levels (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Holm and H2 levels are compared exactly on the printed decimals of α and p (`Fraction(repr(x))`), so p = 0.0125 meets the level 0.0375/3.
+
+### C-25. Clarification: NaN p (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: A NaN p is never rejected and sorts last in Holm.
+
+### C-26. Clarification: Non-finite tested estimate, SE or p (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Status `not_supported_nonfinite`, rejected=False, not supported, for any of H1–H4. Text: "{H} is not supported: {name} has a non-finite {fields} ({coef_lines})." Several coefficients are joined with "; ". It takes precedence over the Holm, H2 and sign rules.
+
+### C-27. Clarification: H1 NaN p_family (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: p_H1 = NaN if either tested p is NaN (never the max of the remaining one). Holm then sorts it last and never rejects it.
+
+### C-28. Clarification: H4 decision text (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 9 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: The H4 decision text lists the two tested coefficients only (b₁ log AUI, b₂ log income), not the task-mix control.
+
+### C-29. Clarification: Robustness rows R6, R32, R35 (organisational) (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2 Task 10 (plans committed at a7fb9bd)
+- Results seen: no
+- Rule: Robustness rows R6, R32 and R35 move from "plan 3" to Plan 4, with no specification change.
+
 ### Deviations after the freeze
