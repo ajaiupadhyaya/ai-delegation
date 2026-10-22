@@ -35,6 +35,8 @@ Rules (PAP §4.1 H1 table, D4, D13, D14)
   percent of `total_weight` (the D13 weight of every global `onet_task` node of the release
   and source, `unmatched:*` included): `unmatched_task` (`node_id` starts with
   `unmatched:`), `no_occupation`, `no_family`, `zero_weight` (weight 0; no usage).
+  `zero_weight` is 0% of weight by definition, so `structural_drop_nodes` also counts the
+  dropped nodes per reason, in the same key order.
 - **Variable-level drops** (a missing outcome, predictor or OEWS code) are not applied here.
   Each estimator applies them to its own variables.
 """
@@ -71,6 +73,7 @@ class TaskRows:
     rows: pl.DataFrame
     total_weight: float
     structural_drops: dict[str, float] = field(default_factory=dict)
+    structural_drop_nodes: dict[str, int] = field(default_factory=dict)
     release: str = "r6"
     source: str = "claude_ai"
     family_level: str = "iwa"
@@ -144,10 +147,12 @@ def build_task_rows(panel: pl.DataFrame, index: TaskIndex, families: pl.DataFram
         family=pl.Series(fam_lists, dtype=pl.List(pl.String)),
         _reason=pl.Series(reasons, dtype=pl.String))
 
-    dropped = tasks.group_by("_reason").agg(pl.col("weight").sum())
+    dropped = tasks.group_by("_reason").agg(pl.col("weight").sum(), n=pl.len())
     by = dict(zip(dropped["_reason"], dropped["weight"], strict=True))
+    nodes = dict(zip(dropped["_reason"], dropped["n"], strict=True))
     drops = {r: (float(by.get(r, 0.0)) / total * 100 if total > 0 else 0.0)
              for r in DROP_REASONS}
+    drop_nodes = {r: int(nodes.get(r, 0)) for r in DROP_REASONS}
 
     kept = tasks.filter(pl.col("_reason").is_null()).drop("_reason", "node_name")
     kept = kept.with_columns(n_occ=pl.col("soc6").list.len().cast(pl.Int64),
@@ -172,4 +177,4 @@ def build_task_rows(panel: pl.DataFrame, index: TaskIndex, families: pl.DataFram
            .with_columns(task_code=(pl.col("task_node").rank("dense") - 1).cast(pl.Int64))
            .select(ROW_COLUMNS)
            .sort("task_node", "soc6", "family"))
-    return TaskRows(out, total, drops, release, source, family_level)
+    return TaskRows(out, total, drops, drop_nodes, release, source, family_level)

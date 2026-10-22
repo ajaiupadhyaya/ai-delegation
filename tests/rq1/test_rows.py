@@ -77,6 +77,8 @@ def test_structural_drop_shares(index):
     assert d["unmatched_task"] == pytest.approx(20.0)
     assert d["no_family"] == pytest.approx(10.0)
     assert d["no_occupation"] == 0.0 and d["zero_weight"] == 0.0
+    assert out.structural_drop_nodes == {"unmatched_task": 1, "no_occupation": 0,
+                                         "no_family": 1, "zero_weight": 1}
     assert set(out.rows["task_node"]) == {"3", "1"}
     assert (out.release, out.source, out.family_level) == ("r6", "claude_ai", "iwa")
 
@@ -94,6 +96,35 @@ def test_wage_status_no_oews_code_kept_as_row(index):
     assert out.rows.height == 1
     assert r["soc6"] == X and r["oews_code"] is None
     assert r["wage_status"] == "no_oews_code" and r["log_wage"] is None
+
+
+def test_zero_and_null_pct_nodes_counted(index):
+    panel = _panel(_both("3", "Write code", pct=6.0, **VALS)
+                   + _both("1", "Plan budgets", pct=0.0, **VALS)
+                   + _both("5", "Lone", **VALS))  # pct never published
+    out = _build(panel, index)
+    assert out.structural_drops["zero_weight"] == 0.0
+    assert out.structural_drop_nodes["zero_weight"] == 2
+    assert set(out.rows["task_node"]) == {"3"}
+
+
+def test_wage_status_no_wage_row(index):
+    out = R.build_task_rows(_panel(_both("5", "Lone", pct=1.0, **VALS)), index, FAMILIES, WAGES,
+                            OEWS | {X}, None)
+    r = out.rows.row(0, named=True)
+    assert r["oews_code"] == X
+    assert r["wage_status"] == "no_wage_row" and r["log_wage"] is None
+
+
+def test_node_id_half_of_union_contributes(index):
+    # text "Teach" -> ID 4 (occupation T, no family); node_id 5 -> occupation X, family f1.
+    # Without the node_id half the task would be dropped as no_family.
+    out = _build(_panel(_both("5", "Teach", pct=2.0, **VALS)), index)
+    r = out.rows
+    assert sorted(set(r["soc6"])) == [T, X] and r["family"].unique().to_list() == ["f1"]
+    assert r["n_occ"].unique().to_list() == [2] and r["n_family"].unique().to_list() == [1]
+    assert r["weight"].to_list() == [pytest.approx(1.0)] * 2
+    assert sum(out.structural_drop_nodes.values()) == 0
 
 
 def test_topcoded_wage_log(index):
@@ -180,11 +211,25 @@ def test_real_rows_coverage():
     except FileNotFoundError:
         pytest.skip("OEWS 2024 not downloaded")
     struct = pl.read_csv(RAW / by_key("aei_soc_structure").dest)
-    out = R.build_task_rows(pl.read_parquet(_PANEL), default_index(), task_families("iwa"),
+    panel = pl.read_parquet(_PANEL)
+    out = R.build_task_rows(panel, default_index(), task_families("iwa"),
                             wages, set(wages["soc6"]), struct)
     r = out.rows
-    print(f"\ntotal_weight: {out.total_weight:.4f}")
+    # weight (pct) only: is a zero-weight node published as 0 or never published?
+    nodes = panel.filter((pl.col("release") == "r6") & (pl.col("source") == "claude_ai")
+                         & (pl.col("geo_level") == "global")
+                         & (pl.col("taxonomy") == "onet_task")).select("node_id").unique()
+    pct = (panel.filter((pl.col("release") == "r6") & (pl.col("source") == "claude_ai")
+                        & (pl.col("geo_level") == "global") & (pl.col("taxonomy") == "onet_task")
+                        & (pl.col("metric") == "pct") & pl.col("value").is_not_null())
+           .group_by("node_id").agg(s=pl.col("value").sum()))
+    pct = nodes.join(pct, on="node_id", how="left")
+    print(f"\ntask nodes: {nodes.height}; two-month pct == 0: "
+          f"{pct.filter(pl.col('s') == 0).height}; pct null in both months: "
+          f"{pct.filter(pl.col('s').is_null()).height}")
+    print(f"total_weight: {out.total_weight:.4f}")
     print(f"structural_drops (% of total_weight): {out.structural_drops}")
+    print(f"structural_drop_nodes: {out.structural_drop_nodes}")
     print(f"rows: {r.height}; tasks: {r['task_node'].n_unique()}; soc6: {r['soc6'].n_unique()}; "
           f"families: {r['family'].n_unique()}")
     assert sum(out.structural_drops.values()) < 15.0
