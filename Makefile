@@ -27,3 +27,17 @@ data/derived/exposure_ff49.parquet: src/aideleg/exposure.py src/aideleg/occupati
 		$(wildcard src/aideleg/bls/*.py) $(wildcard src/aideleg/crosswalk/*.py) \
 		data/raw/MANIFEST.json data/derived/aei_panel.parquet
 	uv run python -m aideleg.exposure
+
+.PHONY: benchmarks
+benchmarks: data/derived/benchmark_ff49.parquet
+
+data/derived/benchmark_ff49.parquet: src/aideleg/benchmarks.py src/aideleg/exposure.py \
+		$(wildcard src/aideleg/bls/*.py) $(wildcard src/aideleg/crosswalk/*.py) \
+		data/raw/MANIFEST.json data/derived/exposure_ff49.parquet
+	uv run python -m aideleg.benchmarks
+
+# coverage tables only (no H1-H4 relationships, no market data); always regenerated
+.PHONY: audit
+audit: data/derived/aei_panel.parquet data/derived/exposure_ff49.parquet \
+		data/derived/benchmark_ff49.parquet
+	uv run python -m aideleg.audit
