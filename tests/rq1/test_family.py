@@ -288,3 +288,19 @@ def test_h2_nan_p():
     assert (w.status, w.rejected) == ("not_rejected", False)
     assert w.text.endswith("Not met: release-level wild bootstrap p is not finite.")
     assert "nan > 0.0125" not in w.text
+
+
+@pytest.mark.parametrize("member", ["H1", "H3", "H4"])
+def test_nan_p_member_leaves_the_others_decisions_unchanged(member):
+    base = _all()
+    ref = family.decide(base)
+    nan = dict(base)
+    r = base[member]
+    nan[member] = HypothesisResult(r.hypothesis, r.outcome, r.coefs, p_family=math.nan,
+                                   diagnostics=r.diagnostics)
+    out = family.decide(nan)
+    assert out[member].status == "not_rejected" and not out[member].rejected
+    for h in ("H1", "H2", "H3", "H4"):
+        if h != member:
+            assert (out[h].status, out[h].rejected) == (ref[h].status, ref[h].rejected), h
+    assert out["H2"] == ref["H2"]  # H2 is outside the Holm family entirely

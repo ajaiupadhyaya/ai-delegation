@@ -1,15 +1,10 @@
 """RQ1 geography: shift-share split and map specs. Synthetic inputs only."""
 
-import sys
-from pathlib import Path
-
 import polars as pl
+import synth
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "rq1"))
-import synth  # noqa: E402
-
-from aideleg.describe import geography  # noqa: E402
-from aideleg.figures.save import _NAME  # noqa: E402
+from aideleg.describe import geography
+from aideleg.figures.save import _NAME
 
 ISO = pl.DataFrame({"iso_alpha_2": ["AR", "AU"], "iso_alpha_3": ["ARG", "AUS"],
                     "country_name": ["Argentina", "Australia"]})

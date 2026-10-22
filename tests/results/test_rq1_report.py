@@ -3,19 +3,15 @@ synthetic inputs; nothing reads AEI outcomes or writes under docs/."""
 
 import csv
 import json
-import sys
-from pathlib import Path
 
 import polars as pl
 import pytest
+import synth
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "rq1"))
-import synth  # noqa: E402
-
-from aideleg.config import ROOT  # noqa: E402
-from aideleg.results import common, rq1  # noqa: E402
-from aideleg.rq1 import confirm  # noqa: E402
-from aideleg.rq1.family import SPLIT_STATEMENT  # noqa: E402
+from aideleg.config import ROOT
+from aideleg.results import common, rq1
+from aideleg.rq1 import confirm
+from aideleg.rq1.family import SPLIT_STATEMENT
 
 FIGS = ("fig_rq1_coefficients", "fig_rq1_h2_release_effects")
 

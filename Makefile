@@ -67,6 +67,8 @@ freeze:
 
 # P-RQ1 (PAP §0.5). The dry run scrambles every outcome before any estimator sees it and writes
 # outside docs/results; it refuses if its directory already holds a run.
+# It refuses while ${TMPDIR:-/tmp}/aideleg-rq1-dry exists, so delete that directory before a rerun
+# (rm -rf "${TMPDIR:-/tmp}/aideleg-rq1-dry").
 .PHONY: rq1-dry-run rq1-confirm
 rq1-dry-run:
 	uv run python -m aideleg.rq1.confirm --dry-run $${TMPDIR:-/tmp}/aideleg-rq1-dry
