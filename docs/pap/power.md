@@ -43,14 +43,159 @@ Each historical window run through the confirmatory RI test as specified: exposu
 | H5b (Freedman-Lane, permute residuals) | overlapping | 378 | 0.061 | 0.095 |
 | H5b (Freedman-Lane, permute residuals) | non-overlapping | 23 | 0.087 | 0.087 |
 
-Reference only (decided at Task 15): the spec's plausibility threshold is 5 pp per 1 SD for the H5 MDE.
+Reference only (decided at Task 15): the plan file's plausibility threshold is 5 pp per 1 SD for the H5 MDE.
+
+## Small-sample criticals (t_21)
+
+s rests on about 22 independent 17-month windows, so the normal criticals are replaced by t with nu = 21 (fixed): t_21,0.9875 = 2.4138 (Holm step 0.025) and t_21,0.975 = 2.0796 (step 0.05), against 2.2414 and 1.9600 for the normal. MDE_t = (t_21,0.9875 + t_21,0.80) x s = 3.2729 x s. Critical values for |b| in pp.
+
+| hypothesis | windows | s | normal crit 0.025 | t_21 crit 0.025 | normal crit 0.05 | t_21 crit 0.05 | MDE normal | MDE t_21 |
+|---|---|---|---|---|---|---|---|---|
+| H5 | overlapping | 2.271 | 5.090 | 5.482 | 4.451 | 4.723 | 7.00 | 7.43 |
+| H5 | non-overlapping | 2.626 | 5.886 | 6.339 | 5.147 | 5.461 | 8.10 | 8.59 |
+| H5b | overlapping | 2.560 | 5.739 | 6.180 | 5.018 | 5.325 | 7.89 | 8.38 |
+| H5b | non-overlapping | 2.834 | 6.351 | 6.840 | 5.554 | 5.893 | 8.74 | 9.27 |
+
+## Own size of the D10 rule on the historical windows
+
+In-sample: each window's slope b is scored against the s of the same window set. Centred: |b - mean(b)| / s > crit. Uncentred: |b| / s > crit, the decision rule as applied. q_0.9875 and q_0.975 are the empirical quantiles of the symmetrised centred distribution +-(b - mean(b)) / s (equivalently the 0.975 and 0.95 quantiles of |b - mean(b)| / s), the empirical counterparts of the 0.025 and 0.05 two-sided criticals. Kurtosis is excess (Fisher, bias-corrected). Only rates, quantiles and kurtosis are reported.
+
+| hypothesis | windows | n | excess kurtosis | q_0.9875 | q_0.975 | centred 0.025 normal | centred 0.025 t_21 | centred 0.05 normal | centred 0.05 t_21 | uncentred 0.025 normal | uncentred 0.025 t_21 | uncentred 0.05 normal | uncentred 0.05 t_21 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| H5 | overlapping | 378 | -0.43 | 2.080 | 1.896 | 0.011 | 0.003 | 0.040 | 0.026 | 0.101 | 0.071 | 0.140 | 0.124 |
+| H5 | non-overlapping | 23 | -0.82 | 1.755 | 1.654 | 0.000 | 0.000 | 0.000 | 0.000 | 0.087 | 0.043 | 0.174 | 0.130 |
+| H5b | overlapping | 378 | -0.36 | 2.131 | 1.863 | 0.024 | 0.013 | 0.034 | 0.029 | 0.058 | 0.032 | 0.090 | 0.074 |
+| H5b | non-overlapping | 23 | -0.70 | 1.760 | 1.730 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.130 | 0.043 |
+
+## Start-date robustness
+
+Same procedure with windows stepped monthly from the first full month of daily FF5 data (the momentum file starts earlier, so FF5 binds), and from the first month in which every industry has daily returns. An industry with a missing return in a window is dropped from that window's cross-section (z not re-standardised).
+  - from 1963-07-01: 696 overlapping windows, 113 industry-window drops in 89 windows (industries: Hlth, Softw)
+  - from 1969-07-01: 624 overlapping windows, 17 industry-window drops in 17 windows (industries: Softw)
+
+| first window | hypothesis | windows | n | s | MDE normal | MDE t_21 |
+|---|---|---|---|---|---|---|
+| 1963-07-01 | H5 | overlapping | 696 | 2.72 | 8.38 | 8.90 |
+| 1963-07-01 | H5 | non-overl. | 41 | 2.86 | 8.81 | 9.35 |
+| 1963-07-01 | H5b | overlapping | 696 | 3.53 | 10.89 | 11.56 |
+| 1963-07-01 | H5b | non-overl. | 41 | 3.67 | 11.33 | 12.02 |
+| 1969-07-01 | H5 | overlapping | 624 | 2.51 | 7.74 | 8.22 |
+| 1969-07-01 | H5 | non-overl. | 37 | 2.39 | 7.38 | 7.83 |
+| 1969-07-01 | H5b | overlapping | 624 | 3.00 | 9.24 | 9.80 |
+| 1969-07-01 | H5b | non-overl. | 37 | 2.67 | 8.22 | 8.73 |
+
+## Leverage and OLS weights
+
+h_j = diagonal of the hat matrix of [1, z_delegation] (H5) and [1, z_delegation, z_aioe] (H5b); weight w_j is the industry's coefficient in b = sum_j w_j alpha_j. Softw: leverage 0.479 (H5), 0.518 (H5b); OLS weight +0.0967 (H5), +0.1225 (H5b), i.e. 14.2% and 15.1% of the sum of |weights|. Mean leverage is 2/n (H5) and 3/n (H5b).
+
+| industry | h_j H5 | h_j H5b | w_j H5 | w_j H5b |
+|---|---|---|---|---|
+| Softw | 0.479 | 0.518 | +0.0967 | +0.1225 |
+| Books | 0.100 | 0.103 | +0.0403 | +0.0474 |
+| Hardw | 0.084 | 0.084 | +0.0361 | +0.0349 |
+| Aero | 0.076 | 0.077 | +0.0338 | +0.0318 |
+| Guns | 0.074 | 0.074 | +0.0330 | +0.0317 |
+| Telcm | 0.052 | 0.060 | +0.0253 | +0.0133 |
+| Chips | 0.045 | 0.045 | +0.0226 | +0.0229 |
+| Meals | 0.035 | 0.045 | -0.0170 | -0.0039 |
+| Rtail | 0.034 | 0.035 | -0.0165 | -0.0217 |
+| LabEq | 0.034 | 0.035 | +0.0165 | +0.0112 |
+| Cnstr | 0.033 | 0.039 | -0.0162 | -0.0069 |
+| Coal | 0.033 | 0.049 | -0.0162 | +0.0000 |
+| Smoke | 0.033 | 0.033 | -0.0157 | -0.0151 |
+| Other | 0.032 | 0.042 | -0.0157 | -0.0028 |
+| Food | 0.031 | 0.047 | -0.0144 | +0.0020 |
+| Trans | 0.030 | 0.034 | -0.0138 | -0.0057 |
+| Beer | 0.030 | 0.033 | -0.0138 | -0.0063 |
+| Soda | 0.029 | 0.033 | -0.0134 | -0.0052 |
+| Gold | 0.029 | 0.039 | -0.0132 | -0.0005 |
+| Boxes | 0.029 | 0.039 | -0.0130 | +0.0000 |
+| Paper | 0.028 | 0.036 | -0.0126 | -0.0013 |
+| Hlth | 0.028 | 0.055 | -0.0124 | -0.0336 |
+| BusSv | 0.028 | 0.029 | +0.0122 | +0.0075 |
+| Rubbr | 0.027 | 0.035 | -0.0116 | +0.0002 |
+| Steel | 0.027 | 0.037 | -0.0114 | +0.0014 |
+| RlEst | 0.027 | 0.100 | -0.0114 | -0.0464 |
+| Oil | 0.025 | 0.025 | -0.0096 | -0.0094 |
+| Whlsl | 0.025 | 0.037 | -0.0096 | -0.0236 |
+| FabPr | 0.025 | 0.034 | -0.0096 | +0.0025 |
+| Ships | 0.024 | 0.032 | -0.0090 | +0.0020 |
+| Autos | 0.024 | 0.033 | -0.0090 | +0.0033 |
+| BldMt | 0.024 | 0.037 | -0.0087 | +0.0060 |
+| Mines | 0.024 | 0.024 | -0.0082 | -0.0075 |
+| Fun | 0.023 | 0.029 | +0.0079 | +0.0180 |
+| Clths | 0.023 | 0.026 | -0.0076 | -0.0005 |
+| Hshld | 0.023 | 0.026 | -0.0076 | -0.0003 |
+| Drugs | 0.022 | 0.024 | +0.0061 | +0.0009 |
+| Agric | 0.022 | 0.039 | -0.0061 | +0.0106 |
+| Chems | 0.022 | 0.022 | -0.0048 | -0.0068 |
+| MedEq | 0.021 | 0.023 | +0.0041 | -0.0014 |
+| ElcEq | 0.021 | 0.021 | -0.0038 | -0.0038 |
+| PerSv | 0.021 | 0.052 | -0.0032 | -0.0260 |
+| Util | 0.021 | 0.030 | -0.0030 | -0.0152 |
+| Toys | 0.021 | 0.022 | -0.0025 | +0.0018 |
+| Insur | 0.021 | 0.219 | +0.0024 | -0.0552 |
+| Fin | 0.021 | 0.210 | +0.0023 | -0.0540 |
+| Banks | 0.021 | 0.197 | +0.0016 | -0.0528 |
+| Mach | 0.020 | 0.025 | -0.0003 | +0.0086 |
+| Txtls | 0.020 | 0.058 | +0.0000 | +0.0252 |
+
+## Null scales for R12 and R13
+
+Same 378 overlapping windows and code as the primary. R12: `z_delegation` replaced by its standardised average ranks (Pearson with `z_delegation` 0.794); `z_aioe` unchanged in H5b. R13: Softw dropped, 48 industries, z not re-standardised. Criticals for |b| in pp; 'max' columns use max(t_21 critical, empirical centred quantile) x s.
+
+| hypothesis | variant | s | q_0.9875 | q_0.975 | t_21 crit 0.025 | t_21 crit 0.05 | max crit 0.025 | max crit 0.05 | MDE t_21 |
+|---|---|---|---|---|---|---|---|---|---|
+| H5 | R12 standardised ranks | 2.211 | 1.996 | 1.811 | 5.337 | 4.598 | 5.337 | 4.598 | 7.24 |
+| H5 | R13 drop Softw | 3.195 | 1.984 | 1.888 | 7.713 | 6.645 | 7.713 | 6.645 | 10.46 |
+| H5b | R12 standardised ranks | 2.982 | 2.304 | 1.966 | 7.197 | 6.201 | 7.197 | 6.201 | 9.76 |
+| H5b | R13 drop Softw | 3.713 | 2.166 | 1.962 | 8.963 | 7.722 | 8.963 | 7.722 | 12.15 |
+
+## Frozen values
+
+Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal these (tested). s = sd of the 378 overlapping slopes (ddof = 1); bbar = their mean (frozen for the interpretive check; its sign is not interpreted); q = empirical centred quantiles above; crit = max(t21, q) for the same level.
+
+- `t21_0.025` = 2.413845016599001
+- `t21_0.05` = 2.0796138447276795
+- `s_h5` = 0.022709785806829905
+- `bbar_h5` = 0.01650391358632771
+- `q_h5_0.9875` = 2.08027722179776
+- `q_h5_0.975` = 1.896096850699846
+- `s_h5_r12` = 0.02211139470714751
+- `q_h5_r12_0.9875` = 1.9961589827719277
+- `q_h5_r12_0.975` = 1.8109235160395372
+- `s_h5_r13` = 0.03195141979632061
+- `q_h5_r13_0.9875` = 1.9840047664550942
+- `q_h5_r13_0.975` = 1.8881504350635059
+- `s_h5b` = 0.02560409470770698
+- `bbar_h5b` = 0.01216949247017634
+- `q_h5b_0.9875` = 2.13084415252217
+- `q_h5b_0.975` = 1.862988779992977
+- `s_h5b_r12` = 0.02981733257175669
+- `q_h5b_r12_0.9875` = 2.3039239552905793
+- `q_h5b_r12_0.975` = 1.9664328516491718
+- `s_h5b_r13` = 0.037132757280610024
+- `q_h5b_r13_0.9875` = 2.166482901101018
+- `q_h5b_r13_0.975` = 1.962325225285184
+- `crit_h5_0.025` = 2.413845016599001
+- `crit_h5_0.05` = 2.0796138447276795
+- `crit_h5b_0.025` = 2.413845016599001
+- `crit_h5b_0.05` = 2.0796138447276795
+- `crit_h5_r12_0.025` = 2.413845016599001
+- `crit_h5_r12_0.05` = 2.0796138447276795
+- `crit_h5b_r12_0.025` = 2.413845016599001
+- `crit_h5b_r12_0.05` = 2.0796138447276795
+- `crit_h5_r13_0.025` = 2.413845016599001
+- `crit_h5_r13_0.05` = 2.0796138447276795
+- `crit_h5b_r13_0.025` = 2.413845016599001
+- `crit_h5b_r13_0.05` = 2.0796138447276795
 <!-- END GENERATED -->
 
 ## Interpretation
 
 Written by hand from the generated numbers above (2026-10-21); rerunning the module keeps this section.
 
-- **What is measured.** The exposure vectors are this project's Design B values, held fixed; the alphas come from 1990-2022 windows, which can have no causal relation to exposure measured in 2025. The spread of the slope across windows is the noise a 17-month confirmatory window has to beat. The sd is taken around the across-window mean slope (ddof = 1), not around zero; that mean, like the level or sign of any historical slope, is not a finding and is not reported.
+- **What is measured.** The exposure vectors are this project's Design B values, held fixed; the alphas come from 1990-2022 windows, which can have no causal relation to exposure measured in 2025. The spread of the slope across windows is the noise a 17-month confirmatory window has to beat. The sd is taken around the across-window mean slope (ddof = 1), not around zero; that mean, like the level or sign of any historical slope, is not a finding. (Task 15b: the referee ruled that the mean, b-bar, is frozen for the interpretive check; it appears only in the Frozen values list and its sign is not interpreted.)
 - **H5.** MDE 7.00 pp (overlapping windows, n = 378) or 8.10 pp (non-overlapping, n = 23) of annualised alpha per 1 SD of delegation exposure, at alpha = 0.025 and 80% power. The non-overlapping sd depends on the start month (1.78 to 2.82 pp across the 17 offsets, MDE 5.5 to 8.7 pp); the overlapping figure averages over that and is the steadier estimate, while the non-overlapping one uses independent windows.
 - **H5b.** Adding `z_aioe` (Pearson 0.671, Spearman 0.763 with `z_delegation`, VIF 1.82) raises the delegation slope's sd by about 13% (overlapping) and 8% (non-overlapping): MDE 7.89 pp and 8.74 pp. H5b is the less powered of the two.
 - **Against the spec's rule.** Every H5 MDE here exceeds the 5 pp per 1 SD plausibility threshold of §5.4. Whether RQ3 is therefore reported as "what the market evidence can and cannot yet say" is Ajai's call at Task 15; this document does not make it.

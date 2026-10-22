@@ -25,6 +25,7 @@ dependencies = [
     { name = "polars" },
     { name = "pyarrow" },
     { name = "requests" },
+    { name = "scipy" },
     { name = "statsmodels" },
     { name = "xlrd" },
 ]
@@ -44,6 +45,7 @@ requires-dist = [
     { name = "polars", specifier = ">=2.0.0" },
     { name = "pyarrow", specifier = ">=26.0.0" },
     { name = "requests", specifier = ">=2.34.2" },
+    { name = "scipy", specifier = ">=1.18.1" },
     { name = "statsmodels", specifier = ">=0.15.0" },
     { name = "xlrd", specifier = ">=2.0.2" },
 ]

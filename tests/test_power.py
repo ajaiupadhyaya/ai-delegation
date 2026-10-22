@@ -148,3 +148,101 @@ def test_ri_permuting_exposure_alone_is_oversized_with_a_collinear_control():
     alphas = rng.normal(0.0, 0.05, size=(1000, 49))
     p = power.ri_pvalues(alphas, z, c, n_perm=999, rng=np.random.default_rng(12))
     assert np.mean(p <= 0.05) > 0.065
+
+
+# --- Task 15b: small-sample criticals, own-size diagnostics, leverage, variants ---------------
+
+def test_t21_criticals_and_mde():
+    assert power.T_DF == 21
+    assert power.t_crit(0.025) == pytest.approx(2.414, abs=1e-3)
+    assert power.t_crit(0.05) == pytest.approx(2.080, abs=1e-3)
+    rng = np.random.default_rng(3)
+    x = rng.normal(size=5000)
+    x = (x - x.mean()) / x.std(ddof=1)
+    k = power.t_crit(0.025) + power.t_quantile(0.80)
+    assert power.t_quantile(0.80) == pytest.approx(0.859, abs=1e-3)
+    assert power.mde_t(3 * x) == pytest.approx(3 * k)
+
+
+def test_own_size_rates_centred_and_uncentred():
+    # slopes = 10 + standard normal; centred rates are about nominal, uncentred are about 1
+    rng = np.random.default_rng(4)
+    b = 10 + rng.normal(size=200_000)
+    o = power.own_size(b, {"n": 1.96})
+    assert o["centred_n"] == pytest.approx(0.05, abs=0.003)
+    assert o["uncentred_n"] > 0.99
+    assert o["excess_kurtosis"] == pytest.approx(0.0, abs=0.05)
+    assert o["q_0.9875"] == pytest.approx(2.2414, abs=0.03)
+    assert o["q_0.975"] == pytest.approx(1.96, abs=0.02)
+    # the 0.9875 symmetrised quantile is the 0.975 quantile of |b - mean| / sd
+    s = np.std(b, ddof=1)
+    assert o["q_0.9875"] == pytest.approx(np.quantile(np.abs(b - b.mean()) / s, 0.975))
+
+
+def test_leverage_and_ols_weights():
+    rng = np.random.default_rng(6)
+    z = rng.normal(size=49)
+    z = (z - z.mean()) / z.std()
+    c = 0.6 * z + rng.normal(size=49)
+    h = power.leverage(z)
+    assert h == pytest.approx(1 / 49 + z**2 / 49)  # population-SD z: sum z^2 = 49
+    hb = power.leverage(z, c)
+    X = np.column_stack([np.ones(49), z, c])
+    assert hb == pytest.approx(np.diag(X @ np.linalg.inv(X.T @ X) @ X.T))
+    assert hb.sum() == pytest.approx(3.0)
+    w = power.ols_weights(z)
+    a = rng.normal(size=49)
+    assert w @ a == pytest.approx(np.polyfit(z, a, 1)[0])
+    wb = power.ols_weights(z, c)
+    assert wb @ a == pytest.approx(np.linalg.lstsq(X, a, rcond=None)[0][1])
+
+
+def test_rank_z_is_population_z_of_average_ranks():
+    r = power.rank_z(np.array([3.0, 1.0, 1.0, 10.0]))
+    ranks = np.array([3.0, 1.5, 1.5, 4.0])
+    assert r == pytest.approx((ranks - ranks.mean()) / ranks.std())
+
+
+def test_windows_from_1963():
+    w = power.historical_windows(date(1963, 7, 1))
+    assert w[0] == (date(1963, 7, 1), date(1964, 11, 30))
+    assert w[-1][1] <= date(2022, 11, 29)
+
+
+def test_run_power_reports_t21_size_leverage_variants_and_frozen(monkeypatch, tmp_path):
+    returns, factors = _synthetic(date(1963, 7, 1), date(2022, 11, 29))
+    rng = np.random.default_rng(9)
+    z = rng.normal(size=49)
+    z[NAMES.index("I34")] = 5.0
+    z = (z - z.mean()) / z.std()
+    names = list(NAMES)
+    names[33] = "Softw"
+    returns = returns.rename({"I34": "Softw"})
+    expo = pl.DataFrame({"ff49": list(range(1, 50)), "ff49_short": names,
+                         "z_delegation": z, "z_aioe": 0.7 * z + rng.normal(size=49)})
+    monkeypatch.setattr(power, "load_industry_returns",
+                        lambda f, w, end: returns.filter(pl.col("date") <= end))
+    monkeypatch.setattr(power, "load_factors",
+                        lambda f, end: factors.filter(pl.col("date") <= end))
+    monkeypatch.setattr(power, "load_exposure", lambda: expo)
+    monkeypatch.setattr(power, "N_PERM", 99)
+    res = power.run_power(out=tmp_path / "power.md")
+    assert res["leverage_h5"]["Softw"] == pytest.approx(1 / 49 + z[33] ** 2 / 49)
+    assert set(res["leverage_h5b"]) == set(names)
+    for hyp in ("h5", "h5b"):
+        for var in ("r12", "r13"):
+            assert res[f"sd_{hyp}_{var}_overlap"] > 0
+        for k in ("centred", "uncentred"):
+            for crit in ("n", "t"):
+                for lvl in ("0.025", "0.05"):
+                    v = res[f"size_{hyp}_overlap"][f"{k}_{crit}_{lvl}"]
+                    assert 0.0 <= v <= 1.0
+        assert np.isfinite(res[f"bbar_{hyp}"])
+        assert res[f"mde_t_{hyp}_overlap"] > res[f"mde_{hyp}_overlap"]
+        assert res[f"sd_{hyp}_1963_overlap"] > 0
+    text = (tmp_path / "power.md").read_text()
+    assert "t_21" in text and "Frozen values" in text and "Softw" in text
+    frozen = power.parse_frozen(text)
+    assert frozen["bbar_h5"] == res["bbar_h5"]
+    assert frozen["s_h5"] == res["sd_h5_overlap"]
+    assert frozen["s_h5b_r13"] == res["sd_h5b_r13_overlap"]

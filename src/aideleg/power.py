@@ -11,9 +11,17 @@ spread of those slopes across windows is the sampling noise of the slope: its sd
 minimum detectable effect, MDE = (z_{1-alpha/2} + z_power) * sd. alpha = 0.025 is Holm's first
 step over {H5, H5b} (0.05 / 2), power = 0.80.
 
+Pre-freeze additions (referee items C1-C5, Task 15b): t_21 criticals and MDEs (nu = 21 fixed,
+about 22 independent windows); the in-sample size of the D10 rule on the historical windows
+(centred and uncentred, normal and t_21), with kurtosis and empirical centred quantiles; the
+1963 start; leverage and OLS weights per industry; the null scales of R12 and R13; and a
+"Frozen values" list that `aideleg.confirm_h5` hard-codes.
+
 Integrity. Returns are read only through the French loaders with end = 2022-11-29, and every
-row is re-checked against the seal. The historical slopes themselves (their mean or sign) are
-not a finding and are never reported: only their dispersion, the window counts and the MDEs.
+row is re-checked against the seal. The historical slopes themselves are not a finding: only
+their dispersion, rejection rates, quantiles, kurtosis and the window counts are reported,
+plus their mean b-bar, which the referee ruled is frozen (pre-seal, fixed vector) for the
+interpretive check. Its sign is not interpreted anywhere.
 AEI data are conversations matched to O*NET tasks; nothing here says anything about job risk
 or displacement in the labour market.
 
@@ -28,6 +36,7 @@ from statistics import NormalDist
 
 import numpy as np
 import polars as pl
+from scipy import stats as _st
 
 from aideleg.config import DERIVED, ROOT, SEAL_DATE, SEED
 from aideleg.market.french import load_factors, load_industry_returns
@@ -41,7 +50,11 @@ FACTORS = ["mkt_rf", "smb", "hml", "rmw", "cma", "umd"]
 OUT = ROOT / "docs/pap/power.md"
 BEGIN, FINISH = "<!-- BEGIN GENERATED: python -m aideleg.power -->", "<!-- END GENERATED -->"
 N_PERM = 10_000  # spec §5.4: >= 10,000 draws
-PLAUSIBILITY_PP = 5.0  # spec rule, decided by Ajai at Task 15; reported for reference only
+PLAUSIBILITY_PP = 5.0  # plan-file rule (Task 15), reported for reference only
+T_DF = 21  # ~22 independent 17-month windows in 1990-2022 -> nu = 21 (referee C1, fixed)
+HOLM_LEVELS = (0.025, 0.05)  # Holm's two steps over {H5, H5b}
+SOFTW = "Softw"
+FROZEN_HEAD = "## Frozen values"
 
 
 def _add_months(d: date, k: int) -> date:
@@ -199,6 +212,82 @@ def mde(null_slopes: np.ndarray, alpha: float = ALPHA, power: float = POWER) -> 
     return (n.inv_cdf(1 - alpha / 2) + n.inv_cdf(power)) * float(np.std(null_slopes, ddof=1))
 
 
+def t_crit(alpha: float, df: int = T_DF) -> float:
+    """Two-sided critical value t_{df, 1 - alpha/2}."""
+    return float(_st.t.ppf(1 - alpha / 2, df))
+
+
+def t_quantile(p: float, df: int = T_DF) -> float:
+    return float(_st.t.ppf(p, df))
+
+
+def mde_t(null_slopes: np.ndarray, alpha: float = ALPHA, power: float = POWER,
+          df: int = T_DF) -> float:
+    """(t_{df,1-alpha/2} + t_{df,power}) * sd(null_slopes), sd with ddof = 1."""
+    return (t_crit(alpha, df) + t_quantile(power, df)) * float(np.std(null_slopes, ddof=1))
+
+
+def own_size(slopes: np.ndarray, crits: dict[str, float]) -> dict:
+    """In-sample size of the D10 rule on the historical slopes themselves, s = sd(slopes).
+
+    For each named critical value c: `centred_<name>` = share with |b - mean(b)| / s > c,
+    `uncentred_<name>` = share with |b| / s > c (the decision rule as applied). Also the excess
+    kurtosis of b (Fisher, bias-corrected) and the empirical quantiles at 0.9875 and 0.975 of
+    the symmetrised centred distribution +-(b - mean(b)) / s, i.e. the 0.975 and 0.95 quantiles
+    of |b - mean(b)| / s (numpy's default linear interpolation): the empirical analogues of the
+    two-sided criticals at 0.025 and 0.05. Only rates, quantiles and kurtosis are returned."""
+    b = np.asarray(slopes, dtype=float)
+    sd = float(np.std(b, ddof=1))
+    cen, unc = np.abs(b - b.mean()) / sd, np.abs(b) / sd
+    out: dict = {}
+    for name, c in crits.items():
+        out[f"centred_{name}"] = float(np.mean(cen > c))
+        out[f"uncentred_{name}"] = float(np.mean(unc > c))
+    out["excess_kurtosis"] = float(_st.kurtosis(b, fisher=True, bias=False))
+    out["q_0.9875"] = float(np.quantile(cen, 0.975))
+    out["q_0.975"] = float(np.quantile(cen, 0.95))
+    return out
+
+
+def _design(z: np.ndarray, control: np.ndarray | None = None) -> np.ndarray:
+    z = np.asarray(z, dtype=float)
+    cols = [np.ones(len(z)), z] + ([np.asarray(control, dtype=float)] if control is not None
+                                   else [])
+    return np.column_stack(cols)
+
+
+def leverage(z: np.ndarray, control: np.ndarray | None = None) -> np.ndarray:
+    """Diagonal of the hat matrix of [1, z(, control)]."""
+    X = _design(z, control)
+    return np.einsum("ij,ji->i", X, np.linalg.pinv(X))
+
+
+def ols_weights(z: np.ndarray, control: np.ndarray | None = None) -> np.ndarray:
+    """w with b_z = w @ alphas: the row of (X'X)^-1 X' for the coefficient on z."""
+    return np.linalg.pinv(_design(z, control))[1]
+
+
+def rank_z(x: np.ndarray) -> np.ndarray:
+    """Average ranks (ties averaged), z-scored with population SD (D5 variant a, R12)."""
+    r = _st.rankdata(np.asarray(x, dtype=float), method="average")
+    return (r - r.mean()) / r.std()
+
+
+def first_full_month(d: date) -> date:
+    return d if d.day == 1 else _add_months(date(d.year, d.month, 1), 1)
+
+
+def parse_frozen(text: str) -> dict[str, float]:
+    """The `- `key` = value` lines of the Frozen values section of power.md, as floats."""
+    sec = text.split(FROZEN_HEAD, 1)[1].split("\n## ", 1)[0]
+    out = {}
+    for line in sec.splitlines():
+        if line.startswith("- `") and "` = " in line:
+            k, v = line[3:].split("` = ", 1)
+            out[k] = float(v.split()[0])
+    return out
+
+
 def load_exposure() -> pl.DataFrame:
     """`ff49, ff49_short, z_delegation, z_aioe` for Design B (nulls kept; run_power drops)."""
     from aideleg.benchmarks import benchmark_ff49
@@ -289,8 +378,68 @@ def run_power(out: Path = OUT) -> dict:
     res["n_perm"] = N_PERM
     for k, v in r.items():
         res[f"sd_{k}"], res[f"mde_{k}"], res[f"ols_se_{k}"] = v["sd"], v["mde"], v["median_ols_se"]
+    res.update(_task15b(A, h5[:, 0], h5b[:, 0], z, c, keep_names, idx_non, returns, factors))
     _write(out, _block(res, windows, idx_non))
     return res
+
+
+def _task15b(A, b5, b5b, z, c, names, idx_non, returns, factors) -> dict:
+    """Referee items C1-C5: t_21 criticals and MDEs, D10 own-size diagnostics, frozen mean
+    slopes, the 1963 start, leverage, and the R12/R13 null scales. Only dispersion, rates,
+    quantiles, kurtosis, leverage and the frozen mean slopes are produced."""
+    out: dict = {}
+    crits = {f"{kind}_{lvl}": (NormalDist().inv_cdf(1 - lvl / 2) if kind == "n" else t_crit(lvl))
+             for kind in ("n", "t") for lvl in HOLM_LEVELS}
+    out["crits"] = crits
+    for hyp, b in (("h5", b5), ("h5b", b5b)):
+        out[f"mde_t_{hyp}_overlap"] = mde_t(b)
+        out[f"mde_t_{hyp}_nonoverlap"] = mde_t(b[idx_non])
+        out[f"size_{hyp}_overlap"] = own_size(b, crits)
+        out[f"size_{hyp}_nonoverlap"] = own_size(b[idx_non], crits)
+        out[f"bbar_{hyp}"] = float(np.mean(b))  # C3: frozen; its sign is not interpreted
+    # C5: leverage and OLS weights over the industries used
+    out["leverage_h5"] = dict(zip(names, map(float, leverage(z)), strict=True))
+    out["leverage_h5b"] = dict(zip(names, map(float, leverage(z, c)), strict=True))
+    out["weight_h5"] = dict(zip(names, map(float, ols_weights(z)), strict=True))
+    out["weight_h5b"] = dict(zip(names, map(float, ols_weights(z, c)), strict=True))
+    # C5: R12 (standardised ranks of z_delegation; z_aioe unchanged) and R13 (drop Softw,
+    # z not re-standardised), same windows, same code
+    zr = rank_z(z)
+    keep = np.array([n != SOFTW for n in names])
+    variants = {
+        "h5_r12": slope_null_distribution(zr, [None] * len(A), alphas=A),
+        "h5b_r12": slope_null_distribution(zr, [None] * len(A), alphas=A, control=c),
+        "h5_r13": slope_null_distribution(z[keep], [None] * len(A), alphas=A[:, keep]),
+        "h5b_r13": slope_null_distribution(z[keep], [None] * len(A), alphas=A[:, keep],
+                                           control=c[keep]),
+    }
+    for key, b in variants.items():
+        sz = own_size(b, crits)
+        out[f"sd_{key}_overlap"] = float(np.std(b, ddof=1))
+        out[f"mde_t_{key}_overlap"] = mde_t(b)
+        out[f"q_{key}"] = (sz["q_0.9875"], sz["q_0.975"])
+    out["rank_corr_r12"] = float(np.corrcoef(zr, z)[0, 1])
+    # C4: windows from the first full month of daily FF5 (+ UMD) data, and a row from the first
+    # month in which all 49 industries have returns
+    f0 = first_full_month(factors["date"].min())
+    first_all = first_full_month(max(
+        returns.filter(pl.col(n).is_not_null())["date"].min() for n in names))
+    for tag, first in (("1963", f0), ("all49", max(f0, first_all))):
+        w = historical_windows(first)
+        Aw = _alpha_matrix(w, returns, factors, names)
+        idx = list(range(0, len(w), WINDOW_MONTHS))
+        miss = np.isnan(Aw)
+        out[f"start_{tag}"] = first
+        out[f"windows_{tag}"] = (len(w), len(idx))
+        out[f"drops_{tag}"] = (int(miss.sum()), int(miss.any(axis=1).sum()),
+                               sorted({names[j] for j in np.where(miss.any(axis=0))[0]}))
+        for hyp, ctl in (("h5", None), ("h5b", c)):
+            b = slope_null_distribution(z, w, alphas=Aw, control=ctl)
+            for sch, ii in (("overlap", list(range(len(w)))), ("nonoverlap", idx)):
+                out[f"sd_{hyp}_{tag}_{sch}"] = float(np.std(b[ii], ddof=1))
+                out[f"mde_{hyp}_{tag}_{sch}"] = mde(b[ii])
+                out[f"mde_t_{hyp}_{tag}_{sch}"] = mde_t(b[ii])
+    return out
 
 
 def _block(res: dict, windows, idx_non) -> str:
@@ -373,10 +522,171 @@ def _block(res: dict, windows, idx_non) -> str:
         "|---|---|---|---|---|",
         *ri_rows,
         "",
-        f"Reference only (decided at Task 15): the spec's plausibility threshold is "
+        f"Reference only (decided at Task 15): the plan file's plausibility threshold is "
         f"{PLAUSIBILITY_PP:.0f} pp per 1 SD for the H5 MDE.",
+        "",
+        *_block_15b(res),
     ]
     return "\n".join(lines)
+
+
+def frozen_values(res: dict) -> dict[str, float]:
+    """The numbers the confirmatory script (aideleg.confirm_h5) freezes, keyed as in power.md.
+    `crit_<v>_<lvl>` = max(t_21 critical, empirical centred quantile) for variant v, the most
+    conservative of the two calibrations (referee P1); it multiplies `s_<v>`."""
+    f = {"t21_0.025": t_crit(0.025), "t21_0.05": t_crit(0.05)}
+    for hyp in ("h5", "h5b"):
+        f[f"s_{hyp}"] = res[f"sd_{hyp}_overlap"]
+        f[f"bbar_{hyp}"] = res[f"bbar_{hyp}"]
+        sz = res[f"size_{hyp}_overlap"]
+        f[f"q_{hyp}_0.9875"], f[f"q_{hyp}_0.975"] = sz["q_0.9875"], sz["q_0.975"]
+        for var in ("r12", "r13"):
+            key = f"{hyp}_{var}"
+            f[f"s_{key}"] = res[f"sd_{key}_overlap"]
+            f[f"q_{key}_0.9875"], f[f"q_{key}_0.975"] = res[f"q_{key}"]
+    for v in ("h5", "h5b", "h5_r12", "h5b_r12", "h5_r13", "h5b_r13"):
+        f[f"crit_{v}_0.025"] = max(f["t21_0.025"], f[f"q_{v}_0.9875"])
+        f[f"crit_{v}_0.05"] = max(f["t21_0.05"], f[f"q_{v}_0.975"])
+    return f
+
+
+def _block_15b(res: dict) -> list[str]:
+    pp = 100.0
+    cr = res["crits"]
+    kt = t_crit(ALPHA) + t_quantile(POWER)
+    rows_c1 = []
+    for hyp, label in (("h5", "H5"), ("h5b", "H5b")):
+        for sch, name in (("overlap", "overlapping"), ("nonoverlap", "non-overlapping")):
+            sd = res[f"sd_{hyp}_{sch}"]
+            rows_c1.append(
+                f"| {label} | {name} | {sd * pp:.3f} | {cr['n_0.025'] * sd * pp:.3f} | "
+                f"{cr['t_0.025'] * sd * pp:.3f} | {cr['n_0.05'] * sd * pp:.3f} | "
+                f"{cr['t_0.05'] * sd * pp:.3f} | {res[f'mde_{hyp}_{sch}'] * pp:.2f} | "
+                f"{res[f'mde_t_{hyp}_{sch}'] * pp:.2f} |")
+    rows_c2 = []
+    for hyp, label in (("h5", "H5"), ("h5b", "H5b")):
+        for sch, name, n in (("overlap", "overlapping", res["n_windows_overlap"]),
+                             ("nonoverlap", "non-overlapping", res["n_windows_nonoverlap"])):
+            o = res[f"size_{hyp}_{sch}"]
+            rate = " | ".join(f"{o[f'{k}_{c}_{lvl}']:.3f}" for k in ("centred", "uncentred")
+                              for lvl in HOLM_LEVELS for c in ("n", "t"))
+            rows_c2.append(f"| {label} | {name} | {n} | {o['excess_kurtosis']:.2f} | "
+                           f"{o['q_0.9875']:.3f} | {o['q_0.975']:.3f} | {rate} |")
+    rows_c4 = []
+    for tag in ("1963", "all49"):
+        nw, nn = res[f"windows_{tag}"]
+        for hyp, label in (("h5", "H5"), ("h5b", "H5b")):
+            for sch, name, n in (("overlap", "overlapping", nw), ("nonoverlap", "non-overl.", nn)):
+                rows_c4.append(
+                    f"| {res[f'start_{tag}']} | {label} | {name} | {n} | "
+                    f"{res[f'sd_{hyp}_{tag}_{sch}'] * pp:.2f} | "
+                    f"{res[f'mde_{hyp}_{tag}_{sch}'] * pp:.2f} | "
+                    f"{res[f'mde_t_{hyp}_{tag}_{sch}'] * pp:.2f} |")
+    drops = [f"  - from {res[f'start_{t}']}: {res[f'windows_{t}'][0]} overlapping windows, "
+             f"{res[f'drops_{t}'][0]} industry-window drops in {res[f'drops_{t}'][1]} windows "
+             f"(industries: {', '.join(res[f'drops_{t}'][2]) or 'none'})"
+             for t in ("1963", "all49")]
+    lev5, lev5b, w5, w5b = (res[k] for k in ("leverage_h5", "leverage_h5b", "weight_h5",
+                                              "weight_h5b"))
+    order = sorted(lev5, key=lambda n: -lev5[n])
+    rows_c5 = [f"| {n} | {lev5[n]:.3f} | {lev5b[n]:.3f} | {w5[n]:+.4f} | {w5b[n]:+.4f} |"
+               for n in order]
+
+    def share(w: dict) -> float:
+        return abs(w[SOFTW]) / sum(abs(v) for v in w.values())
+
+    rows_var = []
+    for hyp, label in (("h5", "H5"), ("h5b", "H5b")):
+        for var, vname in (("r12", "R12 standardised ranks"), ("r13", "R13 drop Softw")):
+            key = f"{hyp}_{var}"
+            sd = res[f"sd_{key}_overlap"]
+            q1, q2 = res[f"q_{key}"]
+            rows_var.append(
+                f"| {label} | {vname} | {sd * pp:.3f} | {q1:.3f} | {q2:.3f} | "
+                f"{cr['t_0.025'] * sd * pp:.3f} | {cr['t_0.05'] * sd * pp:.3f} | "
+                f"{max(cr['t_0.025'], q1) * sd * pp:.3f} | {max(cr['t_0.05'], q2) * sd * pp:.3f}"
+                f" | {res[f'mde_t_{key}_overlap'] * pp:.2f} |")
+    fz = frozen_values(res)
+    has_softw = SOFTW in lev5
+    softw = (f"Softw: leverage {lev5[SOFTW]:.3f} (H5), {lev5b[SOFTW]:.3f} (H5b); OLS weight "
+             f"{w5[SOFTW]:+.4f} (H5), {w5b[SOFTW]:+.4f} (H5b), i.e. {share(w5):.1%} and "
+             f"{share(w5b):.1%} of the sum of |weights|. Mean leverage is 2/n (H5) and 3/n "
+             f"(H5b)." if has_softw else "Softw is not among the industries used.")
+    return [
+        f"## Small-sample criticals (t_{T_DF})",
+        "",
+        f"s rests on about 22 independent 17-month windows, so the normal criticals are "
+        f"replaced by t with nu = {T_DF} (fixed): t_{T_DF},0.9875 = {cr['t_0.025']:.4f} "
+        f"(Holm step 0.025) and t_{T_DF},0.975 = {cr['t_0.05']:.4f} (step 0.05), against "
+        f"{cr['n_0.025']:.4f} and {cr['n_0.05']:.4f} for the normal. MDE_t = "
+        f"(t_{T_DF},0.9875 + t_{T_DF},0.80) x s = {kt:.4f} x s. Critical values for |b| in pp.",
+        "",
+        "| hypothesis | windows | s | normal crit 0.025 | t_21 crit 0.025 | normal crit 0.05 | "
+        "t_21 crit 0.05 | MDE normal | MDE t_21 |",
+        "|---|---|---|---|---|---|---|---|---|",
+        *rows_c1,
+        "",
+        "## Own size of the D10 rule on the historical windows",
+        "",
+        "In-sample: each window's slope b is scored against the s of the same window set. "
+        "Centred: |b - mean(b)| / s > crit. Uncentred: |b| / s > crit, the decision rule as "
+        "applied. q_0.9875 and q_0.975 are the empirical quantiles of the symmetrised centred "
+        "distribution +-(b - mean(b)) / s (equivalently the 0.975 and 0.95 quantiles of "
+        "|b - mean(b)| / s), the empirical counterparts of the 0.025 and 0.05 two-sided "
+        "criticals. Kurtosis is excess (Fisher, bias-corrected). Only rates, quantiles and "
+        "kurtosis are reported.",
+        "",
+        "| hypothesis | windows | n | excess kurtosis | q_0.9875 | q_0.975 | "
+        "centred 0.025 normal | centred 0.025 t_21 | centred 0.05 normal | centred 0.05 t_21 | "
+        "uncentred 0.025 normal | uncentred 0.025 t_21 | uncentred 0.05 normal | "
+        "uncentred 0.05 t_21 |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        *rows_c2,
+        "",
+        "## Start-date robustness",
+        "",
+        "Same procedure with windows stepped monthly from the first full month of daily FF5 "
+        "data (the momentum file starts earlier, so FF5 binds), and from the first month in "
+        "which every industry has daily returns. An industry with a missing return in a "
+        "window is dropped from that window's cross-section (z not re-standardised).",
+        *drops,
+        "",
+        "| first window | hypothesis | windows | n | s | MDE normal | MDE t_21 |",
+        "|---|---|---|---|---|---|---|",
+        *rows_c4,
+        "",
+        "## Leverage and OLS weights",
+        "",
+        "h_j = diagonal of the hat matrix of [1, z_delegation] (H5) and [1, z_delegation, "
+        "z_aioe] (H5b); weight w_j is the industry's coefficient in b = sum_j w_j alpha_j. "
+        + softw,
+        "",
+        "| industry | h_j H5 | h_j H5b | w_j H5 | w_j H5b |",
+        "|---|---|---|---|---|",
+        *rows_c5,
+        "",
+        "## Null scales for R12 and R13",
+        "",
+        f"Same 378 overlapping windows and code as the primary. R12: `z_delegation` replaced "
+        f"by its standardised average ranks (Pearson with `z_delegation` "
+        f"{res['rank_corr_r12']:.3f}); `z_aioe` unchanged in H5b. R13: Softw dropped, 48 "
+        f"industries, z not re-standardised. Criticals for |b| in pp; 'max' columns use "
+        f"max(t_{T_DF} critical, empirical centred quantile) x s.",
+        "",
+        "| hypothesis | variant | s | q_0.9875 | q_0.975 | t_21 crit 0.025 | t_21 crit 0.05 | "
+        "max crit 0.025 | max crit 0.05 | MDE t_21 |",
+        "|---|---|---|---|---|---|---|---|---|---|",
+        *rows_var,
+        "",
+        FROZEN_HEAD,
+        "",
+        "Full precision (repr). Read by `aideleg.confirm_h5`, whose constants must equal "
+        "these (tested). s = sd of the 378 overlapping slopes (ddof = 1); bbar = their mean "
+        "(frozen for the interpretive check; its sign is not interpreted); q = empirical "
+        "centred quantiles above; crit = max(t21, q) for the same level.",
+        "",
+        *[f"- `{k}` = {v!r}" for k, v in fz.items()],
+    ]
 
 
 def main() -> int:
