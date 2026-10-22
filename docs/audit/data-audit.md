@@ -18,8 +18,8 @@ Table keys:
 - **[XW]** [crosswalk_coverage](tables/crosswalk_coverage.md)
 - **[EXP]** [exposure_coverage](tables/exposure_coverage.md)
 - **[BEN]** [benchmark_coverage](tables/benchmark_coverage.md)
-- **[PQ]** [panel_quality](tables/panel_quality.md) (from `make panel`)
-- **[FI]** [facet_inventory](tables/facet_inventory.md)
+- **[PQ]** [panel_quality](tables/panel_quality.md) (from `make panel`; its
+  `r6_bucket_consistency` and `unmatched_tasks` checks agree with [R6] and [TM])
 
 ## 1. Sources
 
@@ -31,6 +31,11 @@ Table keys:
 | Census SIC 1987 → NAICS 2022 concordances + Siccodes49 | Industry crosswalk to FF49 | six links, equal splits |
 | AIOE (Felten, Raj & Seamans 2021); GPTs-are-GPTs `occ_level.csv` (Eloundou et al.) | "Could" benchmarks, descriptive (RQ2) | SOC 2010 (AIOE); O\*NET-SOC 2019 (Eloundou) |
 | Ken French library | Market tests (Task 14 onward) | sealed; not read by the audit |
+
+Omitted on purpose: [MET] lists metric availability but leaves out the AEI education
+metrics (`human_education_years_mean`, `ai_education_years_mean`). Education is an H1
+covariate, and the integrity scan keeps every mention of it out of `audit.py`. Both
+metrics are in the panel (r4–r6, task level and above).
 
 ## 2. Measurement regimes per release
 
@@ -97,18 +102,18 @@ sits in sentinel rows. In r6:
 - Geographic task-level analysis on r6 therefore rests on a small published fraction.
 
 **Task × collaboration suppression** [SUP §Task x collaboration]:
-- The ledger finding (Task 6) was that renormalised task automation runs about 7–9
-  points above the overall figure (r3 57.8 vs 51.1). **The current panel does not
-  reproduce this.**
-- The pct-weighted task automation is 51.20 vs 51.07 overall for r3 claude_ai. The
-  claude_ai gaps are 0.13–0.35 points, the 1p_api gaps 1.11–1.86 points.
+- **Retracted: the Task 6 "7–9 points" figure** (r3 57.8 vs 51.1). It came from an
+  uncommitted script. The Task 13 reviewer re-derived it on the panel at commit 45bde80
+  (the Task 6 code) and got 51.20 vs 51.07, the same as the current panel.
+- The aggregate suppression bias of renormalised task automation is small. The
+  pct-weighted task automation is 51.20 vs 51.07 overall for r3 claude_ai. The gaps are
+  0.13–0.35 points (claude_ai) and 1.11–1.86 points (1p_api).
 - Tasks publishing only some patterns carry 27–41% of the weight in r3–r5. Their
   automation differs from that of fully published tasks by up to 9.3 points (r4
   claude_ai: 40.55 partial vs 49.87 complete). The sign varies by source.
 - The bias of renormalising over published patterns is therefore composition-dependent.
   It is not a uniform upward shift.
-- The Task 6 figure is unexplained and should be re-derived before the PAP cites it (see
-  §10).
+- The real suppression uncertainty is the occupation-level R7 bound width, below.
 
 **R7 bounds** [SUP §Occupation automation]:
 - The width between "suppressed = non-automation" (lb) and "suppressed = automation" (ub)
@@ -119,6 +124,8 @@ sits in sentinel rows. In r6:
   corr(z_delegation, z_delegation_lb) = 0.99990 and corr(z_delegation, z_delegation_ub)
   = 0.99969 (Pearson); Spearman is 0.99949 and 0.99888 [SUP §Delegation vs its bounds].
   A_pooled carries no bounds.
+- So suppression matters for occupation-level (RQ1) measures and hardly at all for the
+  FF49 indices (RQ3).
 
 ## 5. r6 internal consistency
 
@@ -231,9 +238,9 @@ The controller ruled this not contamination. It is to be disclosed in the PAP.
 1. **Classifier drift.** No release states the classifier model, so classifier drift
    cannot be separated from behavioural change in H2.
 2. **Default windows.** The r1/r2 windows are defaults, not documented windows.
-3. **Unreproduced Task 6 finding.** The 7–9 point gap is not reproduced by the current
-   panel (§4). Before the PAP relies on it, re-derive it from commit 45bde80, or retract
-   it.
+3. **Suppression uncertainty at occupation level (closed item: Task 6 figure).** The
+   Task 6 "7–9 points" figure is retracted (§4). The remaining risk is the R7 bound
+   width: median 10.54–18.18 points per occupation on r2–r5.
 4. **Sparse geographic task data in r6.** The r6 country and subregion task groups are
    mostly unpublished (§4).
 5. **Equal allocation.** Equal allocation of shared tasks drives within-group U dispersion
@@ -247,9 +254,14 @@ The controller ruled this not contamination. It is to be disclosed in the PAP.
    - renormalised `automation_pct` (the current default);
    - the R7 bounds `automation_share_all_lb` / `_ub`.
 
-   The bounds barely move FF49 z-scores (Pearson 0.99969–0.99990), but at
-   occupation level they are 10–18 points wide on r2–r5 (§4). Decide which is primary,
-   and whether the other is a pre-registered robustness check.
+   This stays open, on the following grounds:
+   - The aggregate bias of renormalising is small: 0.13–0.35 points (claude_ai) and
+     1.11–1.86 (1p_api).
+   - The R7 bounds are wide at occupation level: median 10.54–18.18 points on r2–r5.
+   - They barely move the FF49 z-scores (Pearson 0.99969–0.99990) (§4).
+
+   Decide which is primary, and whether the other is a pre-registered robustness check.
+   The choice matters mainly for occupation- and task-level RQ1 measures.
 2. **Definition-stable metric list for H2.**
    - Candidates published at task level in r2–r6 under `collab_v2`: `automation_pct`,
      `augmentation_pct` and the five pattern shares [MET].
@@ -280,5 +292,7 @@ The controller ruled this not contamination. It is to be disclosed in the PAP.
    (`dv_rating_beta`). It is descriptive only either way.
 9. **Occupation basis for r6.** Published SOC (default) or task-allocated. The two agree
    at ρ 0.931–0.958. 43 r6-only occupations enter A_pooled through r6 alone.
-10. **The Task 6 suppression figure.** Re-derive it or drop it from the PAP narrative
-    (risk 3).
+10. **H5b collinearity in the power analysis.** Across FF49, Spearman(z_aioe,
+    z_delegation) = 0.763 [BEN]. The Task 14 minimum detectable effect for H5b must use
+    this collinearity (variance inflation of the delegation slope once AIOE is
+    controlled), not the H5 power alone.

@@ -53,6 +53,74 @@ def test_audit_imports_no_market_module():
     assert not any(m and m.startswith("aideleg.market") for m in mods), mods
 
 
+# Allowlist (controller ruling, Task 13 review): every correlation or regression in
+# audit.py sits in one of these functions; `rank_correlations` (the descriptive
+# could-vs-does Spearman) is called only from `build`. Checked on the AST, so a generic
+# loop over metrics cannot bypass it by building names or method strings.
+STAT_NAMES = {"corr", "cov", "corrcoef", "pearsonr", "spearmanr", "kendalltau", "pearson",
+              "spearman", "kendall", "ols", "wls", "glm", "lstsq", "polyfit", "linregress",
+              "regress", "regression", "fit"}
+STAT_ALLOWED = {"bounds_ff49", "r6_allocated_vs_published"}
+RANKCORR_ALLOWED = {"build"}
+BANNED_MODULES = ("statsmodels", "scipy", "sklearn", "numpy", "linearmodels")
+
+
+def _stat_violations(source: str) -> list[str]:
+    """Statistical names, method strings or modules outside the allowlist."""
+    tree = ast.parse(source)
+    out: list[str] = []
+    docstrings = {id(n.body[0].value) for n in ast.walk(tree)
+                  if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef)) and n.body
+                  and isinstance(n.body[0], ast.Expr)
+                  and isinstance(n.body[0].value, ast.Constant)}
+
+    def visit(node: ast.AST, func: str | None) -> None:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            func = node.name if func is None else func  # nested defs inherit the outer
+        name = None
+        if isinstance(node, ast.Attribute):
+            name = node.attr
+        elif isinstance(node, ast.Name):
+            name = node.id
+        elif isinstance(node, ast.alias):
+            name = node.asname or node.name
+            if any(node.name.split(".")[0] == m for m in BANNED_MODULES):
+                out.append(f"import {node.name}")
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            if node.module.split(".")[0] in BANNED_MODULES:
+                out.append(f"from {node.module}")
+        elif (isinstance(node, ast.Constant) and isinstance(node.value, str)
+              and id(node) not in docstrings
+              and node.value.lower() in STAT_NAMES and func not in STAT_ALLOWED):
+            out.append(f"string {node.value!r} in {func}")
+        if name is not None:
+            low = name.lower()
+            if low in STAT_NAMES and func not in STAT_ALLOWED:
+                out.append(f"{name} in {func}")
+            if low == "rank_correlations" and func not in RANKCORR_ALLOWED:
+                out.append(f"{name} in {func}")
+        for child in ast.iter_child_nodes(node):
+            visit(child, func)
+
+    visit(tree, None)
+    return out
+
+
+def test_correlations_only_in_allowlisted_functions():
+    assert _stat_violations(SOURCE) == []
+
+
+@pytest.mark.parametrize("snippet", [
+    "def f(df, ms):\n    return [df.select(pl.corr(m, 'wage')) for m in ms]",
+    "def f(df):\n    return getattr(pl, 'corr')('a', 'b')",
+    "def f(df):\n    return df.select(pl.corr('a', 'b', method=M))",
+    "import statsmodels.api as sm",
+    "def build():\n    pass\ndef g(b, e):\n    return rank_correlations(b, e)",
+])
+def test_allowlist_catches_bypasses(snippet):
+    assert _stat_violations(snippet)
+
+
 def test_task_collab_suppression_toy():
     rows = []
     for node, pct, auto, n in [("1", 60.0, 50.0, 5), ("2", 40.0, 100.0, 1)]:

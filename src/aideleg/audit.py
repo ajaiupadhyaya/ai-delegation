@@ -443,7 +443,8 @@ def r6_only_occupations(occ: dict[str, pl.DataFrame], source: str = "claude_ai"
     r6 = occ["r6"].filter(pl.col("source") == source)
     n_months = r6["period_start"].n_unique()
     use = r6.group_by("soc6").agg(usage=pl.col("usage_share").sum() / n_months)
-    only = use.filter(~pl.col("soc6").is_in(list(earlier))).sort("usage", descending=True)
+    only = (use.filter(~pl.col("soc6").is_in(list(earlier)))
+            .sort(["usage", "soc6"], descending=[True, False]))
     summary = pl.DataFrame({"source": [source], "r6_occupations": [use.height],
                             "r6_only": [only.height],
                             "r6_only_usage_pct": [only["usage"].sum()]})
@@ -498,7 +499,7 @@ def oews_coverage(r6_pub: pl.DataFrame, nat: pl.DataFrame, struct: pl.DataFrame
     resid = pl.DataFrame({"oews_codes_without_aei": [res.height],
                           "employment": [float(res["tot_emp"].sum())],
                           "employment_pct": [100 * res["tot_emp"].sum() / total_emp]})
-    top = (res.sort("tot_emp", descending=True).head(15)
+    top = (res.sort(["tot_emp", "soc6"], descending=[True, False]).head(15)
            .with_columns(emp_pct=100 * pl.col("tot_emp") / total_emp))
     return {"summary": pl.DataFrame(summary), "hybrids": hyb, "residual": resid,
             "residual_top": top}
@@ -535,7 +536,7 @@ def crosswalk_coverage(matrix: pl.DataFrame) -> dict[str, pl.DataFrame]:
                              "share_of_private"))
     by = coverage_by_code(matrix, "split", "exclude")
     private_unmapped = (by.filter((pl.col("status") == "private") & (pl.col("unmapped_emp") > 0))
-                        .sort("unmapped_emp", descending=True).head(10)
+                        .sort(["unmapped_emp", "naics"], descending=[True, False]).head(10)
                         .select("naics", "naics_title", "tot_emp", "unmapped_emp"))
     excluded = (by.filter(pl.col("status") != "private")
                 .group_by("status").agg(codes=pl.len(), tot_emp=pl.col("tot_emp").sum(),
@@ -602,7 +603,7 @@ def computer_occupations(occ_exp: pl.DataFrame, design: str = "B",
 
 # --- benchmarks -----------------------------------------------------------------------
 
-def benchmark_coverage(nat_full: pl.DataFrame, struct: pl.DataFrame
+def benchmark_coverage(nat: pl.DataFrame, struct: pl.DataFrame
                        ) -> dict[str, pl.DataFrame]:
     from aideleg.benchmarks import _crosswalk, coverage, load_aioe, load_aioe_raw, load_eloundou
 
@@ -610,16 +611,16 @@ def benchmark_coverage(nat_full: pl.DataFrame, struct: pl.DataFrame
     detailed = set(struct["Detailed Occupation"].drop_nulls())
     aioe = load_aioe()
     el = load_eloundou()
-    cov = pl.DataFrame([
+    cover = pl.DataFrame([
         {"benchmark": "AIOE (SOC 2010, as published)", "codes": raw.height,
          "codes_not_soc2018_detailed": int((~raw["soc6"].is_in(list(detailed))).sum()),
-         "oews_emp_covered_pct": 100 * coverage(raw, nat_full, struct)},
+         "oews_emp_covered_pct": 100 * coverage(raw, nat, struct)},
         {"benchmark": "AIOE (mapped to SOC 2018)", "codes": aioe.height,
          "codes_not_soc2018_detailed": int((~aioe["soc6"].is_in(list(detailed))).sum()),
-         "oews_emp_covered_pct": 100 * coverage(aioe, nat_full, struct)},
+         "oews_emp_covered_pct": 100 * coverage(aioe, nat, struct)},
         {"benchmark": "Eloundou (O*NET-SOC 2019)", "codes": el.height,
          "codes_not_soc2018_detailed": int((~el["soc6"].is_in(list(detailed))).sum()),
-         "oews_emp_covered_pct": 100 * coverage(el, nat_full, struct)},
+         "oews_emp_covered_pct": 100 * coverage(el, nat, struct)},
     ])
     xw = _crosswalk()
     pairs = xw.select(old=pl.col("o2010").str.slice(0, 7),
@@ -631,7 +632,7 @@ def benchmark_coverage(nat_full: pl.DataFrame, struct: pl.DataFrame
         "aioe_2010_codes": [raw.height],
         "with_one_successor": [int((succ["k"] == 1).sum())],
         "with_2plus_successors": [multi.height]})
-    return {"coverage": cov, "split_summary": split_summary,
+    return {"coverage": cover, "split_summary": split_summary,
             "splits": multi.select(soc2010="old", soc2018_successors="new")}
 
 
@@ -746,7 +747,7 @@ def build(out: Path = TABLES) -> list[Path]:
         ("Delegation vs its bounds across FF49",
          "Correlation across the 49 industries between `z_delegation` and the same index "
          "built from the lb / ub shares (A_pooled carries no bounds).\n\n"
-         + md_table(bounds_ff49(exposure), digits={"pearson": 5, "spearman": 5})),
+         + md_table(bounds_ff49(exposure), digits=5)),
     ], out))
 
     # 5. r6 checks
