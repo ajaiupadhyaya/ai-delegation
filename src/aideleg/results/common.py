@@ -60,6 +60,13 @@ def write_csv(df: pl.DataFrame, path: Path) -> Path:
     return path
 
 
+def round10(df: pl.DataFrame) -> pl.DataFrame:
+    """Round every Float64 column to 10 significant digits, so regeneration is bit-stable."""
+    return df.with_columns(
+        pl.col(c).map_elements(lambda v: float(f"{v:.10g}"), return_dtype=pl.Float64)
+        for c, t in df.schema.items() if t == pl.Float64)
+
+
 def fmt_coef(c: dict) -> str:
     """One coefficient as the RQ1 decision texts print it (`family._coef_lines`)."""
     return (f"{c['name']} = {c['estimate']:.3f} (95% CI [{c['ci_low']:.3f}, {c['ci_high']:.3f}], "

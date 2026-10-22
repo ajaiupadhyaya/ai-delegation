@@ -32,7 +32,7 @@ import polars as pl
 from aideleg.describe import anatomy, geography
 from aideleg.figures import FIGSIZE, PALETTE, apply_style, save_figure
 from aideleg.figures.save import FIGURES_DIR
-from aideleg.results.common import write_csv, write_result_doc
+from aideleg.results.common import round10, write_csv, write_result_doc
 from aideleg.rq1.confirm import JSON_NAME, OUT_DIR
 from aideleg.rq1.family import SPLIT_STATEMENT
 
@@ -445,7 +445,7 @@ def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=No
                 "of usage; in the panel these are the tasks published with pct 0.00, which "
                 "carry no education value or collaboration pattern."
                 if miss.height else "none in this release.")
-    paths = [write_csv(tables[k], out / ANATOMY_CSVS[k]) for k in ANATOMY_CSVS]
+    paths = [write_csv(round10(tables[k]), out / ANATOMY_CSVS[k]) for k in ANATOMY_CSVS]
     paths.append(_anatomy_doc(out / ANATOMY_MD, tables, release, source, zero_note, edu_note))
     major, decile = tables["major"], tables["decile"]
     edu = tables["education"].filter(pl.col("bin") != anatomy.EDU_MISSING)  # no patterns to stack
@@ -556,7 +556,7 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
         t, sample = geography.geo_sample_tables(panel, geo, **kw)
         tables[geo], globals_[geo] = t, (sample.global_automation, sample.m_global)
         excluded[geo] = sample.excluded
-        paths.append(write_csv(t, out / GEOGRAPHY_CSVS[geo]))
+        paths.append(write_csv(round10(t), out / GEOGRAPHY_CSVS[geo]))
         vals = geography.map_values(t, geo).with_columns(
             log10_aui=pl.col("aui").log10())
         unmatched[geo] = {}
@@ -575,22 +575,77 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
     return paths
 
 
+# --- index ----------------------------------------------------------------------------------
+
+README_MD = "README.md"
+HANDOFF_NOTE = (
+    "RQ1 robustness rows R10, R22–R28, R31, R36–R38 are reported in Plan 4, through these "
+    "builders and estimators; R28's r4/r5 country parts use Plan 4's own construction, because "
+    "r4 and r5 publish no country usage index or GWA rows")
+_DESCRIPTIONS = {
+    "confirmatory_rq1.json": "the single logged first run of H1-H4 (write-once)",
+    "confirmatory_rq1.md": "the runner's own report of that run (write-once)",
+    "confirmatory_rq1.log": "the runner's log (write-once)",
+    "confirmatory_rq1.attempt": "the run marker (write-once)",
+    "confirmatory_table.csv": "one row per coefficient, copied from the JSON",
+    "confirmatory_table.md": "the same table as markdown",
+    "decisions.md": "the alpha split, the four decision texts, samples",
+    "anatomy.md": "descriptive anatomy: composition and concentration",
+    "geography.md": "descriptive shift-share split by country and US state",
+}
+
+
+def _prrq1_commit() -> str:
+    import subprocess
+
+    from aideleg.config import ROOT
+    return subprocess.run(
+        ["git", "log", "-1", "--format=%H", "--", "docs/results/rq1/confirmatory_rq1.json"],
+        cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip()
+
+
+def report_index(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR) -> Path:
+    """Write `README.md`: every generated file, the P-RQ1 commit, the split, the hand-off."""
+    out = Path(out)
+    names = sorted({p.name for p in out.iterdir() if p.is_file() and p.name != README_MD}
+                   | {n for n in _DESCRIPTIONS if n.startswith("confirmatory_rq1")})
+    files = "\n".join(f"- `{n}`: {_DESCRIPTIONS.get(n, 'table (CSV) behind the markdown report')}"
+                      for n in names)
+    figs = sorted({p.stem for p in Path(fig_dir).glob("fig_rq1_*.pdf")})
+    sections = [
+        ("P-RQ1 run", f"The confirmatory run was committed in `{_prrq1_commit()}`. Its four "
+         "`confirmatory_rq1.*` files are write-once and are never regenerated."),
+        ("Alpha split", SPLIT_STATEMENT),
+        ("Files in this directory", files),
+        ("Figures (`docs/paper/figures/`, PDF and PNG)",
+         "\n".join(f"- `{f}`" for f in figs)),
+        ("Hand-off", HANDOFF_NOTE + "."),
+    ]
+    return write_result_doc(out / README_MD, "RQ1 results", GENERATOR, sections)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog=GENERATOR, description=(
-        "RQ1 reporting from the committed P-RQ1 JSON (no estimator is run)."))
+        "RQ1 reporting from the committed P-RQ1 JSON (no estimator is run). With no section "
+        "flag, all three sections and the README are written."))
     ap.add_argument("--confirmatory", action="store_true",
                     help="write the confirmatory table, decisions and figures")
     ap.add_argument("--anatomy", action="store_true",
                     help="write the descriptive anatomy (composition, concentration)")
     ap.add_argument("--geography", action="store_true",
                     help="write the descriptive shift-share tables and the eight maps")
+    ap.add_argument("--out", type=Path, default=OUT_DIR, help="output directory")
+    ap.add_argument("--fig-dir", type=Path, default=FIGURES_DIR, help="figure directory")
     a = ap.parse_args(argv)
-    if not (a.confirmatory or a.anatomy or a.geography):
-        ap.print_help()
-        return 2
-    paths = (report_confirmatory() if a.confirmatory else []) + (
-        report_anatomy() if a.anatomy else []) + (
-        report_geography() if a.geography else [])
+    every = not (a.confirmatory or a.anatomy or a.geography)
+    out, figs = a.out, a.fig_dir
+    json_path = OUT_DIR / JSON_NAME  # always the committed run
+    paths = (report_confirmatory(json_path, out, fig_dir=figs) if every or a.confirmatory
+             else []) + (
+        report_anatomy(out, fig_dir=figs) if every or a.anatomy else []) + (
+        report_geography(out, fig_dir=figs) if every or a.geography else [])
+    if every or (a.confirmatory and a.anatomy and a.geography):
+        paths.append(report_index(out, figs))
     for p in paths:
         print(p)
     return 0

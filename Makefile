@@ -75,3 +75,22 @@ rq1-dry-run:
 # creates docs/results/rq1/confirmatory_rq1.attempt first and refuses forever after; never rerun.
 rq1-confirm:
 	uv run python -m aideleg.rq1.confirm
+
+# RQ1/RQ2 reports (plan 2 Task 16). They read data/ and the committed confirmatory JSON; they never
+# run the confirmatory runner and never touch the network. `results-rq1` rewrites everything in
+# docs/results/rq1 except the four write-once confirmatory_rq1.* files.
+.PHONY: results-rq1 results-rq2 results figures-check
+results-rq1:
+	uv run python -m aideleg.results.rq1
+
+results-rq2:
+	uv run python -m aideleg.results.rq2
+
+results: results-rq1 results-rq2
+
+# fails if a figure has a PDF without a PNG, or the reverse
+figures-check:
+	@uv run python -c "from pathlib import Path; d = Path('docs/paper/figures'); \
+		pdf = {p.stem for p in d.glob('*.pdf')}; png = {p.stem for p in d.glob('*.png')}; \
+		odd = sorted(pdf ^ png); print('figures without a PDF/PNG twin:', odd) if odd else None; \
+		raise SystemExit(1 if odd else 0)"

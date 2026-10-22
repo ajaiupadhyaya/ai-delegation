@@ -19,7 +19,7 @@ from aideleg.config import DERIVED, ROOT
 from aideleg.describe import rq2
 from aideleg.figures import FIGSIZE, PALETTE, apply_style, save_figure
 from aideleg.figures.save import FIGURES_DIR
-from aideleg.results.common import generated_line, write_result_doc
+from aideleg.results.common import WORDING, generated_line, round10, write_result_doc
 from aideleg.results.common import write_csv as _write_csv
 
 GENERATOR = "aideleg.results.rq2"
@@ -36,14 +36,8 @@ RANK_NOTE = ("Rank 1 is the highest value. `gap = rank_does - rank_could`: a pos
              "the industry ranks lower on the AEI measure than on the benchmark.")
 
 
-def _round10(df: pl.DataFrame) -> pl.DataFrame:
-    return df.with_columns(
-        pl.col(c).map_elements(lambda v: float(f"{v:.10g}"), return_dtype=pl.Float64)
-        for c, t in df.schema.items() if t == pl.Float64)
-
-
 def write_csv(df: pl.DataFrame, path: Path) -> Path:
-    return _write_csv(_round10(df), path)
+    return _write_csv(round10(df), path)
 
 
 def _cell(v, digits: int) -> str:
@@ -91,6 +85,19 @@ def could_vs_does(exposure: pl.DataFrame, bench: pl.DataFrame, draws: int) -> pl
     return pl.concat(parts)
 
 
+def _outliers(d: pl.DataFrame, bench_col: str, n_gap: int = 5) -> list[bool]:
+    """Industries worth a label: |z| > 1 on either axis, or among the `n_gap` largest rank gaps."""
+    x, y = np.asarray(d[bench_col], float), np.asarray(d["z_delegation"], float)
+    gap = np.abs(_ranks(y) - _ranks(x))
+    top = set(np.argsort(-gap, kind="stable")[:n_gap].tolist())
+    return [bool(abs(a) > 1 or abs(b) > 1 or i in top)
+            for i, (a, b) in enumerate(zip(x, y, strict=True))]
+
+
+def _ranks(v: np.ndarray) -> np.ndarray:
+    return np.argsort(np.argsort(-v, kind="stable"), kind="stable")
+
+
 def fig_could_vs_does(exposure_b: pl.DataFrame, bench: pl.DataFrame):
     apply_style()
     d = exposure_b.join(bench, on="ff49")
@@ -98,8 +105,10 @@ def fig_could_vs_does(exposure_b: pl.DataFrame, bench: pl.DataFrame):
                              sharey=True)
     for ax, b in zip(axes, rq2.BENCH_COLS, strict=True):
         ax.scatter(d[b], d["z_delegation"], s=8, color=PALETTE[5])
-        for x, y, lab in zip(d[b], d["z_delegation"], d["ff49_short"], strict=True):
-            ax.annotate(lab, (x, y), fontsize=4, xytext=(2, 2), textcoords="offset points")
+        keep = _outliers(d, b)
+        for x, y, lab, k in zip(d[b], d["z_delegation"], d["ff49_short"], keep, strict=True):
+            if k:
+                ax.annotate(lab, (x, y), fontsize=4, xytext=(2, 2), textcoords="offset points")
         ax.set_xlabel(f"{b} (could)")
     axes[0].set_ylabel("z_delegation (does; conversations matched to O*NET tasks)")
     fig.suptitle("Benchmark exposure against delegation-weighted AEI exposure, 49 industries "
@@ -174,7 +183,7 @@ def report(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR, *, exposure=None, o
              "occupations (weights are `usage_share`; occupations with no usage carry no "
              "weight).\n\n" + md_table(summ, 4))]))
 
-    readme = [generated_line(GENERATOR), "", "# RQ2 results", "", DESCRIPTIVE, "",
+    readme = [generated_line(GENERATOR), "", "# RQ2 results", "", WORDING, "", DESCRIPTIVE, "",
               "- `could_vs_does.md` / `.csv`: Spearman correlations, Design B and "
               f"Design A_pooled ({EXPLORATORY})",
               "- `top_bottom.md` / `.csv`: top and bottom industries per AEI column",
