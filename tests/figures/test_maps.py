@@ -1,5 +1,6 @@
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import pandas as pd
 import polars as pl
 import pytest
 from matplotlib.colors import TwoSlopeNorm, to_hex
@@ -100,3 +101,45 @@ def test_colourbar_tick_labels_do_not_overlap(lo, hi):
     boxes = sorted((t.get_window_extent() for t in labels), key=lambda b: b.x0)
     assert all(a.x1 < b.x0 for a, b in zip(boxes, boxes[1:], strict=False))
     plt.close(fig)
+
+
+def test_choropleth_is_exported_from_the_package():
+    from aideleg import figures
+    from aideleg.figures import choropleth
+    assert choropleth is maps.choropleth
+    assert "choropleth" in figures.__all__
+
+
+def test_partial_ids_get_their_own_legend_entry():
+    gdf = gpd.GeoDataFrame({"iso3": ["AAA", "BBB", "CCC"], "name": ["a", "b", "c"]},
+                           geometry=[box(0, 0, 10, 10), box(20, 0, 30, 10), box(40, 0, 50, 10)],
+                           crs="EPSG:4326")
+    vals = pl.DataFrame({"iso3": ["AAA"], "v": [1.0]})
+    fig, _ = maps.choropleth(gdf, vals, id_col="iso3", value_col="v", title="t",
+                             cmap="viridis", label="l", partial_ids=["BBB", "ZZZ"])
+    texts = [t.get_text() for t in fig.axes[0].get_legend().get_texts()]
+    assert texts == [maps.MISSING_LABEL, maps.PARTIAL_LABEL]
+    assert maps.PARTIAL_LABEL.replace("\n", " ") == (
+        "not published in both months (not in the H4 sample)")
+    hatched = [c for c in fig.axes[0].collections if c.get_hatch()]
+    assert len(hatched) == 1 and len(hatched[0].get_paths()) == 1  # BBB only
+    box_ = fig.get_tightbbox(fig.canvas.get_renderer())
+    w, h = fig.get_size_inches()
+    assert box_.x0 >= -1e-6 and box_.y0 >= -1e-6 and box_.x1 <= w + 1e-6 and box_.y1 <= h + 1e-6
+    plt.close(fig)
+    # only partial geographies missing: one legend entry, the partial one
+    vals = pl.DataFrame({"iso3": ["AAA", "CCC"], "v": [1.0, 2.0]})
+    fig, _ = maps.choropleth(gdf, vals, id_col="iso3", value_col="v", title="t",
+                             cmap="viridis", label="l", partial_ids=["BBB"])
+    texts = [t.get_text() for t in fig.axes[0].get_legend().get_texts()]
+    assert texts == [maps.PARTIAL_LABEL]
+    plt.close(fig)
+
+
+def test_natural_earth_iso3_dedup_rule():
+    """The sovereign keeps a shared ISO_A3_EH code; dependencies fall back to ADM0_A3; -99 too."""
+    raw = pd.DataFrame({
+        "ISO_A3_EH": ["AUS", "AUS", "AUS", "-99", "FRA"],
+        "ADM0_A3": ["AUS", "IOA", "ATC", "KOS", "FRA"],
+    })
+    assert maps.ne_iso3(raw).tolist() == ["AUS", "IOA", "ATC", "KOS", "FRA"]

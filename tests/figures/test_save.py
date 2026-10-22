@@ -36,3 +36,10 @@ def test_save_rejects_bad_names(tmp_path, name):
     with pytest.raises(ValueError):
         save_figure(_fig(), name, out_dir=tmp_path)
     plt.close("all")
+
+
+def test_save_closes_the_figure_when_the_name_is_rejected(tmp_path):
+    fig = _fig()
+    with pytest.raises(ValueError):
+        save_figure(fig, "Bad Name", out_dir=tmp_path)
+    assert not plt.fignum_exists(fig.number)

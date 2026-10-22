@@ -1,3 +1,4 @@
+from aideleg.figures.maps import choropleth
 from aideleg.figures.save import save_figure
 from aideleg.figures.style import (
     DIVERGING_CMAP,
@@ -8,5 +9,5 @@ from aideleg.figures.style import (
     apply_style,
 )
 
-__all__ = ["apply_style", "save_figure", "PALETTE", "FIGSIZE", "SEQUENTIAL_CMAP",
+__all__ = ["apply_style", "save_figure", "choropleth", "PALETTE", "FIGSIZE", "SEQUENTIAL_CMAP",
            "DIVERGING_CMAP", "MISSING_COLOR"]

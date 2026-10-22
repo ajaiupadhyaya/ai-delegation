@@ -79,3 +79,53 @@ def test_choropleth_ids_alias_kosovo():
     assert "iso3" not in geography.map_values(t, "us_state").columns
     assert geography.unalias(["KOS"]) == ["XKX"]
 
+
+
+def _report_inputs():
+    from datetime import date
+
+    import geopandas as gpd
+    from shapely.geometry import box
+
+    inp = _inputs()
+    panel = inp.panel.filter(~((pl.col("geo_id") == "NAM") & (pl.col("metric") == "automation_pct")
+                               & (pl.col("period_start") == date(2026, 5, 1))))
+    st = panel.filter((pl.col("geo_level") == "country") & pl.col("geo_id").is_in(["ARG", "AUS"])
+                      ).with_columns(
+        geo_level=pl.lit("subregion"),
+        geo_id=pl.when(pl.col("geo_id") == "ARG").then(pl.lit("US-CA")).otherwise(pl.lit("US-TX")))
+    panel = pl.concat([panel, st])
+    sgdp = pl.DataFrame({"state_code": ["CA", "TX"], "state_name": ["California", "Texas"],
+                         "gdp_total": ["4.0e12", "2.5e12"], "year": ["2024", "2024"]})
+    swap = pl.DataFrame({"state_code": ["CA", "TX"], "working_age_pop": ["25000000", "19000000"]})
+    countries = gpd.GeoDataFrame(
+        {"iso3": list(synth.SYNTH_COUNTRIES), "name": list(synth.SYNTH_COUNTRIES)},
+        geometry=[box(10 * i, 0, 10 * i + 8, 8) for i in range(len(synth.SYNTH_COUNTRIES))],
+        crs="EPSG:4326")
+    states = gpd.GeoDataFrame({"geo_id": ["US-CA", "US-TX"], "name": ["California", "Texas"]},
+                              geometry=[box(-120, 35, -115, 40), box(-100, 28, -95, 33)],
+                              crs="EPSG:4326")
+    return dict(panel=panel, gdp={"country": inp.gdp_country, "us_state": sgdp},
+                wap={"country": inp.wap_country, "us_state": swap},
+                names={"country": ISO, "us_state": sgdp}, countries=countries, states=states)
+
+
+def test_report_geography_marks_one_month_geographies(tmp_path, monkeypatch):
+    from aideleg.figures import maps
+    from aideleg.results import rq1
+
+    calls = []
+    real = maps.choropleth
+
+    def spy(*a, **kw):
+        calls.append(kw.get("partial_ids", ()))
+        return real(*a, **kw)
+
+    monkeypatch.setattr(maps, "choropleth", spy)
+    rq1.report_geography(tmp_path / "o", fig_dir=tmp_path / "f", **_report_inputs())
+    md = (tmp_path / "o" / "geography.md").read_text(encoding="utf-8")
+    label = "not published in both months (not in the H4 sample)"
+    assert f"{label}, `missing_month`: 1 (NAM)" in md
+    assert "not published, by reason" not in md
+    assert len(calls) == 8
+    assert all(list(c) == ["NAM"] for c in calls[:4])  # the four country maps

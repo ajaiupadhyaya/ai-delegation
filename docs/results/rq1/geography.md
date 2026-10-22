@@ -18,7 +18,8 @@ RQ1's α = 0.05 is split (D22): H2 is tested on its own at α = 0.0125, and {H1,
 - AUI is drawn on a diverging scale centred at parity (log10 AUI = 0, a usage share equal to the working-age population share), on a log colour scale with ticks in AUI units. This is a presentation choice in a descriptive figure.
 - The diverging maps (AUI, mix part, within part) cut their colour scale at the 2nd and 98th percentiles of the plotted values; values beyond are drawn in the end colour, marked by arrows on the colourbar.
 - Not published is a property of the release, not a zero. Kosovo (XKX) is published in r3–r5 but not in r6, so it is absent from the r6 maps.
-- A geography the release does not publish (a missing month, or no task mix) is not in the table; on the maps it is drawn in grey with the legend entry "not published", never as zero.
+- A geography published in only one of r6's two months is not published in both months (not in the H4 sample): it is not in the table, and on the maps it is drawn in hatched grey with the legend entry "not published in both months (not in the H4 sample)", never as zero.
+- A geography r6 does not publish at all, or one with no task mix, is not in the table either; on the maps it is drawn in plain grey with the legend entry "not published", never as zero.
 
 ## Countries
 
@@ -28,7 +29,7 @@ The identity: gap = mix_part + within_part, where gap = automation_pct − globa
 - m_global = 48.8282
 - offset m_global − global_automation = 0.0282 (common to every row's mix_part)
 - geographies in the table: 114; in the confirmatory H4 frame: 113
-- not published, by reason: missing_month 7 (BWA, COG, HTI, MOZ, NAM, TGO, TTO); missing_income 0; missing_mix 0
+- not in the table, by reason: not published in both months (not in the H4 sample), `missing_month`: 7 (BWA, COG, HTI, MOZ, NAM, TGO, TTO); no GDP per working-age person, `missing_income`: 0; no task mix, `missing_mix`: 0
 
 Unmatched geography IDs per map (IDs in the table that match no map geometry; Kosovo is joined as XKX → KOS, the Natural Earth code):
 
@@ -164,7 +165,7 @@ The identity: gap = mix_part + within_part, where gap = automation_pct − globa
 - m_global = 48.8282
 - offset m_global − global_automation = 0.0282 (common to every row's mix_part)
 - geographies in the table: 51; in the confirmatory H4 frame: 51
-- not published, by reason: missing_month 1 (US-PR); missing_income 0; missing_mix 0
+- not in the table, by reason: not published in both months (not in the H4 sample), `missing_month`: 1 (US-PR); no GDP per working-age person, `missing_income`: 0; no task mix, `missing_mix`: 0
 
 Unmatched geography IDs per map (IDs in the table that match no map geometry):
 

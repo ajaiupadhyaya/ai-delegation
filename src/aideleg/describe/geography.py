@@ -115,6 +115,11 @@ def map_values(table: pl.DataFrame, geo: Geo) -> pl.DataFrame:
     return table
 
 
+def map_ids(ids: list[str], geo: Geo) -> list[str]:
+    """AEI geography ids in the id space of the map geometry (the Natural Earth alias)."""
+    return [NE_ALIAS.get(i, i) for i in ids] if geo == "country" else list(ids)
+
+
 def unalias(ids: list[str]) -> list[str]:
     """Map Natural Earth ids back to the AEI codes for reporting."""
     back = {v: k for k, v in NE_ALIAS.items()}

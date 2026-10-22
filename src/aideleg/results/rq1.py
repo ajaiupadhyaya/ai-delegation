@@ -467,6 +467,10 @@ def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=No
 
 GEOGRAPHY_MD = "geography.md"
 GEOGRAPHY_CSVS = {"country": "geography_country.csv", "us_state": "geography_state.csv"}
+PARTIAL = "not published in both months (not in the H4 sample)"
+# how geography.md names each exclusion reason of `h4.EXCLUSION_REASONS`
+REASON_TEXT = {"missing_month": PARTIAL, "missing_income": "no GDP per working-age person",
+               "missing_mix": "no task mix"}
 
 
 def _geography_doc(path: Path, tables: dict, globals_: dict, excluded: dict,
@@ -491,8 +495,11 @@ def _geography_doc(path: Path, tables: dict, globals_: dict, excluded: dict,
         "marked by arrows on the colourbar.",
         "- Not published is a property of the release, not a zero. Kosovo (XKX) is published in "
         "r3–r5 but not in r6, so it is absent from the r6 maps.",
-        "- A geography the release does not publish (a missing month, or no task mix) is not in "
-        "the table; on the maps it is drawn in grey with the legend entry \"not published\", "
+        f"- A geography published in only one of r6's two months is {PARTIAL}: it is not in the "
+        "table, and on the maps it is drawn in hatched grey with the legend entry "
+        f"\"{PARTIAL}\", never as zero.",
+        "- A geography r6 does not publish at all, or one with no task mix, is not in the table "
+        "either; on the maps it is drawn in plain grey with the legend entry \"not published\", "
         "never as zero.",
     ])
     sections = [("α split", SPLIT_STATEMENT + " This document tests nothing; the split is "
@@ -515,8 +522,9 @@ def _geography_doc(path: Path, tables: dict, globals_: dict, excluded: dict,
             "(common to every row's mix_part)",
             f"- geographies in the table: {t.height}; in the confirmatory H4 frame: "
             f"{int(t['in_h4_sample'].sum())}",
-            "- not published, by reason: " + "; ".join(
-                f"{r} {len(v)}" + (f" ({', '.join(v)})" if v and len(v) <= 12 else "")
+            "- not in the table, by reason: " + "; ".join(
+                f"{REASON_TEXT.get(r, r)}, `{r}`: {len(v)}"
+                + (f" ({', '.join(v)})" if v and len(v) <= 12 else "")
                 for r, v in excluded[geo].items()),
             "",
             "Unmatched geography IDs per map (IDs in the table that match no map geometry"
@@ -542,13 +550,13 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
     The maps are `fig_rq1_map_{country|state}_{automation|aui|mix|within}`. `panel`, `gdp`,
     `wap` (dicts keyed by geography), `names`, `countries` and `states` are for tests.
     """
-    from aideleg.figures.maps import choropleth, load_countries, load_us_states
+    from aideleg.figures import maps
     from aideleg.rq1.confirm import PANEL_PATH
 
     panel = pl.read_parquet(PANEL_PATH) if panel is None else panel
     out = Path(out)
-    gdfs = {"country": countries if countries is not None else load_countries(),
-            "us_state": states if states is not None else load_us_states()}
+    gdfs = {"country": countries if countries is not None else maps.load_countries(),
+            "us_state": states if states is not None else maps.load_us_states()}
     id_col = {"country": "iso3", "us_state": "geo_id"}
     tables, globals_, excluded, unmatched, paths = {}, {}, {}, {}, []
     for geo in ("country", "us_state"):
@@ -563,15 +571,17 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
         vals = geography.map_values(round10(t), geo).with_columns(
             log10_aui=pl.col("aui").log10())
         unmatched[geo] = {}
+        partial = geography.map_ids(sample.excluded.get("missing_month", []), geo)
         for spec in geography.MAPS[geo]:
             col = "log10_aui" if spec.log else spec.column
             div = spec.center is not None
-            fig, um = choropleth(
+            fig, um = maps.choropleth(
                 gdfs[geo], vals, id_col=id_col[geo], value_col=col, title=spec.title,
                 cmap=spec.cmap, center=spec.center, label=spec.label,
                 ticks=[math.log10(t) for t in geography.AUI_TICKS] if spec.log else None,
                 ticklabels=list(geography.AUI_TICKLABELS) if spec.log else None,
-                clip=geography.CLIP if div else None, edgecolor="0.55" if div else "white")
+                clip=geography.CLIP if div else None, edgecolor="0.55" if div else "white",
+                partial_ids=partial)
             unmatched[geo][spec.fig_name] = geography.unalias(um)
             paths += save_figure(fig, spec.fig_name, out_dir=fig_dir)
     paths.insert(0, _geography_doc(out / GEOGRAPHY_MD, tables, globals_, excluded, unmatched))
