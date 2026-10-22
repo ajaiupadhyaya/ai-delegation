@@ -89,7 +89,20 @@ needing a stated rule:
 - the Claude 3.5 day;
 - the ChatGPT and GPT-4o events, which are missing from the source.
 
-**Trading days.** Every verified date above is a weekday, and none is a NYSE holiday. 2024-06-19
-(Juneteenth) was closed, but neither Claude 3.5 candidate date falls on it. Under P7's
-next-trading-day rule, no date moves. The check against the dates actually present in the
-frozen FF49 and factor files can only run after `pap-v1`.
+**Trading days.** Every verified date above is a weekday (computed). **Whether any of them is an
+NYSE holiday is unverified.** The NYSE holiday calendar
+(https://www.nyse.com/markets/hours-calendars, checked 2026-10-21) shows only 2026–2028, and the
+Internet Archive could not be reached from this environment. From general calendar knowledge,
+none of the dates falls on a standard NYSE holiday, but no source was checked for 2022–2025.
+After `pap-v1`, the check is done mechanically against the dates actually present in the frozen
+FF49 and factor files, applying P7's next-trading-day rule.
+
+**Confirmatory window ends (for `aideleg.confirm_h5`).**
+
+- **2026-08-31 (Mon) is an NYSE trading day.** The NYSE 2026 calendar on the page above lists no
+  August holiday; Labor Day is Monday, September 7, 2026.
+- **2025-04-01 (Tue) is a weekday.** It is not on the 2026–2028 calendar, and its holiday status
+  is unverified by source. Good Friday 2025 was April 18 (calendar knowledge). If it were
+  not a trading day, the script's coverage check (data must start on or before 2025-04-01)
+  would still pass, because the files hold earlier dates. The check fails safe only in the
+  other direction: missing late data makes it refuse.
