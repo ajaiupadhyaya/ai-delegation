@@ -1483,3 +1483,21 @@ input or the confirmatory script is recorded here with its date, the reason, Aja
 whether results had been seen at the time. A change made after a confirmatory result has been seen
 demotes that hypothesis to exploratory, and the pre-registered specification is still reported as the
 primary result (§0.5).
+
+### Additions (D20)
+
+### A-1. Addition: `ne_admin0_50m` (2026-10-22)
+- Type: addition under D20 (outside §9.4; descriptive; not a deviation)
+- Used by: descriptive choropleths (spec §5.2); no confirmatory or robustness input
+- URL: https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip
+- Retrieved (UTC): 2026-10-22T14:41:41Z; bytes: 799734; SHA-256: `5fed433373581fa648920435f937d95f2d3c0200e067409c6478dcdf1b853139`
+
+### A-2. Addition: `census_states_20m` (2026-10-22)
+- Type: addition under D20 (outside §9.4; descriptive; not a deviation)
+- Used by: descriptive choropleths (spec §5.2); no confirmatory or robustness input
+- URL: https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_20m.zip
+- Retrieved (UTC): 2026-10-22T14:41:41Z; bytes: 186432; SHA-256: `0fd2d6562708ff8182c00d5d25b5556d049ecf2794d97b89ed2dac4d5e9e2c8d`
+
+### Clarifications (pre-result)
+
+### Deviations after the freeze

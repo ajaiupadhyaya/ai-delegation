@@ -116,6 +116,13 @@ SOURCES: list[Source] = [
             ("census_naics17_22", "2017_to_2022_NAICS.xlsx"),
         )
     ],
+    # Boundary files for the descriptive choropleths (outside PAP 9.4; PAP 11 A-entries)
+    Source("ne_admin0_50m",
+           "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip",
+           "geo/ne_50m_admin_0_countries.zip", unzip=True),
+    Source("census_states_20m",
+           "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_20m.zip",
+           "geo/cb_2023_us_state_20m.zip", unzip=True),
     # SEC
     Source("sec_tickers", "https://www.sec.gov/files/company_tickers_exchange.json",
            "sec/company_tickers_exchange.json"),

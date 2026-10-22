@@ -14,6 +14,7 @@ REQUIRED = (
         "aei_geo_gdp_us_state", "aei_geo_iso",
         "oews_2024_nat", "oews_2024_ind", "oews_2025_ind",
         "ff_siccodes49", "aioe", "eloundou_occ", "census_sic87_naics97", "sec_tickers",
+        "ne_admin0_50m", "census_states_20m",
     }
     | {f"aei_r{n}_{s}" for n in (3, 4, 5, 6) for s in ("claude_ai", "api", "docs")}
     | {f"{p}_{f}" for p in ("ff49", "ff5", "mom") for f in ("daily", "monthly")}
@@ -57,3 +58,10 @@ def test_onet_dwa_files_are_29_3_text_database():
     base = "https://www.onetcenter.org/dl_files/database/db_29_3_text/"
     assert sources.by_key("onet_29_3_tasks_to_dwas").url == base + "Tasks%20to%20DWAs.txt"
     assert sources.by_key("onet_29_3_dwa_reference").url == base + "DWA%20Reference.txt"
+
+
+def test_new_geo_keys_registered():
+    for key in ("ne_admin0_50m", "census_states_20m"):
+        assert sources.by_key(key).unzip
+    assert sources.by_key("ne_admin0_50m").dest == "geo/ne_50m_admin_0_countries.zip"
+    assert sources.by_key("census_states_20m").dest == "geo/cb_2023_us_state_20m.zip"

@@ -263,6 +263,14 @@
     "bytes": 367616,
     "sha256": "ba04e2332bbe5d56eec834908f7d0e253b377b59d906dbc3053088a0aa09701d"
   },
+  "census_states_20m": {
+    "key": "census_states_20m",
+    "url": "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_20m.zip",
+    "dest": "geo/cb_2023_us_state_20m.zip",
+    "retrieved_utc": "2026-10-22T14:41:41Z",
+    "bytes": 186432,
+    "sha256": "0fd2d6562708ff8182c00d5d25b5556d049ecf2794d97b89ed2dac4d5e9e2c8d"
+  },
   "eloundou_occ": {
     "key": "eloundou_occ",
     "url": "https://raw.githubusercontent.com/openai/GPTs-are-GPTs/main/data/occ_level.csv",
@@ -326,6 +334,14 @@
     "retrieved_utc": "2026-10-21T21:13:24Z",
     "bytes": 5600,
     "sha256": "c06d1c2e9a5e4f6985879722f23c6bb585f46b34eaf3fcb681d4de887e353f3e"
+  },
+  "ne_admin0_50m": {
+    "key": "ne_admin0_50m",
+    "url": "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip",
+    "dest": "geo/ne_50m_admin_0_countries.zip",
+    "retrieved_utc": "2026-10-22T14:41:41Z",
+    "bytes": 799734,
+    "sha256": "5fed433373581fa648920435f937d95f2d3c0200e067409c6478dcdf1b853139"
   },
   "oews_2024_ind": {
     "key": "oews_2024_ind",
