@@ -50,10 +50,13 @@ audit: data/derived/aei_panel.parquet data/derived/exposure_ff49.parquet \
 # Pre-seal only: once the tag pap-v1 exists the frozen values are fixed, and both this guard
 # and `aideleg.power.main` refuse. (The benchmarks are computed in-process, not read from
 # their parquet.)
-.PHONY: power
-power: data/derived/exposure_ff49.parquet
+# the guard is the first prerequisite, so it fires before any rebuild of the exposure parquet
+.PHONY: power power-unfrozen
+power-unfrozen:
 	@uv run python -c "import sys; from aideleg.market.seal import pap_frozen; \
 		sys.exit('pap-v1 exists: the power analysis is frozen, not rerun' if pap_frozen() else 0)"
+
+power: power-unfrozen data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.power
 
 # regenerate the GENERATED blocks of PAP section 9 from the files (MANIFEST, code binding,

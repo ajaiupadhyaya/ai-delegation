@@ -12,7 +12,9 @@ Steps.
    do not exist, and `pap-v1` exists. Then the binding (PAP §9.2, P-H5), before anything is
    loaded: `pap-v1` is an annotated tag; HEAD descends from it; this script's own blob and the
    working-tree blobs of `src/aideleg/power.py` and every `src/aideleg/market/*.py` equal
-   their blobs at `pap-v1`; `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`. Then the
+   their blobs at `pap-v1`; `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`; no
+   untracked or uncommitted file under those paths (`git status --porcelain
+   --untracked-files=all`), so nothing can shadow bound code on import. Then the
    French data: every French zip's SHA-256 equals `git show pap-v1:data/raw/MANIFEST.json`, and
    every extracted member's CRC32 equals the zip header's (hashes only; no row is parsed).
    Then the Design B exposure vector against its frozen SHA-256 (PAP §9.3). A refusal in
@@ -241,7 +243,9 @@ def check_binding(repo: Path = ROOT, own: Path | None = None) -> None:
     (a) `pap-v1` is an annotated tag; (b) HEAD descends from it; (c) this script's own blob
     (`own`, default this file) and the working-tree blobs of power.py and every
     market/*.py equal their blobs at `pap-v1`, and no market module is added or missing;
-    (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`."""
+    (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`; (e) `git status --porcelain
+    --untracked-files=all -- src pyproject.toml uv.lock` is empty (no untracked file can shadow
+    bound code)."""
     repo = Path(repo)
     own = Path(__file__).resolve() if own is None else Path(own)
     rc, kind = _run_git(repo, "cat-file", "-t", PAP_TAG)
@@ -267,6 +271,12 @@ def check_binding(repo: Path = ROOT, own: Path | None = None) -> None:
     rc, _ = _run_git(repo, "diff", "--quiet", PAP_TAG, "--", *DIFF_PATHS)
     if rc:
         raise BindingError(f"{', '.join(DIFF_PATHS)} differ from {PAP_TAG}")
+    # (e) nothing untracked either: an untracked src/aideleg/power/__init__.py would shadow
+    # power.py on import, and neither (c) nor (d) sees it
+    rc, st = _run_git(repo, "status", "--porcelain", "--untracked-files=all", "--", *DIFF_PATHS)
+    if rc or st:
+        raise BindingError(f"untracked or uncommitted files under {', '.join(DIFF_PATHS)}: "
+                           f"{st.splitlines()[:5] if not rc else 'git status failed'}")
 
 
 def _sha256(path: Path) -> str:

@@ -482,6 +482,15 @@ def test_binding_refuses_src_or_lock_changes_against_the_tag(bound_repo, rel, co
         ch.check_binding(bound_repo, own=_own(bound_repo))
 
 
+@pytest.mark.parametrize("rel", ["src/aideleg/power/__init__.py", "src/aideleg/new_module.py"])
+def test_binding_refuses_an_untracked_file_under_src(bound_repo, rel):
+    # an untracked package src/aideleg/power/ would shadow power.py on import; (c) and (d) miss it
+    (bound_repo / rel).parent.mkdir(parents=True, exist_ok=True)
+    (bound_repo / rel).write_text("x = 1\n")
+    with pytest.raises(ch.BindingError, match="untracked"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
 def test_binding_refuses_in_this_repo_before_the_tag():
     # this repo has no pap-v1: the check refuses without reading anything
     assert not seal.pap_frozen()
@@ -577,3 +586,17 @@ def test_french_data_requires_the_confirmatory_keys(french_repo):
     _g(repo, "tag", "-f", "-a", "pap-v1", "-m", "signed plan")
     with pytest.raises(ch.BindingError, match="mom_daily"):
         ch.check_french_data(repo, raw)
+
+
+def test_report_prints_the_r13_mde(unsealed, tmp_path):
+    r, f = _market(date(1989, 6, 1), date(2026, 9, 30))
+    unsealed["state"].update(returns=r, factors=f)
+    out = tmp_path / "c.md"
+    res = ch.run(out=out)
+    text = out.read_text()
+    from scipy import stats
+    for hyp, v in (("H5", "h5_r13"), ("H5b", "h5b_r13")):
+        mde = (ch.FROZEN[f"crit_{v}_0.025"] + stats.t.ppf(0.80, 21)) * ch.FROZEN[f"s_{v}"]
+        assert res["decision"]["mde_r13"][hyp] == pytest.approx(mde)
+        assert f"R13 (Softw dropped) MDE at Holm level 0.025: {mde * 100:.2f} pp" in text
+    assert text.count("R13 (Softw dropped) MDE") == 2

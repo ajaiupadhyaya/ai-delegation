@@ -315,17 +315,44 @@ def test_freedman_lane_statistic_matches_brute_force(scheme, stat):
 
 
 def test_freedman_lane_t_and_coef_differ_but_share_draws(monkeypatch, tmp_path):
-    returns, factors = _synthetic(date(1989, 6, 1), date(2022, 11, 29), seed=3)
-    rng = np.random.default_rng(9)
+    # correlated control and heteroskedastic, z-aligned alpha noise: the t and the coefficient
+    # rank the draws differently, so the p-values differ
+    rng = np.random.default_rng(31)
     z = rng.normal(size=49)
+    c = 0.8 * z + 0.6 * rng.normal(size=49)
+    alphas = rng.normal(0.0, 1.0, size=(200, 49)) * (0.02 + 0.05 * np.abs(z)) + 0.004 * z
+    p_t = power.ri_pvalues(alphas, z, c, n_perm=199, rng=np.random.default_rng(5),
+                           scheme="freedman_lane")
+    p_c = power.ri_pvalues(alphas, z, c, n_perm=199, rng=np.random.default_rng(5),
+                           scheme="freedman_lane_coef")
+    assert not np.allclose(p_t, p_c)
+    # same draws: both schemes consume the generator identically (same permutation indices)
+    g_t, g_c = np.random.default_rng(5), np.random.default_rng(5)
+    power.ri_pvalues(alphas[:3], z, c, n_perm=50, rng=g_t, scheme="freedman_lane")
+    power.ri_pvalues(alphas[:3], z, c, n_perm=50, rng=g_c, scheme="freedman_lane_coef")
+    assert g_t.bit_generator.state == g_c.bit_generator.state
+    # run_power gives the coefficient column a copy of the generator taken just before the t
+    # column: the same permutations, scored two ways
+    states = []
+    real = power.ri_pvalues
+
+    def spy(a, zz, cc=None, n_perm=10_000, rng=None, scheme="exposure"):
+        if scheme.startswith("freedman_lane"):
+            states.append((scheme, rng.bit_generator.state))
+        return real(a, zz, cc, n_perm, rng, scheme)
+
+    returns, factors = _synthetic(date(1989, 6, 1), date(2022, 11, 29), seed=3)
     expo = pl.DataFrame({"ff49": list(range(1, 50)), "ff49_short": NAMES,
-                         "z_delegation": z, "z_aioe": 0.7 * z + rng.normal(size=49)})
+                         "z_delegation": z, "z_aioe": c})
+    monkeypatch.setattr(power, "ri_pvalues", spy)
     monkeypatch.setattr(power, "load_industry_returns",
                         lambda f, w, end: returns.filter(pl.col("date") <= end))
     monkeypatch.setattr(power, "load_factors",
                         lambda f, end: factors.filter(pl.col("date") <= end))
     monkeypatch.setattr(power, "load_exposure", lambda: expo)
     res = power.run_power(out=tmp_path / "power.md", n_perm=49)
+    assert [sc for sc, _ in states] == ["freedman_lane", "freedman_lane_coef"]
+    assert states[0][1] == states[1][1]
     for lvl in (0.025, 0.05):
         for sch in ("overlap", "nonoverlap"):
             assert 0 <= res[f"ri_reject_h5b_fl_{sch}_{lvl}"] <= 1
