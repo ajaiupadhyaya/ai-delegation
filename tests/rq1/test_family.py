@@ -258,3 +258,33 @@ def test_structural_errors_raise():
     bad["H2"].diagnostics.pop("p_wild")
     with pytest.raises(ValueError, match="p_wild"):
         family.decide(bad)
+
+
+def test_h1_nan_estimate_is_not_supported():
+    d = family.decide(_all(h1=_h1(-1.0, math.nan)))["H1"]
+    assert (d.status, d.rejected) == ("not_supported_nonfinite", False)
+    assert d.text == (
+        "H1 is not supported: log_wage has a non-finite estimate (human_education_years_mean"
+        " = -1.000 (95% CI [-2.960, 0.960], p = 0.0010); log_wage = nan (95% CI [nan, nan], "
+        "p = 0.0020)).")
+
+
+def test_nonfinite_se_is_not_supported():
+    res = _all()
+    c = res["H3"].coefs["error_cost"]
+    res["H3"].coefs["error_cost"] = Coef(c.name, c.estimate, math.inf, c.ci_low, c.ci_high,
+                                         c.p, c.df)
+    d = family.decide(res)["H3"]
+    assert (d.status, d.rejected) == ("not_supported_nonfinite", False)
+    assert "error_cost has a non-finite se" in d.text
+
+
+def test_h2_nan_p():
+    d = family.decide(_all(h2=_h2(0.5, math.nan, 0.004)))["H2"]
+    assert (d.status, d.rejected) == ("not_supported_nonfinite", False)
+    assert "trend has a non-finite p" in d.text
+    assert "nan > 0.0125" not in d.text
+    w = family.decide(_all(h2=_h2(0.5, 0.001, math.nan)))["H2"]
+    assert (w.status, w.rejected) == ("not_rejected", False)
+    assert w.text.endswith("Not met: release-level wild bootstrap p is not finite.")
+    assert "nan > 0.0125" not in w.text

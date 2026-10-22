@@ -26,6 +26,8 @@ Rules
   with covariates). It is reported beside β_w and γ.
 """
 
+import math
+
 import numpy as np
 import polars as pl
 
@@ -141,6 +143,11 @@ def _attenuation(rows: pl.DataFrame, col: str, regressors: list[str]) -> float:
                               controls)
 
 
+def _p_intersection_union(ps: list[float]) -> float:
+    """max of the p-values (D17); NaN if any is NaN, so a NaN is never dropped by max."""
+    return math.nan if any(math.isnan(p) for p in ps) else max(ps)
+
+
 def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
                 predictors: tuple[str, str] = ("human_education_years_mean", "log_wage")
                 ) -> HypothesisResult:
@@ -153,7 +160,8 @@ def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
     diagnostics["tested"] = list(tested)
     return HypothesisResult(
         hypothesis="H1", outcome=outcome, coefs=fit.coefs,
-        p_family=max(fit.coefs[p].p for p in tested), sample=_sample(rows, fit),
+        p_family=_p_intersection_union([fit.coefs[p].p for p in tested]),
+        sample=_sample(rows, fit),
         drops=drops, diagnostics=diagnostics, notes=_psd_note(fit, tested))
 
 

@@ -27,7 +27,7 @@ NULLS = {"H1": "β_e = 0 or β_w = 0", "H2": "β = 0", "H3": "γ = 0", "H4": "b�
 _N_TESTED = {"H1": 2, "H2": 1, "H3": 1, "H4": 2}
 
 Status = Literal["supported", "contradicts", "rejected_mixed_sign", "rejected_zero_estimate",
-                 "not_rejected"]
+                 "not_supported_nonfinite", "not_rejected"]
 
 
 @dataclass(frozen=True)
@@ -114,6 +114,19 @@ def _zero_estimate(h: str, zero: list[Coef], lines: str) -> str:
             f"hypothesis is not supported ({lines}).")
 
 
+def _nonfinite(h: str, coefs: list[Coef], level: float) -> Decision | None:
+    """Any non-finite tested estimate, SE or p: not rejected and not supported."""
+    bad = []
+    for c in coefs:
+        fields = [f for f in ("estimate", "se", "p") if not math.isfinite(getattr(c, f))]
+        if fields:
+            bad.append(f"{c.name} has a non-finite {' and '.join(fields)}")
+    if not bad:
+        return None
+    text = f"{h} is not supported: {'; '.join(bad)} ({_coef_lines(coefs)})."
+    return Decision(h, "not_supported_nonfinite", False, level, text)
+
+
 def _signed(h: str, coefs: list[Coef], rule: str, level: float) -> Decision:
     """A rejected directional hypothesis: every tested estimate must have the stated sign."""
     lines = _coef_lines(coefs)
@@ -132,6 +145,9 @@ def _signed(h: str, coefs: list[Coef], rule: str, level: float) -> Decision:
 def _family_decision(res: HypothesisResult, step: HolmStep) -> Decision:
     h, coefs = res.hypothesis, _tested(res)
     lines = _coef_lines(coefs)
+    nonfinite = _nonfinite(h, coefs, step.level)
+    if nonfinite:
+        return nonfinite
     if not step.rejected:
         return Decision(h, "not_rejected", False, step.level, _not_rejected(h, lines))
     rule = (f"Holm over {{H1, H3, H4}} at family-wise {FAMILY_ALPHA} rejects at step {step.rank} "
@@ -145,14 +161,18 @@ def _h2_decision(res: HypothesisResult) -> Decision:
     (coef,) = _tested(res)
     if "p_wild" not in res.diagnostics:
         raise ValueError('H2: diagnostics["p_wild"] is missing')
+    nonfinite = _nonfinite("H2", [coef], H2_ALPHA)
+    if nonfinite:
+        return nonfinite
     p_c, p_w = float(coef.p), float(res.diagnostics["p_wild"])
     lines = _coef_lines([coef])
     alpha = _exact(H2_ALPHA)
     failed = []
-    if not _meets(p_c, alpha):
-        failed.append(f"task-clustered p = {p_c:.4f} > {H2_ALPHA}")
-    if not _meets(p_w, alpha):
-        failed.append(f"release-level wild bootstrap p = {p_w:.4f} > {H2_ALPHA}")
+    for label, p in (("task-clustered p", p_c), ("release-level wild bootstrap p", p_w)):
+        if not math.isfinite(p):
+            failed.append(f"{label} is not finite")
+        elif not _meets(p, alpha):
+            failed.append(f"{label} = {p:.4f} > {H2_ALPHA}")
     if failed:
         text = f"{_not_rejected('H2', lines)}. Not met: {'; '.join(failed)}."
         return Decision("H2", "not_rejected", False, H2_ALPHA, text)

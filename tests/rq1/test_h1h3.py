@@ -2,6 +2,7 @@
 only. No real outcome enters these tests (P-RQ1)."""
 
 import dataclasses
+import math
 
 import numpy as np
 import polars as pl
@@ -202,3 +203,9 @@ def test_tested_coefficients_are_named_in_diagnostics():
                                                           "log_wage"]
     h3 = h1h3.estimate_h3(tr, covariates=("human_education_years_mean",))
     assert h3.diagnostics["tested"] == ["error_cost"]
+
+
+def test_h1_p_family_is_nan_when_any_tested_p_is_nan():
+    assert math.isnan(h1h3._p_intersection_union([0.01, math.nan]))
+    assert math.isnan(h1h3._p_intersection_union([math.nan, 0.01]))
+    assert h1h3._p_intersection_union([0.01, 0.2]) == 0.2
