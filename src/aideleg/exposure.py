@@ -95,27 +95,29 @@ def _wmean(col: str, w: str = "usage_share") -> pl.Expr:
     return pl.when(den > 0).then((pl.col(w) * pl.col(col)).filter(has).sum() / den).alias(col)
 
 
-def _with_shares(occ: pl.DataFrame) -> pl.DataFrame:
-    return occ.with_columns(pl.lit(None, pl.Float64).alias(c) for c in SHARES
+def _with_shares(occ: pl.DataFrame, shares: list[str] = SHARES) -> pl.DataFrame:
+    return occ.with_columns(pl.lit(None, pl.Float64).alias(c) for c in shares
                             if c not in occ.columns)
 
 
 def oews_usage(occ: pl.DataFrame, national: pl.DataFrame,
-               soc_structure: pl.DataFrame | None = None) -> tuple[pl.DataFrame, float]:
-    """AEI occupation rows summed to OEWS codes: (`soc6` = OEWS code, `usage_share`, SHARES),
-    and the percent of usage on AEI codes with no OEWS code (dropped before renormalising)."""
+               soc_structure: pl.DataFrame | None = None, *,
+               shares: list[str] = SHARES) -> tuple[pl.DataFrame, float]:
+    """AEI occupation rows summed to OEWS codes: (`soc6` = OEWS code, `usage_share`, `shares`),
+    and the percent of usage on AEI codes with no OEWS code (dropped before renormalising).
+    `shares` names the usage-weighted columns carried through (default `SHARES`)."""
     if occ["soc6"].is_duplicated().any():
         raise ValueError("occ must hold one row per soc6 (one release, period and source)")
     if all(c in occ.columns for c in KEY) and occ.select(KEY).unique().height > 1:
         raise ValueError("occ spans more than one (release, period_start, source) key")
     codes = set(national.filter(pl.col("tot_emp").is_not_null())["soc6"])
-    occ = _with_shares(occ).with_columns(
+    occ = _with_shares(occ, shares).with_columns(
         oews=pl.col("soc6").map_elements(lambda s: oews_code_for(s, codes, soc_structure),
                                          return_dtype=pl.String))
     total = occ["usage_share"].sum()
     lost = occ.filter(pl.col("oews").is_null())["usage_share"].sum()
     mapped = (occ.filter(pl.col("oews").is_not_null())
-              .group_by("oews").agg(pl.col("usage_share").sum(), *[_wmean(c) for c in SHARES])
+              .group_by("oews").agg(pl.col("usage_share").sum(), *[_wmean(c) for c in shares])
               .rename({"oews": "soc6"}))
     kept = total - lost
     mapped = mapped.with_columns(

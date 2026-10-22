@@ -7,6 +7,8 @@ re-runs an estimator. Every number it writes is copied or formatted from that JS
 Reporting (PAP §0.2): every coefficient appears in the same table and in the same figure style
 whether or not its hypothesis is rejected; no stars; a non-rejection names its null.
 
+Outputs of `report_anatomy` (descriptive; no test, no p-value) are listed in its docstring.
+
 Outputs (`report_confirmatory`):
 - `confirmatory_table.csv` / `.md`: one row per coefficient;
 - `decisions.md`: the α split, the four decision texts verbatim, the H2 disclosure notes, and
@@ -20,12 +22,15 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import polars as pl
 
+from aideleg.describe import anatomy
 from aideleg.figures import FIGSIZE, PALETTE, apply_style, save_figure
 from aideleg.figures.save import FIGURES_DIR
 from aideleg.results.common import write_csv, write_result_doc
 from aideleg.rq1.confirm import JSON_NAME, OUT_DIR
+from aideleg.rq1.family import SPLIT_STATEMENT
 
 GENERATOR = "aideleg.results.rq1"
 HYPOTHESES = ("H1", "H2", "H3", "H4")
@@ -237,16 +242,208 @@ def report_confirmatory(json_path: Path = OUT_DIR / JSON_NAME, out: Path = OUT_D
     return paths
 
 
+# --- RQ1 descriptive anatomy (spec §5.2) -----------------------------------------------------
+
+ANATOMY_MD = "anatomy.md"
+ANATOMY_CSVS = {"major": "anatomy_major_group.csv", "decile": "anatomy_wage_decile.csv",
+                "education": "anatomy_education.csv", "concentration": "anatomy_concentration.csv"}
+FIG_MAJOR, FIG_DECILE = "fig_rq1_composition_major", "fig_rq1_composition_wage_decile"
+FIG_EDU, FIG_LORENZ = "fig_rq1_composition_education", "fig_rq1_lorenz"
+# the two automation patterns take the two warm palette colours
+PATTERN_STYLE = [("directive", PALETTE[6]), ("feedback loop", PALETTE[1]),
+                 ("task iteration", PALETTE[2]), ("validation", PALETTE[3]),
+                 ("learning", PALETTE[5])]
+LORENZ_RELEASES = ("r2", "r3", "r4", "r5", "r6")
+
+
+def _cell(x, digits: int) -> str:
+    if x is None:
+        return "—"
+    return f"{x:.{digits}f}" if isinstance(x, float) else str(x)
+
+
+def _md_table(df: pl.DataFrame, digits: int = 2) -> str:
+    out = ["| " + " | ".join(df.columns) + " |", "|" + "---|" * df.width]
+    out += ["| " + " | ".join(_cell(v, digits) for v in row) + " |" for row in df.iter_rows()]
+    return "\n".join(out)
+
+
+def _stacked(ax, df: pl.DataFrame, labels: list[str], *, horizontal: bool) -> None:
+    """Stacked bars of the five patterns (percent of classified conversations)."""
+    base = np.zeros(df.height)
+    pos = np.arange(df.height)
+    for (name, color), col in zip(PATTERN_STYLE, anatomy.FIVE_PATTERNS, strict=True):
+        vals = np.nan_to_num(df[col].to_numpy(allow_copy=True).astype(float))
+        if horizontal:
+            ax.barh(pos, vals, left=base, color=color, label=name, linewidth=0)
+        else:
+            ax.bar(pos, vals, bottom=base, color=color, label=name, linewidth=0)
+        base += vals
+    ticks = (ax.set_yticks, ax.set_yticklabels) if horizontal else (ax.set_xticks,
+                                                                     ax.set_xticklabels)
+    ticks[0](pos)
+    ticks[1](labels)
+    if horizontal:
+        ax.invert_yaxis()
+        ax.set_xlim(0, 100)
+        ax.set_xlabel("% of classified conversations")
+    else:
+        ax.set_ylim(0, 100)
+        ax.set_ylabel("% of classified conversations")
+
+
+def fig_composition(df: pl.DataFrame, labels: list[str], *, horizontal: bool, xlabel: str = "",
+                    size: str = "double"):
+    apply_style()
+    fig, ax = plt.subplots(figsize=FIGSIZE[size], layout="constrained")
+    _stacked(ax, df, labels, horizontal=horizontal)
+    if xlabel:
+        (ax.set_ylabel if horizontal else ax.set_xlabel)(xlabel)
+    ax.legend(frameon=False, ncols=5, loc="upper center", bbox_to_anchor=(0.5, -0.12 if not
+                                                                          horizontal else -0.05),
+              fontsize=7)
+    return fig
+
+
+def fig_lorenz(panel: pl.DataFrame):
+    apply_style()
+    fig, ax = plt.subplots(figsize=FIGSIZE["single"], layout="constrained")
+    ax.plot([0, 1], [0, 1], color=PALETTE[0], linewidth=0.6, linestyle=":", label="equality")
+    colors = [PALETTE[2], PALETTE[3], PALETTE[1], PALETTE[7], PALETTE[6]]
+    for r, color in zip(LORENZ_RELEASES, colors, strict=True):
+        if panel.filter((pl.col("release") == r) & (pl.col("source") == "claude_ai")).is_empty():
+            continue
+        x, y = anatomy.lorenz_points(anatomy.task_shares(panel, r, "claude_ai"))
+        ax.plot(x, y, color=color, linewidth=1.0, label=r)
+    ax.set_xlabel("cumulative share of tasks (smallest first)")
+    ax.set_ylabel("cumulative share of usage")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.legend(frameon=False, loc="upper left")
+    return fig
+
+
+def _anatomy_doc(path: Path, tables: dict[str, pl.DataFrame], release: str, source: str,
+                 zero_note: str) -> Path:
+    major, decile, edu, conc = (tables[k] for k in ("major", "decile", "education",
+                                                    "concentration"))
+    scope = "\n".join([
+        "- Composition is computed over published cells only: what AEI leaves out is not "
+        "imputed, and each table's usage shares are renormalised to 100 over the cells it "
+        "covers.",
+        "- The occupation basis is AEI's published SOC rows (D9). The task-allocated basis is "
+        "not used here.",
+        f"- The reference release is {release} ({source}); its two months are combined by D13: "
+        "a value missing in one month is averaged over the month that has it, never treated "
+        "as 0.",
+        "- Cross-release concentration mixes suppression regimes (PAP §5), so differences "
+        "between releases are not read as changes in the underlying conversations.",
+        "- These tables are descriptive. No hypothesis test is attached to any of them, and "
+        "they report no p-value.",
+        "- Patterns are percentages of classified conversations. Automation = directive + "
+        "feedback loop; augmentation = task iteration + validation + learning.",
+    ])
+    csvs = "\n".join(f"- `{v}`" for v in ANATOMY_CSVS.values())
+    figs = "\n".join(f"- `{n}` (PDF and PNG)" for n in
+                      (FIG_MAJOR, FIG_DECILE, FIG_EDU, FIG_LORENZ))
+    sections = [
+        ("α split", SPLIT_STATEMENT + " This document tests nothing; the split is stated "
+                    "because every RQ1 results document states it."),
+        ("Scope and reading", scope),
+        (f"Composition by occupation major group ({release}, {source})",
+         "`usage_share` is the percentage of published SOC-major usage.\n\n"
+         + _md_table(major)),
+        (f"Composition by wage decile ({release}, {source}, published basis)",
+         "Deciles are employment-weighted deciles of the OEWS May 2024 annual median wage; a "
+         "top-coded median takes the top-code and a suppressed median is excluded, and those "
+         "occupations form the final row (`decile` empty). `emp_share` is the percentage of "
+         "OEWS employment; `usage_share` is the percentage of conversations matched to OEWS "
+         "occupations; `n_occ` counts OEWS occupations.\n\n" + _md_table(decile)),
+        (f"Composition by education ({release}, {source})",
+         "Matched tasks are binned on the mean education years of the person in the "
+         "conversation (`human_education_years_mean`), left-closed bins. A task with no "
+         "published value is `not published`; its patterns are empty when its published "
+         "usage is 0.00.\n\n" + _md_table(edu)),
+        ("Usage concentration across tasks",
+         "One row per release and source over the published matched tasks, usage renormalised "
+         "to 100. `topK_share` is the usage share of the largest ⌈K% · n⌉ tasks; "
+         "`n_tasks_50pct` is the number of largest tasks that together hold half the usage. "
+         + zero_note + "\n\n" + _md_table(conc, digits=4)),
+        ("Figures", figs),
+        ("Tables as CSV", "Full-precision values:\n\n" + csvs),
+    ]
+    return write_result_doc(path, "RQ1 descriptive anatomy", GENERATOR, sections)
+
+
+def _load_anatomy_inputs():
+    from aideleg.acquire.sources import by_key
+    from aideleg.aei.tasks import default_index
+    from aideleg.bls.oews import load_national, load_national_wages
+    from aideleg.config import RAW
+    from aideleg.rq1.confirm import PANEL_PATH
+
+    return (pl.read_parquet(PANEL_PATH), default_index(), load_national_wages(2024),
+            load_national(2024), pl.read_csv(RAW / by_key("aei_soc_structure").dest))
+
+
+def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=None, index=None,
+                   wages=None, national=None, soc_structure=None, release: str = "r6",
+                   source: str = "claude_ai") -> list[Path]:
+    """Write `anatomy.md`, one CSV per table and four figures (descriptive; no test).
+
+    Tables: composition by major group, wage decile (published basis) and education, and usage
+    concentration. Figures: `fig_rq1_composition_major`, `fig_rq1_composition_wage_decile`,
+    `fig_rq1_composition_education` (stacked bars of the five patterns) and `fig_rq1_lorenz`
+    (claude_ai r2-r6). With `panel=None` the study inputs are loaded; the other inputs are
+    for tests (`index` is unused on the published basis).
+    """
+    if panel is None:
+        panel, index, wages, national, soc_structure = _load_anatomy_inputs()
+    out = Path(out)
+    tables = {
+        "major": anatomy.by_major_group(panel, release=release, source=source),
+        "decile": anatomy.by_wage_decile(panel, index, wages, national, soc_structure,
+                                         release=release, source=source),
+        "education": anatomy.by_education(panel, release=release, source=source),
+        "concentration": anatomy.concentration(panel),
+    }
+    shares = anatomy.task_shares(panel, release, source)
+    zero_note = (f"{release} {source} publishes usage to two decimals: "
+                 f"{int((shares == 0).sum())} of its {shares.size} published matched tasks "
+                 "carry 0.00, so its task count and Gini are not comparable with releases "
+                 "that publish finer values.")
+    paths = [write_csv(tables[k], out / ANATOMY_CSVS[k]) for k in ANATOMY_CSVS]
+    paths.append(_anatomy_doc(out / ANATOMY_MD, tables, release, source, zero_note))
+    major, decile = tables["major"], tables["decile"]
+    edu = tables["education"].filter(pl.col("bin") != anatomy.EDU_MISSING)  # no patterns to stack
+    paths += save_figure(fig_composition(
+        major, [f"{m} {n[:44]}" for m, n in zip(major["major"], major["name"], strict=True)],
+        horizontal=True, size="tall"), FIG_MAJOR, out_dir=fig_dir)
+    paths += save_figure(fig_composition(
+        decile, [str(d) if d is not None else "no wage" for d in decile["decile"]],
+        horizontal=False, xlabel="wage decile (employment-weighted)"),
+        FIG_DECILE, out_dir=fig_dir)
+    paths += save_figure(fig_composition(
+        edu, edu["bin"].to_list(), horizontal=False,
+        xlabel="education years (human, mean per task)"), FIG_EDU, out_dir=fig_dir)
+    paths += save_figure(fig_lorenz(panel), FIG_LORENZ, out_dir=fig_dir)
+    return paths
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog=GENERATOR, description=(
         "RQ1 reporting from the committed P-RQ1 JSON (no estimator is run)."))
     ap.add_argument("--confirmatory", action="store_true",
                     help="write the confirmatory table, decisions and figures")
+    ap.add_argument("--anatomy", action="store_true",
+                    help="write the descriptive anatomy (composition, concentration)")
     a = ap.parse_args(argv)
-    if not a.confirmatory:
+    if not (a.confirmatory or a.anatomy):
         ap.print_help()
         return 2
-    for p in report_confirmatory():
+    paths = (report_confirmatory() if a.confirmatory else []) + (
+        report_anatomy() if a.anatomy else [])
+    for p in paths:
         print(p)
     return 0
 
