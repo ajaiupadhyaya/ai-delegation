@@ -1680,4 +1680,10 @@ primary result (§0.5).
 - Results seen: no
 - Rule: (a) Task unit and cluster: the H1/H3 task unit and cluster is the panel node_id (the O*NET Task ID for r6), not the statement text. Two r6 IDs sharing one statement stay separate tasks and clusters: one such pair with positive weight (nodes 976 and 14630), about 0.02% of r6 task usage. (b) Zero-weight drop: 1,611 of the 2,823 r6 task nodes are dropped as `zero_weight`, because r6 task pct is published rounded to 0.01 and those nodes show 0.00; this follows from D13, as the usage-weighted mean is undefined at zero usage. (c) r6 automation measure: the H1–H4 automation outcome in r6 is AEI's published automation bucket. 41 r6 global task-month cells publish all five patterns but no bucket; they are null and skipped (0.033% of usage). Where both exist, the bucket and the renormalised pattern sum differ by ≤ 0.034 pp. (d) H3 sample: the H3 sample does not require wage, education or an OEWS code (1,689 vs H1's 1,684 rows); this reading follows the H3 missing-values row ("H3 applies the same rule to its own variables"), and C-12 is the related entry.
 
+### C-31. Clarification: Disclosure: a unit-test artefact in docs/results/rq1 before the P-RQ1 run (2026-10-22)
+- Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
+- Fixed by: Plan 2, Task 10
+- Results seen: no
+- Rule: On 2026-10-22 at 19:47:28 UTC, while recording a failing test for the panel-hash refusal, a unit test called confirm.run against the real output directory with the clean-tree check stubbed (HEAD recorded as 'abc') and load_inputs stubbed to raise before reading any data. It created an attempt marker, a log and a markdown file under docs/results/rq1 containing only the stub's traceback. No data were loaded and no outcome was read, so it is not a P-RQ1 attempt. The files were never committed; they were removed and a copy is kept outside the repository. The test fixture now redirects the output directory to a temporary path so no test can write the real one.
+
 ### Deviations after the freeze
