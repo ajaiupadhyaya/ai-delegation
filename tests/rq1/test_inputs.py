@@ -147,17 +147,18 @@ _NEEDS = pytest.mark.skipif(not _PANEL.exists() or not (RAW / "onet").exists(),
 @pytest.mark.data
 @_NEEDS
 def test_real_families_cover_r6_tasks():
+    from aideleg.aei.tasks import default_index
     p = pl.read_parquet(_PANEL).filter(
         (pl.col("release") == "r6") & (pl.col("source") == "claude_ai")
         & (pl.col("geo_level") == "global") & (pl.col("taxonomy") == "onet_task")
         & (pl.col("metric") == "pct") & ~pl.col("node_id").str.starts_with("unmatched:"))
     w = inputs.two_month_mean(p.with_columns(pct=pl.col("value")).with_columns(v=pl.col("value")),
-                              ["v"], key=["node_id"], n_periods=2)
-    w = w.with_columns(task_id=pl.col("node_id").cast(pl.Int64, strict=False)).drop_nulls("task_id")
-    fam = inputs.task_families("iwa")["task_id"].unique()
-    share = w.filter(pl.col("task_id").is_in(fam.to_list()))["weight"].sum() / w["weight"].sum()
-    print(f"r6 claude_ai matched-task D13 weight with an IWA: {share:.4f}")
-    assert share >= 0.9
+                              ["v"], key=["node_id", "node_name"], n_periods=2)
+    idx, fam = default_index(), inputs.task_families("iwa")
+    covered = [bool(inputs.families_for_text(n, idx, fam, "iwa")) for n in w["node_name"]]
+    share = w.filter(pl.Series(covered))["weight"].sum() / w["weight"].sum()
+    print(f"r6 claude_ai matched-task D13 weight with an IWA (any candidate): {share:.4f}")
+    assert share >= 0.9899 - 1e-4
 
 
 @pytest.mark.data
@@ -170,3 +171,54 @@ def test_real_topcoded_count():
     print(f"topcoded 2024 occupations: {n}")
     assert n >= 1
 
+
+
+def _index(tmp_path, rows):
+    from aideleg.aei.tasks import TaskIndex
+    f = tmp_path / "t.txt"
+    f.write_text("O*NET-SOC Code\tTask ID\tTask\tTask Type\tIncumbents Responding\tDate\t"
+                 "Domain Source\r\n" + "".join(f"11-1011.00\t{i}\t{t}\tCore\t1\t1\tA\r\n"
+                                                for i, t in rows), encoding="utf-8")
+    return TaskIndex.from_onet(f)
+
+
+def test_families_for_text_union_and_drop(tmp_path):
+    idx = _index(tmp_path, [(1, "Do a thing."), (2, "do a thing"), (3, "Other"), (4, "Lone")])
+    fam = pl.DataFrame({"task_id": [1, 2, 2], "family": ["A.I01", "A.I02", "A.I01"]},
+                       schema={"task_id": pl.Int64, "family": pl.String})
+    assert inputs.families_for_text("Do a thing", idx, fam, "iwa") == ["A.I01", "A.I02"]
+    only2 = fam.filter(pl.col("task_id") == 2)  # smallest candidate (1) has no link
+    assert inputs.families_for_text("do a thing.", idx, only2, "iwa") == ["A.I01", "A.I02"]
+    assert inputs.families_for_text("Other", idx, fam, "iwa") == []
+    assert inputs.families_for_text("not in index", idx, fam, "iwa") == []
+
+
+def test_two_month_mean_rejects_duplicates_and_extra_periods():
+    dup = _wide([("t", APR, 3.0, 60.0), ("t", APR, 1.0, 20.0)])
+    with pytest.raises(ValueError, match="duplicate"):
+        inputs.two_month_mean(dup, ["automation"], key=["task"], n_periods=2)
+    two = _wide([("t", APR, 3.0, 60.0), ("t", MAY, 1.0, 20.0)])
+    with pytest.raises(ValueError, match="periods"):
+        inputs.two_month_mean(two, ["automation"], key=["task"], n_periods=1)
+
+
+def test_task_families_rejects_dwa_with_two_iwas(tmp_path):
+    t2d = tmp_path / "t.txt"
+    t2d.write_text("O*NET-SOC Code\tTask ID\tDWA ID\tDate\tDomain Source\n"
+                   "x\t1\tD1\td\ts\n", encoding="utf-8")
+    ref = tmp_path / "r.txt"
+    ref.write_text("Element ID\tIWA ID\tDWA ID\tDWA Title\nA\tI1\tD1\tt\nA\tI2\tD1\tt\n",
+                   encoding="utf-8")
+    with pytest.raises(ValueError, match="more than one"):
+        inputs.task_families("iwa", tasks_to_dwas=t2d, dwa_reference=ref)
+
+
+def test_error_cost_indicator_rejects_null():
+    with pytest.raises(ValueError, match="null"):
+        inputs.error_cost_indicator(pl.Series("soc6", ["23-1011", None]))
+
+
+def test_result_rejects_non_finite():
+    r = HypothesisResult("H1", "y", {}, p_family=float("nan"))
+    with pytest.raises(ValueError, match="non-finite"):
+        r.to_dict()

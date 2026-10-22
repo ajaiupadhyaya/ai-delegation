@@ -4,6 +4,7 @@ Every estimate carries its point value, 95% CI and p-value. Wording: AEI data ar
 conversations matched to O*NET tasks.
 """
 
+import math
 from dataclasses import asdict, dataclass, field
 
 
@@ -44,6 +45,8 @@ def _plain(x):
     if isinstance(x, int):
         return int(x)
     if isinstance(x, float):
+        if not math.isfinite(x):
+            raise ValueError(f"non-finite float {x} in a result")
         return float(x)
     if hasattr(x, "item"):  # numpy scalar
         return _plain(x.item())
