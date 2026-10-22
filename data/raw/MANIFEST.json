@@ -279,6 +279,14 @@
     "bytes": 126022,
     "sha256": "40c74f53de40aec91c0017d80690cbba915f83a8bb414bcf2f884692f1749acb"
   },
+  "ff3_monthly": {
+    "key": "ff3_monthly",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip",
+    "dest": "french/F-F_Research_Data_Factors_CSV.zip",
+    "retrieved_utc": "2026-10-22T21:55:15Z",
+    "bytes": 13065,
+    "sha256": "593f4fbef03181bc0b22ff6292f217689dd1fb79355049ca905d95b262040a66"
+  },
   "ff49_daily": {
     "key": "ff49_daily",
     "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/49_Industry_Portfolios_daily_CSV.zip",

@@ -1498,6 +1498,12 @@ primary result (§0.5).
 - URL: https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_20m.zip
 - Retrieved (UTC): 2026-10-22T14:41:41Z; bytes: 186432; SHA-256: `0fd2d6562708ff8182c00d5d25b5556d049ecf2794d97b89ed2dac4d5e9e2c8d`
 
+### A-3. Addition: `ff3_monthly` (2026-10-22)
+- Type: addition under D20 (outside §9.4; the PAP names FF3; FF5 2×3 SMB is not FF3 SMB; not a deviation)
+- Used by: Plan 3 Task 6 tercile FF3 alphas
+- URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip
+- Retrieved (UTC): 2026-10-22T21:55:15Z; bytes: 13065; SHA-256: `593f4fbef03181bc0b22ff6292f217689dd1fb79355049ca905d95b262040a66`
+
 ### Clarifications (pre-result)
 
 ### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)
@@ -1693,5 +1699,71 @@ primary result (§0.5).
 - Fixed by: Plan 2 final fix wave (I1)
 - Results seen: RQ1 confirmatory results seen
 - Rule: H4's task-mix control (`h4._mix`) sums over a polars group_by whose row order is not fixed, so `mix` reproduces only to about 1e-14 between runs; this is far below any reported precision and does not affect the committed P-RQ1 output; figures are built from values rounded to 10 significant digits.
+
+### C-33. Clarification: Event-study cross-sectional inference (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 5 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: Each CAR-on-exposure regression is OLS with an intercept and HC3 SEs, nominal and single-test; randomisation inference is not used (PAP §3.2 documents its size).
+
+### C-34. Clarification: Tercile ties and size (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: k = n // 3 over industries with non-null exposure; ties at a cut broken by ascending `ff49`.
+
+### C-35. Clarification: French firm-size timing (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 2, 6, 7 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: French does not document the timing of 'Average Firm Size'; it is determined empirically from pre-seal rows (≤ 2022-11-29, non-July months): corr(size growth, prior-month VW return) = 0.956 vs corr(size growth, same-month VW return) = 0.084 (median per industry 0.972 vs 0.090), so row t holds ME at the end of t − 1 (SIZE_ME_OFFSET = 1). Cap weights for month t and FM log_size use the row whose ME is the prior month-end, i.e. the row dated t − (1 − SIZE_ME_OFFSET) months (for SIZE_ME_OFFSET = 1, the row dated t). Cap = average firm size × number of firms, both from that row. Script: scripts/french_size_timing.py.
+
+### C-36. Clarification: FF3 factors (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: FF3 alphas use Mkt-RF, SMB and HML of `F-F_Research_Data_Factors_CSV.zip` (`ff3_monthly`), never FF5 columns.
+
+### C-37. Clarification: Tercile bootstrap and DSR (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: The stationary bootstrap (block 3, 10,000 draws) is applied to the Sharpe ratio and the mean, one draw set per variant, one `default_rng(SEED)` consumed in `VARIANTS` order; the DSR is taken over the variants run (six in the primary run).
+
+### C-38. Clarification: Fama–MacBeth characteristics (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 7 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: log BE/ME = ln("Sum of BE / Sum of ME") with French's July–June timing; a month with n ≤ regressors + 1 complete industries is skipped and counted.
+
+### C-39. Clarification: Exhibit-only CIKs (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 11 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: A CIK whose only hit is in an exhibit of a 10-K (`file_type` not in FORMS) counts in `n_talk`; such CIKs are also reported separately.
+
+### C-40. Clarification: SIC source (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 10 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: SIC = the current SIC of the EDGAR bulk submissions file.
+
+### C-41. Clarification: Secondary measure years (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 13 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: The secondary talk measure covers all D18 filings, 2019–2025.
+
+### C-42. Clarification: Gap–return test (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 12 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: The gap–return association uses the H5 form (no control) with the D21 null and nominal p.
+
+### C-43. Clarification: H6 `all` (2026-10-22)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 12 (plans committed at a7fb9bd)
+- Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
+- Rule: `python -m aideleg.h6 all` = build + talk + secondary + summary from saved raw files, with no network; acquisition is the separate `h6-data` target.
 
 ### Deviations after the freeze

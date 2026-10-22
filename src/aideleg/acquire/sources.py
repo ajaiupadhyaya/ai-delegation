@@ -92,6 +92,7 @@ SOURCES: list[Source] = [
     # Kenneth French data library
     _zip("ff49_daily", f"{FF}/49_Industry_Portfolios_daily_CSV.zip", "french"),
     _zip("ff49_monthly", f"{FF}/49_Industry_Portfolios_CSV.zip", "french"),
+    _zip("ff3_monthly", f"{FF}/F-F_Research_Data_Factors_CSV.zip", "french"),
     _zip("ff5_daily", f"{FF}/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip", "french"),
     _zip("ff5_monthly", f"{FF}/F-F_Research_Data_5_Factors_2x3_CSV.zip", "french"),
     _zip("mom_daily", f"{FF}/F-F_Momentum_Factor_daily_CSV.zip", "french"),

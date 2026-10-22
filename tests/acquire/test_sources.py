@@ -13,7 +13,8 @@ REQUIRED = (
         "aei_geo_wap_country", "aei_geo_wap_us_state", "aei_geo_gdp_country",
         "aei_geo_gdp_us_state", "aei_geo_iso",
         "oews_2024_nat", "oews_2024_ind", "oews_2025_ind",
-        "ff_siccodes49", "aioe", "eloundou_occ", "census_sic87_naics97", "sec_tickers",
+        "ff3_monthly", "ff_siccodes49", "aioe", "eloundou_occ", "census_sic87_naics97",
+        "sec_tickers",
         "ne_admin0_50m", "census_states_20m",
     }
     | {f"aei_r{n}_{s}" for n in (3, 4, 5, 6) for s in ("claude_ai", "api", "docs")}
