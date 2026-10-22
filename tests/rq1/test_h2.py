@@ -247,3 +247,13 @@ def test_r6_indicator_requires_r6():
     df = h2_frame(rng.normal(size=10), {r: rng.normal(size=10) for r in R2_R5})
     with pytest.raises(ValueError, match="r6"):
         h2.estimate_h2(df, r6_indicator=True)
+
+
+def test_near_zero_trend_does_not_trip_the_fast_path_check():
+    rng = np.random.default_rng(SEED)
+    n = 300
+    alpha = rng.normal(0, 5, n)
+    shock = rng.normal(0, 1, n)  # the same deviation in every release: no trend at all
+    df = h2_frame(alpha, {r: shock for r in R2_R5}, weight=rng.uniform(0.5, 2, n))
+    res = h2.estimate_h2(df)
+    assert abs(res.coefs["trend"].estimate) < 1e-9

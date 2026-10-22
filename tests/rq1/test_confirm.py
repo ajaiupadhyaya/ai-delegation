@@ -17,9 +17,11 @@ STATUSES = {"supported", "contradicts", "rejected_mixed_sign", "rejected_zero_es
 
 
 @pytest.fixture
-def clean(monkeypatch):
-    """A clean tree (HEAD "abc"), and no real input is ever loaded."""
+def clean(monkeypatch, tmp_path_factory):
+    """A clean tree (HEAD "abc"), no real input is ever loaded, and OUT_DIR is a tmp path, so
+    no test can ever write the real docs/results/rq1."""
     monkeypatch.setattr(confirm, "check_clean", lambda repo=ROOT: "abc")
+    monkeypatch.setattr(confirm, "OUT_DIR", tmp_path_factory.mktemp("rq1-out"))
 
     def boom():
         raise AssertionError("loaded")
@@ -99,10 +101,19 @@ def test_real_run_refuses_supplied_inputs_or_other_dir(clean, tmp_path, inputs):
     with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
         confirm.run(tmp_path, inputs=inputs)
     assert list(tmp_path.iterdir()) == []
-    if not confirm.OUT_DIR.exists():  # never create the real output directory
-        with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
-            confirm.run(confirm.OUT_DIR, inputs=inputs)
-        assert not confirm.OUT_DIR.exists()
+    with pytest.raises(confirm.RefusedError, match="P-RQ1 protocol"):
+        confirm.run(confirm.OUT_DIR, inputs=inputs)  # a tmp OUT_DIR (fixture `clean`)
+    assert list(confirm.OUT_DIR.iterdir()) == []
+
+
+def test_real_run_refuses_panel_hash_mismatch(clean, tmp_path, monkeypatch):
+    fake = tmp_path / "aei_panel.parquet"
+    fake.write_bytes(b"not the frozen panel")
+    monkeypatch.setattr(confirm, "PANEL_PATH", fake)
+    assert confirm.OUT_DIR != confirm.ROOT / "docs/results/rq1"  # a tmp OUT_DIR
+    with pytest.raises(confirm.RefusedError, match="SHA-256"):
+        confirm.run(confirm.OUT_DIR)
+    assert list(confirm.OUT_DIR.iterdir()) == []
 
 
 def test_logger_failure_after_marker_writes_traceback(clean, tmp_path, monkeypatch, inputs):
@@ -219,7 +230,11 @@ def test_run_on_synthetic_inputs_writes_schema(clean, tmp_path, inputs):
     assert "Holm at family-wise α = 0.0375" in md and "SCRAMBLED" in md
     for d in data["decisions"].values():
         assert d["text"] in md
-    assert "6/1296" in md and "C-15" in md  # the H2 granularity note (C-15)
+    assert "6/1296" in md and "C-15" in md
+    for h in ("H1", "H3"):
+        nodes = data["results"][h]["diagnostics"]["structural_drop_nodes"]
+        assert list(nodes) == ["unmatched_task", "no_occupation", "no_family", "zero_weight"]
+    assert "structural drop nodes: unmatched_task = " in md  # the H2 granularity note (C-15)
     for h, coef in (("H1", "log_wage"), ("H3", "error_cost")):
         att = data["results"][h]["diagnostics"][f"attenuation_{coef}"]
         row = next(x for x in md.splitlines() if x.startswith(f"| {h} | {coef} |"))

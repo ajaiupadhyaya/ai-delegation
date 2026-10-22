@@ -8,7 +8,8 @@ Protocol (each step completes before the next)
    --porcelain --untracked-files=all -- src tests pyproject.toml uv.lock` is empty.
 2. Refuse (`RefusedError`) if the attempt marker or any output exists in `out_dir`. A dry run
    (`scramble_seed` set) also refuses an `out_dir` inside `docs/results`; a real run refuses
-   supplied `inputs` and any `out_dir` other than `OUT_DIR`.
+   supplied `inputs`, any `out_dir` other than `OUT_DIR`, and a panel parquet whose SHA-256
+   is not the PAP §9.3 value.
 3. The bound blobs and library versions are recorded, then the marker is created with
    exclusive creation (UTC time and HEAD). **Only then** are the inputs loaded.
 4. From the marker on, any exception writes its traceback to `confirmatory_rq1.md` and is
@@ -288,6 +289,10 @@ def _markdown(payload: dict) -> str:
         r = results[h]
         sample = ", ".join(f"{k} = {v}" for k, v in r["sample"].items())
         out.append(f"- **{h}** ({r['outcome']}): {sample}")
+        nodes = r["diagnostics"].get("structural_drop_nodes")
+        if nodes:
+            out.append("  - structural drop nodes: " + ", ".join(f"{k} = {v}"
+                                                                 for k, v in nodes.items()))
         if r["drops"]:
             out.append("  - drops (%): " + ", ".join(f"{k} = {_fmt(v)}"
                                                     for k, v in r["drops"].items()))
@@ -390,6 +395,10 @@ def run(out_dir: Path = OUT_DIR, *, scramble_seed: int | None = None,
                                   or out_dir.resolve() != OUT_DIR.resolve()):
         raise RefusedError("a real run takes the study inputs and writes only to "
                            f"{OUT_DIR}; anything else is outside the P-RQ1 protocol")
+    panel_sha = _sha256(PANEL_PATH)
+    if scramble_seed is None and panel_sha != PAP_PANEL_SHA256:
+        raise RefusedError(f"{PANEL_PATH} has SHA-256 {panel_sha}, not the PAP §9.3 value "
+                           f"{PAP_PANEL_SHA256}")
     blobs, versions = _blobs(repo), _versions()
     pap = _git(repo, "rev-parse", f"{PAP_TAG}^{{commit}}")
     pap_commit = pap.stdout.strip() if pap.returncode == 0 else None
@@ -414,7 +423,6 @@ def run(out_dir: Path = OUT_DIR, *, scramble_seed: int | None = None,
         results, fit_checks = _fit(inputs, log)
         checks.update(fit_checks)
 
-        panel_sha = _sha256(PANEL_PATH)
         meta = {"utc": utc, "head": head, "pap_v1_commit": pap_commit, "blobs": blobs,
                 "versions": versions, "seed": SEED, "scrambled": scramble_seed is not None,
                 "scramble_seed": scramble_seed, "inputs": source,

@@ -49,6 +49,7 @@ WEBB = (-math.sqrt(1.5), -1.0, -math.sqrt(0.5), math.sqrt(0.5), 1.0, math.sqrt(1
 ALPHA_H2 = 0.0125
 TIE_RTOL = 1e-9
 STATSMODELS_RTOL = 1e-8  # fast path vs the exact call
+STATSMODELS_ATOL = 1e-10  # ... and absolute, so a β near 0 cannot fail the relative check
 _DRAW_CELLS = 4_000_000  # rows x draws per bootstrap chunk
 _WORDS = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
 
@@ -303,7 +304,8 @@ def estimate_h2(df: pl.DataFrame, outcome: str = "automation_pct", *,
     names = ["trend", *(["r6"] if r6_indicator else [])]
     coefs, df_inf, fit = _primary(y, t, extra, w, task, names)
     beta_w, _ = clustered_within(y, np.column_stack([t, extra]), w, task, tested=0)
-    if not np.allclose(beta_w, fit.params[:len(names)], rtol=STATSMODELS_RTOL, atol=0):
+    if not np.allclose(beta_w, fit.params[:len(names)], rtol=STATSMODELS_RTOL,
+                       atol=STATSMODELS_ATOL):
         raise AssertionError("within fast path disagrees with the statsmodels fit")
 
     p_wild, n_draws = wild_bootstrap_p(df, outcome, r6_indicator=r6_indicator)

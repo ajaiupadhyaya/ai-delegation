@@ -158,6 +158,7 @@ def estimate_h1(tr: TaskRows, outcome: str = "automation_pct",
     diagnostics = {k: getattr(fit, k) for k in _FIT_FIELDS}
     diagnostics["attenuation_log_wage"] = _attenuation(rows, predictors[1], tested)
     diagnostics["tested"] = list(tested)
+    diagnostics["structural_drop_nodes"] = dict(tr.structural_drop_nodes)
     return HypothesisResult(
         hypothesis="H1", outcome=outcome, coefs=fit.coefs,
         p_family=_p_intersection_union([fit.coefs[p].p for p in tested]),
@@ -174,6 +175,7 @@ def estimate_h3(tr: TaskRows, outcome: str = "validation_pct", indicator: str = 
     coefs, notes = dict(fit.coefs), _psd_note(fit, [indicator])
     diagnostics = {k: getattr(fit, k) for k in _FIT_FIELDS}
     diagnostics["tested"] = [indicator]
+    diagnostics["structural_drop_nodes"] = dict(tr.structural_drop_nodes)
     if covariates:
         cov_fit = _fit(rows, outcome, regressors, list(covariates))
         coefs.update(cov_fit.coefs)
