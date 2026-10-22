@@ -3,6 +3,7 @@ the seal is monkeypatched and every loader is replaced by synthetic returns."""
 
 import hashlib
 import re
+import subprocess
 from datetime import date
 
 import numpy as np
@@ -491,10 +492,13 @@ def test_binding_refuses_an_untracked_file_under_src(bound_repo, rel):
         ch.check_binding(bound_repo, own=_own(bound_repo))
 
 
-def test_binding_refuses_in_this_repo_before_the_tag():
-    # this repo has no pap-v1: the check refuses without reading anything
-    assert not seal.pap_frozen()
-    with pytest.raises(ch.BindingError):
+def test_binding_refuses_in_this_repo_when_src_differs():
+    # on a branch whose src/pyproject.toml/uv.lock differ from pap-v1, check_binding refuses
+    rc = subprocess.run(["git", "-C", str(ROOT), "diff", "--quiet", "pap-v1", "--",
+                         *ch.DIFF_PATHS]).returncode
+    if rc == 0:
+        pytest.skip("this checkout equals pap-v1 under DIFF_PATHS")
+    with pytest.raises(ch.BindingError, match="differ from"):
         ch.check_binding()
 
 
