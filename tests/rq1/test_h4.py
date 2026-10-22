@@ -120,8 +120,10 @@ def test_country_join_keeps_namibia(tmp_path):
     wap.write_text("iso_alpha_3,year,working_age_pop,country_code,country_name\n"
                    "NAM,2024,1798301.0,NA,Namibia\nAAA,2024,100.0,AA,Aland\n")
     rows = _global({"g1": 40.0, "g2": 80.0}) + _country("NAM") + _country("AAA")
-    s = h4.build_geo_sample(_panel(rows), gdp=h4.read_income_csv(gdp),
-                            wap=h4.read_income_csv(wap))
+    wap_df = h4.read_income_csv(wap)
+    assert wap_df.filter(pl.col("iso_alpha_3") == "NAM")["country_code"].to_list() == ["NA"]
+    assert wap_df.schema["country_code"] == pl.String
+    s = h4.build_geo_sample(_panel(rows), gdp=h4.read_income_csv(gdp), wap=wap_df)
     assert s.frame["geo_id"].to_list() == ["NAM"]
     assert s.frame["income"][0] == pytest.approx(13370000000.0 / 1798301.0)
     assert s.excluded["missing_income"] == ["AAA"]
@@ -203,16 +205,17 @@ def test_h4_rejects_null_regressor():
 
 def test_shift_share_identity():
     f = pl.DataFrame({"geo_id": ["AAA"], "automation_pct": [60.0], "mix": [55.0]})
-    out = h4.shift_share(f, 50.0)
-    assert out.columns == ["geo_id", "gap", "mix_part", "within_part"]
-    assert out.row(0) == ("AAA", 10.0, 5.0, 5.0)
+    out = h4.shift_share(f, 50.0, m_global=52.0)
+    assert out.columns == ["geo_id", "gap", "mix_part", "within_part", "global_automation",
+                           "m_global", "offset"]
+    assert out.row(0) == ("AAA", 10.0, 5.0, 5.0, 50.0, 52.0, 2.0)
     rng = np.random.default_rng(SEED)
     for _ in range(20):
         r = pl.DataFrame({"geo_id": [str(i) for i in range(30)],
                           "automation_pct": rng.uniform(0, 100, 30),
                           "mix": rng.uniform(0, 100, 30)})
         g = float(rng.uniform(0, 100))
-        s = h4.shift_share(r, g)
+        s = h4.shift_share(r, g, m_global=g)
         assert np.allclose(s["mix_part"] + s["within_part"], s["gap"], rtol=0, atol=1e-12)
 
 
@@ -270,3 +273,22 @@ def test_iwa_mix_level():
                  taxonomy="onet_iwa")
     s = _sample(rows, ["AAA"], mix_level="iwa")
     assert s.frame["mix"][0] == pytest.approx(0.25 * 10 + 0.75 * 30)
+
+
+def test_release_without_global_gwa_pct_raises():
+    rows = [r for r in _global({"g1": 40.0, "g2": 80.0})
+            if not (r["taxonomy"] == "onet_gwa" and r["metric"] == "pct")]
+    rows += _country("AAA")
+    with pytest.raises(ValueError, match="global onet_gwa pct"):
+        _sample(rows, ["AAA"])
+
+
+def test_m_global_unavailable_raises():
+    # global pct published only for g2, whose automation_pct is not: no node to sum over
+    rows = _gwa("global", "GLOBAL", {p: {"g2": 100.0} for p in (APR, MAY)})
+    rows += _gwa("global", "GLOBAL", {p: {"g1": 40.0} for p in (APR, MAY)},
+                 metric="automation_pct")
+    rows += _overall("global", "GLOBAL", {p: {"automation_pct": 50.0} for p in (APR, MAY)})
+    rows += _country("AAA", gwa={p: {"g1": 1.0} for p in (APR, MAY)})
+    with pytest.raises(ValueError, match="m_global"):
+        _sample(rows, ["AAA"])

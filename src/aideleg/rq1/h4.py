@@ -32,8 +32,10 @@ Rules
   (`WLS` with `weights`, R28). `p_family` is the joint HC3 Wald F test of the two predictors
   (D17), with (2, n - 4) df. Coefficients carry normal-reference HC3 p-values and 95% CIs.
 - **Shift-share** (descriptive). gap = automation - global = (M - global) + (automation - M).
+  `mix_part` carries the common offset m_global - global, printed alongside.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -106,7 +108,7 @@ def _mix(pct: pl.DataFrame, a_bar: pl.DataFrame, n_periods: int) -> pl.DataFrame
             .select("geo_id", mix=pl.col("num") / pl.col("den")))
 
 
-def _wide(long: pl.DataFrame, metrics, index: list[str]) -> pl.DataFrame:
+def _wide(long: pl.DataFrame, metrics: Sequence[str], index: list[str]) -> pl.DataFrame:
     if long.select(index + ["metric"]).is_duplicated().any():
         raise ValueError("duplicate panel rows")
     wide = long.pivot(on="metric", index=index, values="value", aggregate_function=None)
@@ -148,6 +150,8 @@ def build_geo_sample(panel: pl.DataFrame, *, release: str = "r6", source: str = 
         raise ValueError(f"{release}/{source} publishes no {geo} {taxonomy} pct rows")
     if g_overall.is_empty():
         raise ValueError(f"{release}/{source} publishes no global overall automation_pct")
+    if not (g_mix["metric"] == "pct").any():
+        raise ValueError(f"{release}/{source} publishes no global {taxonomy} pct")
     if not (g_mix["metric"] == "automation_pct").any():
         raise ValueError(f"{release}/{source} publishes no global {taxonomy} automation_pct")
 
@@ -165,6 +169,8 @@ def build_geo_sample(panel: pl.DataFrame, *, release: str = "r6", source: str = 
                n_periods)
     g_pct = g_wide.select(pl.lit("GLOBAL").alias("geo_id"), "node_id", "period_start", "pct")
     m_global = _mix(g_pct, a_bar, n_periods)["mix"]
+    if len(m_global) != 1:
+        raise ValueError(f"m_global: no global {taxonomy} node has both pct and automation_pct")
     global_automation = g_overall["value"].drop_nulls().mean()
 
     if gdp is None or wap is None:
@@ -200,7 +206,7 @@ def build_geo_sample(panel: pl.DataFrame, *, release: str = "r6", source: str = 
     ).select(FRAME_COLUMNS)
     return GeoSample(frame=frame, excluded=excluded,
                      global_automation=float(global_automation),
-                     m_global=float(m_global[0]) if len(m_global) else float("nan"))
+                     m_global=float(m_global[0]))
 
 
 def estimate_h4(frame: pl.DataFrame, outcome: str = "automation_pct",
@@ -247,12 +253,20 @@ def estimate_h4(frame: pl.DataFrame, outcome: str = "automation_pct",
                      "tested": list(predictors), "control": control})
 
 
-def shift_share(frame: pl.DataFrame, global_automation: float) -> pl.DataFrame:
-    """Descriptive split of each geography's gap from the global share (PAP §4.4)."""
-    g = float(global_automation)
+def shift_share(frame: pl.DataFrame, global_automation: float, *,
+                m_global: float) -> pl.DataFrame:
+    """Descriptive split of each geography's gap from the global share (PAP §4.4).
+
+    `m_global` is in general not equal to `global_automation`, so every `mix_part` carries the
+    common offset `m_global - global_automation`; it is printed alongside on every row.
+    """
+    g, m = float(global_automation), float(m_global)
     return frame.select(
         "geo_id",
         gap=pl.col("automation_pct") - g,
         mix_part=pl.col("mix") - g,
         within_part=pl.col("automation_pct") - pl.col("mix"),
+        global_automation=pl.lit(g),
+        m_global=pl.lit(m),
+        offset=pl.lit(m - g),
     )
