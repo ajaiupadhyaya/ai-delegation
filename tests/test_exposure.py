@@ -242,3 +242,15 @@ def test_a_pooled_raises_on_missing_release():
 def test_unknown_design_raises():
     with pytest.raises(ValueError):
         build_exposure("C", panel=_design_panel(), **KW)
+
+
+def test_oews_usage_default_equals_explicit_shares():
+    from aideleg.exposure import SHARES, oews_usage
+    occ = pl.DataFrame({"soc6": ["15-1252", "13-2011"], "usage_share": [70.0, 30.0],
+                        "automation_pct": [40.0, 10.0], "augmentation_pct": [60.0, 90.0],
+                        "directive_pct": [1.0, 2.0]})
+    nat = pl.DataFrame({"soc6": ["15-1252", "13-2011"], "tot_emp": [10, 20]})
+    default, lost = oews_usage(occ, nat)
+    explicit, lost2 = oews_usage(occ, nat, shares=SHARES)
+    assert default.equals(explicit) and lost == lost2
+    assert "directive_pct" not in default.columns  # only SHARES are carried by default

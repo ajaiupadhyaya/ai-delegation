@@ -66,7 +66,7 @@ Deciles are employment-weighted deciles of the OEWS May 2024 annual median wage;
 
 ## Composition by education (r6, claude_ai)
 
-Matched tasks are binned on the mean education years of the person in the conversation (`human_education_years_mean`), left-closed bins. A task with no published value is `not published`; its patterns are empty when its published usage is 0.00.
+Matched tasks are binned on the mean education years of the person in the conversation (`human_education_years_mean`), left-closed bins. A task with no published value is `zero published usage`: 1649 tasks holding 0.0000% of usage; in the panel these are the tasks published with pct 0.00, which carry no education value or collaboration pattern.
 
 | bin | usage_share | n_tasks | directive_pct | feedback_loop_pct | task_iteration_pct | validation_pct | learning_pct | automation_pct | augmentation_pct |
 |---|---|---|---|---|---|---|---|---|---|
@@ -75,24 +75,43 @@ Matched tasks are binned on the mean education years of the person in the conver
 | 14–16 | 14.66 | 299 | 35.56 | 20.30 | 31.36 | 4.17 | 8.61 | 55.86 | 44.14 |
 | 16–18 | 1.49 | 51 | 26.86 | 10.25 | 41.94 | 8.73 | 12.22 | 37.11 | 62.89 |
 | ≥18 | 0.02 | 2 | 16.93 | 27.18 | 35.73 | 12.20 | 7.96 | 44.11 | 55.89 |
-| not published | 0.00 | 1649 | — | — | — | — | — | — | — |
+| zero published usage | 0.00 | 1649 | — | — | — | — | — | — | — |
 
-## Usage concentration across tasks
+## Usage concentration across tasks, as published
 
-One row per release and source over the published matched tasks, usage renormalised to 100. `topK_share` is the usage share of the largest ⌈K% · n⌉ tasks; `n_tasks_50pct` is the number of largest tasks that together hold half the usage. r6 claude_ai publishes usage to two decimals: 1649 of its 2821 published matched tasks carry 0.00, so its task count and Gini are not comparable with releases that publish finer values.
+One row per release and source over the published matched tasks, usage renormalised to 100. `topK_share` is the usage share of the largest ⌈K% · n⌉ tasks; `n_tasks_50pct` is the number of largest tasks that together hold half the usage. The columns ending `_pos` repeat the statistics over the tasks with positive usage only; `n_zero` counts the tasks published as 0.
+
+In r6, usage is published to two decimals, and earlier releases publish finer values. Both drive the gap between the as-published rows of r6 and r1-r5: the zero-usage tasks it keeps in its task count and Gini (zero inclusion), and its coarser rounding (which turns small shares into those zeros). The as-published Gini and top-K columns of different releases are therefore not comparable; use the `_pos` columns or the harmonised table. claude_ai: 1649 of 2821 published matched tasks carry 0.00; Gini 0.891 as published, 0.738 over positive-usage tasks, 0.738 harmonised; top-10% share 82.3 as published, 65.7 positive-only; 1p_api: 1349 of 2426 published matched tasks carry 0.00; Gini 0.893 as published, 0.758 over positive-usage tasks, 0.758 harmonised; top-10% share 83.0 as published, 67.7 positive-only.
+
+| release | source | n_tasks | gini | top1_share | top5_share | top10_share | n_tasks_50pct | n_zero | n_tasks_pos | gini_pos | top1_share_pos | top5_share_pos | top10_share_pos |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| r1 | claude_ai | 3513 | 0.7754 | 37.0296 | 59.3315 | 70.7963 | 97 | 0 | 3513 | 0.7754 | 37.0296 | 59.3315 | 70.7963 |
+| r2 | claude_ai | 3364 | 0.8015 | 38.7585 | 62.7696 | 73.7679 | 73 | 0 | 3364 | 0.8015 | 38.7585 | 62.7696 | 73.7679 |
+| r3 | claude_ai | 2616 | 0.8225 | 38.5743 | 65.8054 | 76.6016 | 53 | 0 | 2616 | 0.8225 | 38.5743 | 65.8054 | 76.6016 |
+| r4 | claude_ai | 3168 | 0.8234 | 43.5899 | 67.4744 | 77.2345 | 50 | 0 | 3168 | 0.8234 | 43.5899 | 67.4744 | 77.2345 |
+| r5 | claude_ai | 3258 | 0.8078 | 38.2223 | 64.0534 | 75.1454 | 68 | 0 | 3258 | 0.8078 | 38.2223 | 64.0534 | 75.1454 |
+| r6 | claude_ai | 2821 | 0.8912 | 38.0292 | 69.4254 | 82.3301 | 54 | 1649 | 1172 | 0.7381 | 24.1223 | 51.9034 | 65.6899 |
+| r3 | 1p_api | 2054 | 0.8421 | 42.4094 | 68.7397 | 79.5107 | 34 | 0 | 2054 | 0.8421 | 42.4094 | 68.7397 | 79.5107 |
+| r4 | 1p_api | 2251 | 0.8483 | 47.7783 | 71.2131 | 80.7384 | 28 | 0 | 2251 | 0.8483 | 47.7783 | 71.2131 | 80.7384 |
+| r5 | 1p_api | 2297 | 0.8515 | 47.6683 | 71.3635 | 80.9984 | 28 | 0 | 2297 | 0.8515 | 47.6683 | 71.3635 | 80.9984 |
+| r6 | 1p_api | 2426 | 0.8926 | 40.2336 | 69.9994 | 82.9832 | 43 | 1349 | 1077 | 0.7582 | 25.2934 | 54.4212 | 67.6880 |
+
+## Usage concentration across tasks, harmonised
+
+Every release and source with each month's usage rounded to two decimals (r6's publication precision) and zero-usage tasks dropped, so the rows are like-for-like in rounding and zero handling. Suppression regimes still differ (PAP §5).
 
 | release | source | n_tasks | gini | top1_share | top5_share | top10_share | n_tasks_50pct |
 |---|---|---|---|---|---|---|---|
-| r1 | claude_ai | 3513 | 0.7754 | 37.0296 | 59.3315 | 70.7963 | 97 |
-| r2 | claude_ai | 3364 | 0.8015 | 38.7585 | 62.7696 | 73.7679 | 73 |
-| r3 | claude_ai | 2616 | 0.8225 | 38.5743 | 65.8054 | 76.6016 | 53 |
-| r4 | claude_ai | 3168 | 0.8234 | 43.5899 | 67.4744 | 77.2345 | 50 |
-| r5 | claude_ai | 3258 | 0.8078 | 38.2223 | 64.0534 | 75.1454 | 68 |
-| r6 | claude_ai | 2821 | 0.8912 | 38.0292 | 69.4254 | 82.3301 | 54 |
-| r3 | 1p_api | 2054 | 0.8421 | 42.4094 | 68.7397 | 79.5107 | 34 |
-| r4 | 1p_api | 2251 | 0.8483 | 47.7783 | 71.2131 | 80.7384 | 28 |
-| r5 | 1p_api | 2297 | 0.8515 | 47.6683 | 71.3635 | 80.9984 | 28 |
-| r6 | 1p_api | 2426 | 0.8926 | 40.2336 | 69.9994 | 82.9832 | 43 |
+| r1 | claude_ai | 1996 | 0.6861 | 30.8194 | 52.0174 | 63.1595 | 88 |
+| r2 | claude_ai | 1771 | 0.7078 | 31.3791 | 54.6827 | 65.5270 | 67 |
+| r3 | claude_ai | 1384 | 0.7349 | 29.8124 | 56.5766 | 68.4569 | 50 |
+| r4 | claude_ai | 1557 | 0.7348 | 34.1458 | 58.5971 | 69.3063 | 45 |
+| r5 | claude_ai | 1664 | 0.7143 | 29.3432 | 55.0921 | 66.4633 | 62 |
+| r6 | claude_ai | 1172 | 0.7381 | 24.1223 | 51.9034 | 65.6899 | 54 |
+| r3 | 1p_api | 1102 | 0.7646 | 34.6846 | 59.2984 | 71.4485 | 32 |
+| r4 | 1p_api | 1194 | 0.7769 | 39.5459 | 62.8287 | 73.7171 | 26 |
+| r5 | 1p_api | 1166 | 0.7784 | 39.4504 | 63.0252 | 73.4613 | 25 |
+| r6 | 1p_api | 1077 | 0.7582 | 25.2934 | 54.4212 | 67.6880 | 43 |
 
 ## Figures
 
@@ -109,3 +128,4 @@ Full-precision values:
 - `anatomy_wage_decile.csv`
 - `anatomy_education.csv`
 - `anatomy_concentration.csv`
+- `anatomy_concentration_harmonised.csv`

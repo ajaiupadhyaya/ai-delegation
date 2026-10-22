@@ -246,7 +246,8 @@ def report_confirmatory(json_path: Path = OUT_DIR / JSON_NAME, out: Path = OUT_D
 
 ANATOMY_MD = "anatomy.md"
 ANATOMY_CSVS = {"major": "anatomy_major_group.csv", "decile": "anatomy_wage_decile.csv",
-                "education": "anatomy_education.csv", "concentration": "anatomy_concentration.csv"}
+                "education": "anatomy_education.csv", "concentration": "anatomy_concentration.csv",
+                "harmonised": "anatomy_concentration_harmonised.csv"}
 FIG_MAJOR, FIG_DECILE = "fig_rq1_composition_major", "fig_rq1_composition_wage_decile"
 FIG_EDU, FIG_LORENZ = "fig_rq1_composition_education", "fig_rq1_lorenz"
 # the two automation patterns take the two warm palette colours
@@ -313,8 +314,9 @@ def fig_lorenz(panel: pl.DataFrame):
     for r, color in zip(LORENZ_RELEASES, colors, strict=True):
         if panel.filter((pl.col("release") == r) & (pl.col("source") == "claude_ai")).is_empty():
             continue
-        x, y = anatomy.lorenz_points(anatomy.task_shares(panel, r, "claude_ai"))
+        x, y = anatomy.lorenz_points(anatomy.harmonised_shares(panel, r, "claude_ai"))
         ax.plot(x, y, color=color, linewidth=1.0, label=r)
+    ax.set_title("each release rounded to 2 dp, zero-usage tasks dropped", fontsize=6.5)
     ax.set_xlabel("cumulative share of tasks (smallest first)")
     ax.set_ylabel("cumulative share of usage")
     ax.set_xlim(0, 1)
@@ -323,10 +325,29 @@ def fig_lorenz(panel: pl.DataFrame):
     return fig
 
 
+def _zero_note(conc: pl.DataFrame, harm: pl.DataFrame, release: str) -> str:
+    """Why the as-published concentration of `release` differs from earlier releases."""
+    parts = []
+    for r in conc.filter(pl.col("release") == release).iter_rows(named=True):
+        h = harm.filter((pl.col("release") == release) & (pl.col("source") == r["source"]))
+        parts.append(
+            f"{r['source']}: {r['n_zero']} of {r['n_tasks']} published matched tasks carry 0.00; "
+            f"Gini {r['gini']:.3f} as published, {r['gini_pos']:.3f} over positive-usage tasks, "
+            f"{h['gini'].item():.3f} harmonised; top-10% share {r['top10_share']:.1f} as "
+            f"published, {r['top10_share_pos']:.1f} positive-only")
+    return (f"In {release}, usage is published to two decimals, and earlier releases publish "
+            "finer values. Both drive the gap between the as-published rows of "
+            f"{release} and r1-r5: the zero-usage tasks it keeps in its task count and Gini "
+            "(zero inclusion), and its coarser rounding (which turns small shares into those "
+            "zeros). The as-published Gini and top-K columns of different releases are "
+            "therefore not comparable; use the `_pos` columns or the harmonised table. "
+            + "; ".join(parts) + ".")
+
+
 def _anatomy_doc(path: Path, tables: dict[str, pl.DataFrame], release: str, source: str,
-                 zero_note: str) -> Path:
-    major, decile, edu, conc = (tables[k] for k in ("major", "decile", "education",
-                                                    "concentration"))
+                 zero_note: str, edu_note: str) -> Path:
+    major, decile, edu, conc, harm = (tables[k] for k in (
+        "major", "decile", "education", "concentration", "harmonised"))
     scope = "\n".join([
         "- Composition is computed over published cells only: what AEI leaves out is not "
         "imputed, and each table's usage shares are renormalised to 100 over the cells it "
@@ -362,13 +383,19 @@ def _anatomy_doc(path: Path, tables: dict[str, pl.DataFrame], release: str, sour
         (f"Composition by education ({release}, {source})",
          "Matched tasks are binned on the mean education years of the person in the "
          "conversation (`human_education_years_mean`), left-closed bins. A task with no "
-         "published value is `not published`; its patterns are empty when its published "
-         "usage is 0.00.\n\n" + _md_table(edu)),
-        ("Usage concentration across tasks",
+         "published value is `zero published usage`: " + edu_note + "\n\n" + _md_table(edu)),
+        ("Usage concentration across tasks, as published",
          "One row per release and source over the published matched tasks, usage renormalised "
          "to 100. `topK_share` is the usage share of the largest ⌈K% · n⌉ tasks; "
          "`n_tasks_50pct` is the number of largest tasks that together hold half the usage. "
-         + zero_note + "\n\n" + _md_table(conc, digits=4)),
+         "The columns ending `_pos` repeat the statistics over the tasks with positive usage "
+         "only; `n_zero` counts the tasks published as 0.\n\n" + zero_note + "\n\n"
+         + _md_table(conc, digits=4)),
+        ("Usage concentration across tasks, harmonised",
+         "Every release and source with each month's usage rounded to two decimals (r6's "
+         "publication precision) and zero-usage tasks dropped, so the rows are like-for-like "
+         "in rounding and zero handling. Suppression regimes still differ (PAP §5).\n\n"
+         + _md_table(harm, digits=4)),
         ("Figures", figs),
         ("Tables as CSV", "Full-precision values:\n\n" + csvs),
     ]
@@ -406,14 +433,16 @@ def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=No
                                          release=release, source=source),
         "education": anatomy.by_education(panel, release=release, source=source),
         "concentration": anatomy.concentration(panel),
+        "harmonised": anatomy.concentration_harmonised(panel),
     }
-    shares = anatomy.task_shares(panel, release, source)
-    zero_note = (f"{release} {source} publishes usage to two decimals: "
-                 f"{int((shares == 0).sum())} of its {shares.size} published matched tasks "
-                 "carry 0.00, so its task count and Gini are not comparable with releases "
-                 "that publish finer values.")
+    zero_note = _zero_note(tables["concentration"], tables["harmonised"], release)
+    miss = tables["education"].filter(pl.col("bin") == anatomy.EDU_MISSING)
+    edu_note = (f"{miss['n_tasks'].item()} tasks holding {miss['usage_share'].item():.4f}% "
+                "of usage; in the panel these are the tasks published with pct 0.00, which "
+                "carry no education value or collaboration pattern."
+                if miss.height else "none in this release.")
     paths = [write_csv(tables[k], out / ANATOMY_CSVS[k]) for k in ANATOMY_CSVS]
-    paths.append(_anatomy_doc(out / ANATOMY_MD, tables, release, source, zero_note))
+    paths.append(_anatomy_doc(out / ANATOMY_MD, tables, release, source, zero_note, edu_note))
     major, decile = tables["major"], tables["decile"]
     edu = tables["education"].filter(pl.col("bin") != anatomy.EDU_MISSING)  # no patterns to stack
     paths += save_figure(fig_composition(

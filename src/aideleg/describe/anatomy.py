@@ -31,7 +31,7 @@ FIVE_PATTERNS = PATTERN_COLS[:5]
 EDU_METRIC = "human_education_years_mean"
 EDU_EDGES = (12.0, 14.0, 16.0, 18.0)
 EDU_LABELS = ("<12", "12–14", "14–16", "16–18", "≥18")
-EDU_MISSING = "not published"
+EDU_MISSING = "zero published usage"
 CONCENTRATION_RELEASES: dict[str, tuple[str, ...]] = {
     "claude_ai": ("r1", "r2", "r3", "r4", "r5", "r6"),
     "1p_api": ("r3", "r4", "r5", "r6"),
@@ -186,7 +186,9 @@ def by_education(panel: pl.DataFrame, *, release: str = "r6",
     """`bin, usage_share, n_tasks, *PATTERN_COLS` over global matched `onet_task` rows.
 
     Tasks are D13 averaged, then binned on `human_education_years_mean`; a task with no value
-    is `bin = "not published"`. Empty bins are omitted. `usage_share` sums to 100.
+    is `bin = "zero published usage"`: in the panel these are exactly the tasks published
+    with pct 0.00 (the row's `usage_share` shows it).
+    Empty bins are omitted. `usage_share` sums to 100.
     """
     sub = _slice(panel, release, source, "onet_task")
     wide = _matched(_wide(sub, ["pct", EDU_METRIC, *PATTERN_COLS]))
@@ -236,29 +238,69 @@ def concentration_stats(shares: np.ndarray) -> dict:
     return out
 
 
-def task_shares(panel: pl.DataFrame, release: str, source: str) -> np.ndarray:
+def task_shares(panel: pl.DataFrame, release: str, source: str, *,
+                round_dp: int | None = None, drop_zero: bool = False) -> np.ndarray:
     """Matched `onet_task` usage shares (percent, sum 100), D13 averaged over the months.
 
-    Every published matched task is kept, including one published as 0.00."""
+    As published by default: every published matched task is kept, including one published as
+    0.00. `round_dp` rounds each month's pct to that many decimals first and `drop_zero` drops
+    tasks whose usage is 0, both before renormalising (the harmonised series).
+    """
     sub = _slice(panel, release, source, "onet_task")
     wide = _matched(_wide(sub, ["pct"]))
+    if round_dp is not None:
+        wide = wide.with_columns(pl.col("pct").round(round_dp))
     tm = two_month_mean(wide, [], key=["node_id"],
                         n_periods=_n_periods(panel, release, source))
-    w = tm["weight"].to_numpy()  # a published pct of 0.00 (r6 rounds to 2 dp) stays in
+    if drop_zero:
+        tm = tm.filter(pl.col("weight") > 0)
+    w = tm["weight"].to_numpy()
     return w / w.sum() * 100
 
 
-def concentration(panel: pl.DataFrame) -> pl.DataFrame:
-    """One row per release × source present: `release, source, n_tasks, gini, top1_share,
-    top5_share, top10_share, n_tasks_50pct` over the published matched tasks."""
-    rows = []
+_POS = ["n_zero", "n_tasks_pos", "gini_pos", "top1_share_pos", "top5_share_pos",
+        "top10_share_pos"]
+_SCHEMA = {"release": pl.String, "source": pl.String, "n_tasks": pl.Int64,
+           "gini": pl.Float64, "top1_share": pl.Float64, "top5_share": pl.Float64,
+           "top10_share": pl.Float64, "n_tasks_50pct": pl.Int64}
+
+
+def _releases(panel: pl.DataFrame):
     for source, releases in CONCENTRATION_RELEASES.items():
         for release in releases:
-            if _slice(panel, release, source, "onet_task").is_empty():
-                continue
-            rows.append({"release": release, "source": source,
-                         **concentration_stats(task_shares(panel, release, source))})
-    schema = {"release": pl.String, "source": pl.String, "n_tasks": pl.Int64,
-              "gini": pl.Float64, "top1_share": pl.Float64, "top5_share": pl.Float64,
-              "top10_share": pl.Float64, "n_tasks_50pct": pl.Int64}
-    return pl.DataFrame(rows, schema=schema)
+            if not _slice(panel, release, source, "onet_task").is_empty():
+                yield release, source
+
+
+def concentration(panel: pl.DataFrame) -> pl.DataFrame:
+    """One row per release x source present, over the published matched tasks as published:
+    `release, source, n_tasks, gini, top1_share, top5_share, top10_share, n_tasks_50pct`, then
+    the positive-only columns `n_zero` (tasks published as 0), `n_tasks_pos`, `gini_pos`,
+    `top1_share_pos`, `top5_share_pos`, `top10_share_pos` (usage renormalised over the tasks
+    with positive usage)."""
+    rows = []
+    for release, source in _releases(panel):
+        x = task_shares(panel, release, source)
+        pos = concentration_stats(x[x > 0])
+        rows.append({"release": release, "source": source, **concentration_stats(x),
+                     "n_zero": int((x == 0).sum()), "n_tasks_pos": pos["n_tasks"],
+                     "gini_pos": pos["gini"], "top1_share_pos": pos["top1_share"],
+                     "top5_share_pos": pos["top5_share"], "top10_share_pos": pos["top10_share"]})
+    schema = _SCHEMA | {"n_zero": pl.Int64, "n_tasks_pos": pl.Int64, "gini_pos": pl.Float64,
+                        "top1_share_pos": pl.Float64, "top5_share_pos": pl.Float64,
+                        "top10_share_pos": pl.Float64}
+    return pl.DataFrame(rows, schema=schema).select([*_SCHEMA, *_POS])
+
+
+def harmonised_shares(panel: pl.DataFrame, release: str, source: str) -> np.ndarray:
+    """`task_shares` with each month's pct rounded to 2 dp (r6's publication precision) and
+    zero-usage tasks dropped, so every release is read on the same footing."""
+    return task_shares(panel, release, source, round_dp=2, drop_zero=True)
+
+
+def concentration_harmonised(panel: pl.DataFrame) -> pl.DataFrame:
+    """Like-for-like concentration: the `concentration` columns (without the positive-only
+    block) on `harmonised_shares`, one row per release x source present."""
+    rows = [{"release": r, "source": s, **concentration_stats(harmonised_shares(panel, r, s))}
+            for r, s in _releases(panel)]
+    return pl.DataFrame(rows, schema=_SCHEMA)
