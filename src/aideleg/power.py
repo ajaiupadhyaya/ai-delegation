@@ -550,6 +550,34 @@ def frozen_values(res: dict) -> dict[str, float]:
     return f
 
 
+def null_scales(A: np.ndarray, z: np.ndarray, c: np.ndarray, names: list[str]
+                ) -> dict[str, float]:
+    """The `frozen_values` keys recomputed from a windows x industries alpha matrix over
+    `names` (used by `aideleg.confirm_h5` when an industry drops out of the confirmatory
+    window). Same estimators as `run_power`; R13 drops Softw if present."""
+    nw = len(A)
+    zr, keep = rank_z(z), np.array([n != SOFTW for n in names])
+    slopes = {
+        "h5": slope_null_distribution(z, [None] * nw, alphas=A),
+        "h5b": slope_null_distribution(z, [None] * nw, alphas=A, control=c),
+        "h5_r12": slope_null_distribution(zr, [None] * nw, alphas=A),
+        "h5b_r12": slope_null_distribution(zr, [None] * nw, alphas=A, control=c),
+        "h5_r13": slope_null_distribution(z[keep], [None] * nw, alphas=A[:, keep]),
+        "h5b_r13": slope_null_distribution(z[keep], [None] * nw, alphas=A[:, keep],
+                                           control=c[keep]),
+    }
+    f = {"t21_0.025": t_crit(0.025), "t21_0.05": t_crit(0.05)}
+    for v, b in slopes.items():
+        sz = own_size(b, {})
+        f[f"s_{v}"] = float(np.std(b, ddof=1))
+        f[f"q_{v}_0.9875"], f[f"q_{v}_0.975"] = sz["q_0.9875"], sz["q_0.975"]
+        if v in ("h5", "h5b"):
+            f[f"bbar_{v}"] = float(np.mean(b))
+        f[f"crit_{v}_0.025"] = max(f["t21_0.025"], f[f"q_{v}_0.9875"])
+        f[f"crit_{v}_0.05"] = max(f["t21_0.05"], f[f"q_{v}_0.975"])
+    return f
+
+
 def _block_15b(res: dict) -> list[str]:
     pp = 100.0
     cr = res["crits"]
