@@ -9,6 +9,7 @@ REQUIRED = (
         "aei_r1_task_pct", "aei_r1_collab", "aei_r1_wage", "aei_soc_structure",
         "aei_r2_task_pct", "aei_r2_collab_by_task", "aei_r2_thinking", "aei_onet_tasks",
         "aei_job_exposure", "onet_29_3_tasks", "onet_2010_2019_crosswalk",
+        "onet_29_3_tasks_to_dwas", "onet_29_3_dwa_reference",
         "aei_geo_wap_country", "aei_geo_wap_us_state", "aei_geo_gdp_country",
         "aei_geo_gdp_us_state", "aei_geo_iso",
         "oews_2024_nat", "oews_2024_ind", "oews_2025_ind",
@@ -50,3 +51,9 @@ def test_no_robot_or_task_penetration_files():
         low = s.url.lower()
         assert "robot_exposure" not in low
         assert "penetration" not in low
+
+
+def test_onet_dwa_files_are_29_3_text_database():
+    base = "https://www.onetcenter.org/dl_files/database/db_29_3_text/"
+    assert sources.by_key("onet_29_3_tasks_to_dwas").url == base + "Tasks%20to%20DWAs.txt"
+    assert sources.by_key("onet_29_3_dwa_reference").url == base + "DWA%20Reference.txt"

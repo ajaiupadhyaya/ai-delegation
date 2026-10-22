@@ -359,6 +359,14 @@
     "bytes": 108052,
     "sha256": "8f026a33134bfde5770308d1c6117cf70d9dd41c2b3467e6dd271d65bdeecc5a"
   },
+  "onet_29_3_dwa_reference": {
+    "key": "onet_29_3_dwa_reference",
+    "url": "https://www.onetcenter.org/dl_files/database/db_29_3_text/DWA%20Reference.txt",
+    "dest": "onet/db_29_3_dwa_reference.txt",
+    "retrieved_utc": "2026-10-22T02:15:59Z",
+    "bytes": 187200,
+    "sha256": "e38a5b529a06d6803dd80d119f2bff4e1ce9507724ffd648d1f7b20983ab9d18"
+  },
   "onet_29_3_tasks": {
     "key": "onet_29_3_tasks",
     "url": "https://www.onetcenter.org/dl_files/database/db_29_3_text/Task%20Statements.txt",
@@ -366,6 +374,14 @@
     "retrieved_utc": "2026-10-21T21:54:30Z",
     "bytes": 2759559,
     "sha256": "fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a"
+  },
+  "onet_29_3_tasks_to_dwas": {
+    "key": "onet_29_3_tasks_to_dwas",
+    "url": "https://www.onetcenter.org/dl_files/database/db_29_3_text/Tasks%20to%20DWAs.txt",
+    "dest": "onet/db_29_3_tasks_to_dwas.txt",
+    "retrieved_utc": "2026-10-22T02:15:59Z",
+    "bytes": 1197935,
+    "sha256": "6cb7098b09a6a03cc730b544bd7a17b1eac5d0b5beda947c4f901c42f5a713d6"
   },
   "sec_tickers": {
     "key": "sec_tickers",

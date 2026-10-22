@@ -63,6 +63,13 @@ SOURCES: list[Source] = [
     # O*NET 29.3 task statements (O*NET-SOC 2019) and the 2010 -> 2019 taxonomy crosswalk
     Source("onet_29_3_tasks", f"{ONET}/dl_files/database/db_29_3_text/Task%20Statements.txt",
            "onet/db_29_3_task_statements.txt"),
+    # O*NET 29.3 task -> Detailed Work Activity links and the DWA/IWA/GWA hierarchy (D14)
+    Source("onet_29_3_tasks_to_dwas",
+           f"{ONET}/dl_files/database/db_29_3_text/Tasks%20to%20DWAs.txt",
+           "onet/db_29_3_tasks_to_dwas.txt"),
+    Source("onet_29_3_dwa_reference",
+           f"{ONET}/dl_files/database/db_29_3_text/DWA%20Reference.txt",
+           "onet/db_29_3_dwa_reference.txt"),
     Source("onet_2010_2019_crosswalk",
            f"{ONET}/taxonomy/2019/walk/2010_to_2019_Crosswalk.csv?fmt=csv",
            "onet/2010_to_2019_Crosswalk.csv"),
