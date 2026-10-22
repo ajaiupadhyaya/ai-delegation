@@ -29,6 +29,7 @@ Run: `uv run python -m aideleg.power` -> docs/pap/power.md (the generated block 
 text outside it is kept).
 """
 
+import copy
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -173,17 +174,22 @@ def slope_null_distribution(z: np.ndarray, windows: list[tuple[date, date]], *,
 def ri_pvalues(alphas: np.ndarray, z: np.ndarray, control: np.ndarray | None = None,
                n_perm: int = 10_000, rng: np.random.Generator | None = None,
                scheme: str = "exposure") -> np.ndarray:
-    """Per window (row of `alphas`), the two-sided randomisation-inference p-value of the
-    coefficient on `z`, p = (1 + #{|b_perm| >= |b_obs|}) / (n_perm + 1), over the industries
-    with an alpha. Only p-values are returned.
+    """Per window (row of `alphas`), the two-sided randomisation-inference p-value for `z`,
+    p = (1 + #{|S_perm| >= |S_obs|}) / (n_perm + 1), over the industries with an alpha. Only
+    p-values are returned.
 
     - `scheme="exposure"` (the spec's wording, "shuffle exposure across industries"): `z` is
-      permuted, the control (if any) stays in place.
+      permuted, the control (if any) stays in place; S is the coefficient on `z`.
     - `scheme="freedman_lane"`: alphas are regressed on [1(, control)] and the residuals are
-      permuted (Freedman & Lane 1983). Without a control the two schemes coincide in
-      distribution; with a control correlated with `z`, permuting `z` alone breaks that
-      correlation and is oversized even when industries are exchangeable."""
-    if scheme not in ("exposure", "freedman_lane"):
+      permuted (Freedman & Lane 1983); S is the pivotal t of the coefficient on `z` in the
+      refit on [1(, control), z] (Winkler et al. 2014), which brings the size closer to
+      nominal than the coefficient when the control is correlated with `z`.
+    - `scheme="freedman_lane_coef"`: the same permutations with S the coefficient itself (the
+      statistic before the final review; reported as a secondary column).
+    Without a control the exposure and coefficient schemes coincide in distribution; with a
+    control correlated with `z`, permuting `z` alone breaks that correlation and is oversized
+    even when industries are exchangeable."""
+    if scheme not in ("exposure", "freedman_lane", "freedman_lane_coef"):
         raise ValueError(f"unknown scheme {scheme!r}")
     rng = np.random.default_rng(SEED) if rng is None else rng
     z = np.asarray(z, dtype=float)
@@ -201,7 +207,14 @@ def ri_pvalues(alphas: np.ndarray, z: np.ndarray, control: np.ndarray | None = N
         else:
             rz, e = M @ zz, M @ y  # fitted part of y is orthogonal to rz, so it drops out
             Ep = np.vstack([e, rng.permuted(np.tile(e, (n_perm, 1)), axis=1)])
-            b = (Ep @ rz) / (rz @ rz)
+            rr = rz @ rz
+            b = (Ep @ rz) / rr
+            if scheme == "freedman_lane":
+                # y* = H0 y + P e refit on [1(, control), z]: the residual sum of squares is
+                # e*' M e* - b^2 rz'rz (H0 y drops out), dof = n - p
+                rss = np.einsum("ij,ij->i", Ep @ M, Ep) - b**2 * rr
+                dof = len(y) - X0.shape[1] - 1
+                b = b / np.sqrt(np.maximum(rss, 0.0) / dof / rr)
         out[i] = (1 + np.sum(np.abs(b[1:]) >= np.abs(b[0]) * (1 - 1e-12))) / (n_perm + 1)
     return out
 
@@ -319,8 +332,10 @@ def _write(out: Path, block: str) -> None:
                    "\n\n## Interpretation\n\n(to be written from the numbers above)\n")
 
 
-def run_power(out: Path = OUT) -> dict:
-    """Run the H5/H5b power analysis on pre-seal history and write `out`."""
+def run_power(out: Path = OUT, n_perm: int | None = None) -> dict:
+    """Run the H5/H5b power analysis on pre-seal history and write `out`. `n_perm` defaults
+    to N_PERM (tests pass a small value)."""
+    n_perm = N_PERM if n_perm is None else n_perm
     expo = load_exposure()
     returns, factors = _load_returns()
     names = [c for c in returns.columns if c != "date"]
@@ -342,9 +357,12 @@ def run_power(out: Path = OUT) -> dict:
     h5b = np.column_stack([slope_null_distribution(z, windows, alphas=A, control=c),
                            [_cross_section(a, z, c)[1] for a in A]])
     rng = np.random.default_rng(SEED)
-    p_h5 = ri_pvalues(A, z, None, N_PERM, rng)
-    p_h5b = ri_pvalues(A, z, c, N_PERM, rng)
-    p_h5b_fl = ri_pvalues(A, z, c, N_PERM, rng, scheme="freedman_lane")
+    p_h5 = ri_pvalues(A, z, None, n_perm, rng)
+    p_h5b = ri_pvalues(A, z, c, n_perm, rng)
+    # the coefficient-based Freedman-Lane column reuses the pivotal-t column's draws
+    rng_coef = copy.deepcopy(rng)
+    p_h5b_fl = ri_pvalues(A, z, c, n_perm, rng, scheme="freedman_lane")
+    p_h5b_flc = ri_pvalues(A, z, c, n_perm, rng_coef, scheme="freedman_lane_coef")
     missing = np.isnan(A)
     idx_non = list(range(0, len(windows), WINDOW_MONTHS))
 
@@ -376,11 +394,11 @@ def run_power(out: Path = OUT) -> dict:
         "nonoverlap_offset_sd_h5b": (min(offsets_b), float(np.median(offsets_b)),
                                      max(offsets_b)),
     }
-    for hyp, p in (("h5", p_h5), ("h5b", p_h5b), ("h5b_fl", p_h5b_fl)):
+    for hyp, p in (("h5", p_h5), ("h5b", p_h5b), ("h5b_fl", p_h5b_fl), ("h5b_flc", p_h5b_flc)):
         for scheme, idx in (("overlap", all_idx), ("nonoverlap", idx_non)):
             for lvl in (0.025, 0.05):
                 res[f"ri_reject_{hyp}_{scheme}_{lvl}"] = float(np.mean(p[idx] <= lvl))
-    res["n_perm"] = N_PERM
+    res["n_perm"] = n_perm
     for k, v in r.items():
         res[f"sd_{k}"], res[f"mde_{k}"], res[f"ols_se_{k}"] = v["sd"], v["mde"], v["median_ols_se"]
     res.update(_task15b(A, h5[:, 0], h5b[:, 0], z, c, keep_names, idx_non, returns, factors))
@@ -462,12 +480,13 @@ def _block(res: dict, windows, idx_non) -> str:
             rows.append(f"| {label} | {name} | {n} | {res[f'sd_{key}'] * pp:.2f} | "
                         f"{res[f'mde_{key}'] * pp:.2f} | {res[f'ols_se_{key}'] * pp:.2f} |")
     label = {"h5": "H5 (permute z)", "h5b": "H5b (permute z, z_aioe fixed)",
-             "h5b_fl": "H5b (Freedman-Lane, permute residuals)"}
+             "h5b_fl": "H5b (Freedman-Lane, pivotal t; permute residuals)",
+             "h5b_flc": "H5b (Freedman-Lane, coefficient; secondary, same draws)"}
     ri_rows = [f"| {label[hyp]} | {scheme} | "
                f"{res['n_windows_' + ('overlap' if scheme == 'overlapping' else 'nonoverlap')]}"
                f" | {res[f'ri_reject_{hyp}_{key}_0.025']:.3f} | "
                f"{res[f'ri_reject_{hyp}_{key}_0.05']:.3f} |"
-               for hyp in ("h5", "h5b", "h5b_fl")
+               for hyp in ("h5", "h5b", "h5b_fl", "h5b_flc")
                for scheme, key in (("overlapping", "overlap"), ("non-overlapping", "nonoverlap"))]
     lo, med, hi = res["nonoverlap_offset_sd_h5"]
     lob, medb, hib = res["nonoverlap_offset_sd_h5b"]
@@ -522,8 +541,11 @@ def _block(res: dict, windows, idx_non) -> str:
         f"window and row (seed `SEED` = {SEED}), two-sided permutation p-value of the "
         f"slope; for H5b `z_aioe` stays in place. The spec does not say how H5b's control "
         f"is handled, so the Freedman-Lane scheme (residuals of alpha on [1, z_aioe] "
-        f"permuted) is shown beside it. Share of windows rejecting (nominal level in the "
-        f"header). Only rejection rates are reported.",
+        f"permuted) is shown beside it, scored by the pivotal t of the coefficient on "
+        f"`z_delegation` (Winkler et al. 2014; final-review ruling K4). The coefficient-based "
+        f"Freedman-Lane statistic used before that ruling is kept as a secondary row, on the "
+        f"same permutation draws. Share of windows rejecting (nominal level in the header). "
+        f"Only rejection rates are reported.",
         "",
         "| hypothesis | windows | n | reject at 0.025 | reject at 0.05 |",
         "|---|---|---|---|---|",
@@ -731,6 +753,10 @@ def _block_15b(res: dict) -> list[str]:
 
 
 def main() -> int:
+    from aideleg.market import seal
+
+    if seal.pap_frozen():
+        sys.exit("pap-v1 exists: the power analysis is frozen, not rerun (pre-seal only)")
     res = run_power()
     for k in ("h5_overlap", "h5_nonoverlap", "h5b_overlap", "h5b_nonoverlap"):
         print(f"{k:16s} sd {res[f'sd_{k}'] * 100:6.2f} pp  MDE {res[f'mde_{k}'] * 100:6.2f} pp")

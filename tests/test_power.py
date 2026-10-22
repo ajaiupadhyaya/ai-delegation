@@ -109,7 +109,8 @@ def test_power_never_reads_sealed_dates(monkeypatch, tmp_path):
     monkeypatch.setattr(power, "load_industry_returns", fake_returns)
     monkeypatch.setattr(power, "load_factors", fake_factors)
     monkeypatch.setattr(power, "load_exposure", lambda: expo)
-    res = power.run_power(out=tmp_path / "power.md")
+    res = power.run_power(out=tmp_path / "power.md", n_perm=19)
+    assert res["n_perm"] == 19
     assert seen and all(e < SEAL_DATE for e in seen)
     assert res["max_return_date"] < SEAL_DATE
     text = (tmp_path / "power.md").read_text()
@@ -126,7 +127,8 @@ def test_slope_null_distribution_validates_control_length():
 
 
 @pytest.mark.parametrize(("with_control", "scheme"),
-                         [(False, "exposure"), (False, "freedman_lane"), (True, "freedman_lane")])
+                         [(False, "exposure"), (False, "freedman_lane"), (True, "freedman_lane"),
+                          (True, "freedman_lane_coef")])
 def test_ri_size_is_nominal_when_industries_are_exchangeable(with_control, scheme):
     rng = np.random.default_rng(11)
     z = rng.normal(size=49)
@@ -266,3 +268,79 @@ def test_own_size_centred_on_a_given_mean():
 def _norm_cdf(x):
     from statistics import NormalDist
     return NormalDist().cdf(x)
+
+
+# --- K4: Freedman-Lane with the pivotal t (Winkler et al. 2014) --------------------------------
+
+def _fl_reference(a, z, c, n_perm, seed, stat):
+    """Brute force: y* = H0 y + P e, refit [1, c, z] per draw; |t| or |coef| of z."""
+    ok = ~np.isnan(a)
+    y, zz, cc = a[ok], z[ok], c[ok]
+    X0 = np.column_stack([np.ones(len(y)), cc])
+    X = np.column_stack([X0, zz])
+    fit0 = X0 @ np.linalg.lstsq(X0, y, rcond=None)[0]
+    e = y - fit0
+    draws = np.random.default_rng(seed).permuted(np.tile(e, (n_perm, 1)), axis=1)
+
+    def score(yy):
+        coef = np.linalg.lstsq(X, yy, rcond=None)[0]
+        if stat == "coef":
+            return coef[2]
+        r = yy - X @ coef
+        s2 = r @ r / (len(yy) - X.shape[1])
+        return coef[2] / np.sqrt(s2 * np.linalg.inv(X.T @ X)[2, 2])
+
+    obs = score(y)
+    perm = np.array([score(fit0 + d) for d in draws])
+    return (1 + np.sum(np.abs(perm) >= np.abs(obs) * (1 - 1e-12))) / (n_perm + 1), obs
+
+
+@pytest.mark.parametrize(("scheme", "stat"),
+                         [("freedman_lane", "t"), ("freedman_lane_coef", "coef")])
+def test_freedman_lane_statistic_matches_brute_force(scheme, stat):
+    rng = np.random.default_rng(21)
+    z = rng.normal(size=49)
+    c = 0.7 * z + rng.normal(size=49)
+    alphas = rng.normal(0.0, 0.05, size=(6, 49)) + 0.01 * z  # a little signal
+    alphas[2, 7] = np.nan
+    for i, a in enumerate(alphas):
+        p = power.ri_pvalues(a[None, :], z, c, n_perm=199, rng=np.random.default_rng(100 + i),
+                             scheme=scheme)[0]
+        want, obs = _fl_reference(a, z, c, 199, 100 + i, stat)
+        assert p == pytest.approx(want)
+    # the observed FL t is the conventional OLS t of the coefficient on z
+    _, t_obs = _fl_reference(alphas[0], z, c, 1, 0, "t")
+    b, se, _ = power._cross_section(alphas[0], z, c)
+    assert t_obs == pytest.approx(b / se)
+
+
+def test_freedman_lane_t_and_coef_differ_but_share_draws(monkeypatch, tmp_path):
+    returns, factors = _synthetic(date(1989, 6, 1), date(2022, 11, 29), seed=3)
+    rng = np.random.default_rng(9)
+    z = rng.normal(size=49)
+    expo = pl.DataFrame({"ff49": list(range(1, 50)), "ff49_short": NAMES,
+                         "z_delegation": z, "z_aioe": 0.7 * z + rng.normal(size=49)})
+    monkeypatch.setattr(power, "load_industry_returns",
+                        lambda f, w, end: returns.filter(pl.col("date") <= end))
+    monkeypatch.setattr(power, "load_factors",
+                        lambda f, end: factors.filter(pl.col("date") <= end))
+    monkeypatch.setattr(power, "load_exposure", lambda: expo)
+    res = power.run_power(out=tmp_path / "power.md", n_perm=49)
+    for lvl in (0.025, 0.05):
+        for sch in ("overlap", "nonoverlap"):
+            assert 0 <= res[f"ri_reject_h5b_fl_{sch}_{lvl}"] <= 1
+            assert 0 <= res[f"ri_reject_h5b_flc_{sch}_{lvl}"] <= 1
+    text = (tmp_path / "power.md").read_text()
+    assert "Freedman-Lane, pivotal t" in text and "Freedman-Lane, coefficient" in text
+
+
+def test_main_refuses_once_the_pap_is_frozen(monkeypatch):
+    from aideleg.market import seal
+
+    def boom(*a, **k):
+        raise AssertionError("run_power was called after the tag")
+
+    monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: True)
+    monkeypatch.setattr(power, "run_power", boom)
+    with pytest.raises(SystemExit, match="pap-v1"):
+        power.main()

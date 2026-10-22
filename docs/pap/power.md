@@ -32,7 +32,7 @@ Non-overlapping sd across all 17 start offsets (min / median / max, pp): H5 1.78
 
 ## Size of the specified randomisation-inference test under no relation
 
-Each historical window run through the confirmatory RI test as specified: exposure (`z_delegation`) permuted across industries, 10,000 permutations per window and row (seed `SEED` = 20261021), two-sided permutation p-value of the slope; for H5b `z_aioe` stays in place. The spec does not say how H5b's control is handled, so the Freedman-Lane scheme (residuals of alpha on [1, z_aioe] permuted) is shown beside it. Share of windows rejecting (nominal level in the header). Only rejection rates are reported.
+Each historical window run through the confirmatory RI test as specified: exposure (`z_delegation`) permuted across industries, 10,000 permutations per window and row (seed `SEED` = 20261021), two-sided permutation p-value of the slope; for H5b `z_aioe` stays in place. The spec does not say how H5b's control is handled, so the Freedman-Lane scheme (residuals of alpha on [1, z_aioe] permuted) is shown beside it, scored by the pivotal t of the coefficient on `z_delegation` (Winkler et al. 2014; final-review ruling K4). The coefficient-based Freedman-Lane statistic used before that ruling is kept as a secondary row, on the same permutation draws. Share of windows rejecting (nominal level in the header). Only rejection rates are reported.
 
 | hypothesis | windows | n | reject at 0.025 | reject at 0.05 |
 |---|---|---|---|---|
@@ -40,8 +40,10 @@ Each historical window run through the confirmatory RI test as specified: exposu
 | H5 (permute z) | non-overlapping | 23 | 0.087 | 0.174 |
 | H5b (permute z, z_aioe fixed) | overlapping | 378 | 0.148 | 0.204 |
 | H5b (permute z, z_aioe fixed) | non-overlapping | 23 | 0.130 | 0.174 |
-| H5b (Freedman-Lane, permute residuals) | overlapping | 378 | 0.061 | 0.095 |
-| H5b (Freedman-Lane, permute residuals) | non-overlapping | 23 | 0.087 | 0.087 |
+| H5b (Freedman-Lane, pivotal t; permute residuals) | overlapping | 378 | 0.056 | 0.095 |
+| H5b (Freedman-Lane, pivotal t; permute residuals) | non-overlapping | 23 | 0.087 | 0.087 |
+| H5b (Freedman-Lane, coefficient; secondary, same draws) | overlapping | 378 | 0.061 | 0.095 |
+| H5b (Freedman-Lane, coefficient; secondary, same draws) | non-overlapping | 23 | 0.087 | 0.087 |
 
 Reference only (decided at Task 15): the plan file's plausibility threshold is 5 pp per 1 SD for the H5 MDE.
 
