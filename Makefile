@@ -41,3 +41,8 @@ data/derived/benchmark_ff49.parquet: src/aideleg/benchmarks.py src/aideleg/expos
 audit: data/derived/aei_panel.parquet data/derived/exposure_ff49.parquet \
 		data/derived/benchmark_ff49.parquet
 	uv run python -m aideleg.audit
+
+# pre-seal power analysis for H5/H5b (returns end 2022-11-29); rewrites the generated block
+.PHONY: power
+power: data/derived/exposure_ff49.parquet data/derived/benchmark_ff49.parquet
+	uv run python -m aideleg.power
