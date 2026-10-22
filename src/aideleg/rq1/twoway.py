@@ -48,6 +48,9 @@ def resolve_tested_cov(
 
     Returns (block, clipped, smallest eigenvalue before clipping, positions in `idx` whose
     variance fell back to the larger one-way cluster variance). Off-diagonals are kept.
+    The fallback applies whenever a tested variance is ≤ ZERO_VARIANCE_RTOL x the larger
+    one-way variance, whether or not the block was clipped. If both one-way variances are
+    also zero, it raises ValueError: the PAP rule gives no SE, and the run stops.
     """
     ix = np.asarray(idx, dtype=int)
     block = np.asarray(v_two, dtype=float)[np.ix_(ix, ix)]

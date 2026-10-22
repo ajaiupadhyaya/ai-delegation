@@ -64,3 +64,14 @@ power: power-unfrozen data/derived/exposure_ff49.parquet
 .PHONY: freeze
 freeze:
 	uv run python scripts/pap_freeze.py
+
+# P-RQ1 (PAP §0.5). The dry run scrambles every outcome before any estimator sees it and writes
+# outside docs/results; it refuses if its directory already holds a run.
+.PHONY: rq1-dry-run rq1-confirm
+rq1-dry-run:
+	uv run python -m aideleg.rq1.confirm --dry-run $${TMPDIR:-/tmp}/aideleg-rq1-dry
+
+# SINGLE RUN, WRITE-ONCE: the logged first run of H1-H4 on real outcomes (plan 2 Task 11). It
+# creates docs/results/rq1/confirmatory_rq1.attempt first and refuses forever after; never rerun.
+rq1-confirm:
+	uv run python -m aideleg.rq1.confirm

@@ -16,6 +16,7 @@ Occupation 0 has no OEWS code, occupation 1 a suppressed wage, occupation 2 a to
 """
 
 import math
+from datetime import date
 
 import numpy as np
 import polars as pl
@@ -118,3 +119,98 @@ def h2_frame(alpha: np.ndarray, release_values: dict[str, np.ndarray],
                            outcome: alpha + np.asarray(v, float), "weight": w})
              for r, v in release_values.items()]
     return pl.concat(parts).sort("task_node", "release")
+
+
+# --- whole-run inputs for `aideleg.rq1.confirm` -------------------------------------------
+
+SYNTH_WINDOWS = {"r2": [(date(2025, 2, 24), date(2025, 3, 4))],
+                 "r3": [(date(2025, 8, 4), date(2025, 8, 11))],
+                 "r4": [(date(2025, 11, 13), date(2025, 11, 20))],
+                 "r5": [(date(2026, 2, 5), date(2026, 2, 12))],
+                 "r6": [(date(2026, 4, 1), date(2026, 5, 1)),
+                        (date(2026, 5, 1), date(2026, 6, 1))]}
+SYNTH_SOC6 = ("11-1021", "13-2011", "15-1252", "23-1011", "25-1021", "29-1141", "41-2031",
+              "43-4051", "47-2061", "53-3032")
+SYNTH_COUNTRIES = ("ARG", "AUS", "BRA", "CAN", "DEU", "FRA", "GBR", "IND", "JPN", "NAM",
+                   "NGA", "USA")
+_PATTERNS = ("directive_pct", "feedback_loop_pct", "task_iteration_pct", "validation_pct",
+             "learning_pct")
+
+
+def _patterns(rng: np.random.Generator) -> dict[str, float]:
+    """Five renormalised patterns (sum 100), their buckets and the suppression shares."""
+    raw = rng.dirichlet(np.ones(5)) * 100
+    out = dict(zip(_PATTERNS, map(float, raw), strict=True))
+    out["automation_pct"] = out["directive_pct"] + out["feedback_loop_pct"]
+    out["augmentation_pct"] = 100 - out["automation_pct"]
+    out["none_pct"] = float(rng.uniform(1, 10))
+    out["filtered_pct"] = float(rng.uniform(1, 10))
+    out["not_classified_pct"] = float(rng.uniform(1, 10))
+    out["ai_autonomy_mean"] = float(rng.uniform(1, 5))
+    return out
+
+
+def synthetic_inputs(seed: int = 7, *, n_task: int = 40, n_family: int = 5):
+    """A small, complete `confirm.Inputs`: r2-r6 global tasks, r6 country overall and GWA
+    rows, families, wages and GDP/WAP frames. Nothing here reads AEI data."""
+    from aideleg.aei.schema import PANEL_COLUMNS
+    from aideleg.aei.tasks import TaskIndex, normalise_task_text
+    from aideleg.rq1.confirm import Inputs
+
+    rng = np.random.default_rng(seed)
+    recs: list[tuple] = []
+
+    def add(rel, start, end, geo_level, geo_id, taxonomy, node_id, metric, value):
+        recs.append((rel, start, end, "claude_ai", geo_level, geo_id, taxonomy, 0, node_id,
+                     node_id if taxonomy != "onet_task" else f"Task statement {node_id}.",
+                     metric, float(value), "collab_v2"))
+
+    ids_by_text, occ_by_id, fam_rows = {}, {}, []
+    for t in range(n_task):
+        tid = 1000 + t
+        k = int(rng.integers(1, 4))
+        occ_by_id[tid] = sorted(f"{s}.00" for s in rng.choice(SYNTH_SOC6, k, replace=False))
+        ids_by_text[normalise_task_text(f"Task statement {tid}.")] = [tid]
+        for f in rng.choice(n_family, int(rng.integers(1, 3)), replace=False):
+            fam_rows.append((tid, f"iwa{int(f):02d}"))
+        educ = float(rng.uniform(10, 20))
+        for rel, windows in SYNTH_WINDOWS.items():
+            for start, end in windows:
+                values = {"pct": float(rng.uniform(0.1, 2.0)), **_patterns(rng)}
+                if rel == "r6":
+                    values["human_education_years_mean"] = educ
+                for m, v in values.items():
+                    add(rel, start, end, "global", "GLOBAL", "onet_task", str(tid), m, v)
+
+    gwas = ("g1", "g2", "g3")
+    for start, end in SYNTH_WINDOWS["r6"]:
+        add("r6", start, end, "global", "GLOBAL", "overall", "overall", "automation_pct", 45.0)
+        for g in gwas:
+            add("r6", start, end, "global", "GLOBAL", "onet_gwa", g, "pct", 100 / 3)
+            add("r6", start, end, "global", "GLOBAL", "onet_gwa", g, "automation_pct",
+                rng.uniform(20, 70))
+        for c in SYNTH_COUNTRIES:
+            vals = {**_patterns(rng), "usage_per_capita_index": rng.uniform(0.2, 5.0),
+                    "usage_pct": rng.uniform(0.1, 5.0)}
+            for m in ("automation_pct", "usage_per_capita_index", "usage_pct",
+                      "validation_pct", "ai_autonomy_mean"):
+                add("r6", start, end, "country", c, "overall", "overall", m, vals[m])
+            for g, s in zip(gwas, rng.dirichlet(np.ones(3)) * 100, strict=True):
+                add("r6", start, end, "country", c, "onet_gwa", g, "pct", s)
+
+    schema = {c: (pl.Date if c.startswith("period") else pl.Int64 if c == "level"
+                  else pl.Float64 if c == "value" else pl.String) for c in PANEL_COLUMNS}
+    panel = pl.DataFrame(recs, schema=schema, orient="row")
+    families = pl.DataFrame(fam_rows, schema={"task_id": pl.Int64, "family": pl.String},
+                            orient="row").unique().sort("task_id", "family")
+    medians = rng.uniform(30_000, 200_000, len(SYNTH_SOC6))
+    wages = pl.DataFrame({"soc6": list(SYNTH_SOC6), "tot_emp": [1000] * len(SYNTH_SOC6),
+                          "a_median": medians,
+                          "a_median_status": ["published"] * len(SYNTH_SOC6)})
+    gdp = pl.DataFrame({"iso_alpha_3": list(SYNTH_COUNTRIES), "year": "2024",
+                        "gdp_total": [str(x) for x in rng.uniform(1e10, 1e13, 12)]})
+    wap = pl.DataFrame({"iso_alpha_3": list(SYNTH_COUNTRIES), "year": "2024",
+                        "working_age_pop": [str(x) for x in rng.uniform(1e6, 1e8, 12)]})
+    return Inputs(panel=panel, index=TaskIndex(ids_by_text, occ_by_id), families=families,
+                  wages=wages, oews_codes=set(SYNTH_SOC6), soc_structure=None,
+                  gdp_country=gdp, wap_country=wap)
