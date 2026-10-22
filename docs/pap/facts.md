@@ -101,8 +101,10 @@ FF49 and factor files, applying P7's next-trading-day rule.
 
 - **2026-08-31 (Mon) is an NYSE trading day.** The NYSE 2026 calendar on the page above lists no
   August holiday; Labor Day is Monday, September 7, 2026.
-- **2025-04-01 (Tue) is a weekday.** It is not on the 2026–2028 calendar, and its holiday status
-  is unverified by source. Good Friday 2025 was April 18 (calendar knowledge). If it were
-  not a trading day, the script's coverage check (data must start on or before 2025-04-01)
-  would still pass, because the files hold earlier dates. The check fails safe only in the
-  other direction: missing late data makes it refuse.
+- **2025-04-01 (Tue) is a weekday.** It is not on the 2026–2028 calendar, so no source confirms
+  it was a trading day, although it was a normal session (calendar knowledge; Good Friday 2025
+  was April 18). This matters for the script. `_check_coverage` runs on the frames already
+  filtered to the window, so it requires the first in-window date to be on or before
+  2025-04-01. If 2025-04-01 had been a holiday, the first in-window date would be later and the
+  script would refuse to run. It fails safe, but `FIRST_TRADING_DAY` would then need
+  correcting.
