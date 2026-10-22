@@ -1,10 +1,13 @@
 """Plan 2 Task 16: the committed RQ1/RQ2 results regenerate byte-identically, carry the one
 wording disclaimer, have both figure formats, and leave the P-RQ1 output untouched."""
 
+import re
 import subprocess
 from pathlib import Path
 
+import numpy as np
 import pytest
+from matplotlib.image import imread
 
 from aideleg.config import ROOT
 from aideleg.results import common, rq1, rq2
@@ -30,11 +33,52 @@ def _text_files(d: Path) -> dict[str, bytes]:
             if p.suffix in (".md", ".csv") and not p.name.startswith("confirmatory_rq1")}
 
 
-def test_results_docs_up_to_date(tmp_path):
-    o1, o2, figs = tmp_path / "rq1", tmp_path / "rq2", tmp_path / "figs"
+def _generate(root: Path) -> tuple[Path, Path, Path]:
+    o1, o2, figs = root / "rq1", root / "rq2", root / "figs"
     assert rq1.main(["--anatomy", "--geography", "--confirmatory", "--out", str(o1),
                      "--fig-dir", str(figs)]) == 0
     rq2.report(o2, figs)
+    return o1, o2, figs
+
+
+@pytest.fixture(scope="module")
+def runs(tmp_path_factory):
+    """Two consecutive regenerations into fresh directories."""
+    return [_generate(tmp_path_factory.mktemp(f"run{i}")) for i in (1, 2)]
+
+
+_PDF_VOLATILE = re.compile(rb"/(CreationDate|ModDate) \([^)]*\)")
+
+
+def _pdf(p: Path) -> bytes:
+    """PDF bytes with the date metadata blanked."""
+    return _PDF_VOLATILE.sub(b"", p.read_bytes())
+
+
+def _figures_equal(a: Path, b: Path) -> bool:
+    if a.suffix == ".pdf":
+        return _pdf(a) == _pdf(b)
+    pa, pb = imread(a), imread(b)
+    return pa.shape == pb.shape and np.array_equal(pa, pb)
+
+
+def test_figures_regenerate_identically(runs):
+    """Figures: two consecutive runs agree byte for byte, and both match the committed files
+    (PNG pixel arrays; PDF bytes with the date metadata normalised)."""
+    (_, _, f1), (_, _, f2) = runs
+    names = sorted(p.name for p in f1.iterdir())
+    assert names == sorted(p.name for p in f2.iterdir())
+    assert names == sorted(p.name for p in FIG_DIR.iterdir() if p.suffix in (".pdf", ".png"))
+    differ = [n for n in names if (f1 / n).read_bytes() != (f2 / n).read_bytes()]
+    assert not differ, f"figures differ between two runs: {differ}"
+    stale = [n for n in names if not _figures_equal(FIG_DIR / n, f1 / n)]
+    assert not stale, f"stale committed figures: {stale}"
+
+
+def test_results_docs_up_to_date(runs):
+    (o1, o2, _), (p1, p2, _) = runs
+    for a, b in ((o1, p1), (o2, p2)):
+        assert _text_files(a) == _text_files(b), "text outputs differ between two runs"
     for committed, fresh in ((RQ1_DIR, o1), (RQ2_DIR, o2)):
         want, got = _text_files(committed), _text_files(fresh)
         assert sorted(got) == sorted(want)

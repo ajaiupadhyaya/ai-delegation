@@ -557,7 +557,10 @@ def report_geography(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=
         tables[geo], globals_[geo] = t, (sample.global_automation, sample.m_global)
         excluded[geo] = sample.excluded
         paths.append(write_csv(round10(t), out / GEOGRAPHY_CSVS[geo]))
-        vals = geography.map_values(t, geo).with_columns(
+        # h4._mix sums over a polars group_by whose row order is not fixed, so `mix` (and the
+        # mix part) reproduce only to ~1e-14; the maps are drawn from 10-significant-digit
+        # values so that they regenerate identically
+        vals = geography.map_values(round10(t), geo).with_columns(
             log10_aui=pl.col("aui").log10())
         unmatched[geo] = {}
         for spec in geography.MAPS[geo]:
