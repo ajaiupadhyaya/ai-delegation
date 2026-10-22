@@ -1,12 +1,14 @@
 """Guarded loaders on fixtures and synthetic data. No real market data is read."""
 
+import subprocess
 from datetime import date
 from pathlib import Path
 
 import polars as pl
 import pytest
 
-from aideleg import confirm_h5, power
+from aideleg import power
+from aideleg.config import ROOT
 from aideleg.market import french, seal
 from aideleg.rq3 import data, guard
 
@@ -20,17 +22,17 @@ def fixture_file(monkeypatch):
     monkeypatch.setattr(guard, "assert_confirmatory_recorded", lambda repo=None: None)
 
 
-def test_read_french_annual_reads_beme_table():
-    df = data.read_french_annual(FX / "ind_monthly_small.csv", "Sum of BE / Sum of ME")
+def test__read_french_annual_reads_beme_table():
+    df = data._read_french_annual(FX / "ind_monthly_small.csv", "Sum of BE / Sum of ME")
     assert df.columns == ["year", "Agric", "Food"]
     assert df["year"].to_list() == [2023, 2024]
     assert df["year"].dtype == pl.Int64
     assert df["Food"].to_list() == [0.40, None]
 
 
-def test_read_french_annual_missing_title_raises():
+def test__read_french_annual_missing_title_raises():
     with pytest.raises(ValueError, match="not found"):
-        data.read_french_annual(FX / "ind_monthly_small.csv", "No such table")
+        data._read_french_annual(FX / "ind_monthly_small.csv", "No such table")
 
 
 def test_characteristics_cap_is_firms_times_size(fixture_file):
@@ -63,7 +65,7 @@ def test_beme_long_and_nonpositive_null(fixture_file):
 
 def test_beme_sets_nonpositive_to_null(fixture_file, monkeypatch):
     monkeypatch.setattr(
-        data, "read_french_annual",
+        data, "_read_french_annual",
         lambda p, t: pl.DataFrame({"year": [2023], "Agric": [-0.3], "Food": [0.0]}))
     assert data.beme()["beme"].to_list() == [None, None]
 
@@ -80,7 +82,7 @@ def test_post_seal_loaders_call_the_guard_first(monkeypatch):
     monkeypatch.setattr(guard, "assert_confirmatory_recorded", _refuse)
     for name in ("load_industry_returns", "load_factors", "read_french_table", "_single_file"):
         monkeypatch.setattr(french, name, _boom)
-    monkeypatch.setattr(data, "read_french_annual", _boom)
+    monkeypatch.setattr(data, "_read_french_annual", _boom)
     for fn in (data.daily, data.monthly, data.ff3_monthly, data.characteristics, data.beme):
         with pytest.raises(guard.ConfirmatoryNotRecorded):
             fn()
@@ -143,5 +145,8 @@ def test_zero_assigned_has_three_designs_and_reads_no_market_data(monkeypatch):
     assert set(z["design"]) == {"B", "A_pooled", "A_r2"}
 
 
-def test_hash_constant_is_the_confirmatory_one():
-    assert len(confirm_h5.EXPOSURE_SHA256) == 64
+def test_pinned_blobs_match_the_confirmatory_commit():
+    for rel, blob in guard.PINNED.items():
+        got = subprocess.run(["git", "-C", str(ROOT), "rev-parse", f"ebe59be:{rel}"],
+                             capture_output=True, text=True, check=True).stdout.strip()
+        assert got == blob

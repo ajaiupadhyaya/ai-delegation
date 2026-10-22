@@ -47,7 +47,7 @@ def ff3_monthly() -> pl.DataFrame:
     return df.select("date", "mkt_rf", "smb", "hml", "rf").filter(pl.col("date") <= MARKET_END)
 
 
-def read_french_annual(path: Path, title: str) -> pl.DataFrame:
+def _read_french_annual(path: Path, title: str) -> pl.DataFrame:
     """The YYYY-dated table that follows `title`: `year` plus one Float64 column per industry."""
     lines = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
     header_idx = None
@@ -104,7 +104,7 @@ def characteristics() -> pl.DataFrame:
 def beme() -> pl.DataFrame:
     """Long `year, ff49_short, beme` from "Sum of BE / Sum of ME"; values <= 0 become null."""
     guard.assert_confirmatory_recorded()
-    wide = read_french_annual(_monthly_file(), "Sum of BE / Sum of ME")
+    wide = _read_french_annual(_monthly_file(), "Sum of BE / Sum of ME")
     names = [c for c in wide.columns if c != "year"]
     long = wide.unpivot(names, index="year", variable_name="ff49_short", value_name="beme")
     return long.with_columns(

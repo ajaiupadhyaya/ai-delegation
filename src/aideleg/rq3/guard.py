@@ -10,6 +10,11 @@ from pathlib import Path
 from aideleg.config import ROOT
 
 CONFIRMATORY = ("docs/results/confirmatory_h5.md", "docs/results/confirmatory_h5.attempt")
+# Blob IDs of the two files at ebe59be, the commit that recorded the single confirmatory run.
+PINNED = {
+    CONFIRMATORY[0]: "72d3fcb2dc376d27d1dc44deb10b65ccd78dcedf",
+    CONFIRMATORY[1]: "4f02b7fd710e8d163d92b842a6ae62dafad70d35",
+}
 RESULT_HEADING = "# Confirmatory test of H5 and H5b"
 
 
@@ -25,6 +30,15 @@ def _git_ok(repo: Path, *args: str) -> bool:
         return False
 
 
+def _head_blob(repo: Path, rel: str) -> str:
+    try:
+        out = subprocess.run(["git", "-C", str(repo), "rev-parse", f"HEAD:{rel}"],
+                             capture_output=True, text=True, check=False)
+    except OSError:
+        return ""
+    return out.stdout.strip()
+
+
 def assert_confirmatory_recorded(repo: Path = ROOT) -> None:
     for rel in CONFIRMATORY:
         # tracked, and present in HEAD (a staged-only file is not a record)
@@ -33,6 +47,11 @@ def assert_confirmatory_recorded(repo: Path = ROOT) -> None:
             raise ConfirmatoryNotRecorded(
                 f"{rel} is not committed in {repo}: market data are not read until the "
                 "confirmatory H5 result and its attempt marker are committed")
+    for rel in CONFIRMATORY:
+        if _head_blob(repo, rel) != PINNED[rel]:
+            raise ConfirmatoryNotRecorded(
+                f"{rel} at HEAD differs from the pinned confirmatory record "
+                f"({PINNED[rel]}): a later committed edit is not the recorded result")
     for rel in CONFIRMATORY:
         if not _git_ok(repo, "diff", "--quiet", "HEAD", "--", rel):
             raise ConfirmatoryNotRecorded(
