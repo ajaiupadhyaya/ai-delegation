@@ -18,6 +18,8 @@ from aideleg.config import SEED
 
 AEI_COLS = ("z_usage", "z_delegation", "z_augmentation")
 BENCH_COLS = ("z_aioe", "z_eloundou", "z_eloundou_gpt4")
+# rank gaps are reported against each benchmark: the D8 headline first, then the others
+RANK_BENCHMARKS = ("z_eloundou", "z_eloundou_gpt4", "z_aioe")
 SPEARMAN_COLUMNS = ["aei", "benchmark", "n", "spearman", "ci_low", "ci_high", "n_draws_used"]
 
 
@@ -67,12 +69,22 @@ def _joined(exposure: pl.DataFrame, bench: pl.DataFrame) -> pl.DataFrame:
     return exposure.join(bench.select("ff49", *cols), on="ff49", how="left")
 
 
+def _no_nulls(d: pl.DataFrame, cols: tuple[str, ...]) -> None:
+    """Ranks need a value for every industry: a null would sort first and take a rank."""
+    for c in cols:
+        n = d[c].null_count() + (d[c].is_nan().sum() if d[c].dtype.is_float() else 0)
+        if n:
+            raise ValueError(f"{c}: {n} null value(s); ranks need every industry's value")
+
+
 def top_bottom(exposure: pl.DataFrame, bench: pl.DataFrame, col: str, k: int = 10) -> pl.DataFrame:
     """The k highest and k lowest industries on `col`, with the three benchmarks beside them.
 
     `rank` counts from the highest (1); the bottom block therefore carries ranks n-k+1 .. n.
     """
-    d = (_joined(exposure, bench).sort([col, "ff49_short"], descending=[True, False])
+    d = _joined(exposure, bench)
+    _no_nulls(d, (col,))
+    d = (d.sort([col, "ff49_short"], descending=[True, False])
          .with_row_index("rank", offset=1))
     n = d.height
     d = d.with_columns(side=pl.when(pl.col("rank") <= k).then(pl.lit("top"))
@@ -85,13 +97,15 @@ def top_bottom(exposure: pl.DataFrame, bench: pl.DataFrame, col: str, k: int = 1
 
 
 def rank_gaps(exposure: pl.DataFrame, bench: pl.DataFrame, aei: str = "z_delegation",
-              bench_col: str = "z_aioe", k: int = 10) -> pl.DataFrame:
+              bench_col: str = "z_eloundou", k: int = 10) -> pl.DataFrame:
     """Rank on the AEI measure minus rank on the benchmark; the k largest and k smallest gaps.
 
-    Rank 1 is the highest value; ties break on the industry name. Output is sorted by gap,
-    largest first, and holds each industry once.
+    The default benchmark is the D8 headline, `z_eloundou`. Rank 1 is the highest value; ties
+    break on the industry name. Output is sorted by gap, largest first, and holds each industry
+    once. A null on either measure raises.
     """
     d = _joined(exposure, bench)
+    _no_nulls(d, (aei, bench_col))
     does = d.sort([aei, "ff49_short"], descending=[True, False]).with_row_index("rank_does", 1)
     could = d.sort([bench_col, "ff49_short"], descending=[True, False]).with_row_index(
         "rank_could", 1)

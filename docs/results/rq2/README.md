@@ -8,6 +8,6 @@ RQ2 is descriptive. Nothing in this document is a hypothesis test or a decision;
 
 - `could_vs_does.md` / `.csv`: Spearman correlations, Design B and Design A_pooled (exploratory; contains look-ahead (PAP §10, S3))
 - `top_bottom.md` / `.csv`: top and bottom industries per AEI column
-- `rank_gaps.md` / `.csv`: rank on does minus rank on could
+- `rank_gaps.md` / `.csv`: rank on does minus rank on could, against `z_eloundou` (headline), `z_eloundou_gpt4` and `z_aioe`
 - `bounds.md` / `.csv` / `bounds_occupation.csv`: widths of the R7 bounds
 - figures `fig_rq2_could_vs_does` and `fig_rq2_bound_widths` in `docs/paper/figures/`

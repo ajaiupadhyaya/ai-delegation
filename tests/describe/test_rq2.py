@@ -62,7 +62,7 @@ def test_rank_gap_hand_case():
     ex = _ex(["a", "b", "c"], [3.0, 2.0, 1.0])
     bench = pl.DataFrame({"ff49": [0, 1, 2], "z_aioe": [1.0, 2.0, 3.0],
                           "z_eloundou": [0.0] * 3, "z_eloundou_gpt4": [0.0] * 3})
-    g = rq2.rank_gaps(ex, bench, k=3)
+    g = rq2.rank_gaps(ex, bench, bench_col="z_aioe", k=3)
     assert g.columns == ["ff49_short", "rank_does", "rank_could", "gap"]
     assert g["gap"].to_list() == [2, 0, -2]
     assert g["ff49_short"].to_list() == ["c", "b", "a"]  # lowest on does, highest on could
@@ -110,4 +110,36 @@ def test_docs_state_zero_assigned_share(tmp_path):
     assert (tmp_path / "figs" / "fig_rq2_bound_widths.png").exists()
     csv = pl.read_csv(tmp_path / "docs" / "could_vs_does.csv")
     assert csv.columns[0] == "design" and csv.height == 2 * 3 * 3
+    gaps = pl.read_csv(tmp_path / "docs" / "rank_gaps.csv")
+    assert gaps.columns[0] == "benchmark"
+    assert gaps["benchmark"].unique(maintain_order=True).to_list() == list(rq2.RANK_BENCHMARKS)
+    md = (tmp_path / "docs" / "rank_gaps.md").read_text()
+    heads = [ln for ln in md.splitlines() if ln.startswith("## Rank gaps")]
+    assert heads == [
+        "## Rank gaps, `z_delegation` against `z_eloundou` (headline benchmark, Design B)",
+        "## Rank gaps, `z_delegation` against `z_eloundou_gpt4` (Design B)",
+        "## Rank gaps, `z_delegation` against `z_aioe` (Design B)"]
     assert paths
+
+
+def test_rank_gaps_default_is_the_headline_benchmark():
+    assert rq2.RANK_BENCHMARKS == ("z_eloundou", "z_eloundou_gpt4", "z_aioe")
+    ex = _ex(["a", "b", "c"], [3.0, 2.0, 1.0])
+    bench = pl.DataFrame({"ff49": [0, 1, 2], "z_aioe": [1.0, 2.0, 3.0],
+                          "z_eloundou": [3.0, 1.0, 2.0], "z_eloundou_gpt4": [0.0] * 3})
+    assert rq2.rank_gaps(ex, bench, k=3).equals(
+        rq2.rank_gaps(ex, bench, bench_col="z_eloundou", k=3))
+
+
+def test_nulls_raise_instead_of_sorting_first():
+    import pytest
+    ex = _ex(["a", "b", "c"], [3.0, None, 1.0])
+    bench = pl.DataFrame({"ff49": [0, 1, 2], "z_aioe": [1.0, 2.0, 3.0],
+                          "z_eloundou": [0.0, 1.0, 2.0], "z_eloundou_gpt4": [0.0] * 3})
+    with pytest.raises(ValueError, match="null"):
+        rq2.top_bottom(ex, bench, "z_delegation", k=1)
+    with pytest.raises(ValueError, match="null"):
+        rq2.rank_gaps(ex, bench, k=1)
+    ok = _ex(["a", "b", "c"], [3.0, 2.0, 1.0])
+    with pytest.raises(ValueError, match="null"):  # an industry without a benchmark value
+        rq2.rank_gaps(ok, bench.filter(pl.col("ff49") != 1), k=1)

@@ -164,12 +164,16 @@ def report(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR, *, exposure=None, o
     paths.append(write_result_doc(out / "top_bottom.md", "RQ2: top and bottom industries",
                                   GENERATOR, secs))
 
-    gaps = rq2.rank_gaps(ex_b, bench, k=k)
-    paths.append(write_csv(gaps, out / "rank_gaps.csv"))
+    gaps = {b: rq2.rank_gaps(ex_b, bench, bench_col=b, k=k) for b in rq2.RANK_BENCHMARKS}
+    paths.append(write_csv(pl.concat(
+        g.select(pl.lit(b).alias("benchmark"), pl.all()) for b, g in gaps.items()),
+        out / "rank_gaps.csv"))
     paths.append(write_result_doc(
         out / "rank_gaps.md", "RQ2: rank gaps between does and could", GENERATOR,
-        _preamble(occ, ("B",)) + [("Rank gaps, `z_delegation` against `z_aioe` (Design B)",
-                                   RANK_NOTE + "\n\n" + md_table(gaps))]))
+        _preamble(occ, ("B",)) + [
+            (f"Rank gaps, `z_delegation` against `{b}` ("
+             + ("headline benchmark, " if b == "z_eloundou" else "") + "Design B)",
+             RANK_NOTE + "\n\n" + md_table(g)) for b, g in gaps.items()]))
 
     ff, summ = rq2.bound_widths(ex_b, occ_b)
     paths.append(write_csv(ff, out / "bounds.csv"))
@@ -187,7 +191,8 @@ def report(out: Path = OUT_DIR, fig_dir: Path = FIGURES_DIR, *, exposure=None, o
               "- `could_vs_does.md` / `.csv`: Spearman correlations, Design B and "
               f"Design A_pooled ({EXPLORATORY})",
               "- `top_bottom.md` / `.csv`: top and bottom industries per AEI column",
-              "- `rank_gaps.md` / `.csv`: rank on does minus rank on could",
+              "- `rank_gaps.md` / `.csv`: rank on does minus rank on could, against "
+              "`z_eloundou` (headline), `z_eloundou_gpt4` and `z_aioe`",
               "- `bounds.md` / `.csv` / `bounds_occupation.csv`: widths of the R7 bounds",
               f"- figures `{FIG_COULD}` and `{FIG_WIDTHS}` in `docs/paper/figures/`", ""]
     (out / "README.md").write_text("\n".join(readme), encoding="utf-8")

@@ -16,6 +16,60 @@ Zero-assigned employment share (D3): every exposure index below is built with th
 
 - Design B: 12.14% of OEWS employment is in 232 of 831 occupations with no AEI usage, and is assigned an exposure of zero.
 
+## Rank gaps, `z_delegation` against `z_eloundou` (headline benchmark, Design B)
+
+Rank 1 is the highest value. `gap = rank_does - rank_could`: a positive gap means the industry ranks lower on the AEI measure than on the benchmark.
+
+| ff49_short | rank_does | rank_could | gap |
+|---|---|---|---|
+| Rtail | 48 | 20 | 28 |
+| RlEst | 33 | 8 | 25 |
+| Whlsl | 31 | 11 | 20 |
+| Hlth | 36 | 18 | 18 |
+| Trans | 42 | 24 | 18 |
+| Smoke | 45 | 31 | 14 |
+| Fin | 14 | 1 | 13 |
+| Banks | 15 | 4 | 11 |
+| Beer | 41 | 30 | 11 |
+| Insur | 13 | 2 | 11 |
+| Boxes | 38 | 46 | -8 |
+| Clths | 25 | 33 | -8 |
+| Agric | 23 | 32 | -9 |
+| MedEq | 12 | 21 | -9 |
+| BldMt | 27 | 37 | -10 |
+| Mach | 17 | 27 | -10 |
+| Steel | 34 | 44 | -10 |
+| FabPr | 30 | 41 | -11 |
+| Autos | 28 | 45 | -17 |
+| Txtls | 16 | 43 | -27 |
+
+## Rank gaps, `z_delegation` against `z_eloundou_gpt4` (Design B)
+
+Rank 1 is the highest value. `gap = rank_does - rank_could`: a positive gap means the industry ranks lower on the AEI measure than on the benchmark.
+
+| ff49_short | rank_does | rank_could | gap |
+|---|---|---|---|
+| RlEst | 33 | 12 | 21 |
+| Rtail | 48 | 29 | 19 |
+| Hlth | 36 | 18 | 18 |
+| Trans | 42 | 24 | 18 |
+| Whlsl | 31 | 14 | 17 |
+| Banks | 15 | 3 | 12 |
+| Insur | 13 | 2 | 11 |
+| Smoke | 45 | 34 | 11 |
+| Fin | 14 | 4 | 10 |
+| Cnstr | 47 | 40 | 7 |
+| Drugs | 11 | 16 | -5 |
+| Food | 43 | 48 | -5 |
+| Paper | 37 | 42 | -5 |
+| Steel | 34 | 39 | -5 |
+| Boxes | 38 | 44 | -6 |
+| Gold | 39 | 46 | -7 |
+| Ships | 29 | 37 | -8 |
+| Agric | 23 | 35 | -12 |
+| Fun | 10 | 25 | -15 |
+| Txtls | 16 | 38 | -22 |
+
 ## Rank gaps, `z_delegation` against `z_aioe` (Design B)
 
 Rank 1 is the highest value. `gap = rank_does - rank_could`: a positive gap means the industry ranks lower on the AEI measure than on the benchmark.
