@@ -30,6 +30,8 @@ from aideleg.config import RAW
 from aideleg.occupations import soc_rollup
 
 SUPPRESSED = ("**", "*", "#")
+# OEWS prints `#` where the annual median is at or above this limit (PAP section 4.1).
+A_MEDIAN_TOPCODE: dict[int, float] = {2024: 239_200.0}
 
 
 def _unzipped(key: str, filename: str, raw: Path = RAW) -> Path:
@@ -67,6 +69,31 @@ def load_national(year: int = 2024, *, path: Path | None = None) -> pl.DataFrame
         soc6=pl.col("OCC_CODE"), title=pl.col("OCC_TITLE"),
         tot_emp=_num("TOT_EMP", pl.Int64()), a_median=_num("A_MEDIAN", pl.Float64()),
     ).sort("soc6")
+
+
+def load_national_wages(year: int = 2024, *, path: Path | None = None) -> pl.DataFrame:
+    """Detailed occupations, cross-industry: `soc6, tot_emp, a_median, a_median_status`.
+
+    For the wage regressors only; `load_national` (which nulls `#`) stays as it is, so the
+    exposure inputs do not move. Reads the raw `A_MEDIAN` strings: `#` becomes the year's
+    top-code (`"topcoded"`, KeyError if the year has none), `*`, `**` or empty becomes null
+    (`"suppressed"`), anything else is the published number.
+    """
+    topcode = A_MEDIAN_TOPCODE[year]
+    path = path or _unzipped(f"oews_{year}_nat", f"national_M{year}_dl.xlsx")
+    raw = pd.read_excel(path, dtype=str, engine="openpyxl", keep_default_na=False)
+    df = pl.from_pandas(raw).with_columns(pl.all().str.strip_chars())
+    df = df.filter(pl.col("O_GROUP") == "detailed")
+    med = pl.col("A_MEDIAN")
+    status = (pl.when(med == "#").then(pl.lit("topcoded"))
+              .when(med.is_in(["*", "**", ""])).then(pl.lit("suppressed"))
+              .otherwise(pl.lit("published")))
+    value = (pl.when(status == "topcoded").then(pl.lit(topcode))
+             .when(status == "published").then(med.cast(pl.Float64, strict=True)))
+    emp = pl.when(pl.col("TOT_EMP").is_in(SUPPRESSED) | (pl.col("TOT_EMP") == "")).then(None) \
+        .otherwise(pl.col("TOT_EMP")).cast(pl.Float64, strict=True).cast(pl.Int64())
+    return df.select(soc6=pl.col("OCC_CODE"), tot_emp=emp, a_median=value.cast(pl.Float64),
+                     a_median_status=status).sort("soc6")
 
 
 def load_industry_matrix(year: int = 2024, digits: Literal[3, 4] = 4, *,
