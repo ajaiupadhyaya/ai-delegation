@@ -73,6 +73,9 @@ def unsealed(monkeypatch):
         return state["factors"].filter(pl.col("date") <= end)
 
     monkeypatch.setattr(seal, "pap_frozen", lambda repo=None: True)
+    # K1/K2 are tested on tmp git repos below; here they are recorded no-ops
+    monkeypatch.setattr(ch, "check_binding", lambda *a, **k: calls.append(("binding",)))
+    monkeypatch.setattr(ch, "check_french_data", lambda *a, **k: calls.append(("french",)))
     for mod in (ch, power):
         monkeypatch.setattr(mod, "load_industry_returns", fake_returns)
         monkeypatch.setattr(mod, "load_factors", fake_factors)
@@ -115,6 +118,10 @@ def test_refuses_to_overwrite(unsealed, tmp_path):
     assert unsealed["calls"] == []
 
 
+def _loads(calls):
+    return [c for c in calls if c[0] in ("returns", "factors")]
+
+
 def test_refuses_on_exposure_hash_mismatch(unsealed, monkeypatch, tmp_path):
     monkeypatch.setattr(ch, "EXPOSURE_SHA256", "0" * 64)
     with pytest.raises(ValueError, match="exposure vector"):
@@ -137,7 +144,8 @@ def test_decide_co_condition_and_wording():
     d = ch.decide(b, fz, null="zero")
     assert d["primary"]["H5"] == 0.025 and d["primary"]["H5b"] is None
     assert d["co_condition"]["H5"] is False
-    assert "driven by Softw" in d["wording"]["H5"]
+    assert "not robust to dropping Softw (R13 not rejected)" in d["wording"]["H5"]
+    assert "driven by" not in d["wording"]["H5"]
     b["h5_r13"] = 10 * fz["s_h5_r13"]
     d = ch.decide(b, fz, null="zero")
     assert d["co_condition"]["H5"] is True
@@ -161,7 +169,9 @@ def test_end_to_end_synthetic_planted_slope(unsealed, tmp_path):
     out = tmp_path / "confirmatory_h5.md"
     res = ch.run(out=out)
     # loaders asked only for the confirmatory window's end (no dropped industries)
-    assert {c[-1] for c in unsealed["calls"]} == {ch.WINDOW[1]}
+    assert {c[-1] for c in _loads(unsealed["calls"])} == {ch.WINDOW[1]}
+    # binding and data checks ran before the first load
+    assert [c[0] for c in unsealed["calls"][:3]] == ["binding", "french", "returns"]
     a = power.window_alphas(r, f, *ch.WINDOW).to_numpy()
     z = unsealed["expo"]["z_delegation"].to_numpy()
     assert res["b"]["h5"] == pytest.approx(np.polyfit(z, a, 1)[0])
@@ -172,7 +182,9 @@ def test_end_to_end_synthetic_planted_slope(unsealed, tmp_path):
     for needle in ("H5", "H5b", "R12", "R13", "Freedman-Lane", "HC3", "Holm",
                    ch.EXPOSURE_SHA256, "conversations matched to"):
         assert needle in text
-    assert set(res["ri"]) == {"h5_exposure", "h5b_exposure", "h5b_freedman_lane"}
+    assert set(res["ri"]) == {"h5_exposure", "h5b_exposure", "h5b_freedman_lane",
+                              "h5b_freedman_lane_coef"}
+    assert "pivotal t" in text
     assert all(0 < p <= 1 for p in res["ri"].values())
     with pytest.raises(FileExistsError):
         ch.run(out=out)
@@ -190,7 +202,7 @@ def test_end_to_end_synthetic_null_and_softw_only(unsealed, tmp_path):
     res = ch.run(out=tmp_path / "b.md")
     assert res["decision"]["primary"]["H5"] is not None
     assert res["decision"]["co_condition"]["H5"] is False
-    assert "driven by Softw" in res["decision"]["wording"]["H5"]
+    assert "not robust to dropping Softw" in res["decision"]["wording"]["H5"]
 
 
 def test_dropped_industry_rescales_on_pre_seal_history(unsealed, tmp_path, monkeypatch):
@@ -200,7 +212,7 @@ def test_dropped_industry_rescales_on_pre_seal_history(unsealed, tmp_path, monke
     unsealed["state"].update(returns=r, factors=f)
     res = ch.run(out=tmp_path / "c.md")
     assert res["dropped"] == ["I05"]
-    ends = {c[-1] for c in unsealed["calls"]}
+    ends = {c[-1] for c in _loads(unsealed["calls"])}
     assert ends == {ch.WINDOW[1], power.END}
     # the rescaled values equal what the power module computes on the kept industries
     expo = unsealed["expo"].filter(pl.col("ff49_short") != "I05")
@@ -246,7 +258,9 @@ def test_refuses_when_data_stop_before_the_window_end(unsealed, tmp_path):
     out = tmp_path / "c.md"
     with pytest.raises(ValueError, match="window coverage"):
         ch.run(out=out)
-    assert not out.exists()
+    # a refusal after the first read is an attempt, recorded with its traceback
+    assert "window coverage" in out.read_text()
+    assert ch.attempt_path(out).exists()
 
 
 def test_refuses_when_data_start_late_or_dates_differ(unsealed, tmp_path):
@@ -259,7 +273,8 @@ def test_refuses_when_data_start_late_or_dates_differ(unsealed, tmp_path):
     unsealed["state"].update(returns=r, factors=f)
     with pytest.raises(ValueError, match="window coverage"):
         ch.run(out=tmp_path / "b.md")
-    assert not (tmp_path / "a.md").exists() and not (tmp_path / "b.md").exists()
+    for name in ("a.md", "b.md"):
+        assert "window coverage" in (tmp_path / name).read_text()
 
 
 def test_mde_uses_the_primary_critical():
@@ -307,3 +322,258 @@ def test_end_to_end_reports_both_statistics(unsealed, tmp_path, monkeypatch, nul
     assert f"Confirmatory null: {'b = 0' if null == 'zero' else 'b = bbar'}" in text
     assert "(b - bbar) / s" in text and "b / s" in text
     assert "pre-seal, full 49 industries" in text
+
+
+
+# --- K3: attempt marker and crash record ------------------------------------------------------
+
+def test_attempt_marker_and_traceback_on_a_crash(unsealed, tmp_path, monkeypatch):
+    r, f = _market(date(1989, 6, 1), date(2026, 9, 30))
+    unsealed["state"].update(returns=r, factors=f)
+    out = tmp_path / "confirmatory_h5.md"
+    marker = ch.attempt_path(out)
+    assert marker == tmp_path / "confirmatory_h5.attempt"
+
+    def crash(*a, **k):
+        raise RuntimeError("synthetic crash after the first read")
+
+    monkeypatch.setattr(power, "window_alphas", crash)
+    with pytest.raises(RuntimeError, match="synthetic crash"):
+        ch.run(out=out)
+    m = marker.read_text()
+    assert re.search(r"started_utc: \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", m)
+    assert re.search(r"head: ([0-9a-f]{40}|unknown)", m)
+    text = out.read_text()
+    assert "Traceback" in text and "synthetic crash after the first read" in text
+    # a second run refuses, even with the output removed
+    out.unlink()
+    unsealed["calls"].clear()
+    with pytest.raises(FileExistsError, match="attempt"):
+        ch.run(out=out)
+    assert unsealed["calls"] == []
+
+
+def test_no_marker_when_refused_before_the_first_read(unsealed, tmp_path, monkeypatch):
+    monkeypatch.setattr(ch, "EXPOSURE_SHA256", "0" * 64)
+    out = tmp_path / "c.md"
+    with pytest.raises(ValueError, match="exposure vector"):
+        ch.run(out=out)
+    assert not ch.attempt_path(out).exists() and not out.exists()
+    assert _loads(unsealed["calls"]) == []
+
+
+def test_marker_written_before_the_first_post_seal_read(unsealed, tmp_path, monkeypatch):
+    r, f = _market(date(1989, 6, 1), date(2026, 9, 30))
+    unsealed["state"].update(returns=r, factors=f)
+    out = tmp_path / "c.md"
+    seen = []
+    orig = ch.load_industry_returns
+
+    def spy(*a, **k):
+        seen.append(ch.attempt_path(out).exists())
+        return orig(*a, **k)
+
+    monkeypatch.setattr(ch, "load_industry_returns", spy)
+    ch.run(out=out)
+    assert seen == [True]
+
+
+def test_binding_failure_reads_nothing(unsealed, tmp_path, monkeypatch):
+    def refuse(*a, **k):
+        raise ch.BindingError("not bound")
+
+    monkeypatch.setattr(ch, "check_binding", refuse)
+    monkeypatch.setattr(power, "load_exposure", lambda: (_ for _ in ()).throw(
+        AssertionError("exposure loaded before the binding check")))
+    out = tmp_path / "c.md"
+    with pytest.raises(ch.BindingError):
+        ch.run(out=out)
+    assert not out.exists() and not ch.attempt_path(out).exists()
+    assert _loads(unsealed["calls"]) == []
+
+
+# --- K1: the script enforces its own binding (tmp git repos only; never pap-v1 here) ----------
+
+BOUND = ("src/aideleg/confirm_h5.py", "src/aideleg/power.py", "src/aideleg/market/__init__.py",
+         "src/aideleg/market/french.py", "src/aideleg/market/seal.py")
+
+
+def _g(repo, *args):
+    import subprocess
+    return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True,
+                          text=True).stdout.strip()
+
+
+@pytest.fixture
+def bound_repo(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _g(repo, "init", "-q")
+    for k, v in (("user.email", "t@example.com"), ("user.name", "t"),
+                 ("commit.gpgsign", "false"), ("tag.gpgsign", "false")):
+        _g(repo, "config", k, v)
+    for rel in BOUND + ("src/aideleg/other.py", "pyproject.toml", "uv.lock", "README.md"):
+        (repo / rel).parent.mkdir(parents=True, exist_ok=True)
+        (repo / rel).write_text(f"# {rel}\n")
+    _g(repo, "add", "-A")
+    _g(repo, "commit", "-q", "-m", "plan")
+    _g(repo, "tag", "-a", "pap-v1", "-m", "signed plan")
+    return repo
+
+
+def _own(repo):
+    return repo / "src/aideleg/confirm_h5.py"
+
+
+def test_binding_passes_on_the_tagged_commit_and_a_docs_only_descendant(bound_repo):
+    ch.check_binding(bound_repo, own=_own(bound_repo))
+    (bound_repo / "README.md").write_text("results\n")
+    _g(bound_repo, "commit", "-q", "-am", "docs")
+    ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+def test_binding_refuses_without_the_tag(bound_repo):
+    _g(bound_repo, "tag", "-d", "pap-v1")
+    with pytest.raises(ch.BindingError, match="annotated"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+def test_binding_refuses_a_lightweight_tag(bound_repo):  # (a)
+    _g(bound_repo, "tag", "-d", "pap-v1")
+    _g(bound_repo, "tag", "pap-v1")
+    with pytest.raises(ch.BindingError, match="annotated"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+def test_binding_refuses_when_head_does_not_descend_from_the_tag(bound_repo):  # (b)
+    _g(bound_repo, "checkout", "-q", "--orphan", "elsewhere")
+    _g(bound_repo, "commit", "-q", "-m", "unrelated")
+    with pytest.raises(ch.BindingError, match="descend"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+def test_binding_refuses_when_the_running_script_differs(bound_repo, tmp_path):  # (c)
+    other = tmp_path / "confirm_h5.py"
+    other.write_text("# edited copy\n")
+    with pytest.raises(ch.BindingError, match="confirm_h5.py"):
+        ch.check_binding(bound_repo, own=other)
+
+
+def test_binding_refuses_an_untracked_market_module(bound_repo):  # (c), invisible to diff
+    (bound_repo / "src/aideleg/market/extra.py").write_text("x = 1\n")
+    with pytest.raises(ch.BindingError, match="extra.py"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+@pytest.mark.parametrize("rel", ["src/aideleg/power.py", "src/aideleg/market/seal.py"])
+def test_binding_refuses_an_edited_bound_module(bound_repo, rel):  # (c)
+    (bound_repo / rel).write_text("# edited\n")
+    with pytest.raises(ch.BindingError, match=rel.rsplit("/", 1)[-1]):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+@pytest.mark.parametrize("rel", ["src/aideleg/other.py", "pyproject.toml", "uv.lock"])
+@pytest.mark.parametrize("commit", [False, True])
+def test_binding_refuses_src_or_lock_changes_against_the_tag(bound_repo, rel, commit):  # (d)
+    (bound_repo / rel).write_text("# changed after the tag\n")
+    if commit:
+        _g(bound_repo, "commit", "-q", "-am", "change")
+    with pytest.raises(ch.BindingError, match="differ from pap-v1"):
+        ch.check_binding(bound_repo, own=_own(bound_repo))
+
+
+def test_binding_refuses_in_this_repo_before_the_tag():
+    # this repo has no pap-v1: the check refuses without reading anything
+    assert not seal.pap_frozen()
+    with pytest.raises(ch.BindingError):
+        ch.check_binding()
+
+
+# --- K2: French data bound to the tagged MANIFEST ---------------------------------------------
+
+def _zip_bytes(members: dict[str, bytes]) -> bytes:
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for n, b in members.items():
+            z.writestr(n, b)
+    return buf.getvalue()
+
+
+@pytest.fixture
+def french_repo(bound_repo):
+    import json
+    raw = bound_repo / "data/raw"
+    manifest = {}
+    for key in ch.FRENCH_REQUIRED + ("ff_siccodes49",):
+        dest = f"french/{key}.zip"
+        body = _zip_bytes({f"{key}.csv": f"{key} data\n".encode()})
+        (raw / dest).parent.mkdir(parents=True, exist_ok=True)
+        (raw / dest).write_bytes(body)
+        (raw / dest).with_suffix("").mkdir()
+        (raw / dest).with_suffix("").joinpath(f"{key}.csv").write_bytes(f"{key} data\n".encode())
+        manifest[key] = {"key": key, "url": "u", "dest": dest, "retrieved_utc": "t",
+                         "bytes": len(body), "sha256": hashlib.sha256(body).hexdigest()}
+    manifest["other"] = {"key": "other", "url": "u", "dest": "bls/x.zip", "retrieved_utc": "t",
+                         "bytes": 0, "sha256": "0" * 64}
+    (raw / "MANIFEST.json").write_text(json.dumps(manifest))
+    _g(bound_repo, "add", "data/raw/MANIFEST.json")
+    _g(bound_repo, "commit", "-q", "-m", "manifest")
+    _g(bound_repo, "tag", "-f", "-a", "pap-v1", "-m", "signed plan")
+    return bound_repo, raw
+
+
+def test_french_data_passes_when_zips_and_members_match(french_repo):
+    repo, raw = french_repo
+    ch.check_french_data(repo, raw)
+
+
+def test_french_data_refuses_a_zip_that_differs_from_the_tagged_manifest(french_repo):
+    repo, raw = french_repo
+    (raw / "french/ff5_daily.zip").write_bytes(_zip_bytes({"ff5_daily.csv": b"other\n"}))
+    with pytest.raises(ch.BindingError, match="ff5_daily.*SHA-256"):
+        ch.check_french_data(repo, raw)
+
+
+def test_french_data_uses_the_manifest_at_the_tag_not_the_working_tree(french_repo):
+    import json
+    repo, raw = french_repo
+    body = _zip_bytes({"ff5_daily.csv": b"other\n"})
+    (raw / "french/ff5_daily.zip").write_bytes(body)
+    m = json.loads((raw / "MANIFEST.json").read_text())
+    m["ff5_daily"]["sha256"] = hashlib.sha256(body).hexdigest()
+    (raw / "MANIFEST.json").write_text(json.dumps(m))  # edited, not tagged
+    with pytest.raises(ch.BindingError, match="SHA-256"):
+        ch.check_french_data(repo, raw)
+
+
+def test_french_data_refuses_an_edited_extracted_member(french_repo):
+    repo, raw = french_repo
+    (raw / "french/mom_daily/mom_daily.csv").write_bytes(b"edited\n")
+    with pytest.raises(ch.BindingError, match="CRC32"):
+        ch.check_french_data(repo, raw)
+
+
+@pytest.mark.parametrize("change", ["extra", "missing"])
+def test_french_data_refuses_extra_or_missing_members(french_repo, change):
+    repo, raw = french_repo
+    d = raw / "french/ff49_daily"
+    if change == "extra":
+        (d / "stale.csv").write_text("old\n")
+    else:
+        (d / "ff49_daily.csv").unlink()
+    with pytest.raises(ch.BindingError, match="members"):
+        ch.check_french_data(repo, raw)
+
+
+def test_french_data_requires_the_confirmatory_keys(french_repo):
+    import json
+    repo, raw = french_repo
+    m = json.loads((raw / "MANIFEST.json").read_text())
+    del m["mom_daily"]
+    (raw / "MANIFEST.json").write_text(json.dumps(m))
+    _g(repo, "commit", "-q", "-am", "drop")
+    _g(repo, "tag", "-f", "-a", "pap-v1", "-m", "signed plan")
+    with pytest.raises(ch.BindingError, match="mom_daily"):
+        ch.check_french_data(repo, raw)

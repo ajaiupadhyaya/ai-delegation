@@ -8,8 +8,19 @@ unedited (PAP single-run protocol). Every number this script freezes was produce
 asserts the constants below equal that list. This file's git blob hash is recorded in the PAP.
 
 Steps.
-1. Refuse unless `pap-v1` exists and the output file does not; check the Design B exposure
-   vector against its frozen SHA-256 (PAP §9.3).
+1. Refuse unless the output file and the attempt marker `docs/results/confirmatory_h5.attempt`
+   do not exist, and `pap-v1` exists. Then the binding (PAP §9.2, P-H5), before anything is
+   loaded: `pap-v1` is an annotated tag; HEAD descends from it; this script's own blob and the
+   working-tree blobs of `src/aideleg/power.py` and every `src/aideleg/market/*.py` equal
+   their blobs at `pap-v1`; `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`. Then the
+   French data: every French zip's SHA-256 equals `git show pap-v1:data/raw/MANIFEST.json`, and
+   every extracted member's CRC32 equals the zip header's (hashes only; no row is parsed).
+   Then the Design B exposure vector against its frozen SHA-256 (PAP §9.3). A refusal in
+   this step reads no market data and writes nothing.
+   Immediately before the first post-seal read, the attempt marker is created (exclusive,
+   with the UTC time and HEAD). From then on any failure writes its traceback to the output
+   file and is re-raised: a refusal after data load is recorded as an attempt, not a result,
+   and no second run is possible.
 2. Load FF49 daily value-weighted returns and FF5 + UMD daily factors through the sealed loaders,
    end = 2026-08-31, and keep the window 2025-04-01 -> 2026-08-31. Refuse unless both files
    cover the first (2025-04-01) and last (2026-08-31) NYSE trading days of the window and hold
@@ -27,22 +38,29 @@ Steps.
    Holm level L; Holm over {H5, H5b} at family-wise 0.05, ordered by the t_21 p-value
    2(1 - F_21(|T|)). Co-condition: "delegation exposure is priced" requires rejection of the
    primary AND of its R13 variant at the same Holm level; if only the primary rejects, the
-   fixed wording is "driven by Softw". Under the b = 0 null, if the primary rejects but
-   |b - bbar| / s < c, the fixed wording adds "not distinguishable from the 1990-2022 pattern
-   for this exposure vector". Intervals: b +- c_v,0.05 * s_v and b +- c_v,0.025 * s_v; the
-   MDE is (c_v,0.025 + t_21,0.80) * s_v.
+   fixed wording is "not robust to dropping Softw (R13 not rejected)". Under the b = 0 null,
+   if the primary rejects but |b - bbar| / s < c, the fixed wording adds "not
+   distinguishable from the 1990-2022 pattern for this exposure vector". Intervals:
+   b +- c_v,0.05 * s_v and b +- c_v,0.025 * s_v; the MDE is (c_v,0.025 + t_21,0.80) * s_v.
 6. Secondary, never used for the decision: RI permuting z_delegation (H5, H5b with z_aioe in
-   place) and Freedman-Lane RI for H5b, 10,000 permutations each from one
-   `numpy.random.default_rng(SEED)` consumed in that order; conventional OLS with HC3 SEs.
+   place) and Freedman-Lane RI for H5b scored by the pivotal t (Winkler et al. 2014), 10,000
+   permutations each from one `numpy.random.default_rng(SEED)` consumed in that order; the
+   coefficient-scored Freedman-Lane p on the same draws as the t version; conventional OLS
+   with HC3 SEs.
 
 AEI data are conversations matched to O*NET tasks; nothing here says anything about job risk or
 displacement in the labour market.
 """
 
+import copy
 import hashlib
+import json
 import subprocess
 import sys
-from datetime import date
+import traceback
+import zipfile
+import zlib
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -52,7 +70,7 @@ import statsmodels.api as sm
 from scipy import stats as _st
 
 from aideleg import power
-from aideleg.config import PAP_TAG, ROOT, SEED
+from aideleg.config import PAP_TAG, RAW, ROOT, SEED
 from aideleg.market import seal
 from aideleg.market.french import load_factors, load_industry_returns
 
@@ -64,6 +82,12 @@ FIRST_TRADING_DAY, LAST_TRADING_DAY = date(2025, 4, 1), date(2026, 8, 31)
 # is reported as secondary. Fixed at signing (PAP); the script's hash is recorded then.
 PRIMARY_NULL: Literal["bbar", "zero"] = "bbar"
 OUT = ROOT / "docs/results/confirmatory_h5.md"
+# Bound to their blobs at pap-v1 (K1); market/*.py is globbed on disk and listed at the tag.
+BOUND_FILES = ("src/aideleg/confirm_h5.py", "src/aideleg/power.py")
+BOUND_DIR = "src/aideleg/market"
+DIFF_PATHS = ("src", "pyproject.toml", "uv.lock")
+# The French files the confirmatory run reads; every French zip in the tagged MANIFEST is checked.
+FRENCH_REQUIRED = ("ff49_daily", "ff5_daily", "mom_daily")
 EXPOSURE_SHA256 = "bddc49d49b9565bba8daa8bc6fdb709043a6007090b9e7faf7dda1001229ac36"
 N_PERM = 10_000
 T_DF = 21
@@ -152,7 +176,7 @@ def decide(b: dict[str, float], fz: dict[str, float],
     if not passes[first]:  # Holm stops at the first step
         passes = {"H5": False, "H5b": False}
     h0 = "b = 0" if null == "zero" else "b = bbar (the 1990-2022 pattern for this exposure vector)"
-    primary, co, wording, ci = {}, {}, {}, {}
+    primary, co, wording, ci, mde_r13 = {}, {}, {}, {}, {}
     for hyp, v in (("H5", "h5"), ("H5b", "h5b")):
         L = lvl[hyp]
         ok = passes[hyp]
@@ -164,6 +188,7 @@ def decide(b: dict[str, float], fz: dict[str, float],
             ci[(hyp, lv)] = (b[v] - c, b[v] + c)
         # P14: MDE with the primary critical at Holm's first step, c_0.025 + t_21,0.80
         mde = (fz[f"crit_{v}_0.025"] + float(_st.t.ppf(0.80, T_DF))) * fz[f"s_{v}"]
+        mde_r13[hyp] = (fz[f"crit_{r13}_0.025"] + float(_st.t.ppf(0.80, T_DF))) * fz[f"s_{r13}"]
         if not ok:
             lo, hi = ci[(hyp, 0.05)]
             wording[hyp] = (f"{hyp} is not rejected (H0: {h0}). Interval [{lo * 100:.2f}, "
@@ -179,14 +204,15 @@ def decide(b: dict[str, float], fz: dict[str, float],
                  f"(Softw dropped): {what}.")
         else:
             w = (f"{hyp} is rejected at Holm level {L} (H0: {h0}), but its R13 variant (Softw "
-                 f"dropped) is not: the result is driven by Softw.")
+                 f"dropped) is not: the result is not robust to dropping Softw (R13 not "
+                 f"rejected).")
         if null == "zero" and abs(T_bbar[v]) < fz[f"crit_{v}_{L}"]:
             w += (" The slope is not distinguishable from the 1990-2022 pattern for this "
                   "exposure vector.")
         wording[hyp] = w
     return {"null": null, "T": T, "p_t21": p, "T_zero": T_zero, "T_bbar": T_bbar,
             "p_t21_secondary": p_other, "holm_level": lvl, "primary": primary,
-            "co_condition": co, "wording": wording, "ci": ci}
+            "co_condition": co, "wording": wording, "ci": ci, "mde_r13": mde_r13}
 
 
 def _git(*args: str) -> str:
@@ -195,6 +221,110 @@ def _git(*args: str) -> str:
                               check=True).stdout.strip()
     except (subprocess.CalledProcessError, OSError):
         return "unknown"
+
+
+class BindingError(RuntimeError):
+    """The checkout, the code or the data are not the ones the signed PAP binds."""
+
+
+def _run_git(repo: Path, *args: str) -> tuple[int, str]:
+    try:
+        r = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
+    except OSError as exc:
+        return 1, str(exc)
+    return r.returncode, r.stdout.strip()
+
+
+def check_binding(repo: Path = ROOT, own: Path | None = None) -> None:
+    """Refuse (BindingError) unless the checkout is the one the signed PAP binds (K1).
+
+    (a) `pap-v1` is an annotated tag; (b) HEAD descends from it; (c) this script's own blob
+    (`own`, default this file) and the working-tree blobs of power.py and every
+    market/*.py equal their blobs at `pap-v1`, and no market module is added or missing;
+    (d) `git diff --quiet pap-v1 -- src pyproject.toml uv.lock`."""
+    repo = Path(repo)
+    own = Path(__file__).resolve() if own is None else Path(own)
+    rc, kind = _run_git(repo, "cat-file", "-t", PAP_TAG)
+    if rc or kind != "tag":
+        raise BindingError(f"{PAP_TAG} is not an annotated tag in {repo} (got {kind!r})")
+    rc, _ = _run_git(repo, "merge-base", "--is-ancestor", PAP_TAG, "HEAD")
+    if rc:
+        raise BindingError(f"HEAD does not descend from {PAP_TAG}")
+    files = {rel: repo / rel for rel in BOUND_FILES}
+    files[BOUND_FILES[0]] = own
+    rc, listed = _run_git(repo, "ls-tree", "--name-only", f"{PAP_TAG}:{BOUND_DIR}")
+    tagged = {n for n in listed.splitlines() if n.endswith(".py")} if not rc else set()
+    on_disk = {q.name for q in (repo / BOUND_DIR).glob("*.py")}
+    if tagged != on_disk:
+        raise BindingError(f"{BOUND_DIR}/*.py differ from {PAP_TAG}: "
+                           f"{sorted(tagged ^ on_disk)}")
+    files.update({f"{BOUND_DIR}/{n}": repo / BOUND_DIR / n for n in sorted(on_disk)})
+    for rel, path in files.items():
+        rc_t, want = _run_git(repo, "rev-parse", f"{PAP_TAG}:{rel}")
+        rc_h, got = _run_git(repo, "hash-object", str(path))
+        if rc_t or rc_h or got != want:
+            raise BindingError(f"{rel}: blob {got or '?'} != {want or '?'} at {PAP_TAG}")
+    rc, _ = _run_git(repo, "diff", "--quiet", PAP_TAG, "--", *DIFF_PATHS)
+    if rc:
+        raise BindingError(f"{', '.join(DIFF_PATHS)} differ from {PAP_TAG}")
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _crc32(path: Path) -> int:
+    c = 0
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            c = zlib.crc32(chunk, c)
+    return c
+
+
+def check_french_data(repo: Path = ROOT, raw: Path = RAW) -> None:
+    """Refuse (BindingError) unless the French files are the ones the signed PAP binds (K2):
+    each French zip's SHA-256 equals `git show pap-v1:data/raw/MANIFEST.json`, and the
+    extracted directory holds exactly the zip's members, each with the CRC32 of the zip
+    header. Hashes only: no row is parsed."""
+    rc, text = _run_git(Path(repo), "show", f"{PAP_TAG}:data/raw/MANIFEST.json")
+    if rc:
+        raise BindingError(f"data/raw/MANIFEST.json is not in {PAP_TAG}")
+    manifest = json.loads(text)
+    french = {k: e for k, e in manifest.items() if e["dest"].startswith("french/")}
+    if missing := [k for k in FRENCH_REQUIRED if k not in french]:
+        raise BindingError(f"{PAP_TAG} MANIFEST lacks {missing}")
+    for key, e in sorted(french.items()):
+        zp = Path(raw) / e["dest"]
+        if not zp.is_file() or _sha256(zp) != e["sha256"]:
+            raise BindingError(f"{key}: {e['dest']} SHA-256 differs from the {PAP_TAG} MANIFEST")
+        with zipfile.ZipFile(zp) as z:
+            members = {i.filename: i.CRC for i in z.infolist() if not i.is_dir()}
+        d = zp.with_suffix("")
+        found = {q.relative_to(d).as_posix() for q in d.rglob("*") if q.is_file()} \
+            if d.is_dir() else set()
+        if found != set(members):
+            raise BindingError(f"{key}: extracted members {sorted(found)} != zip members "
+                               f"{sorted(members)}")
+        for name, crc in members.items():
+            if _crc32(d / name) != crc:
+                raise BindingError(f"{key}: {name} CRC32 differs from the zip header")
+
+
+def attempt_path(out: Path) -> Path:
+    """The attempt marker beside the output: docs/results/confirmatory_h5.attempt."""
+    out = Path(out)
+    return out.with_name(out.stem + ".attempt")
+
+
+def _write_marker(marker: Path) -> None:
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with marker.open("x") as fh:  # exclusive: one attempt, ever
+        fh.write(f"started_utc: {stamp}\nhead: {_git('rev-parse', 'HEAD')}\n")
 
 
 def _vector_hash(expo: pl.DataFrame) -> str:
@@ -221,16 +351,38 @@ def _hc3(alphas: np.ndarray, X: np.ndarray) -> tuple[float, float]:
 
 def run(out: Path = OUT) -> dict:
     out = Path(out)
+    marker = attempt_path(out)
     if out.exists():
         raise FileExistsError(f"{out} exists; the confirmatory test is run once")
+    if marker.exists():
+        raise FileExistsError(f"{marker} exists: an attempt was already made; not rerun")
     if not seal.pap_frozen():
         raise seal.SealedPeriodError(f"the git tag {PAP_TAG} does not exist; not run")
+    check_binding()
+    check_french_data()
     expo = power.load_exposure()
     if expo.height != 49 or expo.null_count().sum_horizontal().item():
         raise ValueError("the Design B exposure vector must have 49 rows and no nulls")
     if (h := _vector_hash(expo)) != EXPOSURE_SHA256:
         raise ValueError(f"exposure vector hash {h} != frozen {EXPOSURE_SHA256}")
+    _write_marker(marker)  # immediately before the first post-seal read
+    try:
+        return _confirm(expo, out)
+    except BaseException:
+        tb = traceback.format_exc()
+        try:
+            with out.open("x") as fh:
+                fh.write("# Confirmatory test of H5 and H5b: attempt failed\n\n"
+                         "Written by `uv run python -m aideleg.confirm_h5` after the attempt "
+                         f"marker `{marker.name}`; committed unedited. This is a record of an "
+                         "attempt, not a result.\n\n"
+                         f"- Commit: `{_git('rev-parse', 'HEAD')}`.\n\n```\n{tb}```\n")
+        except OSError:
+            pass
+        raise
 
+
+def _confirm(expo: pl.DataFrame, out: Path) -> dict:
     returns = load_industry_returns("D", "VW", WINDOW[1])
     factors = load_factors("D", WINDOW[1])
     names = [c for c in returns.columns if c != "date"]
@@ -239,8 +391,8 @@ def run(out: Path = OUT) -> dict:
     expo = expo.with_columns(pl.col("ff49_short").cast(pl.Enum(names))).sort("ff49_short")
     win = [df.filter((pl.col("date") >= WINDOW[0]) & (pl.col("date") <= WINDOW[1]))
            for df in (returns, factors)]
-    first, last = (min(d["date"].min() for d in win), max(d["date"].max() for d in win))
     _check_coverage(*win)
+    first, last = (min(d["date"].min() for d in win), max(d["date"].max() for d in win))
     alphas_all = power.window_alphas(returns, factors, *WINDOW).to_numpy().astype(float)
     ok = ~np.isnan(alphas_all)
     dropped = [n for n, k in zip(names, ok, strict=True) if not k]
@@ -270,9 +422,12 @@ def run(out: Path = OUT) -> dict:
     rng = np.random.default_rng(SEED)
     A1 = a[None, :]
     ri = {"h5_exposure": float(power.ri_pvalues(A1, z, None, N_PERM, rng)[0]),
-          "h5b_exposure": float(power.ri_pvalues(A1, z, c, N_PERM, rng)[0]),
-          "h5b_freedman_lane": float(power.ri_pvalues(A1, z, c, N_PERM, rng,
-                                                      scheme="freedman_lane")[0])}
+          "h5b_exposure": float(power.ri_pvalues(A1, z, c, N_PERM, rng)[0])}
+    rng_coef = copy.deepcopy(rng)  # the coefficient version reuses the t version's draws
+    ri["h5b_freedman_lane"] = float(power.ri_pvalues(A1, z, c, N_PERM, rng,
+                                                     scheme="freedman_lane")[0])
+    ri["h5b_freedman_lane_coef"] = float(power.ri_pvalues(A1, z, c, N_PERM, rng_coef,
+                                                          scheme="freedman_lane_coef")[0])
     hc3 = {"h5": _hc3(a, power._design(z)), "h5b": _hc3(a, power._design(z, c))}
     res = {"b": b, "T": d["T"], "decision": d, "ri": ri, "hc3": hc3, "dropped": dropped,
            "frozen_used": fz, "first_date": first, "last_date": last, "n": len(kept),
@@ -302,7 +457,9 @@ def _report(res: dict) -> str:
                 f"{d['primary'][hyp] is not None}; R13 co-condition met: {d['co_condition'][hyp]}.",
                 f"  - Interval b +- c_0.05 x s: [{lo * pp:.3f}, {hi * pp:.3f}] pp; "
                 f"b +- c_0.025 x s: [{lo2 * pp:.3f}, {hi2 * pp:.3f}] pp.",
-                f"  - Fixed wording: {d['wording'][hyp]}"]
+                f"  - Fixed wording: {d['wording'][hyp]}",
+                f"  - R13 (Softw dropped) MDE at Holm level 0.025: {d['mde_r13'][hyp] * pp:.2f} "
+                f"pp; the co-conditioned claim has 80% power only near it."]
     other = "b = 0" if d["null"] == "bbar" else "b = bbar"
     interp = [f"- {hyp}: secondary null {other}: T = "
               f"{(d['T_zero'] if d['null'] == 'bbar' else d['T_bbar'])[v]:.3f}, p (t_21) = "
@@ -355,9 +512,12 @@ def _report(res: dict) -> str:
         f"- RI, permute z_delegation, H5: p = {res['ri']['h5_exposure']:.4f}.",
         f"- RI, permute z_delegation with z_aioe in place, H5b: p = "
         f"{res['ri']['h5b_exposure']:.4f} (oversized even under exchangeability).",
-        f"- Freedman-Lane RI, H5b: p = {res['ri']['h5b_freedman_lane']:.4f}.",
+        f"- Freedman-Lane RI (pivotal t), H5b: p = {res['ri']['h5b_freedman_lane']:.4f}; "
+        f"coefficient-scored on the same draws: p = "
+        f"{res['ri']['h5b_freedman_lane_coef']:.4f}.",
         "- Documented size at nominal 0.025 (pre-seal, full 49 industries; 378 overlapping "
-        "windows, power.md): 13.8% (H5), 14.8% (H5b, z_aioe in place), 6.1% (Freedman-Lane)."
+        "windows, power.md): 13.8% (H5), 14.8% (H5b, z_aioe in place), 5.6% (Freedman-Lane, "
+        "pivotal t), 6.1% (Freedman-Lane, coefficient)."
         + (" Not recomputed for the kept industries." if res["dropped"] else ""),
         f"- {N_PERM:,} permutations each, one `default_rng(SEED = {SEED})` in that order.",
         f"- OLS with HC3 SEs: H5 b = {res['hc3']['h5'][0] * pp:.3f} pp (SE "
