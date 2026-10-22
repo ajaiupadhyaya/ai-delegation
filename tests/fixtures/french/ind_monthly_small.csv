@@ -8,3 +8,18 @@ This file was created using the 202608 CRSP database.
   Average Value Weighted Returns -- Annual
 ,Agric,Food
   2023,   5.00,   6.00
+
+  Number of Firms in Portfolios
+,Agric,Food 
+202312,     10,     20
+202401,     10,     21
+
+  Average Firm Size
+,Agric,Food 
+202312,   2.50,   4.00
+202401,   2.60, -99.99
+
+  Sum of BE / Sum of ME
+,Agric,Food 
+  2023,   0.50,   0.40
+  2024,   0.55, -99.99
