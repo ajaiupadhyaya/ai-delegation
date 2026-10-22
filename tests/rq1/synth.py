@@ -95,3 +95,26 @@ def task_rows(seed: int, *, n_occ: int = 40, n_task: int = 400, n_family: int = 
             .sort("task_node", "soc6", "family"))
     total = float(rows["weight"].sum())
     return TaskRows(rows, total, {r: 0.0 for r in DROP_REASONS}, {r: 0 for r in DROP_REASONS})
+
+
+H2_TIMES = {"r2": 0.0, "r3": 0.4394250513347023, "r4": 0.7159479808350445,
+            "r5": 0.945927446954141}
+
+
+def h2_frame(alpha: np.ndarray, release_values: dict[str, np.ndarray],
+             weight: np.ndarray | None = None, times: dict[str, float] | None = None,
+             outcome: str = "automation_pct") -> pl.DataFrame:
+    """A balanced `build_h2_panel`-shaped frame: one row per (task, release).
+
+    `alpha` holds the task effects; `release_values[r]` is added to them in release r (a
+    per-task array: trend, release shock and noise, as the test builds it). `weight` is per
+    task (default 1.0). Nothing here reads AEI data.
+    """
+    times = times or H2_TIMES
+    n = len(alpha)
+    w = np.ones(n) if weight is None else np.asarray(weight, float)
+    parts = [pl.DataFrame({"task_node": [f"{i:05d}" for i in range(n)],
+                           "release": r, "t": times[r],
+                           outcome: alpha + np.asarray(v, float), "weight": w})
+             for r, v in release_values.items()]
+    return pl.concat(parts).sort("task_node", "release")
