@@ -1,4 +1,4 @@
-"""RQ2 descriptives: what Claude users are matched to against what exposure benchmarks say.
+"""RQ2 descriptives: conversations matched to O*NET tasks against exposure benchmarks.
 
 AEI data are conversations matched to O*NET tasks. RQ2 is descriptive: there is no hypothesis test
 and no decision here. The one inferential-looking quantity, a Spearman correlation across the 49

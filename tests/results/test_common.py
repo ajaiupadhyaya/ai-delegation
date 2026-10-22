@@ -16,6 +16,10 @@ def test_write_result_doc_rejects_forbidden_and_stars(tmp_path):
         common.write_result_doc(path, "T", GEN, [("S", "there is no effect here")])
     with pytest.raises(ValueError, match="job risk"):
         common.write_result_doc(path, "T", GEN, [("S", "Job Risk rises")])
+    with pytest.raises(ValueError, match="person in the conversation"):
+        common.write_result_doc(path, "T", GEN, [("S", "the person in the conversation")])
+    with pytest.raises(ValueError, match="claude users"):
+        common.write_result_doc(path, "T", GEN, [("S", "what Claude users do")])
     with pytest.raises(ValueError, match="star"):
         common.write_result_doc(path, "T", GEN, [("S", "| a | b |\n|---|---|\n| x | 0.12** |")])
     assert not path.exists()

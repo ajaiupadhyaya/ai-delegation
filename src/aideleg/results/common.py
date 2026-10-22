@@ -14,7 +14,8 @@ import polars as pl
 WORDING = ("AEI data are conversations matched to O*NET tasks. Nothing here says anything about "
            "job risk, displacement or reassurance about the labour market.")
 FORBIDDEN_PHRASES = ("job risk", "displacement", "job market", "reassur", "no effect",
-                     "accountants use", "workers use")
+                     "accountants use", "workers use", "person in the conversation",
+                     "claude users")
 _STARS = re.compile(r"\d\*+")
 
 

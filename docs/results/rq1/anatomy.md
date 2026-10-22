@@ -66,7 +66,7 @@ Deciles are employment-weighted deciles of the OEWS May 2024 annual median wage;
 
 ## Composition by education (r6, claude_ai)
 
-Matched tasks are binned on the mean education years of the person in the conversation (`human_education_years_mean`), left-closed bins. A task with no published value is `zero published usage`: 1649 tasks holding 0.0000% of usage; in the panel these are the tasks published with pct 0.00, which carry no education value or collaboration pattern.
+Matched tasks are binned on `human_education_years_mean`, AEI's mean estimated years of human education required for the task, in left-closed bins. A task with no published value is `zero published usage`: 1649 tasks holding 0.0000% of usage; in the panel these are the tasks published with pct 0.00, which carry no education value or collaboration pattern.
 
 | bin | usage_share | n_tasks | directive_pct | feedback_loop_pct | task_iteration_pct | validation_pct | learning_pct | automation_pct | augmentation_pct |
 |---|---|---|---|---|---|---|---|---|---|

@@ -385,8 +385,8 @@ def _anatomy_doc(path: Path, tables: dict[str, pl.DataFrame], release: str, sour
          "OEWS employment; `usage_share` is the percentage of conversations matched to OEWS "
          "occupations; `n_occ` counts OEWS occupations.\n\n" + _md_table(decile)),
         (f"Composition by education ({release}, {source})",
-         "Matched tasks are binned on the mean education years of the person in the "
-         "conversation (`human_education_years_mean`), left-closed bins. A task with no "
+         "Matched tasks are binned on `human_education_years_mean`, AEI's mean estimated "
+         "years of human education required for the task, in left-closed bins. A task with no "
          "published value is `zero published usage`: " + edu_note + "\n\n" + _md_table(edu)),
         ("Usage concentration across tasks, as published",
          "One row per release and source over the published matched tasks, usage renormalised "
@@ -458,7 +458,7 @@ def report_anatomy(out: Path = OUT_DIR, *, fig_dir: Path = FIGURES_DIR, panel=No
         FIG_DECILE, out_dir=fig_dir)
     paths += save_figure(fig_composition(
         edu, edu["bin"].to_list(), horizontal=False,
-        xlabel="education years (human, mean per task)"), FIG_EDU, out_dir=fig_dir)
+        xlabel="estimated years of education required (mean per task)"), FIG_EDU, out_dir=fig_dir)
     paths += save_figure(fig_lorenz(panel), FIG_LORENZ, out_dir=fig_dir)
     return paths
 
