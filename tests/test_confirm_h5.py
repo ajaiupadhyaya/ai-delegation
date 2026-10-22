@@ -134,21 +134,21 @@ def test_decide_co_condition_and_wording():
     # H5 far beyond its critical; R13 not; H5b not
     b = {"h5": 10 * s, "h5b": 0.0, "h5_r12": 10 * fz["s_h5_r12"], "h5b_r12": 0.0,
          "h5_r13": 0.0, "h5b_r13": 0.0}
-    d = ch.decide(b, fz)
+    d = ch.decide(b, fz, null="zero")
     assert d["primary"]["H5"] == 0.025 and d["primary"]["H5b"] is None
     assert d["co_condition"]["H5"] is False
     assert "driven by Softw" in d["wording"]["H5"]
     b["h5_r13"] = 10 * fz["s_h5_r13"]
-    d = ch.decide(b, fz)
+    d = ch.decide(b, fz, null="zero")
     assert d["co_condition"]["H5"] is True
     assert "delegation exposure is priced" in d["wording"]["H5"]
     # rejects but within crit of the frozen historical mean -> fixed P5 wording
     # (an artificial frozen mean, so that the rule is exercised without using the real one)
     fz2 = dict(fz, bbar_h5=10 * s)
-    d = ch.decide(dict(b, h5=10.5 * s), fz2)
+    d = ch.decide(dict(b, h5=10.5 * s), fz2, null="zero")
     assert d["primary"]["H5"] == 0.025
     assert "not distinguishable from the 1990-2022 pattern" in d["wording"]["H5"]
-    d = ch.decide({k: 0.0 for k in b}, fz)
+    d = ch.decide({k: 0.0 for k in b}, fz, null="zero")
     assert d["primary"] == {"H5": None, "H5b": None}
     assert "80% power only against |b| >=" in d["wording"]["H5"]
 
@@ -163,7 +163,7 @@ def test_end_to_end_synthetic_planted_slope(unsealed, tmp_path):
     a = power.window_alphas(r, f, *ch.WINDOW).to_numpy()
     z = unsealed["expo"]["z_delegation"].to_numpy()
     assert res["b"]["h5"] == pytest.approx(np.polyfit(z, a, 1)[0])
-    assert res["T"]["h5"] == pytest.approx(res["b"]["h5"] / ch.FROZEN["s_h5"])
+    assert res["decision"]["T_zero"]["h5"] == pytest.approx(res["b"]["h5"] / ch.FROZEN["s_h5"])
     assert res["decision"]["primary"]["H5"] == 0.025
     assert res["b"]["h5"] == pytest.approx(0.40, abs=0.05)
     text = out.read_text()
@@ -218,7 +218,7 @@ def test_holm_stops_when_the_first_fails_the_max_critical():
     fz["crit_h5_0.025"] = 50.0  # an empirical quantile above t_21 (not the frozen case)
     b = {"h5": 6 * fz["s_h5"], "h5b": 3 * fz["s_h5b"], "h5_r12": 0.0, "h5b_r12": 0.0,
          "h5_r13": 0.0, "h5b_r13": 0.0}
-    d = ch.decide(b, fz)
+    d = ch.decide(b, fz, null="zero")
     assert d["holm_level"] == {"H5": 0.025, "H5b": 0.05}
     assert d["primary"] == {"H5": None, "H5b": None}
 
@@ -230,3 +230,77 @@ def test_creates_the_results_directory(unsealed, tmp_path):
     ch.run(out=out)
     assert out.exists()
     assert ch.OUT == ROOT / "docs/results/confirmatory_h5.md"
+
+
+
+def test_primary_null_constant_is_bbar_for_now():
+    assert ch.PRIMARY_NULL == "bbar"
+
+
+def test_refuses_when_data_stop_before_the_window_end(unsealed, tmp_path):
+    r, f = _market(date(1989, 6, 1), date(2026, 7, 31))
+    unsealed["state"].update(returns=r, factors=f)
+    out = tmp_path / "c.md"
+    with pytest.raises(ValueError, match="window coverage"):
+        ch.run(out=out)
+    assert not out.exists()
+
+
+def test_refuses_when_data_start_late_or_dates_differ(unsealed, tmp_path):
+    r, f = _market(date(2025, 4, 2), date(2026, 9, 30))
+    unsealed["state"].update(returns=r, factors=f)
+    with pytest.raises(ValueError, match="window coverage"):
+        ch.run(out=tmp_path / "a.md")
+    r, f = _market(date(1989, 6, 1), date(2026, 9, 30))
+    f = f.filter(pl.col("date") != date(2025, 7, 15))
+    unsealed["state"].update(returns=r, factors=f)
+    with pytest.raises(ValueError, match="window coverage"):
+        ch.run(out=tmp_path / "b.md")
+    assert not (tmp_path / "a.md").exists() and not (tmp_path / "b.md").exists()
+
+
+def test_mde_uses_the_primary_critical():
+    fz = dict(ch.FROZEN, **{"crit_h5_0.025": 50.0})
+    b = {k: 0.0 for k in ch.VARIANTS}
+    d = ch.decide(b, fz, null="zero")
+    from scipy import stats
+    mde = (50.0 + stats.t.ppf(0.80, 21)) * fz["s_h5"]
+    assert f"{mde * 100:.2f} pp" in d["wording"]["H5"]
+
+
+@pytest.mark.parametrize("null", ["zero", "bbar"])
+def test_decide_uses_the_selected_null_and_reports_both(null):
+    fz = dict(ch.FROZEN)
+    for v in ch.VARIANTS:  # artificial frozen means, so the two nulls disagree
+        fz[f"bbar_{v}"] = 3.0 * fz[f"s_{v}"]
+    b = {v: 3.0 * fz[f"s_{v}"] for v in ch.VARIANTS}  # = bbar: rejects b = 0 only
+    d = ch.decide(b, fz, null=null)
+    assert d["null"] == null
+    for v in ch.VARIANTS:
+        assert d["T_zero"][v] == pytest.approx(3.0)
+        assert d["T_bbar"][v] == pytest.approx(0.0)
+    if null == "zero":
+        assert d["primary"]["H5"] == 0.025 and d["co_condition"]["H5"] is True
+        assert "not distinguishable from the 1990-2022 pattern" in d["wording"]["H5"]
+    else:
+        assert d["primary"] == {"H5": None, "H5b": None}
+        assert "not rejected" in d["wording"]["H5"]
+    assert d["T"] == (d["T_zero"] if null == "zero" else d["T_bbar"])
+
+
+@pytest.mark.parametrize("null", ["zero", "bbar"])
+def test_end_to_end_reports_both_statistics(unsealed, tmp_path, monkeypatch, null):
+    monkeypatch.setattr(ch, "PRIMARY_NULL", null)
+    r, f = _market(date(1989, 6, 1), date(2026, 9, 30), slope_pp=40.0)
+    unsealed["state"].update(returns=r, factors=f)
+    out = tmp_path / "c.md"
+    res = ch.run(out=out)
+    d = res["decision"]
+    assert d["null"] == null and d["primary"]["H5"] == 0.025
+    for v in ch.VARIANTS:
+        assert d["T_bbar"][v] == pytest.approx(
+            (res["b"][v] - ch.FROZEN[f"bbar_{v}"]) / ch.FROZEN[f"s_{v}"])
+    text = out.read_text()
+    assert f"Confirmatory null: {'b = 0' if null == 'zero' else 'b = bbar'}" in text
+    assert "(b - bbar) / s" in text and "b / s" in text
+    assert "pre-seal, full 49 industries" in text
