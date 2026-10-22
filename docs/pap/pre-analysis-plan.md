@@ -1,8 +1,9 @@
 # Pre-analysis plan: *Delegating to the Machine*
 
-**Status: DRAFT, revision 1 (after the hostile-referee review). Not signed, not frozen.** The plan is
-frozen only when Ajai signs §0.1 and the git tag `pap-v1` is created (plan 1, Task 15, Step 4). Until
-then every **[PROPOSED — Ajai to confirm]** block is a recommendation, not a decision.
+**Status: SIGNED and FROZEN on 2026-10-21 (revision 1).** The plan was signed in §0.1, and the annotated
+git tag `pap-v1` marks the frozen state. Ajai accepted all 23 recommendations, so every
+**[PROPOSED — Ajai to confirm]** block below is a decision, adopted as recommended. Any change from here
+on is a deviation and goes in §11.
 
 - Draft date: 2026-10-21. Revision 1: 2026-10-21. Branch `plan-1-foundations`.
 - Code the plan binds to, and the git blob of the confirmatory script `src/aideleg/confirm_h5.py`:
@@ -55,7 +56,15 @@ recommendation is adopted unless Ajai writes a different choice into the block.
 
 ### 0.1 Signature
 
-Signature: *pending (added at freeze, Task 15 Step 4).*
+Signed: Ajai Upadhyaya, 2026-10-21.
+
+Ajai's statement at signing: "I accept all 23 recommendations in the pre-analysis plan, including D21
+(the b = b̄ null) and D22 (the α split). Sign it, freeze it and tag pap-v1."
+
+Adopted as recommended: D1–D23. That includes D11 (the 5 pp plausibility threshold, which fires), D21
+(the H5/H5b confirmatory null is H0: b = b̄, with b = 0 secondary; Ajai explicitly approved this narrower
+claim than the original H5 wording) and D22 (H2 leaves the RQ1 Holm family; α is split, with H2 at 0.0125
+and {H1, H3, H4} by Holm at 0.0375).
 
 ### 0.2 Conventions
 
@@ -1291,7 +1300,7 @@ appear only in a clearly marked appendix (spec §5.4.1).
 ### 9.2 Code
 
 <!-- BEGIN GENERATED: code binding -->
-- Code commit the plan binds to, HEAD at generation: **`b116edc5faeea940f0c4502c372de1ffca03cc99`** ("fix: pre-freeze hardening (final review) -- no untracked file can shadow bound code"), from `git rev-parse HEAD` when this block was generated.
+- Code commit the plan binds to, HEAD at generation: **`75a5eed5af191f7ca89ee09cd1efdedeab4f34bd`** ("docs(pap): P-H5 adds the untracked-file check (e); §9 regenerated"), from `git rev-parse HEAD` when this block was generated.
 - `src/aideleg/confirm_h5.py` git blob: **`f581264ae9c982ff6a84eb1d1e2f465d18544144`** (`git rev-parse HEAD:src/aideleg/confirm_h5.py`), with `PRIMARY_NULL = "bbar"`.
 - `src/aideleg/power.py` git blob: **`a353a7c2683d0cc2e9663e17d3835055b3bb63fc`** (`git rev-parse HEAD:src/aideleg/power.py`).
 <!-- END GENERATED: code binding -->
