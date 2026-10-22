@@ -1,0 +1,402 @@
+{
+  "meta": {
+    "utc": "2026-10-22T20:12:13Z",
+    "head": "edface2ec33ef5be40f0ca400b0902c9532a11a0",
+    "pap_v1_commit": "6a16b1ad052977650b90c8062ceeeab9ac6572e1",
+    "blobs": {
+      "src/aideleg/rq1/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "src/aideleg/rq1/result.py": "e2404e527ef859b0cc403b07da0fc832892ad9e1",
+      "src/aideleg/rq1/inputs.py": "0a43ef457ba8d5325fb8b8ad8f0fdd9db1d81947",
+      "src/aideleg/rq1/rows.py": "1e0e2722d8894d03c9d4f6a6b73397cff7b3ba5f",
+      "src/aideleg/rq1/twoway.py": "57258b6809f2b8bbb952767dd9880d4f665afe33",
+      "src/aideleg/rq1/h1h3.py": "551b0e52a09a74ccd2ab10d87d5c7d174b2722b9",
+      "src/aideleg/rq1/h2.py": "18987b2913d21b238d63c654e2edec96902d278a",
+      "src/aideleg/rq1/h4.py": "1904629c945043318be42572f21f416592681cdb",
+      "src/aideleg/rq1/family.py": "e8736fcefd7ab180a7ccbac008b4a0377d3d8f33",
+      "src/aideleg/rq1/confirm.py": "4b33bfe64bdd213b5732047273d073d6ad036a96",
+      "src/aideleg/bls/oews.py": "c3c103689ca59afbf4e5354fd2057ab4cbf85c9a",
+      "src/aideleg/occupations.py": "750628dbf29f650d23b05e4df5d5df4c08e1306b",
+      "src/aideleg/aei/tasks.py": "359c8c5541a100a97f06c86373a10100de4e64d9"
+    },
+    "versions": {
+      "python": "3.12.12",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "polars": "2.0.0",
+      "statsmodels": "0.15.0"
+    },
+    "seed": 20261021,
+    "scrambled": false,
+    "scramble_seed": null,
+    "inputs": "load_inputs",
+    "input_sha256": {
+      "data/derived/aei_panel.parquet": "15ba38ec8b65c7311cace1823f713126cd3fccafca376cd6e63769c92ddbb370",
+      "data/raw/MANIFEST.json": "2f1718379edfeaeacbd8857826915b4affb7193ed43eb9772b9bf15e8c1dc43d"
+    },
+    "panel_sha256_equals_pap": true,
+    "checks": {
+      "pattern_cells": 18822,
+      "pattern_sum_max_abs_dev": 5.684341886080802e-14,
+      "automation_bucket_max_abs_dev": 0.13162520729686378,
+      "by_release": {
+        "r1": {
+          "pattern_sum": 0.0,
+          "automation_bucket": 7.105427357601002e-15
+        },
+        "r2": {
+          "pattern_sum": 5.684341886080802e-14,
+          "automation_bucket": 0.0
+        },
+        "r3": {
+          "pattern_sum": 1.4210854715202004e-14,
+          "automation_bucket": 1.4210854715202004e-14
+        },
+        "r4": {
+          "pattern_sum": 1.4210854715202004e-14,
+          "automation_bucket": 1.4210854715202004e-14
+        },
+        "r5": {
+          "pattern_sum": 1.4210854715202004e-14,
+          "automation_bucket": 1.4210854715202004e-14
+        },
+        "r6": {
+          "pattern_sum": 2.842170943040401e-14,
+          "automation_bucket": 0.13162520729686378
+        }
+      },
+      "h2_nonpositive_weight_tasks": 0
+    }
+  },
+  "alpha": {
+    "H2": 0.0125,
+    "family": 0.0375,
+    "members": [
+      "H1",
+      "H3",
+      "H4"
+    ],
+    "statement": "RQ1's α = 0.05 is split (D22): H2 is tested on its own at α = 0.0125, and {H1, H3, H4} by Holm at family-wise α = 0.0375, so the RQ1 family-wise error is at most 0.05."
+  },
+  "results": {
+    "H1": {
+      "hypothesis": "H1",
+      "outcome": "automation_pct",
+      "coefs": {
+        "human_education_years_mean": {
+          "name": "human_education_years_mean",
+          "estimate": -0.5347910778604343,
+          "se": 0.58489372544881,
+          "ci_low": -1.6847581030188656,
+          "ci_high": 0.615175947297997,
+          "p": 0.3611081162653986,
+          "df": 387
+        },
+        "log_wage": {
+          "name": "log_wage",
+          "estimate": 4.395154698336432,
+          "se": 2.1992911155937573,
+          "ci_low": 0.07110034176756663,
+          "ci_high": 8.719209054905297,
+          "p": 0.046367973450909504,
+          "df": 387
+        }
+      },
+      "p_family": 0.3611081162653986,
+      "sample": {
+        "n_rows": 1684,
+        "n_tasks": 1142,
+        "n_occ": 388,
+        "n_family": 160,
+        "g_occ": 388,
+        "g_task": 1142,
+        "df_inference": 387
+      },
+      "drops": {
+        "unmatched_task": 0.08209281961471103,
+        "no_occupation": 0.0,
+        "no_family": 0.9960595446584943,
+        "zero_weight": 0.0,
+        "missing_automation_pct": 0.03283712784588441,
+        "missing_human_education_years_mean": 0.0,
+        "no_oews_code": 0.0,
+        "wage_suppressed": 0.16418563922942206,
+        "no_wage_row": 0.0
+      },
+      "diagnostics": {
+        "df_inference": 387,
+        "n_obs": 1684,
+        "g_occ": 388,
+        "g_task": 1142,
+        "psd_clipped": false,
+        "min_eigenvalue": 0.3376965078521196,
+        "zero_variance_fallback": [],
+        "se_oneway_occ": {
+          "human_education_years_mean": 0.5841765043192924,
+          "log_wage": 2.1970987592408826
+        },
+        "se_oneway_task": {
+          "human_education_years_mean": 0.6045906292983922,
+          "log_wage": 2.073941223917679
+        },
+        "p_oneway_occ": {
+          "human_education_years_mean": 0.3605194876425295,
+          "log_wage": 0.046151436089271636
+        },
+        "attenuation_log_wage": 0.9978209217029218,
+        "tested": [
+          "human_education_years_mean",
+          "log_wage"
+        ],
+        "structural_drop_nodes": {
+          "unmatched_task": 2,
+          "no_occupation": 0,
+          "no_family": 63,
+          "zero_weight": 1611
+        }
+      },
+      "notes": []
+    },
+    "H2": {
+      "hypothesis": "H2",
+      "outcome": "automation_pct",
+      "coefs": {
+        "trend": {
+          "name": "trend",
+          "estimate": 4.979177595216438,
+          "se": 1.1585652925995158,
+          "ci_low": 2.706337800456955,
+          "ci_high": 7.25201738997592,
+          "p": 1.852981565286751e-05,
+          "df": 1314
+        }
+      },
+      "p_family": 1.852981565286751e-05,
+      "sample": {
+        "n_tasks": 1315,
+        "n_rows": 5260,
+        "releases": [
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ],
+        "times": {
+          "r2": 0.0,
+          "r3": 0.4394250513347023,
+          "r4": 0.7159479808350445,
+          "r5": 0.945927446954141
+        }
+      },
+      "drops": {},
+      "diagnostics": {
+        "p_wild": 0.9274691358024691,
+        "n_wild_draws": 1296,
+        "p_release_label": 0.7083333333333334,
+        "n_release_orderings": 24,
+        "df_inference": 1314,
+        "g_task": 1315,
+        "r6_indicator": false,
+        "release_effects": {
+          "r3": {
+            "name": "r3",
+            "estimate": 8.447819327999367,
+            "se": 0.7572722740812485,
+            "ci_low": 6.962224540209682,
+            "ci_high": 9.933414115789052,
+            "p": 1.1257537040967182e-27,
+            "df": 1314
+          },
+          "r4": {
+            "name": "r4",
+            "estimate": 5.26509999153095,
+            "se": 1.0476266708660946,
+            "ci_low": 3.2098963678721395,
+            "ci_high": 7.3203036151897605,
+            "p": 5.706704527508724e-07,
+            "df": 1314
+          },
+          "r5": {
+            "name": "r5",
+            "estimate": 5.217810273056524,
+            "se": 1.0269414368684684,
+            "ci_low": 3.203186341620522,
+            "ci_high": 7.232434204492526,
+            "p": 4.29784930272414e-07,
+            "df": 1314
+          }
+        }
+      },
+      "notes": [
+        "With four clusters the release-level co-condition is demanding and may be conservative: H2 can be supported only by a trend that is large relative to release-to-release variation (D22).",
+        "H2 is tested as \"measured within-task automation rises across releases\" (D22). β is the change in measured within-task automation_pct per year, which includes any change in the classifier and in platform scope (PAP §5).",
+        "H2 is tested alone at α = 0.0125: supported only if the task-clustered p ≤ 0.0125, β > 0 and the release-level wild bootstrap p ≤ 0.0125.",
+        "Release-label randomisation over 24 orderings: descriptive only; smallest attainable p = 1/24.",
+        "Release-level wild bootstrap: full enumeration of 6^4 = 1296 Webb vectors; the smallest attainable p is 6/1296 ≈ 0.0046, and near-ties can raise p for strong trends (PAP D22 design; C-15)."
+      ]
+    },
+    "H3": {
+      "hypothesis": "H3",
+      "outcome": "validation_pct",
+      "coefs": {
+        "error_cost": {
+          "name": "error_cost",
+          "estimate": -0.1763412001559772,
+          "se": 0.46893832582816675,
+          "ci_low": -1.0983045850851174,
+          "ci_high": 0.745622184773163,
+          "p": 0.7070890425823566,
+          "df": 390
+        }
+      },
+      "p_family": 0.7070890425823566,
+      "sample": {
+        "n_rows": 1689,
+        "n_tasks": 1147,
+        "n_occ": 391,
+        "n_family": 161,
+        "g_occ": 391,
+        "g_task": 1147,
+        "df_inference": 390
+      },
+      "drops": {
+        "unmatched_task": 0.08209281961471103,
+        "no_occupation": 0.0,
+        "no_family": 0.9960595446584943,
+        "zero_weight": 0.0,
+        "missing_validation_pct": 0.0,
+        "missing_error_cost": 0.0
+      },
+      "diagnostics": {
+        "df_inference": 390,
+        "n_obs": 1689,
+        "g_occ": 391,
+        "g_task": 1147,
+        "psd_clipped": false,
+        "min_eigenvalue": 0.21990315343052388,
+        "zero_variance_fallback": [],
+        "se_oneway_occ": {
+          "error_cost": 0.46100589970709865
+        },
+        "se_oneway_task": {
+          "error_cost": 0.45229750326139373
+        },
+        "p_oneway_occ": {
+          "error_cost": 0.7022885348651738
+        },
+        "tested": [
+          "error_cost"
+        ],
+        "structural_drop_nodes": {
+          "unmatched_task": 2,
+          "no_occupation": 0,
+          "no_family": 63,
+          "zero_weight": 1611
+        },
+        "attenuation_error_cost": 0.9999999999999998
+      },
+      "notes": []
+    },
+    "H4": {
+      "hypothesis": "H4",
+      "outcome": "automation_pct",
+      "coefs": {
+        "log_aui": {
+          "name": "log_aui",
+          "estimate": -1.1920157438436512,
+          "se": 0.40407289626448856,
+          "ci_low": -1.9839840676508382,
+          "ci_high": -0.4000474200364642,
+          "p": 0.0031777214804340924,
+          "df": null
+        },
+        "log_income": {
+          "name": "log_income",
+          "estimate": -0.9208289629044737,
+          "se": 0.3533148125344115,
+          "ci_low": -1.613313270676441,
+          "ci_high": -0.22834465513250635,
+          "p": 0.00915379320164377,
+          "df": null
+        },
+        "mix": {
+          "name": "mix",
+          "estimate": 1.1683855907327239,
+          "se": 0.42100773865458324,
+          "ci_low": 0.34322558575708917,
+          "ci_high": 1.9935455957083585,
+          "p": 0.0055165790128199705,
+          "df": null
+        }
+      },
+      "p_family": 4.827896730594827e-24,
+      "sample": {
+        "n": 113,
+        "excluded_missing_month": 7,
+        "excluded_missing_income": 1,
+        "excluded_missing_mix": 0
+      },
+      "drops": {},
+      "diagnostics": {
+        "F": 91.45448905358995,
+        "df_num": 2,
+        "df_denom": 109,
+        "cov_type": "HC3",
+        "estimator": "OLS",
+        "weights": null,
+        "tested": [
+          "log_aui",
+          "log_income"
+        ],
+        "control": "mix",
+        "excluded": {
+          "missing_month": [
+            "BWA",
+            "COG",
+            "HTI",
+            "MOZ",
+            "NAM",
+            "TGO",
+            "TTO"
+          ],
+          "missing_income": [
+            "PSE"
+          ],
+          "missing_mix": []
+        },
+        "global_automation": 48.8,
+        "m_global": 48.82821716312888
+      },
+      "notes": []
+    }
+  },
+  "decisions": {
+    "H1": {
+      "hypothesis": "H1",
+      "status": "not_rejected",
+      "rejected": false,
+      "level": 0.01875,
+      "text": "H1 is not rejected (H0: β_e = 0 or β_w = 0). human_education_years_mean = -0.535 (95% CI [-1.685, 0.615], p = 0.3611); log_wage = 4.395 (95% CI [0.071, 8.719], p = 0.0464)"
+    },
+    "H2": {
+      "hypothesis": "H2",
+      "status": "not_rejected",
+      "rejected": false,
+      "level": 0.0125,
+      "text": "H2 is not rejected (H0: β = 0). trend = 4.979 (95% CI [2.706, 7.252], p = 0.0000). Not met: release-level wild bootstrap p = 0.9275 > 0.0125."
+    },
+    "H3": {
+      "hypothesis": "H3",
+      "status": "not_rejected",
+      "rejected": false,
+      "level": 0.0375,
+      "text": "H3 is not rejected (H0: γ = 0). error_cost = -0.176 (95% CI [-1.098, 0.746], p = 0.7071)"
+    },
+    "H4": {
+      "hypothesis": "H4",
+      "status": "supported",
+      "rejected": true,
+      "level": 0.0125,
+      "text": "H4 is supported: Holm over {H1, H3, H4} at family-wise 0.0375 rejects at step 1 (level 0.01250, p = 0.0000). log_aui = -1.192 (95% CI [-1.984, -0.400], p = 0.0032); log_income = -0.921 (95% CI [-1.613, -0.228], p = 0.0092)"
+    }
+  }
+}
