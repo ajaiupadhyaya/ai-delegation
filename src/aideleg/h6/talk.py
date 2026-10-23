@@ -322,10 +322,28 @@ def _talk_md(
 
 
 def _gap_md(
-    g: pl.DataFrame, sp: dict, pool_t: dict, nulls_t: list[str], zero_lines: list[str], n_draws: int
+    g: pl.DataFrame,
+    sp: dict,
+    pool_t: dict,
+    nulls_t: list[str],
+    zero_lines: list[str],
+    n_draws: int,
+    counts_t: pl.DataFrame,
 ) -> str:
-    ranked = g.with_row_index("rank", offset=1).select(
-        "rank", pl.col("ff49_short").alias("industry"), "T", "zT", "z_usage", "gap"
+    ranked = (
+        g.with_row_index("rank", offset=1)
+        .join(counts_t, on="ff49_short", how="left")
+        .sort("rank")
+        .select(
+            "rank",
+            pl.col("ff49_short").alias("industry"),
+            pl.col("n_talk").alias(f"talk filers {T_YEAR}"),
+            pl.col("n_filers").alias(f"filers {T_YEAR}"),
+            "T",
+            "zT",
+            "z_usage",
+            "gap",
+        )
     )
     lo, hi = sp["ci95"]
     lines = [
@@ -464,14 +482,73 @@ def _fig_vs_usage(g: pl.DataFrame):
     apply_style()
     fig, ax = plt.subplots(figsize=FIGSIZE["double"])
     x, y = g["z_usage"].to_numpy(), g["T"].to_numpy()
-    ax.scatter(x, y, s=12, color=PALETTE[0])
-    for n, xi, yi in zip(g["ff49_short"].to_list(), x, y, strict=True):
-        ax.annotate(n, (xi, yi), fontsize=5, xytext=(2, 2), textcoords="offset points")
+    ax.scatter(x, y, s=12, color=PALETTE[0], zorder=3)
     ax.set_xlabel("Design B z_usage (SD units)")
     ax.set_ylabel(f"T: share of {T_YEAR} 10-K filers with a primary AI term")
     ax.set_title(f"H6 {T_YEAR} talk vs Design B z_usage across FF49 (exploratory)")
     fig.tight_layout()
+    _place_labels(fig, ax, g["ff49_short"].to_list(), x, y)
     return fig
+
+
+def _place_labels(fig, ax, names: list[str], x: np.ndarray, y: np.ndarray) -> None:
+    """Deterministic greedy label placement: each label (in order of y, then name) takes the
+    first candidate offset whose box overlaps no placed label and no marker; labels away from
+    their point get a thin leader line. Presentation only."""
+    from matplotlib.transforms import Bbox
+
+    renderer = fig.canvas.get_renderer()
+    pts = ax.transData.transform(np.column_stack([x, y]))
+    scale = fig.dpi / 72.0
+    marker = 3.0 * scale
+    markers = [
+        Bbox.from_extents(px - marker, py - marker, px + marker, py + marker) for px, py in pts
+    ]
+    dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)]
+    cands = [(dx * r, dy * r) for r in (3, 8, 13, 18, 24, 30, 38, 46) for dx, dy in dirs]
+    placed: list = []
+    order = sorted(range(len(names)), key=lambda i: (y[i], names[i]))
+    for i in order:
+        probe = ax.text(0, 0, names[i], fontsize=5)
+        ext = probe.get_window_extent(renderer)
+        probe.remove()
+        w, h = ext.width, ext.height
+        chosen = cands[-1]
+        for dx, dy in cands:
+            cx = pts[i][0] + dx * scale
+            cy = pts[i][1] + dy * scale
+            x0 = cx if dx >= 0 else cx - w
+            x0 = x0 - w / 2 if dx == 0 else x0
+            y0 = cy if dy >= 0 else cy - h
+            y0 = y0 - h / 2 if dy == 0 else y0
+            box = Bbox.from_bounds(x0, y0, w, h)
+            others = markers[:i] + markers[i + 1 :]
+            if not any(box.overlaps(b) for b in placed + others):
+                chosen = (dx, dy)
+                placed.append(box)
+                break
+        dx, dy = chosen
+        ha = "center" if dx == 0 else ("left" if dx > 0 else "right")
+        va = "center" if dy == 0 else ("bottom" if dy > 0 else "top")
+        far = max(abs(dx), abs(dy)) > 3
+        ax.annotate(
+            names[i],
+            (x[i], y[i]),
+            xytext=(dx, dy),
+            textcoords="offset points",
+            fontsize=5,
+            ha=ha,
+            va=va,
+            arrowprops={
+                "arrowstyle": "-",
+                "lw": 0.3,
+                "color": "#888888",
+                "shrinkA": 0,
+                "shrinkB": 2,
+            }
+            if far
+            else None,
+        )
 
 
 def run_talk(
@@ -507,7 +584,10 @@ def run_talk(
     sp = spearman_ci(g["T"].to_numpy(), g["z_usage"].to_numpy(), n_draws=n_draws)
     pool_t = pool.filter(pl.col("year") == T_YEAR).row(0, named=True)
     nulls_t = null_talk(t).filter(pl.col("year") == T_YEAR)["ff49_short"].to_list()
-    gap_text = _gap_md(g, sp, pool_t, nulls_t, zero_lines, n_draws)
+    counts_t = t.filter((pl.col("year") == T_YEAR) & pl.col("ff49").is_not_null()).select(
+        "ff49_short", "n_talk", "n_filers"
+    )
+    gap_text = _gap_md(g, sp, pool_t, nulls_t, zero_lines, n_draws, counts_t)
     check_text(gap_text)
     res = gap_returns(g)
     ret_text = _ret_md(res, zero_lines)

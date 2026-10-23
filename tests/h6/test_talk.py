@@ -280,6 +280,7 @@ def test_h6_docs_labelled(monkeypatch, tmp_path):
     g = pl.read_csv(tmp_path / "gap.csv")
     assert g.columns == ["ff49_short", "T", "zT", "z_usage", "resid", "gap"]
     assert g.height == 12  # industries 13..49 have no 2024 filer: T null, listed, not in gap
+    assert "| talk filers 2024 | filers 2024 |" in gap_md
     assert "I13" in gap_md and "unmapped" in (tmp_path / "talk_index.md").read_text()
 
 
