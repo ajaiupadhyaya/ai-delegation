@@ -96,6 +96,15 @@ results: results-rq1 results-rq2
 rq3: data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.rq3 all
 
+# H6 (plan 3 Task 12; PAP §6, D18; C-43). `h6-data` is the only H6 target that touches the
+# network (SEC EDGAR); `h6` = build + talk + secondary + summary from saved raw files, offline.
+.PHONY: h6-data h6
+h6-data:
+	uv run python -m aideleg.h6 acquire
+
+h6: data/derived/exposure_ff49.parquet
+	uv run python -m aideleg.h6 all
+
 # fails if a figure has a PDF without a PNG, or the reverse
 figures-check:
 	@uv run python -c "from pathlib import Path; d = Path('docs/paper/figures'); \
