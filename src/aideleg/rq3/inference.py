@@ -28,6 +28,7 @@ from aideleg import confirm_h5, power
 from aideleg.config import DERIVED, ROOT
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data
+from aideleg.rq3.report import zero_assigned_bullets
 
 CONFIRMATORY_MD = ROOT / "docs/results/confirmatory_h5.md"
 GENERATOR = "uv run python -m aideleg.rq3 influence"
@@ -177,7 +178,8 @@ def _fmt(x: float) -> str:
     return f"{x:.4f}"
 
 
-def _report(df: pl.DataFrame, b: dict[str, float], dropped: list[str], zero_pct: float) -> str:
+def _report(df: pl.DataFrame, b: dict[str, float], dropped: list[str],
+            zero_lines: list[str]) -> str:
     softw = [f"| {spec} | {_fmt(r['dfbetas_b'])} | {_fmt(r['cooks_d'])} | {_fmt(r['leverage'])} |"
              for spec in SPECS
              for r in df.filter((pl.col("spec") == spec) & (pl.col("ff49_short") == power.SOFTW)
@@ -211,7 +213,7 @@ def _report(df: pl.DataFrame, b: dict[str, float], dropped: list[str], zero_pct:
         "- Fits: OLS of alpha on [1, z_delegation] (H5) and [1, z_delegation, z_aioe] (H5b), "
         "Design B exposure. DFBETAS on the z_delegation coefficient, Cook's D and leverage from "
         "`statsmodels` `OLSInfluence`. All three are unitless.",
-        f"- Zero-assigned employment share, Design B: {zero_pct:.2f}% (D3)",
+        *zero_lines,
         "",
         "## Softw",
         "",
@@ -243,10 +245,7 @@ def main_influence(out_dir: Path) -> pl.DataFrame:
     z, c = _exposure_b(names)
     df = influence(alphas, z, c, names)
     dropped = [n for n, a in zip(names, alphas, strict=True) if np.isnan(a)]
-    za = data.zero_assigned().filter(pl.col("design") == "B")
-    if za.height != 1:
-        raise ValueError("no zero-assigned share for Design B")
-    text = _report(df, b, dropped, float(za["no_usage_emp_pct"][0]))
+    text = _report(df, b, dropped, zero_assigned_bullets(["B"], data.zero_assigned()))
     check_text(text)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(df, out_dir / "influence.csv")

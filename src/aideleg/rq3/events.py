@@ -31,6 +31,7 @@ import statsmodels.api as sm
 
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data
+from aideleg.rq3.report import zero_assigned_bullets
 
 GENERATOR = "uv run python -m aideleg.rq3 events"
 HEADING = "# Event studies (exploratory, PAP §8.3 D19)"
@@ -266,20 +267,6 @@ _TABLE_HEAD = ["| event | day 0 | horizon k | design | regressors | regressor | 
                "|---|---|---|---|---|---|---|---|---|---|---|"]
 
 
-def _zero_lines(designs: Sequence[str], zero: pl.DataFrame | None) -> list[str]:
-    if zero is None:
-        return ["- Zero-assigned employment share (D3): this run used an exposure frame passed "
-                "by the caller, which states the share in its own notes."]
-    out = []
-    for d in designs:
-        row = zero.filter(pl.col("design") == d)
-        if row.height != 1:
-            raise ValueError(f"no zero-assigned share for Design {d}")
-        out.append(f"- Zero-assigned employment share, Design {d}: "
-                   f"{float(row['no_usage_emp_pct'][0]):.2f}% (D3)")
-    return out
-
-
 def _method_lines(n_ind: int) -> list[str]:
     return [
         f"- Returns: FF49 daily value-weighted industry returns and FF5 + UMD daily factors, "
@@ -359,7 +346,7 @@ def _event_study_md(df: pl.DataFrame, ed: pl.DataFrame, events: Sequence[Event],
         "| event | announced | day 0 | moved | overlaps |", "|---|---|---|---|---|",
         *days_rows, "",
         "## Method", "", *_method_lines(n_ind), "",
-        "## Exposure", "", *_zero_lines(designs, zero), "",
+        "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
         f"## Slopes, horizons {' and '.join(str(h) for h in HORIZONS)}", "",
         "Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled "
         "`z_delegation` (look-ahead), each alone. Full precision in `event_study.csv`.", "",
@@ -391,7 +378,7 @@ def _esz_md(df: pl.DataFrame, day0: date, designs: Sequence[str], zero: pl.DataF
         "- OLS across industries with an intercept and HC3 SEs, normal reference, nominal and "
         "single-test (PAP §11 C-33); no randomisation inference (PAP §3.2).",
         "- Slopes are pp of CAR per 1 SD of the regressor. A_pooled is labelled look-ahead.", "",
-        "## Exposure", "", *_zero_lines(designs, zero), "",
+        "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
         "## Step 1: CAR on `z_aioe` alone", "",
         f"The `z_aioe` slope is {sign}: b = {alone['b']:.3f} pp per 1 SD (95% CI "
         f"[{alone['ci_lo']:.3f}, {alone['ci_hi']:.3f}], p = {alone['p']:.4f}, n = "

@@ -22,6 +22,7 @@ __all__ = [
     "fixed_wording",
     "md_table",
     "write_summary",
+    "zero_assigned_bullets",
     "zero_assigned_lines",
 ]
 
@@ -31,14 +32,19 @@ GENERATOR = "uv run python -m aideleg.rq3 summary"
 PLAUSIBILITY_PP = 5.0  # D11: the plausibility threshold, pp of annualised alpha per 1 SD
 _WORDING_PREFIX = "  - Fixed wording:"
 _MDE = re.compile(r"departure from H0 of at least ([0-9.]+) pp per 1 SD")
+PASSED_EXPO_LINE = (
+    "- Zero-assigned employment share (D3): this run used an exposure frame passed "
+    "by the caller, which states the share in its own notes."
+)
 _DECISION = re.compile(r"^- \*\*(H5b?)\.\*\* .*primary rejection: (True|False)", re.M)
 
 
-def zero_assigned_lines(designs: Sequence[str]) -> list[str]:
-    """One D3 line per design, from `data.zero_assigned()`; never typed."""
-    from aideleg.rq3 import data
+def zero_assigned_lines(designs: Sequence[str], zero: pl.DataFrame | None = None) -> list[str]:
+    """One D3 line per design, from `zero` (default `data.zero_assigned()`); never typed."""
+    if zero is None:
+        from aideleg.rq3 import data
 
-    zero = data.zero_assigned()
+        zero = data.zero_assigned()
     out = []
     for d in designs:
         row = zero.filter(pl.col("design") == d)
@@ -49,6 +55,14 @@ def zero_assigned_lines(designs: Sequence[str]) -> list[str]:
             f"{float(row['no_usage_emp_pct'][0]):.2f}% (D3)"
         )
     return out
+
+
+def zero_assigned_bullets(designs: Sequence[str], zero: pl.DataFrame | None) -> list[str]:
+    """The D3 lines as markdown bullets for a generated doc. `zero=None` means the caller passed
+    its own exposure frame, so the doc says the caller states the share instead."""
+    if zero is None:
+        return [PASSED_EXPO_LINE]
+    return [f"- {line}" for line in zero_assigned_lines(designs, zero)]
 
 
 def _cell(v, floats: int) -> str:
@@ -71,7 +85,7 @@ def fixed_wording(text: str) -> list[str]:
     return [ln for ln in text.splitlines() if ln.startswith(_WORDING_PREFIX)]
 
 
-def record_commit(record: Path = RECORD, repo: Path = ROOT) -> str:
+def _record_commit(record: Path = RECORD, repo: Path = ROOT) -> str:
     """The last commit that touched the confirmatory record."""
     out = subprocess.run(
         [
@@ -164,7 +178,7 @@ def write_summary(out_dir: Path, *, record: Path = RECORD, commit: str | None = 
     """Write `out_dir/summary.md`. `commit=None` reads it from `git log` for `record`."""
     out_dir = Path(out_dir)
     record = Path(record)
-    commit = record_commit(record) if commit is None else commit
+    commit = _record_commit(record) if commit is None else commit
     try:
         record_rel = str(record.relative_to(ROOT))
     except ValueError:

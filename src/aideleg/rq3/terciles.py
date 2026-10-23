@@ -37,6 +37,7 @@ from scipy import stats as _st
 from aideleg.config import SEED
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data, stats
+from aideleg.rq3.report import zero_assigned_bullets
 
 GENERATOR = "uv run python -m aideleg.rq3 terciles"
 HEADING = "# Tercile portfolios (exploratory, PAP §8.3 D19; Design B rows are secondary)"
@@ -228,20 +229,6 @@ def _f(x, fmt: str = ".3f") -> str:
     return "-" if x is None else format(x, fmt)
 
 
-def _zero_lines(designs: Sequence[str], zero: pl.DataFrame | None) -> list[str]:
-    if zero is None:
-        return ["- Zero-assigned employment share (D3): this run used an exposure frame passed "
-                "by the caller, which states the share in its own notes."]
-    out = []
-    for d in designs:
-        row = zero.filter(pl.col("design") == d)
-        if row.height != 1:
-            raise ValueError(f"no zero-assigned share for Design {d}")
-        out.append(f"- Zero-assigned employment share, Design {d}: "
-                   f"{float(row['no_usage_emp_pct'][0]):.2f}% (D3)")
-    return out
-
-
 def _method_lines() -> list[str]:
     return [
         "- Membership: FF49 industries with a non-null `z_delegation` (conversations matched to "
@@ -340,7 +327,7 @@ def _md(run: list[tuple[str, str]], st_by: dict, dsr_by: dict, legs_by: dict, nu
              "recorded.", "",
              "These portfolios are measurement devices, not strategies (spec §5.4).", "",
              "## Method", "", *_method_lines(), "",
-             "## Exposure", "", *_zero_lines(designs, zero), "",
+             "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
              "## Members", "", *_member_lines(legs_by, nulls),
              "## Months", ""]
     for d in designs:

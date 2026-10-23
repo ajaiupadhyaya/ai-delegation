@@ -188,3 +188,17 @@ def test_figure_names_prefixed():
     names = [n for f in files for n in _figure_names(f)]
     assert names  # events and terciles each save one
     assert [n for n in names if not n.startswith(("fig_rq3_", "fig_h6_"))] == []
+
+
+def test_zero_assigned_bullets_one_rule():
+    zero = pl.DataFrame({"design": ["A_r2", "B"], "no_usage_emp_pct": [6.344, 12.1449]})
+    assert report.zero_assigned_bullets(["B", "A_r2"], zero) == [
+        "- Zero-assigned employment share, Design B: 12.14% (D3)",
+        "- Zero-assigned employment share, Design A_r2: 6.34% (D3)",
+    ]
+    assert report.zero_assigned_bullets(["B"], None) == [
+        "- Zero-assigned employment share (D3): this run used an exposure frame passed "
+        "by the caller, which states the share in its own notes."
+    ]
+    with pytest.raises(ValueError, match="Design A_pooled"):
+        report.zero_assigned_lines(["A_pooled"], zero)
