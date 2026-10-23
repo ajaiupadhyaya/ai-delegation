@@ -9,17 +9,25 @@ the Design B exposure under one fixed `ExposureSpec` and writes up to two parts:
 - `rq2`: Plan 2's could-vs-does Spearman table (`upstream.rq2_correlations`) of the variant
   indices against the variant benchmarks, with Plan 2's Design B bootstrap draws (C-68).
 
+Returns, sample and inference rows (Task 8): R5, R7, R10 (market parts), R18, R19, R21, R34,
+R35. Each runs on the primary Design B exposure (`ExposureSpec()`) and varies one market input:
+the return set, the industries, the exposure column, the null scale, the history start, or (R35)
+the statistic.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
+from datetime import date
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 
-from aideleg.robustness import registry, report
+from aideleg import confirm_h5, power
+from aideleg.robustness import market, registry, report, returns, studentised
 from aideleg.robustness.exposure_variants import (
     ZERO_ASSIGNED_NOTE,
     ExposureSpec,
@@ -339,6 +347,288 @@ run_R17 = _runner("R17")
 run_R20 = _runner("R20")
 run_R33 = _runner("R33")
 
+# --- Task 8: returns, sample and inference rows on the primary Design B exposure ----------
+
+_PRIMARY = ExposureSpec()
+_TECH = ("Hardw", "Softw", "Chips")
+_RMS_Q = (
+    "q is recomputed with the RMS s: q = the 0.975 / 0.95 quantiles of |b − b̄|/s with this s "
+    "(PAP §8.1: s, b̄ and q recomputed; Plan 4 Task 4 Step 3 rule), and the critical is "
+    "max(t₂₁, q); q moves a critical only where it exceeds t₂₁ ({t25} / {t5}), so the c_0.025 "
+    "and c_0.05 columns show the criticals used."
+)
+
+
+@dataclass(frozen=True)
+class MarketRow:
+    row_id: str
+    parts: tuple[tuple[str, dict], ...]
+    notes: tuple[str, ...]
+    label: str = "robustness"
+    extra: Callable[[list[dict], pl.DataFrame], list[str]] | None = field(
+        default=None, compare=False
+    )
+
+
+def history_drops(rs: str, names: list[str], first: date) -> tuple[int, int, list[str]]:
+    """(industry-window drops, windows with a drop, industries dropped somewhere) in the
+    pre-seal history from `first`: an industry with any missing return in a window has no
+    alpha there and is left out of that window's slope (`power._cross_section`)."""
+    miss = np.isnan(market.history(rs, names, first=first))
+    return (
+        int(miss.sum()),
+        int(miss.any(axis=1).sum()),
+        sorted({names[j] for j in np.where(miss.any(axis=0))[0]}),
+    )
+
+
+def _r34_extra(records: list[dict], frame: pl.DataFrame) -> list[str]:
+    out = []
+    for part, kw in MARKET_ROWS["R34"].parts:
+        rec = next(r for r in records if r["part"] == part)
+        dropped = set(filter(None, (rec["dropped"] or "").split(", ")))
+        names = [n for n in frame["industry"].to_list() if n not in dropped]
+        n, w, who = history_drops(kw.get("rs", RETURN_SET), names, kw["first"])
+        nw = len(power.historical_windows(kw["first"]))
+        out.append(
+            f"{part} ({kw['first']:%Y-%m}, {nw} windows): {n} industry-window drops in {w} "
+            f"windows ({', '.join(who) or 'none'})."
+        )
+    return out
+
+
+MARKET_ROWS: dict[str, MarketRow] = {
+    r.row_id: r
+    for r in (
+        MarketRow(
+            "R5",
+            (("market", {"rs": "ff49_ew"}),),
+            (
+                "Equal-weighted FF49 daily returns in place of value-weighted, in the "
+                "confirmatory window and in the 378-window history (PAP §8.2 R5).",
+            ),
+        ),
+        MarketRow(
+            "R7",
+            (("market", {"drop": _TECH}),),
+            (
+                "Technology industries Hardw, Softw and Chips dropped from the window and the "
+                "history (PAP §8.2 R7).",
+                "[default] z not re-standardised after the drop, as for R13 (PAP §11 C-63).",
+            ),
+        ),
+        MarketRow(
+            "R10",
+            (
+                ("market_lb", {"z_col": "z_delegation_lb"}),
+                ("market_ub", {"z_col": "z_delegation_ub"}),
+            ),
+            (
+                "Market parts of R10: the D1 suppression bounds `z_delegation_lb` and "
+                "`z_delegation_ub` (built from `automation_pct_lb` / `_ub`) in place of "
+                "`z_delegation`, for H5 and H5b (PAP §8.2 R10, D1). The H1 and H3 parts of R10 "
+                "are RQ1 rows (PAP §11 C-57).",
+            ),
+        ),
+        MarketRow(
+            "R18",
+            (("market", {"scale": "nonoverlap_max"}),),
+            (
+                "s = the largest sd of the 17 non-overlapping start offsets; b̄ stays the "
+                "378-window mean; q is recomputed with the new s (PAP §3.3, §8.2 R18; §11 "
+                "C-64).",
+            ),
+        ),
+        MarketRow(
+            "R19",
+            (("market", {"scale": "rms"}),),
+            (
+                "s = the root mean square of the 378 historical slopes around the null value "
+                "b̄, sqrt(mean((b − b̄)²)) (PAP §3.3, §8.2 R19).",
+                _RMS_Q.format(
+                    t25=report.fmt_crit(power.t_crit(0.025)),
+                    t5=report.fmt_crit(power.t_crit(0.05)),
+                ),
+            ),
+        ),
+        MarketRow(
+            "R21",
+            (
+                ("usage", {"z_col": "z_usage"}),
+                ("augmentation", {"z_col": "z_augmentation"}),
+            ),
+            (
+                "`z_usage` and `z_augmentation` in place of `z_delegation` (PAP §8.2 R21), each "
+                "with its own s, b̄ and q.",
+                "No error control: R21 carries no error control across its parts or across "
+                "rows (PAP §8.1).",
+            ),
+            label="robustness; no error control",
+        ),
+        MarketRow(
+            "R34",
+            (
+                ("from_1969", {"first": date(1969, 7, 1)}),
+                ("from_1963", {"first": date(1963, 7, 1)}),
+            ),
+            (
+                "Null scale, b̄ and criticals from overlapping 17-month windows starting "
+                "1969-07 (the first month with all 49 industries) and 1963-07 (the first daily "
+                "FF5 month), ending by 2022-11-29 (PAP §3.3, §7, §8.2 R34).",
+                "1963-07 rows are not like-for-like: industries missing in early windows. An "
+                "industry with any missing return in a historical window has no alpha there and "
+                "is left out of that window's slope only (the power analysis rule, PAP §7); z is "
+                "not re-standardised. The drop counts below are computed from the history.",
+            ),
+            extra=_r34_extra,
+        ),
+    )
+}
+
+_MARKET_ROW_NOTE = (
+    "Exposure: the primary Design B vector (`ExposureSpec()`). H5 and H5b with s, b̄ and q "
+    "recomputed for this row by the pre-seal procedure (the same 378 windows unless the row "
+    "says otherwise, the t₂₁ rule and the D21 null b₀ = b̄; PAP §3.3, §8.1); industries with a "
+    "missing return in the confirmatory window are dropped and z is not re-standardised. The "
+    "secondary b = 0 statistic is in each record's note."
+)
+
+
+def _primary_frame() -> pl.DataFrame:
+    expo = variant_exposure(_PRIMARY)
+    return expo.select(
+        pl.col("industry_short").alias("industry"),
+        "z_delegation",
+        "z_delegation_lb",
+        "z_delegation_ub",
+        "z_usage",
+        "z_augmentation",
+        "z_aioe",
+    )
+
+
+def _zero_line() -> str:
+    return ZERO_ASSIGNED_NOTE.format(zero_assigned_share(_PRIMARY)) + (
+        " (the primary Design B exposure; this row rebuilds no index)."
+    )
+
+
+def run_market_row(row_id: str, *, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """Run a Task 8 market row's parts on the primary exposure and write `R<nn>.csv` / `.md`."""
+    row = MARKET_ROWS[row_id]
+    frame = _primary_frame()
+    records: list[dict] = []
+    for part, kw in row.parts:
+        records += market_variant(row_id, part, frame, label=row.label, **kw)
+    notes = [*row.notes]
+    if row.extra is not None:
+        notes += row.extra(records, frame)
+    notes += [_MARKET_ROW_NOTE, _zero_line()]
+    return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+_R35_NOTES = (
+    "Studentised statistic (PAP §8.2 R35, P10): for each of the 378 pre-seal windows w, Σ_w is "
+    "the covariance of the industries' daily FF5+UMD residuals (denominator T_w − 7), c_w = "
+    "[(X_w′X_w)⁻¹]₁₁ is the intercept element of the common factor design, ω the OLS weight "
+    "vector with b = ω′α ([1, z] for H5, [1, z, z_aioe] for H5b), SE_Σ,w = 252·√(c_w·ω′Σ_wω), "
+    "and κ = sd_w(b_w)/median_w(SE_Σ,w), the same sd as s.",
+    "In the confirmatory window SE_Σ is computed the same way; stat = T_stud = (b̂ − b₀)/(κ·SE_Σ) "
+    "with b₀ = b̄ (D21), p from t₂₁, and the t₂₁ criticals of §3.3. The scale column is κ·SE_Σ "
+    "in pp and the interval is b̂ ± t₂₁,0.975·κ·SE_Σ (the §3.3 interval form with this scale).",
+    _MARKET_ROW_NOTE,
+)
+
+
+def _r35_records(frame: pl.DataFrame) -> list[dict]:
+    rs = RETURN_SET
+    end = confirm_h5.WINDOW[1]
+    r = returns.load_return_set(rs, end)  # guarded before anything else
+    f = returns.load_factors(end)
+    names = [c for c in r.columns if c != "date"]
+    if sorted(frame["industry"].to_list()) != sorted(names):
+        raise ValueError(f"exposure industries do not match the {rs} return columns")
+    by = {x["industry"]: x for x in frame.iter_rows(named=True)}
+    a = market._window_alphas(rs, names, None)
+    keep = ~np.isnan(a)
+    kept = [n for n, k in zip(names, keep, strict=True) if k]
+    dropped = [n for n, k in zip(names, keep, strict=True) if not k]
+    ak = a[keep]
+    z = np.array([by[n]["z_delegation"] for n in kept], dtype=float)
+    c = np.array([by[n]["z_aioe"] for n in kept], dtype=float)
+    A = market.history(rs, kept)
+    t25, t5 = power.t_crit(0.025), power.t_crit(0.05)
+    out = []
+    for part, hyp, ctl in (("h5", "H5", None), ("h5b", "H5b", c)):
+        ns = market.null_scales_for(z, ctl, A)
+        w = power.ols_weights(z, ctl)
+        b = float(w @ ak)
+        k = studentised.kappa(z, ctl, rs, names=kept)
+        se = studentised.se_sigma(r, f, *confirm_h5.WINDOW, w, kept)
+        sc = k * se
+        T = studentised.t_stud(b, ns.bbar, k, se)
+        T0 = studentised.t_stud(b, 0.0, k, se)
+        est = "slope of annualised FF5+UMD alpha on z_delegation" + (
+            ", controlling for z_aioe" if ctl is not None else ""
+        )
+        control = "z_aioe" if ctl is not None else None
+        rec = {
+            "row_id": "R35",
+            "part": part,
+            "variant": (
+                f"returns={rs}; z=z_delegation; control={control}; statistic=T_stud; criticals=t21"
+            ),
+            "applies_to": hyp,
+            "label": "robustness",
+            "estimand": est,
+            "unit": report.MARKET_UNIT,
+            "estimate": b * 100,
+            "scale": sc * 100,
+            "ci_lo": (b - t5 * sc) * 100,
+            "ci_hi": (b + t5 * sc) * 100,
+            "stat": T,
+            "p": market._p_t(T),
+            "null": market.NULL,
+            "crit_0025": t25,
+            "crit_005": t5,
+            "n": len(kept),
+            "n_dropped": len(dropped),
+            "dropped": ", ".join(dropped),
+            "note": (
+                f"κ = {report.fmt_stat(k)}; SE_Σ,2025–26 = {report.fmt_pp(se * 100)} pp; "
+                f"b̄ = {report.fmt_pp(ns.bbar * 100)} pp; secondary b = 0: T = "
+                f"{report.fmt_stat(T0)}, p = {report.fmt_p(market._p_t(T0))}"
+            ),
+        }
+        report.check_record(rec)
+        out.append(rec)
+    return out
+
+
+def run_R35(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R35: the studentised statistic T_stud on the primary Design B exposure."""
+    records = _r35_records(_primary_frame())
+    notes = [*_R35_NOTES, _zero_line()]
+    return report.write_row("R35", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+def _market_runner(row_id: str) -> Callable[..., tuple[Path, Path]]:
+    def run(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+        return run_market_row(row_id, out_dir=out_dir)
+
+    run.__name__ = f"run_{registry.output_stem(row_id)}"
+    run.__doc__ = f"PAP §8.2 {row_id} on the primary Design B exposure."
+    return run
+
+
+run_R05 = _market_runner("R5")
+run_R07 = _market_runner("R7")
+run_R10 = _market_runner("R10")
+run_R18 = _market_runner("R18")
+run_R19 = _market_runner("R19")
+run_R21 = _market_runner("R21")
+run_R34 = _market_runner("R34")
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -351,5 +641,13 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R17", run_R17),
         ("R20", run_R20),
         ("R33", run_R33),
+        ("R5", run_R05),
+        ("R7", run_R07),
+        ("R10", run_R10),
+        ("R18", run_R18),
+        ("R19", run_R19),
+        ("R21", run_R21),
+        ("R34", run_R34),
+        ("R35", run_R35),
     )
 }
