@@ -253,3 +253,21 @@ def test_primary_variant_reproduces_confirmatory():
         lo, hi = rec["decision"][hyp]["ci_005"]
         assert (f"{r['ci_lo']:.3f}", f"{r['ci_hi']:.3f}") == (lo, hi)
         assert f"T = {row['T_zero']}" in r["note"]
+
+
+@pytest.mark.parametrize("col", ["z_delegation", "z_aioe"])
+def test_market_variant_refuses_nan_exposure(monkeypatch, col):
+    r, f = _toy_market()
+    monkeypatch.setattr(returns, "load_return_set", lambda rs, end: r.filter(pl.col("date") <= end))
+    monkeypatch.setattr(returns, "load_factors", lambda end: f.filter(pl.col("date") <= end))
+    expo = pl.DataFrame(
+        {
+            "industry": NAMES5,
+            "z_delegation": [-1.2, -0.4, 0.1, 0.5, 1.0],
+            "z_aioe": [0.3, -1.0, 0.8, -0.2, 0.1],
+        }
+    ).with_columns(
+        pl.when(pl.col("industry") == "B").then(float("nan")).otherwise(pl.col(col)).alias(col)
+    )
+    with pytest.raises(ValueError, match="NaN"):
+        market.market_variant("R5", "toy", expo)

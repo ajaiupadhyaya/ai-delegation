@@ -18,6 +18,7 @@ These records are reported as robustness; none is a confirmatory decision (PAP Â
 AEI data are conversations matched to O*NET tasks.
 """
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
@@ -185,7 +186,8 @@ def market_variant(
     first: date = power.FIRST_START,
     label: str = "robustness",
 ) -> list[dict]:
-    """Two records in `report.ROBUSTNESS_COLUMNS`: H5 (no control) and H5b (`control_col`).
+    """Two records in `report.ROBUSTNESS_COLUMNS`: H5 (no control) and H5b (`control_col`);
+    only the H5 record when `control_col` is None.
 
     `expo` has `industry` (the return set's column names) and the z columns. Industries in
     `drop` and industries with a missing window return are removed from the window and the
@@ -199,8 +201,15 @@ def market_variant(
         raise ValueError(f"drop names industries not in {rs}: {unknown}")
     cols = [z_col] + ([control_col] if control_col else [])
     by = {r["industry"]: r for r in expo.select("industry", *cols).iter_rows(named=True)}
-    if any(by[n][c] is None for n in names if n not in drop for c in cols):
-        raise ValueError(f"null exposure values in {cols} for a kept industry")
+    bad = sorted(
+        n
+        for n in names
+        if n not in drop
+        for c in cols
+        if by[n][c] is None or (isinstance(by[n][c], float) and math.isnan(by[n][c]))
+    )
+    if bad:
+        raise ValueError(f"null or NaN exposure values in {cols} for kept industries {bad}")
 
     a = _window_alphas(rs, names, None)
     keep = [n not in drop and not np.isnan(x) for n, x in zip(names, a, strict=True)]

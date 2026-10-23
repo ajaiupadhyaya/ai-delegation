@@ -42,7 +42,10 @@ def test_fmt_p():
 
 def test_fmt_pp_and_rho():
     assert report.fmt_pp(1.234) == "1.23"
-    assert report.fmt_pp(-0.004) == "-0.00"
+    assert report.fmt_pp(-0.004) == "0.00"
+    assert report.fmt_pp(-0.0) == "0.00"
+    assert report.fmt_pp(-0.006) == "-0.01"
+    assert report.fmt_crit(2.413845016599001) == "2.4138"
     assert report.fmt_rho(0.76312) == "0.763"
 
 
@@ -76,3 +79,16 @@ def test_write_row_schema(tmp_path):
 def test_write_row_refuses_unknown_row(tmp_path):
     with pytest.raises(ValueError, match="R00"):
         report.write_row("R00", [_record(row_id="R00")], [], out_dir=tmp_path)
+
+
+def test_write_row_prints_crit_to_4dp(tmp_path):
+    _, md = report.write_row("R5", [_record(crit_0025=2.413845016599001)], [], out_dir=tmp_path)
+    assert "| 2.4138 | 2.0796 |" in md.read_text()
+
+
+def test_write_row_refuses_default_without_c_number(tmp_path):
+    with pytest.raises(ValueError, match="C- number"):
+        report.write_row("R5", [_record()], ["**[default]** no number here."], out_dir=tmp_path)
+    with pytest.raises(ValueError, match="C- number"):
+        report.write_row("R5", [_record(note="[default] in a note")], [], out_dir=tmp_path)
+    report.write_row("R5", [_record(note="[default] (§11 C-64)")], [], out_dir=tmp_path)

@@ -7,6 +7,7 @@ decision (PAP §8.1). `WORDING` (through the adapter) is the last line of every 
 """
 
 import math
+import re
 from pathlib import Path
 
 import polars as pl
@@ -42,6 +43,7 @@ MARKET_UNIT = "pp of annualised alpha per 1 SD"
 RHO_UNIT = "correlation"
 NOT_A_DECISION = "reported as robustness; not a confirmatory decision (PAP §8.1)"
 _DASH = "—"
+_C_NUMBER = re.compile(r"\bC-\d+\b")
 
 
 def _missing(x) -> bool:
@@ -50,7 +52,15 @@ def _missing(x) -> bool:
 
 def fmt_pp(x: float) -> str:
     """pp and RQ1 coefficients: 2 decimals."""
-    return _DASH if _missing(x) else f"{x:.2f}"
+    if _missing(x):
+        return _DASH
+    out = f"{x:.2f}"
+    return "0.00" if out == "-0.00" else out
+
+
+def fmt_crit(x: float) -> str:
+    """Critical values: 4 decimals, as `confirmatory_h5.md` prints them."""
+    return _DASH if _missing(x) else f"{x:.4f}"
 
 
 def fmt_rho(r: float) -> str:
@@ -113,8 +123,8 @@ def _table(records: list[dict]) -> list[str]:
             fmt_stat(r["stat"]),
             fmt_p(r["p"]),
             r["null"] or _DASH,
-            fmt_stat(r["crit_0025"]),
-            fmt_stat(r["crit_005"]),
+            fmt_crit(r["crit_0025"]),
+            fmt_crit(r["crit_005"]),
             _DASH if _missing(r["n"]) else str(r["n"]),
             r["dropped"] or "none",
             r["note"] or "",
@@ -134,6 +144,9 @@ def write_row(
         raise ValueError(f"{row_id}: no records")
     for rec in records:
         check_record(rec)
+    for n in [*notes, *(r["note"] or "" for r in records)]:
+        if "[default]" in n and not _C_NUMBER.search(n):
+            raise ValueError(f"{row_id}: a [default] note names no §11 C- number: {n!r}")
     out_dir = OUT_DIR if out_dir is None else Path(out_dir)
     stem = registry.output_stem(row_id)
     labels = sorted({r["label"] for r in records})
