@@ -38,6 +38,11 @@ in Plan 2's `estimate_h4` on Plan 2's `build_geo_sample` frame or, for r4/r5, on
 `rq1.h4_frame_r45` (PAP §11 C-59); and R25, the five-member split family, Plan 2's `holm` on
 the committed primary p-values (nothing is re-estimated).
 
+H6 rows (Task 14): R29 (parts `pre_formation_2025`, `change_2019_2024`, `float_weighted`) and
+R30 (`narrow`, `broad`). Each part builds a variant T_j with `talk_variant` (Plan 3's numerator,
+denominator and talk table on the saved full-text-search hits) and runs Plan 3's `gap`,
+`spearman_ci` and `gap_returns` on it. Exploratory; nominal p-values.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
@@ -56,6 +61,7 @@ from aideleg import confirm_h5, power
 from aideleg.occupations import SUPPRESSION
 from aideleg.robustness import (
     guards,
+    inputs,
     market,
     registry,
     report,
@@ -2057,6 +2063,376 @@ def run_R25(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     return _write("R25", records, list(_R25_NOTES), out_dir)
 
 
+# --- Task 14: H6 rows R29, R30 ------------------------------------------------------------
+
+# Set by `python -m aideleg.robustness --offline`: talk_variant never fetches, and a phrase /
+# date range the saved full-text-search responses do not cover raises FileNotFoundError.
+OFFLINE: bool = False
+H6_LABEL = "robustness; exploratory"
+R29_CUT = date(2025, 3, 26)  # filings dated before Design B's formation date, 2025-03-27
+_R30_NARROW_DROP = ("computer vision", "reinforcement learning", "foundation model")
+R30_ADDED = ("automation", "robotics")
+R30_LISTS: dict[str, tuple[str, ...]] = {
+    "narrow": tuple(t for t in upstream.PRIMARY_TERMS if t not in _R30_NARROW_DROP),
+    "broad": (*upstream.PRIMARY_TERMS, *R30_ADDED),
+}
+_H6_RET_UNIT = "pp of annualised alpha per 1 SD of gap"
+
+
+def r30_phrases(name: str) -> list[str]:
+    """The full-text-search phrases of an R30 list: `fts_phrases(narrow)` for `narrow`, and
+    `fts_phrases()` plus the added terms, with no plurals for them, for `broad` (C-62)."""
+    if name == "narrow":
+        return upstream.fts_phrases(R30_LISTS["narrow"])
+    if name == "broad":
+        return [*upstream.fts_phrases(), *R30_ADDED]
+    raise ValueError(f"unknown R30 list {name!r}")
+
+
+def uncovered_phrases(
+    saved: pl.DataFrame, phrases: Sequence[str], start: date, end: date
+) -> list[str]:
+    """The phrases whose saved leaf ranges (`saved_ranges()` rows with `leaf`) do not cover
+    every day of [start, end]; coverage is the union of the leaf ranges."""
+    from datetime import timedelta
+
+    out = []
+    for p in phrases:
+        leaves = saved.filter((pl.col("phrase") == p) & pl.col("leaf")).sort("start", "end")
+        cur = start
+        for s, e in zip(leaves["start"].to_list(), leaves["end"].to_list(), strict=True):
+            if s > cur:
+                break
+            cur = max(cur, e + timedelta(days=1))
+            if cur > end:
+                break
+        if cur <= end:
+            out.append(p)
+    return out
+
+
+def _saved_hits(phrases: Sequence[str], start: date, end: date) -> pl.DataFrame:
+    """Plan 3's `hits_from_saved(phrases, start, end, strict=True)`. Online (not `OFFLINE`), a
+    phrase whose saved leaf ranges do not cover [start, end] is first fetched with Plan 3's
+    `fts_hits(phrase, start, end)`, which records each response in the MANIFEST."""
+    phrases = list(dict.fromkeys(phrases))
+    if not OFFLINE:
+        for p in uncovered_phrases(upstream.saved_ranges(), phrases, start, end):
+            st: dict = {}
+            df = upstream.fts_hits(p, start, end, stats=st)
+            print(
+                f"fetched {p!r} {start}..{end}: requests={st.get('requests')} "
+                f"splits={st.get('splits') or 'none'} documents={st.get('documents')} "
+                f"kept rows={df.height}",
+                flush=True,
+            )
+    return upstream.hits_from_saved(phrases, start, end, strict=True)
+
+
+def _talk(
+    year: int,
+    phrases: Sequence[str],
+    *,
+    date_to: date | None = None,
+    weighting: str = "count",
+) -> tuple[pl.DataFrame, dict]:
+    """`(ff49_short, T)` over the 49 FF49 industries and the filer counts behind it."""
+    if weighting not in ("count", "float"):
+        raise ValueError(f"weighting must be 'count' or 'float', got {weighting!r}")
+    start, end = date(year, 1, 1), date_to or date(year, 12, 31)
+    filers = upstream.load_filers().filter(pl.col("year") == year)
+    if date_to is not None:
+        filers = filers.filter(pl.col("date_filed") <= date_to)
+    hits = _saved_hits(phrases, start, end)
+    num = upstream.numerator(hits, filers)
+    t = upstream.talk_table(num, upstream.denominator(filers)).filter(
+        (pl.col("year") == year) & pl.col("ff49").is_not_null()
+    )
+    stats = {
+        "n_filers": filers["cik"].n_unique(),
+        "n_mapped": filers.filter(pl.col("ff49").is_not_null())["cik"].n_unique(),
+        "n_talk": int(num.filter(pl.col("year") == year)["n_talk"].sum()),
+    }
+    if weighting == "count":
+        T = t.select("ff49_short", pl.col("talk").alias("T"))
+    else:
+        per_cik = filers.select("cik", "ff49").unique()
+        if per_cik["cik"].is_duplicated().any():
+            raise ValueError("a filer has more than one FF49 industry")
+        talkers = (
+            hits.filter(
+                pl.col("form").is_in(upstream.FORMS) & (pl.col("file_date").dt.year() == year)
+            )
+            .select(pl.col("cik").cast(pl.Int64))
+            .unique()
+            .with_columns(pl.lit(True).alias("talks"))
+        )
+        fl = per_cik.join(inputs.public_float(), on="cik", how="inner").join(
+            talkers, on="cik", how="left"
+        )
+        fl = fl.with_columns(pl.col("talks").fill_null(False))
+        agg = (
+            fl.filter(pl.col("ff49").is_not_null())
+            .group_by("ff49")
+            .agg(
+                (pl.col("public_float_usd") * pl.col("talks").cast(pl.Float64)).sum().alias("_num"),
+                pl.col("public_float_usd").sum().alias("_den"),
+            )
+        )
+        T = (
+            t.select("ff49", "ff49_short")
+            .join(agg, on="ff49", how="left")
+            .with_columns(
+                pl.when(pl.col("_den") > 0)
+                .then(pl.col("_num") / pl.col("_den"))
+                .otherwise(None)
+                .cast(pl.Float64)
+                .alias("T")
+            )
+            .select("ff49_short", "T")
+        )
+        stats |= {
+            "n_float": fl.height,
+            "n_float_mapped": fl.filter(pl.col("ff49").is_not_null()).height,
+            "n_float_zero": fl.filter(pl.col("public_float_usd") == 0).height,
+        }
+    stats["no_T"] = T.filter(pl.col("T").is_null())["ff49_short"].to_list()
+    return T, stats
+
+
+def talk_variant(
+    year: int,
+    phrases: Sequence[str],
+    *,
+    date_to: date | None = None,
+    weighting: str = "count",
+) -> pl.DataFrame:
+    """`ff49_short, T` for the 49 FF49 industries: Plan 3's talk (`numerator` / `denominator` /
+    `talk_table`) for `year`'s 10-K filers (`upstream.load_filers()`) and the saved hits of
+    `phrases` filed in [year-01-01, `date_to` or year-12-31]. With `date_to`, both the hits and
+    the filers (`date_filed`) are cut at `date_to` (C-61). `"float"`: T_j = Σ float·1[talks] /
+    Σ float over the industry's filers with a CY2024Q2I public float (`inputs.public_float`,
+    C-61); null where that sum is not positive. Hits come from `_saved_hits` (strict)."""
+    return _talk(year, phrases, date_to=date_to, weighting=weighting)[0]
+
+
+def talk_stats(
+    year: int,
+    phrases: Sequence[str],
+    *,
+    date_to: date | None = None,
+    weighting: str = "count",
+) -> dict:
+    """The filer counts behind `talk_variant` (filers, mapped filers, talk filers, and for
+    `"float"` the filers with a public float record)."""
+    return _talk(year, phrases, date_to=date_to, weighting=weighting)[1]
+
+
+def _pct(a: int, b: int) -> str:
+    return f"{100 * a / b:.2f}%" if b else "—"
+
+
+def _h6_records(
+    row_id: str, part: str, T: pl.DataFrame, variant: str, expo_b: pl.DataFrame
+) -> list[dict]:
+    """The divergence (Spearman) and gap–return records of one part, through Plan 3's `gap`,
+    `spearman_ci` (10,000 draws, SEED) and `gap_returns`."""
+    g = upstream.gap(T, expo_b)
+    sp = upstream.spearman_ci(g["T"].to_numpy(), g["z_usage"].to_numpy())
+    kept = set(g["ff49_short"].to_list())
+    no_T = [n for n in T["ff49_short"].to_list() if n not in kept]
+    res = upstream.gap_returns(g)
+    lo, hi = sp["ci95"]
+    div = {
+        "row_id": row_id,
+        "part": part,
+        "variant": variant,
+        "applies_to": "H6 divergence",
+        "label": H6_LABEL,
+        "estimand": "Spearman(T_j, Design B z_usage) across FF49 industries",
+        "unit": report.RHO_UNIT,
+        "estimate": sp["rho"],
+        "scale": None,
+        "ci_lo": lo,
+        "ci_hi": hi,
+        "stat": None,
+        "p": None,
+        "null": None,
+        "crit_0025": None,
+        "crit_005": None,
+        "n": sp["n"],
+        "n_dropped": len(no_T),
+        "dropped": ", ".join(no_T),
+        "note": f"95% percentile CI from {sp['n_draws']:,} industry-bootstrap draws "
+        f"(default_rng(SEED)); {sp['n_nan']} undefined draws; dropped = T undefined",
+    }
+    excl = [*res["no_gap"], *res["dropped"]]
+    lo_b, hi_b = res["ci_0.05"]
+    ret = {
+        "row_id": row_id,
+        "part": part,
+        "variant": variant,
+        "applies_to": "H6 gap-return",
+        "label": H6_LABEL,
+        "estimand": "slope of annualised FF5+UMD alpha on gap_j (Design B window, no control)",
+        "unit": _H6_RET_UNIT,
+        "estimate": res["b"] * 100,
+        "scale": res["s"] * 100,
+        "ci_lo": lo_b * 100,
+        "ci_hi": hi_b * 100,
+        "stat": res["T_bbar"],
+        "p": res["p_bbar"],
+        "null": market.NULL,
+        "crit_0025": None,
+        "crit_005": res["crit_0.05"],
+        "n": res["n"],
+        "n_dropped": len(excl),
+        "dropped": ", ".join(excl),
+        "note": f"nominal p, in no testing family; b̄ = {report.fmt_pp(res['bbar'] * 100)} pp; "
+        f"q_0.975 = {report.fmt_stat(res['q_0.975'])}; secondary b = 0: T = "
+        f"{report.fmt_stat(res['T_zero'])}, p = {report.fmt_p(res['p_zero'])}; no gap: "
+        f"{', '.join(res['no_gap']) or 'none'}; missing return: "
+        f"{', '.join(res['dropped']) or 'none'}",
+    }
+    report.check_record(div)
+    report.check_record(ret)
+    return [div, ret]
+
+
+def _h6_expo_b() -> pl.DataFrame:
+    return upstream.exposures().filter(pl.col("design") == "B").select("ff49_short", "z_usage")
+
+
+_H6_NOTES = (
+    "Each part replaces Plan 3's T_j (talk in 10-Ks filed in 2024, the 15 primary phrases, "
+    "PAP §6 D18) by the part's T_j; everything after T_j is Plan 3's code (PAP §11 C-51): "
+    "gap_j = the standardised residual of zT on Design B (r2) z_usage (`h6.talk.gap`); "
+    "divergence = Spearman(T_j, z_usage) with a 95% percentile CI from 10,000 industry-bootstrap "
+    "draws (`default_rng(SEED)`); the gap–return association = `h6.talk.gap_returns`: OLS of "
+    "the Design B window alphas on gap_j with s, b̄ and q recomputed for the gap vector on the "
+    "same pre-seal historical windows, critical max(t₂₁, q), primary null b = b̄ (D21), b = 0 "
+    "secondary (in the note); the interval is b ± critical × s.",
+    "H6 is exploratory (PAP §6 D18): the p-values are nominal, belong to no testing family and "
+    "do not revisit the H5/H5b decision. An FF49 industry with T_j undefined is excluded from "
+    "zT, the OLS, Spearman and the gap–return regression (C-51 (2)); unmapped filers enter no "
+    "industry (C-49 (5)).",
+    "Hits come from the saved EDGAR full-text-search responses (Plan 3's `hits_from_saved`, "
+    "strict: a date range the saved leaf ranges do not cover is an error, never zero hits).",
+)
+
+
+def _counts_line(part: str, st: dict) -> str:
+    return (
+        f"{part}: {st['n_talk']:,} talk filers of {st['n_filers']:,} filers "
+        f"({st['n_mapped']:,} mapped to an FF49 industry); T_j undefined: "
+        f"{', '.join(st['no_T']) or 'none'}."
+    )
+
+
+def run_R29(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R29: 2025 pre-formation talk, the 2019→2024 change, float-weighted filers."""
+    guards.require_confirmatory_committed()
+    ph = upstream.fts_phrases()
+    expo_b = _h6_expo_b()
+    records: list[dict] = []
+    notes: list[str] = []
+
+    T, st = _talk(2025, ph, date_to=R29_CUT)
+    records += _h6_records(
+        "R29",
+        "pre_formation_2025",
+        T,
+        f"T_j = talk in 10-Ks filed 2025-01-01..{R29_CUT} (hits and filers both cut); "
+        f"{len(ph)} primary phrases; count-weighted",
+        expo_b,
+    )
+    notes.append(
+        f"[default] pre_formation_2025: the numerator hits (file date) and the denominator "
+        f"filers (Date Filed) are both cut at {R29_CUT}, the filings public before Design B's "
+        "formation date 2025-03-27 (PAP §11 C-61). " + _counts_line("pre_formation_2025", st)
+    )
+
+    T24, st24 = _talk(2024, ph)
+    T19, st19 = _talk(2019, ph)
+    Tc = T24.join(T19.rename({"T": "_T19"}), on="ff49_short", how="left", maintain_order="left")
+    Tc = Tc.select("ff49_short", (pl.col("T") - pl.col("_T19")).alias("T"))
+    records += _h6_records(
+        "R29",
+        "change_2019_2024",
+        Tc,
+        f"T_j = talk_2024 − talk_2019 (10-Ks filed in each calendar year); {len(ph)} primary "
+        "phrases; count-weighted",
+        expo_b,
+    )
+    no_c = Tc.filter(pl.col("T").is_null())["ff49_short"].to_list()
+    notes.append(
+        "change_2019_2024: T_j = talk₂₀₂₄ − talk₂₀₁₉, each from the full calendar year's 10-Ks "
+        f"(a difference of two shares of filers); T_j undefined: {', '.join(no_c) or 'none'}. "
+        + _counts_line("2024", st24)
+        + " "
+        + _counts_line("2019", st19)
+    )
+
+    Tf, stf = _talk(2024, ph, weighting="float")
+    records += _h6_records(
+        "R29",
+        "float_weighted",
+        Tf,
+        f"T_j = Σ float·1[talks] / Σ float over 2024 filers with a CY2024Q2I public float; "
+        f"{len(ph)} primary phrases",
+        expo_b,
+    )
+    notes.append(
+        "[default] float_weighted: T_j = Σ float·1[talks] / Σ float over industry j's 2024 "
+        "filers with a public float in the SEC XBRL frame dei/EntityPublicFloat/USD/CY2024Q2I "
+        "(the R29 cap proxy, a §11 addition outside §9.4, A-46; PAP §11 C-61); T_j is undefined "
+        "where that sum is not positive. Filers with a public float: "
+        f"{stf['n_float']:,} of {stf['n_filers']:,} 2024 filers "
+        f"({_pct(stf['n_float'], stf['n_filers'])}); {stf['n_float_mapped']:,} of "
+        f"{stf['n_mapped']:,} FF49-mapped filers ({_pct(stf['n_float_mapped'], stf['n_mapped'])})"
+        f"; {stf['n_float_zero']:,} of them report a float of zero and enter with weight zero. "
+        f"T_j undefined: {', '.join(stf['no_T']) or 'none'}."
+    )
+    notes += [*_H6_NOTES, *upstream.zero_assigned_lines(["B"], upstream.zero_assigned())]
+    return report.write_row("R29", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+def run_R30(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R30: the narrower and broader dictionaries, 2024 filings (T_j) only."""
+    guards.require_confirmatory_committed()
+    expo_b = _h6_expo_b()
+    records: list[dict] = []
+    counts: list[str] = []
+    for part in ("narrow", "broad"):
+        ph = r30_phrases(part)
+        T, st = _talk(2024, ph)
+        records += _h6_records(
+            "R30",
+            part,
+            T,
+            f"T_j = talk in 10-Ks filed 2024; {part} dictionary: {len(R30_LISTS[part])} terms, "
+            f"{len(ph)} phrases; count-weighted",
+            expo_b,
+        )
+        counts.append(_counts_line(part, st))
+    notes = [
+        "[default] narrow: the primary list without items 9–11 (computer vision, reinforcement "
+        f"learning, foundation model(s)): {len(R30_LISTS['narrow'])} terms, "
+        f"{len(r30_phrases('narrow'))} phrases; broad: the 12 primary terms plus "
+        f"{' and '.join(repr(t) for t in R30_ADDED)}: {len(R30_LISTS['broad'])} terms, "
+        f"{len(r30_phrases('broad'))} phrases, the plural rule applied to the primary list only "
+        "(PAP §6.1 D12 alternatives; PAP §11 C-62).",
+        "[default] Only T_j (10-Ks filed in 2024) is computed for each list (PAP §11 C-62).",
+        "The responses for the added terms were retrieved for this row through Plan 3's "
+        "full-text-search client (exact totals, bisection of capped ranges, one MANIFEST "
+        "record per response) and are logged as a §11 set addition of `sec_fts/`.",
+        *counts,
+        *_H6_NOTES,
+        *upstream.zero_assigned_lines(["B"], upstream.zero_assigned()),
+    ]
+    return report.write_row("R30", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -2094,5 +2470,7 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R37", run_R37),
         ("R25", run_R25),
         ("R28", run_R28),
+        ("R29", run_R29),
+        ("R30", run_R30),
     )
 }
