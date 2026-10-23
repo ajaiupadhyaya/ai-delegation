@@ -5,3 +5,6 @@ data/derived/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+
+# superpowers ledgers and reports (local)
+.superpowers/
