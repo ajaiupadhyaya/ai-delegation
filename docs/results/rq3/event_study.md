@@ -74,6 +74,7 @@ Day 0 is the first date on or after the announcement present in both the industr
 - AR = excess return minus the fitted value, intercept included. CAR_k = sum of AR over days 0..k, in pp.
 - An industry with any missing return in the estimation window or in the event window [0, max k] is dropped for that event (listed below).
 - Cross-section: OLS of CAR_k on [1, exposure] across industries, HC3 SEs, 95% CI and p from the normal reference; nominal and single-test (PAP §11 C-33). Randomisation inference is not used: PAP §3.2 documents that it is oversized when industries with similar exposure co-move.
+- Caveat: every industry's CAR for an event is measured over the same calendar days, so the CARs are cross-sectionally correlated. That correlation also affects the HC3 SEs, which allow for heteroskedasticity but not for it, so the nominal p-values may be oversized (too small).
 - Slopes b, SEs and CIs are pp of CAR per 1 SD of exposure. Exposure is the Design A `z_delegation` (conversations matched to O*NET tasks, aggregated to FF49); it is not re-standardised after drops.
 - A_r2 is formed from r2, the earliest release with task-level collaboration. A_pooled pools r2-r6 (`claude_ai`, equal release weights); r3-r6 were published during and after the return window, so it is labelled look-ahead.
 - Every regression run is reported below with its point value, CI and nominal p. No result is counted or starred; an interval that includes zero is reported in the same way as one that does not.
@@ -97,8 +98,8 @@ Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled `z_deleg
 | GPT-4 | 2023-03-14 | 5 | A_pooled (look-ahead) | z_delegation | z_delegation | 0.662 | 0.179 | [0.311, 1.013] | 0.0002 | 49 |
 | GPT-4 | 2023-03-14 | 20 | A_r2 | z_delegation | z_delegation | 0.313 | 0.381 | [-0.434, 1.059] | 0.4118 | 49 |
 | GPT-4 | 2023-03-14 | 20 | A_pooled (look-ahead) | z_delegation | z_delegation | 0.410 | 0.411 | [-0.397, 1.216] | 0.3195 | 49 |
-| PaLM 2 | 2023-05-10 | 5 | A_r2 | z_delegation | z_delegation | 1.158 | 0.229 | [0.710, 1.607] | 0.0000 | 49 |
-| PaLM 2 | 2023-05-10 | 5 | A_pooled (look-ahead) | z_delegation | z_delegation | 1.219 | 0.234 | [0.761, 1.678] | 0.0000 | 49 |
+| PaLM 2 | 2023-05-10 | 5 | A_r2 | z_delegation | z_delegation | 1.158 | 0.229 | [0.710, 1.607] | < 0.0001 | 49 |
+| PaLM 2 | 2023-05-10 | 5 | A_pooled (look-ahead) | z_delegation | z_delegation | 1.219 | 0.234 | [0.761, 1.678] | < 0.0001 | 49 |
 | PaLM 2 | 2023-05-10 | 20 | A_r2 | z_delegation | z_delegation | 2.092 | 0.657 | [0.804, 3.380] | 0.0015 | 49 |
 | PaLM 2 | 2023-05-10 | 20 | A_pooled (look-ahead) | z_delegation | z_delegation | 2.188 | 0.563 | [1.084, 3.293] | 0.0001 | 49 |
 | Claude 2 | 2023-07-11 | 5 | A_r2 | z_delegation | z_delegation | 0.396 | 0.472 | [-0.529, 1.322] | 0.4011 | 49 |
@@ -113,7 +114,7 @@ Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled `z_deleg
 | Gemini 1.0 | 2023-12-06 | 5 | A_pooled (look-ahead) | z_delegation | z_delegation | 0.149 | 0.320 | [-0.478, 0.776] | 0.6416 | 49 |
 | Gemini 1.0 | 2023-12-06 | 20 | A_r2 | z_delegation | z_delegation | 0.051 | 0.378 | [-0.691, 0.793] | 0.8930 | 49 |
 | Gemini 1.0 | 2023-12-06 | 20 | A_pooled (look-ahead) | z_delegation | z_delegation | -0.044 | 0.313 | [-0.657, 0.568] | 0.8874 | 49 |
-| Gemini 1.5 | 2024-02-15 | 5 | A_r2 | z_delegation | z_delegation | -0.692 | 0.174 | [-1.033, -0.351] | 0.0001 | 49 |
+| Gemini 1.5 | 2024-02-15 | 5 | A_r2 | z_delegation | z_delegation | -0.692 | 0.174 | [-1.033, -0.351] | < 0.0001 | 49 |
 | Gemini 1.5 | 2024-02-15 | 5 | A_pooled (look-ahead) | z_delegation | z_delegation | -0.680 | 0.195 | [-1.063, -0.297] | 0.0005 | 49 |
 | Gemini 1.5 | 2024-02-15 | 20 | A_r2 | z_delegation | z_delegation | -0.908 | 0.494 | [-1.875, 0.060] | 0.0660 | 49 |
 | Gemini 1.5 | 2024-02-15 | 20 | A_pooled (look-ahead) | z_delegation | z_delegation | -1.093 | 0.459 | [-1.993, -0.192] | 0.0174 | 49 |

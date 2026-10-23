@@ -245,3 +245,9 @@ def test_identical_exposure():
     assert report.identical_exposure(expo)
     assert not report.identical_exposure(expo, "B", "A_pooled")
     assert not report.identical_exposure(expo.filter(pl.col("design") != "B"))
+
+
+@pytest.mark.data
+def test_committed_record_commit_file_matches_git():
+    f = ROOT / report.RECORD_COMMIT_FILE
+    assert f.read_text(encoding="utf-8").strip() == report._record_commit()

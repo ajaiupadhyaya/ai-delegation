@@ -17,6 +17,12 @@ These portfolios are measurement devices, not strategies (spec §5.4).
 - DSR: each variant's PSR against the expected maximum monthly Sharpe ratio across the variants run (gross of costs).
 - Every estimate is reported with its point value, CI and nominal p where one exists. No result is counted or starred; an interval that includes zero is reported in the same way as one that does not.
 
+## Caveats
+
+- Design B and Design A_r2 exposures are numerically identical (both are formed from release r2; PAP §8.3 D19), so the two designs have the same membership and the B rows are the A_r2 portfolios over a 17-month sub-window (2025-04 to 2026-08) of A_r2's 45 months. They are not independent evidence.
+- The DSR's N = 6 counts every variant run as an independent trial, which overstates the number of independent trials: the B variants are nested in the A_r2 variants (above), and A_r2 and A_pooled are nearly the same portfolios (monthly SR, A_r2 vs A_pooled: cap 0.2372 vs 0.2367; ew 0.0970 vs 0.0916).
+- Design B's FF5+UMD alpha rests on T = 17 months with 7 parameters (10 residual df, NW lag 2), so the spread between its CAPM, FF3 and FF5+UMD alphas is model-fragile; and PSR(0) uses a normal approximation on 17 monthly returns.
+
 ## Exposure
 
 - Zero-assigned employment share, Design B: 12.14% (D3)

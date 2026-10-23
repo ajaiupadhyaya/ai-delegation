@@ -24,6 +24,8 @@ Talk for FF49 industry j and filing year y is the share of the year's 10-K filer
 | 2024 | 6774 | 2538 | 0.375 | 0.429 | 978 (153 / 825) | 14.44% | 5 | 0 |
 | 2025 | 6565 | 3386 | 0.516 | 0.591 | 1038 (168 / 870) | 15.81% | 6 | 0 |
 
+Unmapped filers with a SIC outside Siccodes49 are mostly SIC 6189 (asset-backed securities issuers): 5,461 of 5,580 filer-years over 2019–2025 (97.87%; 97.26% to 98.62% by year). The unmapped share of filers moves from 11.92% (2019) to 15.81% (2025), so part of the change in the all-filers pooled talk share is a change in the filers' composition; the mapped-filers column leaves the unmapped filers out and isolates the trend among filers assigned to an industry.
+
 ## FF49 industries with no filer (talk undefined)
 
 - none

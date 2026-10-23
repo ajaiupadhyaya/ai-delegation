@@ -51,6 +51,10 @@ Slope on z: 0.171 pp per month per 1 SD (2.046 annualised pp per 1 SD), 95% CI [
 - Windows: Design B, 2025-04 to 2026-08 month ends; Design A, 2022-12 to 2026-08 month ends (inclusive). A_r2 is formed from r2, the earliest release with task-level collaboration. A_pooled pools r2-r6; r3-r6 were published during and after the return window, so it is labelled look-ahead.
 - Every estimate is reported with its point value, CI and nominal p. No result is counted or starred; an interval that includes zero is reported in the same way as one that does not.
 
+## Caveats
+
+- Design B and Design A_r2 exposures are numerically identical (both are formed from release r2; PAP §8.3 D19), so the B regressions are the A_r2 regressions, with the same industries and exposure values, over a 17-month sub-window (2025-04 to 2026-08) of A_r2's 45 months. They are not independent evidence.
+
 ## Exposure
 
 - Zero-assigned employment share, Design B: 12.14% (D3)
