@@ -1,0 +1,15 @@
+event,announced,day0,moved,overlaps
+ChatGPT,2022-11-30,2022-11-30,false,""
+GPT-4,2023-03-14,2023-03-14,false,""
+PaLM 2,2023-05-10,2023-05-10,false,""
+Claude 2,2023-07-11,2023-07-11,false,""
+Claude 2.1,2023-11-21,2023-11-21,false,Gemini 1.0
+Gemini 1.0,2023-12-06,2023-12-06,false,""
+Gemini 1.5,2024-02-15,2024-02-15,false,Claude 3
+Claude 3,2024-03-04,2024-03-04,false,""
+Claude 3.5,2024-06-20,2024-06-20,false,""
+OpenAI o1,2024-09-12,2024-09-12,false,""
+Gemini 2.0,2025-02-05,2025-02-05,false,Claude 3.7; GPT-4.5
+Claude 3.7,2025-02-24,2025-02-24,false,GPT-4.5
+GPT-4.5,2025-02-27,2025-02-27,false,Gemini 2.5
+Gemini 2.5,2025-03-25,2025-03-25,false,""
