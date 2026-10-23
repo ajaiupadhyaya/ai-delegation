@@ -21,6 +21,8 @@ JAN = date(2026, 1, 1)
 R10_MARKET_COMMIT = "d2da8f1"
 TASK11_RUNNERS = ("R10", "R23", "R24", "R26", "R27", "R31", "R38")
 H1_NAMES = ("human_education_years_mean", "log_wage")
+# Task 11's runners; R23's H1 runner is `run_R23_h1` since Task 12 (RUNNERS["R23"] carries it)
+T11_RUNNERS = {**rows.RUNNERS, "R23": rows.run_R23_h1}
 
 
 def _panel(nodes, release="r6", source="claude_ai"):
@@ -299,7 +301,7 @@ def test_rows_route_through_plan2(stubbed):
 
 def test_row_calls(stubbed):
     rows.run_R10()
-    rows.run_R23()
+    rows.run_R23_h1()
     rows.run_R27()
     rows.run_R31()
     est = [(n, kw) for n, kw in stubbed if n != "task_rows"]
@@ -338,7 +340,7 @@ def test_rq1_guard(stubbed, monkeypatch, row_id):
 
     monkeypatch.setattr(guards, "require_rq1_run_committed", refuse)
     with pytest.raises(guards.ProtocolError):
-        rows.RUNNERS[row_id]()
+        T11_RUNNERS[row_id]()
     assert not any(n == "task_rows" for n, _ in stubbed)
 
 
@@ -353,7 +355,7 @@ def test_rows_write_parts(stubbed, row_id):
         "R31": {"covariates"},
         "R38": {"oneway_occ"},
     }[row_id]
-    csv_path, md_path = rows.RUNNERS[row_id]()
+    csv_path, md_path = T11_RUNNERS[row_id]()
     df = pl.read_csv(csv_path)
     assert set(df["part"]) == want
     md = md_path.read_text(encoding="utf-8")
@@ -388,7 +390,7 @@ def _r23_md(stubbed_calls, monkeypatch, signs, ps):
         return _res("H1", signs=signs, ps=ps, outcome=outcome)
 
     monkeypatch.setattr(upstream, "estimate_h1", fake_h1)
-    _, md = rows.run_R23()
+    _, md = rows.run_R23_h1()
     return md.read_text(encoding="utf-8")
 
 

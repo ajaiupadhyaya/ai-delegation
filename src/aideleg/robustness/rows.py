@@ -29,6 +29,10 @@ committed market parts, which are carried verbatim and never re-run), R23 (part 
 R26, R27, R31 and R38, each through Plan 2's `build_task_rows` and `estimate_h1` /
 `estimate_h3` (via the adapter) after `guards.require_rq1_run_committed()`.
 
+H2 rows (Task 12): R22, R23 (part `h2`, beside Task 11's `h1` part, which is carried verbatim
+from the committed files and never re-estimated), R36 through Plan 2's `build_h2_panel` and
+`estimate_h2`, and R37 through Plan 4's own `rq1.within_r6`.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
@@ -1331,6 +1335,8 @@ RQ1_LABELS = {
     "p_H1": "p_H1",
     "error_cost": "error cost",
     "coe": "Consequence of Error",
+    rq1.H2_ESTIMAND: "trend β",
+    rq1.R37_ESTIMAND: "May minus April",
 }
 _R23_ALWAYS = (
     "R23 is reported beside H1 (PAP §4.1): the H1 decision uses `automation_pct` only and is "
@@ -1392,7 +1398,7 @@ def _both(row_id: str, part: str, tr: upstream.TaskRows) -> list[dict]:
 
 def _md_label(r: dict) -> dict:
     """An RQ1 record with its coefficient leading the note cell (PAP §11 C-78)."""
-    if r["applies_to"] not in ("H1", "H3"):
+    if r["applies_to"] not in ("H1", "H2", "H3"):
         return r
     name = RQ1_LABELS.get(r["estimand"], r["estimand"])
     return r | {"note": f"{name}: {r['note']}" if r["note"] else name}
@@ -1489,8 +1495,23 @@ def run_R10(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     return _write("R10", market_records + records, market_notes + notes, out)
 
 
-def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
-    """PAP §8.2 R23, H1 part: `ai_autonomy_mean` as H1's delegation measure."""
+_R23_H1_NOTE = (
+    "`ai_autonomy_mean` (D13-averaged, r6 `claude_ai`) in place of `automation_pct` as H1's "
+    "outcome (PAP §8.2 R23, spec §5.4.1); same predictors, sample rule, fixed effects and "
+    "inference. R23's H2 part is a separate Plan 4 task."
+)
+_R23_H1_UNITS = (
+    "ai_autonomy_mean scale points per unit of the regressor (per year of education, "
+    "per log point of wage)"
+)
+_R23_DISAGREE_PREFIX = "R23's education and log-wage coefficients both have the sign opposite"
+
+
+def run_R23_h1(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R23, H1 part only (Task 11): `ai_autonomy_mean` as H1's delegation measure.
+
+    Kept to reproduce the committed H1 part; `RUNNERS["R23"]` is Task 12's `run_R23`, which
+    carries these rows from `R23.csv` and adds the H2 part."""
     guards.require_rq1_run_committed()
     tr = upstream.task_rows()
     res = upstream.estimate_h1(tr, outcome="ai_autonomy_mean")
@@ -1500,9 +1521,7 @@ def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         for n, c in upstream.committed_rq1()["results"]["H1"]["coefs"].items()
     }
     notes = [
-        "`ai_autonomy_mean` (D13-averaged, r6 `claude_ai`) in place of `automation_pct` as H1's "
-        "outcome (PAP §8.2 R23, spec §5.4.1); same predictors, sample rule, fixed effects and "
-        "inference. R23's H2 part is a separate Plan 4 task.",
+        _R23_H1_NOTE,
         _R23_ALWAYS,
         r23_sign_line(res, primary),
     ]
@@ -1512,12 +1531,7 @@ def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
             f"and are significant at nominal 0.05, so {rq1.R23_DISAGREE} (PAP §4.1); the H1 "
             "decision is unchanged."
         )
-    notes.append(
-        _rq1_note(
-            "ai_autonomy_mean scale points per unit of the regressor (per year of education, "
-            "per log point of wage)"
-        )
-    )
+    notes.append(_rq1_note(_R23_H1_UNITS))
     return _write("R23", records, notes, out_dir)
 
 
@@ -1626,6 +1640,232 @@ def run_R38(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     return _write("R38", records, notes, out_dir)
 
 
+# --- Task 12: H2 rows R22, R23 (H2 part), R36, R37 -----------------------------------------
+
+R22_CONFOUNDED = "robustness; confounded with the r6 suppression-regime change"
+R23_H2_LABEL = R22_CONFOUNDED
+R37_LABEL = "robustness; descriptive"
+ALL_RELEASES = ("r2", "r3", "r4", "r5", "r6")
+R22_METRICS = (
+    "augmentation_pct",
+    "directive_pct",
+    "feedback_loop_pct",
+    "task_iteration_pct",
+    "validation_pct",
+    "learning_pct",
+)
+# (part, h2_panel keywords, estimate_h2 keywords, label), in the order of the brief's table
+R22_PARTS: tuple[tuple[str, dict, dict, str], ...] = (
+    ("all_r2_r6", {"releases": ALL_RELEASES}, {}, R22_CONFOUNDED),
+    ("all_r2_r6_r6dummy", {"releases": ALL_RELEASES}, {"r6_indicator": True}, "robustness"),
+    ("unbalanced", {"balanced": False}, {}, "robustness"),
+    *((m, {"outcome": m}, {}, "robustness") for m in R22_METRICS),
+    ("api_r3_r5", {"source": "1p_api", "releases": ("r3", "r4", "r5")}, {}, "robustness"),
+)
+R23_H2_PANEL = {"releases": ("r4", "r5", "r6"), "outcome": "ai_autonomy_mean"}
+
+_H2_NOTE_TEMPLATE = (
+    "H2 parts: Plan 2's `estimate_h2` on Plan 2's `build_h2_panel` (through the adapter), with "
+    "H2's inference (PAP §4.2, D22, §8.1): WLS of the outcome on t_r and task dummies with "
+    "fixed task weights (the task's mean `pct` over the listed releases), SEs clustered by "
+    "task, t with G_task − 1 df; `p` is the two-sided task-clustered p of the trend. The note "
+    "gives the restricted wild cluster bootstrap p (clusters = releases, Webb weights, every "
+    "one of the 6^k weight vectors enumerated; PAP D22, §11 C-15) and whether the D22 rule's "
+    "conditions would hold (both p ≤ 0.0125, compared exactly as PAP §11 C-24, and β > 0): a "
+    "mechanical statement, not a decision; the release-label randomisation p is descriptive. "
+    "The smallest attainable wild-bootstrap p is 6/6^k: {min_p}. β is the change in measured "
+    "within-task outcome per year, including any change in the classifier and platform scope "
+    "(PAP §5). Coefficients are in {units}. Each table row's note cell starts with its "
+    "estimand (PAP §11 C-78). `n` is the number of (task, release) rows; `dropped` shows "
+    "none and `n_dropped` is not reported for H2 rows, because Plan 2's H2 builder applies the "
+    "sample rule and records no drops (PAP §11 C-78)."
+)
+
+
+def _min_p_text(records: list[dict]) -> str:
+    ks = sorted({len(r["variant"].split("releases=")[1].split(";")[0].split(",")) for r in records})
+    out = []
+    for k in ks:
+        p = 6 / 6**k
+        tail = (
+            f", above {rq1.H2_ALPHA}, so the wild condition cannot hold" if p > rq1.H2_ALPHA else ""
+        )
+        out.append(f"{k} releases, 6/{6**k} = {p:.4f}{tail}")
+    return "; ".join(out)
+
+
+def _h2_note(records: list[dict], units: str = rq1.H2_UNIT) -> str:
+    return _H2_NOTE_TEMPLATE.format(min_p=_min_p_text(records), units=units)
+
+
+def _h2_variant(panel_kw: dict, est_kw: dict, res: upstream.HypothesisResult) -> str:
+    return "; ".join(
+        [
+            f"releases={','.join(res.sample['releases'])}",
+            f"source={panel_kw.get('source', 'claude_ai')}",
+            f"outcome={res.outcome}",
+            f"balanced={panel_kw.get('balanced', True)}",
+            f"time_basis={panel_kw.get('time_basis', 'midpoint')}",
+            f"r6_indicator={est_kw.get('r6_indicator', False)}",
+        ]
+    )
+
+
+def _h2_part(row_id: str, part: str, panel_kw: dict, est_kw: dict, label: str) -> list[dict]:
+    """One H2 part: `h2_panel(**panel_kw)` then `estimate_h2(df[, outcome], **est_kw)`."""
+    df = upstream.h2_panel(**panel_kw)
+    outcome = panel_kw.get("outcome")
+    res = (
+        upstream.estimate_h2(df, outcome, **est_kw)
+        if outcome
+        else upstream.estimate_h2(df, **est_kw)
+    )
+    recs = rq1.h2_records(row_id, part, res, label=label)
+    return [r | {"variant": _h2_variant(panel_kw, est_kw, res)} for r in recs]
+
+
+def run_R22(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R22 (D2 alternatives): all releases r2–r6 without and with an r6 indicator,
+    the unbalanced panel, the other definition-stable metrics, and `1p_api` over r3–r5."""
+    guards.require_rq1_run_committed()
+    records: list[dict] = []
+    for part, panel_kw, est_kw, label in R22_PARTS:
+        records += _h2_part("R22", part, panel_kw, est_kw, label)
+    notes = [
+        "D2 alternatives (PAP §5, §8.2 R22): all releases r2–r6, balanced over the five, "
+        "without an r6 indicator (part all_r2_r6, labelled confounded with the r6 "
+        "suppression-regime change, D2) and with one (all_r2_r6_r6dummy; under a linear trend "
+        "the indicator absorbs r6, D2; its coefficient is in the note); the unbalanced r2–r5 "
+        "panel (unbalanced); each other PAP §5 definition-stable metric as the outcome over the "
+        "balanced r2–r5 panel (parts named by metric); `1p_api` over r3–r5, balanced "
+        "(api_r3_r5). t_r is from the `claude_ai` window midpoints in every part (Plan 2's "
+        "`release_times`).",
+        "[default] The unbalanced panel keeps every (task, release) row with a non-null outcome "
+        "for tasks with such rows in at least two of the listed releases (Plan 2's "
+        "`build_h2_panel(balanced=False)`); there is no other unbalanced rule (PAP §11 C-56).",
+        _h2_note(records),
+    ]
+    return _write("R22", records, notes, out_dir)
+
+
+def r23_h1_carry(out_dir: Path) -> tuple[list[dict], list[str]]:
+    """Task 11's committed R23 H1 part, read back from `R23.csv` / `R23.md` (no estimation):
+    the `h1` records verbatim and Task 11's notes (`_R23_H1_NOTE`, `_R23_ALWAYS`, the sign
+    line, the disagreement sentence if printed, and the RQ1 note)."""
+    csv_path, md_path = Path(out_dir) / "R23.csv", Path(out_dir) / "R23.md"
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        rdr = csv.DictReader(f)
+        if rdr.fieldnames != report.ROBUSTNESS_COLUMNS:
+            raise ValueError(f"{csv_path}: columns differ from ROBUSTNESS_COLUMNS")
+        # an empty field of Task 11's H1 rows is a null (`unit` of p_H1, `n_dropped`); none of
+        # its string fields is an empty string, so this round-trips the committed lines
+        records = [
+            {k: None if v == "" else _csv_value(k, v) for k, v in row.items()}
+            for row in rdr
+            if row["part"] == "h1"
+        ]
+    if [r["estimand"] for r in records] != [*H1_COVARIATES, "p_H1"]:
+        raise ValueError(f"{csv_path}: Task 11's committed h1 records are missing")
+    lines = md_path.read_text(encoding="utf-8").splitlines()
+    i, j = lines.index("## Notes"), lines.index("## Results")
+    sign = _R23_SIGN_LINE.split("{")[0]
+
+    def task11(n: str) -> bool:
+        return (
+            n in (_R23_H1_NOTE, _R23_ALWAYS, _rq1_note(_R23_H1_UNITS))
+            or n.startswith(sign)
+            or n.startswith(_R23_DISAGREE_PREFIX)
+        )
+
+    notes = [ln[2:] for ln in lines[i + 1 : j] if ln.startswith("- ") and task11(ln[2:])]
+    fixed = [n for n in notes if not (n.startswith(sign) or n.startswith(_R23_DISAGREE_PREFIX))]
+    if fixed != [_R23_H1_NOTE, _R23_ALWAYS, _rq1_note(_R23_H1_UNITS)] or not any(
+        n.startswith(sign) for n in notes
+    ):
+        raise ValueError(f"{md_path}: Task 11's R23 notes not found")
+    return records, notes
+
+
+def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R23: Task 11's H1 part, carried from the committed `R23.csv` / `.md` and not
+    re-estimated, and the H2 part: `ai_autonomy_mean` over r4–r6 through Plan 2's H2."""
+    guards.require_rq1_run_committed()
+    out = OUT_DIR if out_dir is None else Path(out_dir)
+    h1_records, h1_notes = r23_h1_carry(out)
+    records = _h2_part("R23", "h2", R23_H2_PANEL, {}, R23_H2_LABEL)
+    notes = [
+        "H2 part (part h2; Plan 4 Task 12): `ai_autonomy_mean` as H2's outcome over r4–r6, the "
+        "releases over which it is definition-stable (PAP §5 D2, §8.2 R23), balanced over the "
+        "three; the series includes r6 against D2's regime caveat and has no r6 indicator, so "
+        'it is labelled "confounded with the r6 suppression-regime change", like R22\'s '
+        "all-releases series. The H1 part is Task 11's (commit 61b0625), carried verbatim and "
+        "not re-estimated.",
+        _h2_note(records, rq1.H2_AUTONOMY_UNIT),
+    ]
+    return _write("R23", h1_records + records, h1_notes + notes, out)
+
+
+def run_R36(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R36: the H2 primary with t_r from publication dates."""
+    guards.require_rq1_run_committed()
+    records = _h2_part("R36", "publication", {"time_basis": "publication"}, {}, "robustness")
+    notes = [
+        "The H2 primary (r2–r5 `claude_ai`, balanced, `automation_pct`) with t_r from the "
+        "releases' publication dates in place of the window midpoints (PAP §4.2 Time row, "
+        "§8.2 R36, P19).",
+        _h2_note(records),
+    ]
+    return _write("R36", records, notes, out_dir)
+
+
+def run_R37(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R37: within-r6 April vs May, Plan 4's own `rq1.within_r6`. Descriptive."""
+    guards.require_rq1_run_committed()
+    w = rq1.within_r6(upstream.rq1_inputs().panel)
+    rec = {
+        "row_id": "R37",
+        "part": "within_r6",
+        "variant": "release=r6; source=claude_ai; outcome=automation_pct; periods="
+        + ",".join(p.isoformat() for p in w["periods"]),
+        "applies_to": "H2",
+        "label": R37_LABEL,
+        "estimand": rq1.R37_ESTIMAND,
+        "unit": "pp of automation_pct",
+        "estimate": w["estimate"],
+        "scale": w["se"],
+        "ci_lo": w["ci_lo"],
+        "ci_hi": w["ci_hi"],
+        "stat": w["estimate"] / w["se"],
+        "p": w["p"],
+        "null": rq1.R37_NULL,
+        "crit_0025": None,
+        "crit_005": None,
+        "n": w["n_rows"],
+        "n_dropped": None,
+        "dropped": "",
+        "note": (
+            f"SE clustered by task, df {w['df']}, G_task {w['n_tasks']}; n_tasks {w['n_tasks']}"
+        ),
+    }
+    notes = [
+        "Within-r6 April vs May (PAP §4.2 'Also reported', §8.2 R37, P19), a check on "
+        "short-run seasonality and noise, by Plan 4's own `within_r6` on the study panel: r6 "
+        "`claude_ai` global task rows, April t = 0 and May t = 1, tasks with a published "
+        "`automation_pct` in both months, weight = the task's mean `pct` over the two months "
+        "(fixed across them); WLS with task fixed effects, SEs clustered by task, t with "
+        "G_task − 1 df (H2's primary call on two periods). The estimate is the weighted mean "
+        "within-task May minus April change, in pp of automation_pct. Descriptive: no wild "
+        "bootstrap and no rule check.",
+        f"{w['n_zero_weight']} tasks with `automation_pct` in both months have zero weight (r6 "
+        "task `pct` is published rounded to 0.01; cf. PAP §11 C-30 (b)) and are left out; they "
+        "would carry no weight in the fit.",
+        "`n` is the number of (task, month) rows; `dropped` shows none and `n_dropped` is not "
+        "reported, as for the H2 rows (PAP §11 C-78). The note cell starts with its estimand "
+        "(C-78).",
+    ]
+    return _write("R37", [rec], notes, out_dir)
+
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -1658,5 +1898,8 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R27", run_R27),
         ("R31", run_R31),
         ("R38", run_R38),
+        ("R22", run_R22),
+        ("R36", run_R36),
+        ("R37", run_R37),
     )
 }
