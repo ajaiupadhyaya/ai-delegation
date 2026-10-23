@@ -2216,6 +2216,12 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, and the Task 8 rows including R35 (d2da8f1) seen
 - Rule: R35 reports the interval b̂ ± t₂₁,0.975·κ·SE_Σ,2025–26 (pp): the §3.3 P14 interval form with R35's scale κ·SE_Σ in place of s and R35's t₂₁ critical, i.e. the set of null values b₀ that T_stud does not reject at level 0.05. It is presentation only: T_stud, its p-value (t₂₁), the criticals and the scale are as PAP §8.2 R35 specifies and do not change; R35.csv is unchanged. As for every Plan 4 market row, the single reported interval uses c_0.05.
 
+### C-76. Clarification: R9 label and percentile convention; Design A DSR trial counts (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 10 review (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, and the Task 10 rows R4, R8, R9, R16 (92e12c3) seen
+- Rule: Presentation only; no estimate, sample, specification or default changes, and every numeric column of R04, R08, R09 and R16 .csv stays byte-identical to commit 92e12c3. (1) The applies_to field of R9's 112 placebo records is changed from 'placebo' (a part name that fell through to the field) to 'event studies', the PAP §8.2 R9 and registry value R9's summary records already carry. (2) The 'empirical percentile' of C-60 is 100 × (number of the 56 placebo slopes ≤ the actual mean slope) / 56 at each horizon, descriptive with no p; this convention was fixed in code (0d884ed) before R9 ran and is recorded here. With these data the strict (<) and midrank conventions give the same values (h5 60.71, h20 57.14) because no placebo slope ties the actual mean; an (n+1) denominator, not used, would give 59.65 and 56.14. (3) The deflated Sharpe ratio in a Design A row is computed against the tercile variants that row runs (2 for R4 and R16, 4 for R8; the primary used 6, C-37), so those DSR values are not comparable with the primary's; the rows' notes say so.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
