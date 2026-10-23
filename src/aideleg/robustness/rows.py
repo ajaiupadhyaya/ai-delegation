@@ -18,11 +18,18 @@ New-data rows (Task 9): R6 rebuilds the exposure on the FF30 / FF48 industries a
 `ff30_vw` / `ff48_vw` files (parts `ff30`, `ff48`); R32 is strict real-time Design B (OEWS May
 2023 weights, O*NET 29.2 task statements) on `ff49_vw`. Market parts only.
 
+Design A and event rows (Task 10): R4 (`1p_api` A_pooled), R8 (calendar 2023 excluded), R9
+(placebo event dates) and R16 (r6 task-allocated basis). Design A is analysed by Plan 3's
+terciles, Fama–MacBeth and event slopes, so each Design A part runs those runners
+(`upstream.run_terciles`, `run_fm`, `run_events`) on the variant exposure, with `out_dir` under
+the untracked `WORK_DIR` and no figure directory. All are exploratory.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
 
-from collections.abc import Callable
+import calendar
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field, fields
 from datetime import date
 from pathlib import Path
@@ -31,7 +38,7 @@ import numpy as np
 import polars as pl
 
 from aideleg import confirm_h5, power
-from aideleg.robustness import market, registry, report, returns, studentised
+from aideleg.robustness import market, registry, report, returns, studentised, upstream
 from aideleg.robustness.exposure_variants import (
     ZERO_ASSIGNED_NOTE,
     ExposureSpec,
@@ -39,7 +46,7 @@ from aideleg.robustness.exposure_variants import (
     zero_assigned_share,
 )
 from aideleg.robustness.market import market_variant
-from aideleg.robustness.upstream import AEI_COLS, BENCH_COLS, rq2_correlations
+from aideleg.robustness.upstream import AEI_COLS, BENCH_COLS, Event, rq2_correlations
 
 OUT_DIR: Path = report.OUT_DIR
 RETURN_SET = "ff49_vw"
@@ -728,6 +735,530 @@ run_R19 = _market_runner("R19")
 run_R21 = _market_runner("R21")
 run_R34 = _market_runner("R34")
 
+# --- Task 10: Design A and event rows R4, R8, R9, R16 ---------------------------------------
+
+WORK_DIR: Path = upstream.WORK_DIR  # untracked: Plan 3's runner docs for the variant runs
+DESIGN_A_LABEL = "robustness; exploratory"
+DESIGN_A_PARTS = ("terciles", "fm", "events")
+PLACEBO_YEARS = (2017, 2018, 2019, 2021)  # PAP §8.2 R9: 2020 skipped
+R9_HORIZONS = (5, 20)
+R4_SPEC = ExposureSpec(design="A_pooled", source="1p_api")
+R16_SPEC = ExposureSpec(design="A_pooled", r6_basis="tasks")
+LOOK_AHEAD_A = "A_pooled"
+
+_TERC_UNITS = {
+    "alpha_CAPM": "annualised pp",
+    "alpha_FF3": "annualised pp",
+    "alpha_FF5+UMD": "annualised pp",
+    "mean": "annualised pp",
+    "sharpe": "annualised Sharpe ratio",
+    "psr": "probability",
+    "dsr": "probability",
+}
+_FM_UNITS = {
+    "z": "pp per month per 1 SD",
+    "log_size": "pp per month per unit of log size",
+    "log_beme": "pp per month per unit of log BE/ME",
+    "mom": "pp per month per unit of the 12-2 return (decimal)",
+}
+_EVENT_UNIT = "pp of CAR per 1 SD"
+_APPLIES = {"terciles": "terciles", "fm": "Fama-MacBeth", "events": "event studies"}
+
+_DESIGN_A_NOTE = (
+    "Design A parts run Plan 3's own runners on the exposure frame passed: `run_terciles` "
+    "(fixed-membership H-L terciles, cap and EW legs; C-34, C-35, C-37, C-45), `run_fm` "
+    "(Fama–MacBeth on [1, z, log size, log BE/ME, 12-2 momentum]; C-38, C-46) and `run_events` "
+    "(the 14 D19 events, CAR slopes at horizons 5 and 20, HC3 normal reference; C-33, C-44). "
+    "Records are read from the frames the runners return; their docs are written under the "
+    "untracked `data/derived/robustness/<row>/<part>` and no figure is written."
+)
+_DESIGN_A_COLUMNS = (
+    "Columns: estimate, interval and p are as Plan 3 returns them; the scale column holds the "
+    "SE (Newey-West for terciles and Fama–MacBeth, HC3 for event slopes); n is T (months) for "
+    "terciles and Fama–MacBeth and the number of industries for event slopes. Null 0, nominal "
+    "and single-test; no error control across records or rows (PAP §8.1). Sharpe, PSR and DSR "
+    "carry no p; PSR and DSR carry no interval."
+)
+_R4_BOOT = (
+    "Bootstrap draws: `run_terciles` consumes one `default_rng(SEED)` in `VARIANTS` order "
+    "(PAP §11 C-37); with only A_pooled passed its variants draw first, so the mean and Sharpe "
+    "bootstrap CIs use different draws from the primary run's A_pooled rows. A CI difference "
+    "against the primary is partly draw noise, not only the exposure change."
+)
+_R8_BOOT = (
+    "Bootstrap draws: with Design B absent and 33 months, the one `default_rng(SEED)` "
+    "(consumed in `VARIANTS` order, PAP §11 C-37) gives the A_r2 and A_pooled variants "
+    "different draws from the primary run, so their bootstrap CIs differ partly by draw noise."
+)
+
+
+def placebo_events() -> tuple[Event, ...]:
+    """PAP §8.2 R9 (C-60): each D19 event's month and day in 2017, 2018, 2019 and 2021, named
+    `"<event> placebo <year>"` (never exactly `ESZ_EVENT`, so no Eisfeldt step runs)."""
+    return tuple(
+        Event(f"{e.name} placebo {y}", date(y, e.announced.month, e.announced.day))
+        for e in upstream.EVENTS
+        for y in PLACEBO_YEARS
+    )
+
+
+def _month_ends(start: date, end: date) -> list[date]:
+    out, y, m = [], start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        out.append(date(y, m, calendar.monthrange(y, m)[1]))
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
+def months_without_2023() -> dict[str, list[date]]:
+    """PAP §8.2 R8: every month end of the Design A window whose year is not 2023."""
+    return {"A": [m for m in _month_ends(*upstream.WINDOWS["A"]) if m.year != 2023]}
+
+
+def placebo_percentile(actual: float, placebo: Sequence[float]) -> float:
+    """Empirical percentile of `actual` among `placebo`: 100 x the share of placebo values
+    <= actual."""
+    v = np.asarray(placebo, dtype=float)
+    return float(100.0 * np.mean(v <= actual))
+
+
+def _design_label(d: str | None) -> str:
+    if d is None:
+        return "none"
+    return f"{d} (look-ahead)" if d == LOOK_AHEAD_A else d
+
+
+def _a_record(
+    row_id: str,
+    part: str,
+    variant: str,
+    estimand: str,
+    unit: str,
+    r: dict,
+    *,
+    est: str,
+    scale: str | None,
+    n: int | None,
+    note: str,
+) -> dict:
+    rec = {
+        "row_id": row_id,
+        "part": part,
+        "variant": variant,
+        "applies_to": _APPLIES.get(part, part),
+        "label": DESIGN_A_LABEL,
+        "estimand": estimand,
+        "unit": unit,
+        "estimate": r[est],
+        "scale": None if scale is None else r[scale],
+        "ci_lo": r["ci_lo"],
+        "ci_hi": r["ci_hi"],
+        "stat": None,
+        "p": r["p"],
+        "null": "0",
+        "crit_0025": None,
+        "crit_005": None,
+        "n": n,
+        "n_dropped": None,
+        "dropped": None,
+        "note": note,
+    }
+    report.check_record(rec)
+    return rec
+
+
+def _tercile_records(row_id: str, df: pl.DataFrame, variant: str) -> list[dict]:
+    out = []
+    for r in df.iter_rows(named=True):
+        est = f"{r['statistic']} {r['design']} {r['weighting']}"
+        note = f"{est}; {_design_label(r['design'])}; nominal"
+        out.append(
+            _a_record(
+                row_id,
+                "terciles",
+                variant,
+                est,
+                _TERC_UNITS[r["statistic"]],
+                r,
+                est="estimate",
+                scale="se",
+                n=r["T"],
+                note=note,
+            )
+        )
+    return out
+
+
+def _fm_records(row_id: str, df: pl.DataFrame, variant: str) -> list[dict]:
+    out = []
+    for r in df.iter_rows(named=True):
+        est = f"FM {r['regressor']} {r['design']}"
+        note = (
+            f"{est}; {_design_label(r['design'])}; window {r['window']}; mean n "
+            f"{r['n_mean']:.1f}; {r['skipped']} months skipped; nominal"
+        )
+        out.append(
+            _a_record(
+                row_id,
+                "fm",
+                variant,
+                est,
+                _FM_UNITS[r["regressor"]],
+                r,
+                est="mean",
+                scale="se",
+                n=r["T"],
+                note=note,
+            )
+        )
+    return out
+
+
+def _event_estimand(r: dict) -> str:
+    est = f"CAR slope {r['event']} h{r['horizon']} {r['design'] or 'none'}"
+    if r["regressors"] != "z_delegation":
+        est += f" [{r['regressor']} in {r['regressors']}]"
+    return est
+
+
+def _event_records(row_id: str, part: str, df: pl.DataFrame, variant: str) -> list[dict]:
+    out = []
+    for r in df.iter_rows(named=True):
+        est = _event_estimand(r)
+        note = f"{est}; day 0 {r['day0']}; {_design_label(r['design'])}; nominal"
+        out.append(
+            _a_record(
+                row_id, part, variant, est, _EVENT_UNIT, r, est="b", scale="se", n=r["n"], note=note
+            )
+        )
+    return out
+
+
+def _variant_desc(expo: pl.DataFrame, months: dict | None) -> str:
+    designs = [d for d in upstream.RQ3_DESIGNS if d in set(expo["design"].to_list())]
+    ms = (
+        "full windows"
+        if not months
+        else "; ".join(f"window {k}: {len(v)} month ends" for k, v in sorted(months.items()))
+    )
+    return f"designs {', '.join(designs)}; {ms}"
+
+
+def design_a_records(
+    row_id: str,
+    expo: pl.DataFrame,
+    *,
+    months: dict | None = None,
+    parts: tuple[str, ...] = DESIGN_A_PARTS,
+) -> list[dict]:
+    """Run Plan 3's terciles, Fama–MacBeth and events on `expo` (Plan 3's exposure frame) with
+    `out_dir = WORK_DIR / row_id / part` and no figure, and map the returned rows to
+    `ROBUSTNESS_COLUMNS`. `months` goes to the terciles and Fama–MacBeth only."""
+    unknown = [p for p in parts if p not in DESIGN_A_PARTS]
+    if unknown:
+        raise ValueError(f"unknown Design A parts {unknown}")
+    variant = _variant_desc(expo, months)
+    out: list[dict] = []
+    for part in parts:
+        od = WORK_DIR / row_id / part
+        if part == "terciles":
+            df = upstream.run_terciles(od, months=months, expo=expo)
+            out += _tercile_records(row_id, df, variant)
+        elif part == "fm":
+            df = upstream.run_fm(od, months=months, expo=expo)
+            out += _fm_records(row_id, df, variant)
+        else:
+            if months is not None:
+                raise ValueError("run_events takes no months")
+            df = upstream.run_events(od, expo=expo)
+            out += _event_records(row_id, "events", df, variant)
+    return out
+
+
+def _with_note(records: list[dict], part: str, extra: str) -> list[dict]:
+    return [r | {"note": f"{r['note']}; {extra}"} if r["part"] == part else r for r in records]
+
+
+def _primary_a(*designs: str) -> pl.DataFrame:
+    """Plan 3's primary exposure frame (hash-checked `data.exposures()`), these designs only."""
+    return upstream.exposures().filter(pl.col("design").is_in(list(designs)))
+
+
+def _primary_zero_lines(designs: Sequence[str]) -> list[str]:
+    return upstream.zero_assigned_lines(list(designs), upstream.zero_assigned())
+
+
+def _index_record(row_id: str, variant: pl.DataFrame, desc: str) -> dict:
+    from scipy.stats import spearmanr
+
+    prim = _primary_a("A_pooled").select("ff49", pl.col("z_delegation").alias("z_primary"))
+    j = (
+        variant.select(pl.col("industry").alias("ff49"), "z_delegation")
+        .join(prim, on="ff49", how="inner")
+        .drop_nulls()
+    )
+    rho = float(spearmanr(j["z_delegation"].to_numpy(), j["z_primary"].to_numpy()).statistic)
+    rec = {
+        "row_id": row_id,
+        "part": "index",
+        "variant": f"{desc}; vs primary A_pooled",
+        "applies_to": "A_pooled",
+        "label": DESIGN_A_LABEL,
+        "estimand": "spearman variant A_pooled z_delegation vs primary A_pooled z_delegation",
+        "unit": report.RHO_UNIT,
+        "estimate": rho,
+        "scale": None,
+        "ci_lo": None,
+        "ci_hi": None,
+        "stat": None,
+        "p": None,
+        "null": None,
+        "crit_0025": None,
+        "crit_005": None,
+        "n": j.height,
+        "n_dropped": None,
+        "dropped": None,
+        "note": "variant vs primary A_pooled z_delegation (Spearman, FF49 industries with both "
+        "values); descriptive, no interval",
+    }
+    report.check_record(rec)
+    return rec
+
+
+def _r6_inputs():
+    """Plan 2's anatomy inputs: the study panel, O*NET index, May 2024 wages and national
+    employment, and the AEI SOC structure (as `results.rq1.report_anatomy` loads them)."""
+    from aideleg.bls.oews import load_national
+
+    inp = upstream.rq1_inputs()
+    return inp.panel, inp.index, inp.wages, load_national(2024), inp.soc_structure
+
+
+def _r6_descriptive_records(row_id: str, desc: str) -> list[dict]:
+    panel, index, wages, national, soc = _r6_inputs()
+    tab = {
+        b: upstream.by_wage_decile(
+            panel, index, wages, national, soc, release="r6", source="claude_ai", basis=b
+        )
+        for b in ("tasks", "published")
+    }
+    pub = {r["decile"]: r for r in tab["published"].iter_rows(named=True)}
+    cols = [
+        c for c in tab["tasks"].columns if c not in ("decile", "emp_share", "usage_share", "n_occ")
+    ]
+    out = []
+    for r in tab["tasks"].iter_rows(named=True):
+        d = r["decile"]
+        lab = "no wage" if d is None else str(d)
+        for c in cols:
+            pv = pub[d][c] if d in pub else None
+            rec = {
+                "row_id": row_id,
+                "part": "r6_descriptives",
+                "variant": f"{desc}; r6 claude_ai by_wage_decile basis=tasks vs published",
+                "applies_to": "r6 descriptives",
+                "label": DESIGN_A_LABEL,
+                "estimand": f"r6 wage decile {lab} {c}",
+                "unit": "percent (usage-weighted mean pattern share)",
+                "estimate": r[c],
+                "scale": None,
+                "ci_lo": None,
+                "ci_hi": None,
+                "stat": None,
+                "p": None,
+                "null": None,
+                "crit_0025": None,
+                "crit_005": None,
+                "n": r["n_occ"],
+                "n_dropped": None,
+                "dropped": None,
+                "note": f"published: {report.fmt_pp(pv)}; decile {lab} {c}; task basis "
+                f"(n = OEWS occupations in the decile); descriptive",
+            }
+            report.check_record(rec)
+            out.append(rec)
+    return out
+
+
+def _pooled_row(
+    row_id: str,
+    spec: ExposureSpec,
+    extra_notes: Sequence[str],
+    *,
+    descriptives: bool,
+    out_dir: Path | None,
+) -> tuple[Path, Path]:
+    desc = describe_spec(spec)
+    variant = variant_exposure(spec)
+    row = ExposureRow(row_id, spec, ("rq2",), DESIGN_A_LABEL, ())
+    records = _rq2_records(row, variant, desc)
+    records.append(_index_record(row_id, variant, desc))
+    recs = design_a_records(row_id, upstream.to_rq3_expo(variant, "A_pooled"))
+    records += _with_note(
+        [r | {"variant": f"{desc}; {r['variant']}"} for r in recs],
+        "terciles",
+        _R4_BOOT if row_id == "R4" else _R16_BOOT,
+    )
+    if descriptives:
+        records += _r6_descriptive_records(row_id, desc)
+    notes = [
+        f"Variant: {desc}; every other construction choice is the primary A_pooled one. "
+        "A_pooled is labelled look-ahead (PAP §8.3 D19).",
+        *extra_notes,
+        ZERO_ASSIGNED_NOTE.format(zero_assigned_share(spec)),
+        _RQ2_NOTE,
+        "Index part: the Spearman correlation of the variant A_pooled `z_delegation` with the "
+        "primary A_pooled `z_delegation` (Plan 3's `data.exposures()`), across the FF49 "
+        "industries with both values; descriptive.",
+        _DESIGN_A_NOTE,
+        _DESIGN_A_COLUMNS,
+    ]
+    return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+_R16_BOOT = (
+    "Bootstrap draws: as for R4, `run_terciles` consumes one `default_rng(SEED)` in `VARIANTS` "
+    "order (PAP §11 C-37); with only A_pooled passed its variants draw first, so the mean and "
+    "Sharpe bootstrap CIs use different draws from the primary run's A_pooled rows."
+)
+
+
+def run_R04(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R4: A_pooled from the `1p_api` source, pooled over r3–r6."""
+    return _pooled_row(
+        "R4",
+        R4_SPEC,
+        (
+            "`1p_api` in place of `claude_ai` for A_pooled, pooled over r3–r6 with equal release "
+            "weights: the API source starts at r3 (PAP §8.2 R4; §11 C-65). Design B has no API "
+            "source. For RQ1 this variant is merged into R22 and R24 (PAP §8.2 R4).",
+            _BENCH_PRIMARY,
+            _R4_BOOT,
+        ),
+        descriptives=False,
+        out_dir=out_dir,
+    )
+
+
+def run_R16(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R16: the r6 task-allocated occupation basis, for A_pooled and r6 descriptives."""
+    return _pooled_row(
+        "R16",
+        R16_SPEC,
+        (
+            'r6 occupation tables on the task-allocated basis (`basis="tasks"`) in place of '
+            "AEI's published SOC rows, in the A_pooled pool r2–r6 (PAP D9 alternative, §8.2 "
+            "R16).",
+            _BENCH_PRIMARY,
+            _R16_BOOT,
+            'r6 descriptives: Plan 2\'s `by_wage_decile` (r6, `claude_ai`) on `basis="tasks"` '
+            'beside `basis="published"` with the same inputs; one record per (decile, pattern) '
+            "cell, the estimate the task-basis value and the published value in the note.",
+        ),
+        descriptives=True,
+        out_dir=out_dir,
+    )
+
+
+def run_R08(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R8: Design A terciles and Fama–MacBeth with calendar 2023 excluded."""
+    designs = ("A_r2", "A_pooled")
+    months = months_without_2023()
+    recs = design_a_records("R8", _primary_a(*designs), months=months, parts=("terciles", "fm"))
+    recs = [r | {"variant": f"primary Design A exposures; {r['variant']}"} for r in recs]
+    records = _with_note(recs, "terciles", _R8_BOOT)
+    ms = months["A"]
+    notes = [
+        f"Calendar 2023 excluded (PAP §8.2 R8): the Design A terciles' months and the "
+        f"Fama–MacBeth monthly cross-sections use the {len(ms)} month ends of 2022-12 to "
+        f"2026-08 outside 2023 ({ms[0]:%Y-%m}, then {ms[1]:%Y-%m} to {ms[-1]:%Y-%m}); the "
+        "Newey-West SEs run on those months only. No null scale is involved.",
+        "Not applicable to Design B by design (its window starts 2025-04; PAP §8.2 R8). Event "
+        "studies are not part of R8.",
+        "Exposure: Plan 3's primary A_r2 and A_pooled `z_delegation` (A_pooled labelled "
+        "look-ahead, PAP §8.3 D19); this row rebuilds no index.",
+        *_primary_zero_lines(designs),
+        _R8_BOOT,
+        _DESIGN_A_NOTE,
+        _DESIGN_A_COLUMNS,
+    ]
+    return report.write_row("R8", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+def _r9_slopes(df: pl.DataFrame, h: int) -> pl.DataFrame:
+    return df.filter(
+        (pl.col("horizon") == h)
+        & (pl.col("design") == "A_r2")
+        & (pl.col("regressors") == "z_delegation")
+    )
+
+
+def run_R09(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R9 (C-60): placebo event dates on the primary A_r2 `z_delegation`."""
+    expo = _primary_a("A_r2")
+    events = placebo_events()
+    plc = upstream.run_events(WORK_DIR / "R9", events=events, expo=expo)
+    act = upstream.run_events(WORK_DIR / "R9_actual", expo=expo)
+    variant = "primary A_r2 z_delegation; placebo day-0 dates"
+    records: list[dict] = []
+    for h in R9_HORIZONS:
+        records += _event_records("R9", "placebo", _r9_slopes(plc, h), variant)
+    for h in R9_HORIZONS:
+        p = _r9_slopes(plc, h)["b"].to_list()
+        a = _r9_slopes(act, h)["b"].to_list()
+        if len(p) != len(events) or len(a) != len(upstream.EVENTS):
+            raise ValueError(f"R9 h{h}: {len(p)} placebo and {len(a)} actual slopes")
+        mean_a = float(np.mean(a))
+        rec = {
+            "row_id": "R9",
+            "part": "summary",
+            "variant": f"primary A_r2 z_delegation; D19 events vs {len(p)} placebo dates",
+            "applies_to": "event studies",
+            "label": DESIGN_A_LABEL,
+            "estimand": f"mean CAR slope h{h} A_r2 over the {len(a)} D19 events",
+            "unit": _EVENT_UNIT,
+            "estimate": mean_a,
+            "scale": None,
+            "ci_lo": None,
+            "ci_hi": None,
+            "stat": placebo_percentile(mean_a, p),
+            "p": None,
+            "null": None,
+            "crit_0025": None,
+            "crit_005": None,
+            "n": len(p),
+            "n_dropped": None,
+            "dropped": None,
+            "note": (
+                f"mean of the {len(a)} actual D19 slopes at h{h}; stat = its empirical "
+                f"percentile among the {len(p)} placebo slopes (100 × share of placebo slopes ≤ "
+                "the mean); n = placebo slopes; descriptive"
+            ),
+        }
+        report.check_record(rec)
+        records.append(rec)
+    notes = [
+        "[default] Placebo day-0 dates (PAP §8.2 R9; §11 C-60): each of the 14 D19 events' "
+        'month and day in 2017, 2018, 2019 and 2021 (56 dates, named "<event> placebo '
+        '<year>"); 2020 is skipped, as the PAP states. Day 0 is the next trading day when the '
+        "date is not one (Plan 3's `day_zero`).",
+        "The placebo dates are not D19 events. Plan 3's `event_study.md` for this run (in the "
+        "untracked work directory) prints the D19 rule text whatever events it is given; the "
+        "records here are read from the frame `run_events` returns, not from that doc. No "
+        "placebo is named `ChatGPT`, so no Eisfeldt et al. step runs on them.",
+        "[default] Placebo records: the CAR slope on the primary A_r2 `z_delegation` at "
+        "horizons 5 and 20, one per placebo date and horizon, as Plan 3's `run_events` returns "
+        "it (OLS with intercept, HC3, normal reference; C-44). Summary records: per horizon, "
+        "the mean A_r2 slope over the 14 actual D19 events (a second `run_events` on the same "
+        "exposure) and its empirical percentile among the 56 placebo slopes, in the stat "
+        "column; descriptive, no p (PAP §11 C-60).",
+        "Exposure: Plan 3's primary A_r2 `z_delegation`; this row rebuilds no index.",
+        *_primary_zero_lines(("A_r2",)),
+        _DESIGN_A_COLUMNS,
+    ]
+    return report.write_row("R9", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -750,5 +1281,9 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R35", run_R35),
         ("R6", run_R06),
         ("R32", run_R32),
+        ("R4", run_R04),
+        ("R8", run_R08),
+        ("R9", run_R09),
+        ("R16", run_R16),
     )
 }
