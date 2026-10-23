@@ -31,7 +31,7 @@ import statsmodels.api as sm
 
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data
-from aideleg.rq3.report import zero_assigned_bullets
+from aideleg.rq3.report import fmt_p, zero_assigned_bullets
 
 GENERATOR = "uv run python -m aideleg.rq3 events"
 HEADING = "# Event studies (exploratory, PAP §8.3 D19)"
@@ -259,7 +259,7 @@ def _design_label(d: str | None) -> str:
 def _fmt_row(r: dict) -> str:
     return (f"| {r['event']} | {r['day0']} | {r['horizon']} | {_design_label(r['design'])} | "
             f"{r['regressors']} | {r['regressor']} | {r['b']:.3f} | {r['se']:.3f} | "
-            f"[{r['ci_lo']:.3f}, {r['ci_hi']:.3f}] | {r['p']:.4f} | {r['n']} |")
+            f"[{r['ci_lo']:.3f}, {r['ci_hi']:.3f}] | {fmt_p(r['p'])} | {r['n']} |")
 
 
 _TABLE_HEAD = ["| event | day 0 | horizon k | design | regressors | regressor | b (pp per 1 SD) "
@@ -283,6 +283,10 @@ def _method_lines(n_ind: int) -> list[str]:
         "from the normal reference; nominal and single-test (PAP §11 C-33). Randomisation "
         "inference is not used: PAP §3.2 documents that it is oversized when industries with "
         "similar exposure co-move.",
+        "- Caveat: every industry's CAR for an event is measured over the same calendar days, "
+        "so the CARs are cross-sectionally correlated. That correlation also affects the HC3 "
+        "SEs, which allow for heteroskedasticity but not for it, so the nominal p-values may be "
+        "oversized (too small).",
         "- Slopes b, SEs and CIs are pp of CAR per 1 SD of exposure. Exposure is the Design A "
         "`z_delegation` (conversations matched to O*NET tasks, aggregated to FF49); it is not "
         "re-standardised after drops.",
@@ -381,7 +385,7 @@ def _esz_md(df: pl.DataFrame, day0: date, designs: Sequence[str], zero: pl.DataF
         "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
         "## Step 1: CAR on `z_aioe` alone", "",
         f"The `z_aioe` slope is {sign}: b = {alone['b']:.3f} pp per 1 SD (95% CI "
-        f"[{alone['ci_lo']:.3f}, {alone['ci_hi']:.3f}], p = {alone['p']:.4f}, n = "
+        f"[{alone['ci_lo']:.3f}, {alone['ci_hi']:.3f}], p = {fmt_p(alone['p'])}, n = "
         f"{alone['n']}).", "",
         *_TABLE_HEAD, _fmt_row(alone), "",
         "## Step 2: horse race, `z_aioe` with `z_delegation`", "",

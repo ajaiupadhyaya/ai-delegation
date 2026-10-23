@@ -7,7 +7,7 @@ diagnostics the PAP assigns to the period after the confirmatory run (§3.3, P11
 - `vector_test` scores any vector of industry alphas against the same pre-seal historical null
   as the confirmatory test (s, bbar, empirical quantile, t_21), nominal and single-test.
 - `influence` gives DFBETAS on the exposure coefficient, Cook's D and leverage per industry for
-  H5 and H5b. These are post-result secondary diagnostics; they do not change the confirmatory
+  H5 and H5b. These are post-result diagnostics; they do not change the confirmatory
   decision.
 
 AEI data are conversations matched to O*NET tasks; nothing here speaks to the labour market.
@@ -197,7 +197,7 @@ def _report(df: pl.DataFrame, b: dict[str, float], dropped: list[str],
         "",
         generated_line(GENERATOR),
         "",
-        "Post-result secondary diagnostics that PAP §3.3 (P11) assigns to the period after the "
+        "Post-result diagnostics that PAP §3.3 (P11) assigns to the period after the "
         "confirmatory run. They describe how much single industries move the committed H5 and "
         "H5b slopes; the confirmatory decision in `docs/results/confirmatory_h5.md` stands as "
         "recorded and is not reinterpreted here.",

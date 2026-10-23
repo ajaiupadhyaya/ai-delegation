@@ -95,3 +95,59 @@ def test_guard_refuses_a_later_committed_edit(repo):
     _git(repo, "commit", "-q", "-m", "edit the record")
     with pytest.raises(guard.ConfirmatoryNotRecorded, match="pinned"):
         guard.assert_confirmatory_recorded(repo)
+
+
+# --- no .git (a replication archive): the record's bytes are checked against the pinned blobs
+
+
+def _copy_real_record(dest: Path) -> None:
+    from aideleg.config import ROOT
+
+    for rel in guard.CONFIRMATORY:
+        (dest / rel).parent.mkdir(parents=True, exist_ok=True)
+        (dest / rel).write_bytes((ROOT / rel).read_bytes())
+
+
+def test_blob_sha1_equals_git_hash_object(tmp_path: Path):
+    p = tmp_path / "f.txt"
+    p.write_bytes(b"some bytes\n")
+    want = subprocess.run(["git", "hash-object", str(p)], capture_output=True, text=True,
+                          check=True).stdout.strip()
+    assert guard.blob_sha1(p.read_bytes()) == want
+
+
+def test_guard_without_git_passes_on_the_real_bytes(tmp_path: Path):
+    _copy_real_record(tmp_path)
+    assert not (tmp_path / ".git").exists()
+    guard.assert_confirmatory_recorded(tmp_path)
+
+
+def test_guard_without_git_refuses_edited_bytes(tmp_path: Path):
+    _copy_real_record(tmp_path)
+    md = tmp_path / MD
+    md.write_bytes(md.read_bytes() + b"\nedited\n")
+    with pytest.raises(guard.ConfirmatoryNotRecorded, match="pinned"):
+        guard.assert_confirmatory_recorded(tmp_path)
+
+
+def test_guard_without_git_refuses_a_missing_file(tmp_path: Path):
+    _copy_real_record(tmp_path)
+    (tmp_path / ATTEMPT).unlink()
+    with pytest.raises(guard.ConfirmatoryNotRecorded, match="not present"):
+        guard.assert_confirmatory_recorded(tmp_path)
+
+
+def test_guard_without_git_still_refuses_an_attempt_record(tmp_path: Path, monkeypatch):
+    monkeypatch.setattr(guard, "PINNED", dict(guard.PINNED))
+    _write(tmp_path, guard.RESULT_HEADING + ": attempt failed")
+    guard.PINNED.update({rel: guard.blob_sha1((tmp_path / rel).read_bytes())
+                         for rel in guard.CONFIRMATORY})
+    with pytest.raises(guard.ConfirmatoryNotRecorded, match="attempt"):
+        guard.assert_confirmatory_recorded(tmp_path)
+
+
+def test_guard_with_git_ignores_the_fallback(repo):
+    """With .git present, the real bytes untracked are still refused: git governs."""
+    _copy_real_record(repo)
+    with pytest.raises(guard.ConfirmatoryNotRecorded, match="not committed"):
+        guard.assert_confirmatory_recorded(repo)

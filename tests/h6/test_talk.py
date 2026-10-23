@@ -312,3 +312,20 @@ def test_summary_heading_and_links_without_estimates(monkeypatch, tmp_path):
     for name in ("talk_index.md", "gap.md", "gap_returns.md"):
         assert f"]({name})" in text
     assert re.search(r"\d\.\d|\d%", text.replace(talk.WORDING, "").replace("§3.1", "")) is None
+
+
+def test_composition_line_counts_asset_backed_unmapped_filers():
+    filers = pl.DataFrame(
+        {
+            "year": [2019, 2019, 2019, 2020, 2020, 2020],
+            "cik": [1, 2, 3, 1, 2, 4],
+            "sic": [6189, 3990, 7372, 6189, 6189, None],
+            "ff49": [None, None, 36, None, None, None],
+        },
+        schema={"year": pl.Int64, "cik": pl.Int64, "sic": pl.Int64, "ff49": pl.Int64},
+    )
+    pool = pl.DataFrame({"year": [2019, 2020], "unmapped_share": [2 / 3, 1.0]})
+    line = talk.composition_line(filers, pool)
+    assert "SIC 6189" in line and "3 of 4 filer-years over 2019–2020 (75.00%" in line
+    assert "50.00% to 100.00% by year" in line
+    assert "from 66.67% (2019) to 100.00% (2020)" in line

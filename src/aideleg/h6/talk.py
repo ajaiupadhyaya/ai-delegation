@@ -24,7 +24,7 @@ from aideleg.config import ROOT, SEED
 from aideleg.h6 import edgar
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data, inference
-from aideleg.rq3.report import md_table, zero_assigned_bullets
+from aideleg.rq3.report import fmt_p, md_table, zero_assigned_bullets
 from aideleg.rq3.stats import percentile_ci
 
 __all__ = [
@@ -241,8 +241,48 @@ def _f(x, fmt: str = ".3f") -> str:
     return "—" if x is None or (isinstance(x, float) and np.isnan(x)) else format(x, fmt)
 
 
+ABS_SIC = 6189  # asset-backed securities issuers: in no Siccodes49 range
+
+
+def composition_line(
+    filers: pl.DataFrame, pool: pl.DataFrame, column: str = "the mapped-filers column"
+) -> str:
+    """Who the unmapped filers with a SIC are (mostly SIC 6189, asset-backed issuers) and how
+    the unmapped share moves over the years, from `filers` and `pooled`; never typed."""
+    per_cik = filers.select("year", "cik", "sic", "ff49").unique()
+    out = per_cik.filter(pl.col("sic").is_not_null() & pl.col("ff49").is_null())
+    p = pool.sort("year")
+    y0, y1 = p["year"][0], p["year"][-1]
+    u0, u1 = 100 * p["unmapped_share"][0], 100 * p["unmapped_share"][-1]
+    trend = (
+        f"The unmapped share of filers moves from {u0:.2f}% ({y0}) to {u1:.2f}% ({y1}), so "
+        "part of the change in the all-filers pooled talk share is a change in the filers' "
+        f"composition; {column} leaves the unmapped filers out and isolates the trend among "
+        "filers assigned to an industry."
+    )
+    if out.height == 0:
+        return f"No filer has a SIC outside Siccodes49. {trend}"
+    by = (
+        out.group_by("year")
+        .agg(pl.len().alias("n"), (pl.col("sic") == ABS_SIC).sum().alias("n_abs"))
+        .with_columns((100 * pl.col("n_abs") / pl.col("n")).alias("pct"))
+    )
+    n_abs = int(by["n_abs"].sum())
+    return (
+        f"Unmapped filers with a SIC outside Siccodes49 are mostly SIC {ABS_SIC} "
+        f"(asset-backed securities issuers): {n_abs:,} of {out.height:,} filer-years over "
+        f"{y0}–{y1} ({100 * n_abs / out.height:.2f}%; {by['pct'].min():.2f}% to "
+        f"{by['pct'].max():.2f}% by year). {trend}"
+    )
+
+
 def _talk_md(
-    t: pl.DataFrame, pool: pl.DataFrame, unm: pl.DataFrame, exh: pl.DataFrame, ood: pl.DataFrame
+    t: pl.DataFrame,
+    pool: pl.DataFrame,
+    unm: pl.DataFrame,
+    exh: pl.DataFrame,
+    ood: pl.DataFrame,
+    composition: str | None = None,
 ) -> str:
     rows = (
         pool.join(unm.select("year", "n_no_sic", "n_sic_outside"), on="year", how="left")
@@ -304,6 +344,7 @@ def _talk_md(
         "",
         *pool_lines,
         "",
+        *([composition, ""] if composition else []),
         "## FF49 industries with no filer (talk undefined)",
         "",
         *null_lines,
@@ -329,6 +370,7 @@ def _gap_md(
     zero_lines: list[str],
     n_draws: int,
     counts_t: pl.DataFrame,
+    composition: str | None = None,
 ) -> str:
     ranked = (
         g.with_row_index("rank", offset=1)
@@ -360,6 +402,7 @@ def _gap_md(
         f"filer (T undefined): {', '.join(nulls_t) or 'none'}. Unmapped filers enter no "
         f"industry: {pool_t['n_unmapped']} of {pool_t['n_filers']} {T_YEAR} filers "
         f"({100 * pool_t['unmapped_share']:.2f}%).",
+        *([f"- {composition}"] if composition else []),
         "- z_usage: Design B (release r2) `z_usage`, conversations matched to O*NET tasks "
         "aggregated to FF49 (PAP §2.1), from the hash-checked `rq3.data.exposures()`; used as "
         "given, not re-standardised over the industries with T.",
@@ -406,9 +449,9 @@ def _ret_md(res: dict, zero_lines: list[str]) -> str:
         f"| q_0.975 (empirical centred quantile) | {res['q_0.975']:.3f} |",
         f"| critical, max(t_{power.T_DF}, q) | {res['crit_0.05']:.3f} |",
         f"| T, H0: b = b̄ (D21, primary null) | {res['T_bbar']:.3f} |",
-        f"| p, H0: b = b̄ (nominal) | {res['p_bbar']:.4f} |",
+        f"| p, H0: b = b̄ (nominal) | {fmt_p(res['p_bbar'])} |",
         f"| T, H0: b = 0 (secondary null) | {res['T_zero']:.3f} |",
-        f"| p, H0: b = 0 (nominal) | {res['p_zero']:.4f} |",
+        f"| p, H0: b = 0 (nominal) | {fmt_p(res['p_zero'])} |",
         f"| 95% CI for b, b ± critical × s (pp) | [{lo * pp:.3f}, {hi * pp:.3f}] |",
         f"| industries | {res['n']} |",
     ]
@@ -429,7 +472,8 @@ def _ret_md(res: dict, zero_lines: list[str]) -> str:
         "- Regression: alpha_j = a + b · gap_j + e_j, OLS, unweighted, no control (the H5 form, "
         "C-42); gap_j from `gap.md`, not re-standardised after drops.",
         "- Inference as §3.3 (`rq3.inference.vector_test`): s, b̄ and q recomputed for the gap "
-        "vector on the same pre-seal historical windows; critical = max(t_21, q); primary null "
+        f"vector on the same pre-seal historical windows; critical = max(t_{power.T_DF}, q); "
+        "primary null "
         "b = b̄ (D21), b = 0 secondary; the CI is b ± critical × s.",
         f"- Industries without a gap (no {T_YEAR} filer): {', '.join(res['no_gap']) or 'none'}. "
         f"Dropped for a missing return in the window: {', '.join(res['dropped']) or 'none'}.",
@@ -575,7 +619,8 @@ def run_talk(
         .group_by("year")
         .agg(pl.len().cast(pl.Int64).alias("n_ood"))
     )
-    talk_text = _talk_md(t, pool, edgar.unmapped_report(filers), exh, ood)
+    comp = composition_line(filers, pool)
+    talk_text = _talk_md(t, pool, edgar.unmapped_report(filers), exh, ood, comp)
     check_text(talk_text)
 
     expo_b = data.exposures().filter(pl.col("design") == "B").select("ff49_short", "z_usage")
@@ -587,7 +632,8 @@ def run_talk(
     counts_t = t.filter((pl.col("year") == T_YEAR) & pl.col("ff49").is_not_null()).select(
         "ff49_short", "n_talk", "n_filers"
     )
-    gap_text = _gap_md(g, sp, pool_t, nulls_t, zero_lines, n_draws, counts_t)
+    comp_gap = composition_line(filers, pool, "the mapped-filers column of `talk_index.md`")
+    gap_text = _gap_md(g, sp, pool_t, nulls_t, zero_lines, n_draws, counts_t, comp_gap)
     check_text(gap_text)
     res = gap_returns(g)
     ret_text = _ret_md(res, zero_lines)

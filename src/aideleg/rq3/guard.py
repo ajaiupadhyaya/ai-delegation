@@ -2,8 +2,13 @@
 
 The single confirmatory run is Task 1's; nothing else on this branch may read market data
 until its result and attempt marker are committed, and unmodified, at HEAD.
+
+Without `.git` (a replication archive, Plan 4) and only then, the check falls back to the bytes
+on disk: each file's git blob SHA-1, sha1(b"blob <len>\\0" + data), must equal its pinned blob ID.
+With `.git` present the git checks below are the only ones used.
 """
 
+import hashlib
 import subprocess
 from pathlib import Path
 
@@ -39,7 +44,41 @@ def _head_blob(repo: Path, rel: str) -> str:
     return out.stdout.strip()
 
 
+def blob_sha1(data: bytes) -> str:
+    """The git blob ID of `data` (what `git hash-object` prints), computed without git."""
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def _check_heading(repo: Path) -> None:
+    path = repo / CONFIRMATORY[0]
+    with path.open(encoding="utf-8") as fh:
+        first = fh.readline().rstrip("\r\n")
+    if first != RESULT_HEADING:
+        kind = "an attempt record" if first.startswith(RESULT_HEADING) else "not a result"
+        raise ConfirmatoryNotRecorded(
+            f"{CONFIRMATORY[0]} first line is {first!r}, which is {kind}, not the "
+            f"result heading {RESULT_HEADING!r}; a failed attempt is not a recorded result")
+
+
+def _assert_recorded_without_git(repo: Path) -> None:
+    for rel in CONFIRMATORY:
+        if not (repo / rel).is_file():
+            raise ConfirmatoryNotRecorded(
+                f"{rel} is not present in {repo} (no .git): market data are not read without "
+                "the confirmatory H5 result and its attempt marker")
+    for rel in CONFIRMATORY:
+        if blob_sha1((repo / rel).read_bytes()) != PINNED[rel]:
+            raise ConfirmatoryNotRecorded(
+                f"{rel} in {repo} (no .git) differs from the pinned confirmatory record "
+                f"({PINNED[rel]}): its bytes are not the recorded result")
+    _check_heading(repo)
+
+
 def assert_confirmatory_recorded(repo: Path = ROOT) -> None:
+    repo = Path(repo)
+    if not (repo / ".git").exists():
+        _assert_recorded_without_git(repo)
+        return
     for rel in CONFIRMATORY:
         # tracked, and present in HEAD (a staged-only file is not a record)
         if not (_git_ok(repo, "ls-files", "--error-unmatch", rel)
@@ -56,11 +95,4 @@ def assert_confirmatory_recorded(repo: Path = ROOT) -> None:
         if not _git_ok(repo, "diff", "--quiet", "HEAD", "--", rel):
             raise ConfirmatoryNotRecorded(
                 f"{rel} is modified against HEAD: the confirmatory record is committed unedited")
-    path = repo / CONFIRMATORY[0]
-    with path.open(encoding="utf-8") as fh:
-        first = fh.readline().rstrip("\r\n")
-    if first != RESULT_HEADING:
-        kind = "an attempt record" if first.startswith(RESULT_HEADING) else "not a result"
-        raise ConfirmatoryNotRecorded(
-            f"{CONFIRMATORY[0]} first line is {first!r}, which is {kind}, not the "
-            f"result heading {RESULT_HEADING!r}; a failed attempt is not a recorded result")
+    _check_heading(repo)

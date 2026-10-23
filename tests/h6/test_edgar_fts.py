@@ -269,14 +269,14 @@ def test_hits_from_saved_equals_acquired(monkeypatch, tmp_path: Path):
 
     monkeypatch.setattr(fetch, "_download", no_network)
     monkeypatch.setattr(edgar, "_get_json", no_network)
-    saved = edgar.hits_from_saved()
+    saved = edgar.hits_from_saved(["artificial intelligence"], Y0, Y1)
     order = ["phrase", "file_date", "adsh", "file_type", "cik"]
     assert saved.sort(order).equals(got.sort(order))
     assert saved.height == 9000
     assert not saved["adsh"].str.starts_with("capped").any()  # the split page 0 adds no row
     sub = edgar.hits_from_saved(["artificial intelligence"], date(2024, 7, 2), Y1)
     assert sub.height == 3000
-    assert edgar.hits_from_saved(["machine learning"]).height == 0
+    assert edgar.hits_from_saved(["machine learning"], Y0, Y1, strict=False).height == 0
 
 
 def test_hits_from_saved_names_the_missing_page(monkeypatch, tmp_path: Path):
@@ -288,7 +288,7 @@ def test_hits_from_saved_names_the_missing_page(monkeypatch, tmp_path: Path):
     del man["sec_fts/2024-01-01_2024-12-31/machine_learning/00100"]
     fetch.write_manifest(tmp_path, man)
     with pytest.raises(FileNotFoundError, match="machine_learning/00100"):
-        edgar.hits_from_saved()
+        edgar.hits_from_saved(["machine learning"], Y0, Y1)
 
 
 ERROR_BODY = {"errorType": "ConnectionError", "errorMessage": "getaddrinfo EBUSY"}
@@ -361,6 +361,64 @@ def test_hits_from_saved_skips_ranges_outside_the_window(monkeypatch, tmp_path: 
     man = fetch.load_manifest(tmp_path)
     del man["sec_fts/2023-01-01_2023-12-31/machine_learning/00100"]
     fetch.write_manifest(tmp_path, man)
-    assert edgar.hits_from_saved(start=Y0, end=Y1).height == 150
+    assert edgar.hits_from_saved(["machine learning"], start=Y0, end=Y1).height == 150
     with pytest.raises(FileNotFoundError, match="2023-01-01_2023-12-31/machine_learning/00100"):
-        edgar.hits_from_saved(start=date(2023, 6, 1), end=Y1)
+        edgar.hits_from_saved(["machine learning"], start=date(2023, 6, 1), end=Y1)
+
+
+# --- saved_ranges and the strict coverage contract (Plan 4 reads saved hits only, offline) ---
+
+
+def _save_split(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(edgar, "RAW", tmp_path)
+    monkeypatch.setattr(fetch, "_download", _saving_download(FakeFts(SPLIT)))
+    edgar.fts_hits("artificial intelligence", Y0, Y1)
+
+
+def test_saved_ranges_lists_every_saved_range(monkeypatch, tmp_path: Path):
+    _save_split(monkeypatch, tmp_path)
+    r = edgar.saved_ranges()
+    assert r.columns == ["phrase", "start", "end", "leaf", "pages"]
+    assert r.rows() == [
+        ("artificial intelligence", Y0, date(2024, 7, 1), True, 60),
+        ("artificial intelligence", Y0, Y1, False, 1),  # capped page 0: split, not a leaf
+        ("artificial intelligence", date(2024, 7, 2), Y1, True, 30),
+    ]
+
+
+def test_hits_from_saved_strict_raises_on_uncovered_dates(monkeypatch, tmp_path: Path):
+    _save_split(monkeypatch, tmp_path)
+    with pytest.raises(
+        FileNotFoundError, match=r"'artificial intelligence'.*2023-12-01\.\.2023-12-31"
+    ):
+        edgar.hits_from_saved(["artificial intelligence"], date(2023, 12, 1), Y1)
+    with pytest.raises(FileNotFoundError, match=r"'machine learning'.*2024-01-01\.\.2024-12-31"):
+        edgar.hits_from_saved(["artificial intelligence", "machine learning"], Y0, Y1)
+
+
+def test_hits_from_saved_default_window_is_every_year_and_phrase(monkeypatch, tmp_path: Path):
+    _save_split(monkeypatch, tmp_path)
+    with pytest.raises(FileNotFoundError, match="not covered"):
+        edgar.hits_from_saved()
+    assert edgar.hits_from_saved(strict=False).height == 9000
+
+
+def test_hits_from_saved_strict_passes_when_covered(monkeypatch, tmp_path: Path):
+    _save_split(monkeypatch, tmp_path)
+    got = edgar.hits_from_saved(["artificial intelligence"], date(2024, 6, 1), date(2024, 8, 1))
+    assert got.height > 0
+    assert got["file_date"].min() >= date(2024, 6, 1)
+
+
+@pytest.mark.data
+def test_hits_from_saved_strict_default_equals_the_derived_parquet(monkeypatch):
+    def no_network(*a, **k):
+        pytest.fail("network used")
+
+    monkeypatch.setattr(fetch, "_download", no_network)
+    monkeypatch.setattr(edgar, "_get_json", no_network)
+    assert edgar.hits_from_saved().equals(pl.read_parquet(edgar.FTS_HITS))
+    r = edgar.saved_ranges()
+    assert set(r["phrase"].to_list()) == set(
+        __import__("aideleg.h6.dictionary", fromlist=["fts_phrases"]).fts_phrases()
+    )

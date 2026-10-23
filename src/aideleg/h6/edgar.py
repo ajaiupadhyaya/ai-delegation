@@ -483,26 +483,116 @@ def _parse_fts_key(key: str) -> tuple[date, date, str, int]:
     return date.fromisoformat(s), date.fromisoformat(e), slug, int(off)
 
 
-def hits_from_saved(
-    phrases: Sequence[str] | None = None, start: date | None = None, end: date | None = None
-) -> pl.DataFrame:
-    """The `fts_hits` frame rebuilt offline from the saved `sec_fts/` responses of the MANIFEST
-    (leaf ranges only: an exact page 0 below the cap, with all its pages), optionally restricted
-    to `phrases` and to hits with file_date in [start, end]."""
+def _saved_pages() -> dict[tuple[date, date, str], dict[int, str]]:
+    """(start, end, slug) -> {offset: dest} of every `sec_fts/` MANIFEST record."""
     from aideleg.acquire import fetch
+
+    ranges: dict[tuple[date, date, str], dict[int, str]] = {}
+    for key, rec in fetch.load_manifest(RAW).items():
+        if key.startswith("sec_fts/"):
+            s, e, slug, off = _parse_fts_key(key)
+            ranges.setdefault((s, e, slug), {})[off] = rec.dest
+    return ranges
+
+
+def _phrase_names(phrases: Sequence[str] | None = None) -> dict[str, str]:
     from aideleg.h6.dictionary import fts_phrases
 
     names = {_slug(p): p for p in fts_phrases()}
-    if phrases is not None:
-        names.update({_slug(p): p for p in phrases})
-        wanted = {_slug(p) for p in phrases}
-    manifest = fetch.load_manifest(RAW)
-    ranges: dict[tuple[date, date, str], dict[int, str]] = {}
-    for key, rec in manifest.items():
-        if key.startswith("sec_fts/"):
-            s, e, slug, off = _parse_fts_key(key)
-            if phrases is None or slug in wanted:
-                ranges.setdefault((s, e, slug), {})[off] = rec.dest
+    names.update({_slug(p): p for p in phrases or ()})
+    return names
+
+
+def _is_leaf(pages: dict[int, str]) -> tuple[bool, dict | None]:
+    """A leaf range has an exact (uncapped) page 0 saved; also returns that page."""
+    if 0 not in pages:
+        return False, None
+    first = json.loads((Path(RAW) / pages[0]).read_text())
+    return not _capped(first), first
+
+
+def saved_ranges() -> pl.DataFrame:
+    """`phrase, start, end, leaf, pages`: one row per saved `sec_fts/` range of the MANIFEST.
+    `leaf` = page 0 is saved and exact (below the cap), so the range's hits come from its own
+    pages; a capped range was bisected and its children are the leaves. `pages` = saved pages."""
+    names = _phrase_names()
+    rows = []
+    for (s, e, slug), pages in sorted(_saved_pages().items()):
+        rows.append(
+            {
+                "phrase": names.get(slug, slug.replace("_", " ")),
+                "start": s,
+                "end": e,
+                "leaf": _is_leaf(pages)[0],
+                "pages": len(pages),
+            }
+        )
+    schema = {
+        "phrase": pl.String,
+        "start": pl.Date,
+        "end": pl.Date,
+        "leaf": pl.Boolean,
+        "pages": pl.Int64,
+    }
+    return pl.DataFrame(rows, schema=schema).sort("phrase", "start", "end")
+
+
+def _uncovered(leaves: list[tuple[date, date]], start: date, end: date) -> list[tuple[date, date]]:
+    """The sub-ranges of [start, end] that no (s, e) in `leaves` covers."""
+    gaps, cur = [], start
+    for s, e in sorted(leaves):
+        if e < cur:
+            continue
+        if s > end:
+            break
+        if s > cur:
+            gaps.append((cur, s - timedelta(days=1)))
+        cur = max(cur, e + timedelta(days=1))
+        if cur > end:
+            break
+    if cur <= end:
+        gaps.append((cur, end))
+    return gaps
+
+
+def hits_from_saved(
+    phrases: Sequence[str] | None = None,
+    start: date | None = None,
+    end: date | None = None,
+    *,
+    strict: bool = True,
+) -> pl.DataFrame:
+    """The `fts_hits` frame rebuilt offline from the saved `sec_fts/` responses of the MANIFEST
+    (leaf ranges only: an exact page 0 below the cap, with all its pages), optionally restricted
+    to `phrases` and to hits with file_date in [start, end].
+
+    `strict` (the default): the request, `phrases` (default `fts_phrases()`) x [start, end]
+    (default the first day of `YEARS[0]` to the last of `YEARS[-1]`), must be covered by saved
+    leaf ranges; otherwise FileNotFoundError names each phrase and its uncovered dates, so an
+    offline caller never reads a gap as zero hits. `strict=False` returns what is saved."""
+    from aideleg.h6.dictionary import fts_phrases
+
+    names = _phrase_names(phrases)
+    wanted = {_slug(p) for p in phrases} if phrases is not None else None
+    ranges = {k: v for k, v in _saved_pages().items() if wanted is None or k[2] in wanted}
+    if strict:
+        req = list(phrases) if phrases is not None else fts_phrases()
+        lo = start or date(YEARS[0], 1, 1)
+        hi = end or date(YEARS[-1], 12, 31)
+        leaves: dict[str, list[tuple[date, date]]] = {}
+        for (s, e, slug), pages in ranges.items():
+            if _is_leaf(pages)[0]:
+                leaves.setdefault(slug, []).append((s, e))
+        missing = []
+        for p in req:
+            gaps = _uncovered(leaves.get(_slug(p), []), lo, hi)
+            if gaps:
+                missing.append(f"{p!r}: " + ", ".join(f"{a}..{b}" for a, b in gaps))
+        if missing:
+            raise FileNotFoundError(
+                f"saved full-text-search responses do not cover {lo}..{hi}; not covered: "
+                + "; ".join(missing)
+            )
     parts = []
     for (s, e, slug), pages in sorted(ranges.items()):
         if 0 not in pages:
@@ -510,8 +600,8 @@ def hits_from_saved(
         if (start is not None and e < start) or (end is not None and s > end):
             continue  # no hit of this range can fall in [start, end]
         phrase = names.get(slug, slug.replace("_", " "))
-        first = json.loads((Path(RAW) / pages[0]).read_text())
-        if _capped(first):
+        leaf, first = _is_leaf(pages)
+        if not leaf:
             continue
         value, _ = _total(first)
         for off in range(0, value, FTS_PAGE):

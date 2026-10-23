@@ -37,7 +37,7 @@ from scipy import stats as _st
 from aideleg.config import SEED
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data, stats
-from aideleg.rq3.report import zero_assigned_bullets
+from aideleg.rq3.report import fmt_p, identical_exposure, zero_assigned_bullets
 
 GENERATOR = "uv run python -m aideleg.rq3 terciles"
 HEADING = "# Tercile portfolios (exploratory, PAP §8.3 D19; Design B rows are secondary)"
@@ -301,10 +301,10 @@ def _variant_table(st: dict) -> list[str]:
     for name in MODELS:
         a = st["alpha"][name]
         lines.append(f"| alpha {name} (annualised pp) | {a['estimate']:.3f} | {a['se']:.3f} | "
-                     f"[{a['ci'][0]:.3f}, {a['ci'][1]:.3f}] | {a['p']:.4f} | {st['T']} |")
+                     f"[{a['ci'][0]:.3f}, {a['ci'][1]:.3f}] | {fmt_p(a['p'])} | {st['T']} |")
     mn = st["mean"]
     lines.append(f"| mean H-L (annualised pp) | {mn['estimate']:.3f} | {mn['se']:.3f} | "
-                 f"[{mn['ci'][0]:.3f}, {mn['ci'][1]:.3f}] (bootstrap) | {mn['p']:.4f} | "
+                 f"[{mn['ci'][0]:.3f}, {mn['ci'][1]:.3f}] (bootstrap) | {fmt_p(mn['p'])} | "
                  f"{st['T']} |")
     s = st["sharpe"]
     lines.append(f"| Sharpe (annualised) | {s['estimate']:.3f} | - | "
@@ -316,9 +316,54 @@ def _variant_table(st: dict) -> list[str]:
     return lines
 
 
+def _caveat_lines(run: list[tuple[str, str]], st_by: dict, legs_by: dict, months_by: dict,
+                  same_b_a: bool) -> list[str]:
+    """Nesting of the variants and the small-T caveats, every number from this run."""
+    designs = list(dict.fromkeys(d for d, _ in run))
+    out = []
+    if "B" in designs and "A_r2" in designs:
+        nested = (legs_by["B"] == legs_by["A_r2"]
+                  and set(months_by["B"]) <= set(months_by["A_r2"]))
+        if same_b_a and nested:
+            out.append(
+                "- Design B and Design A_r2 exposures are numerically identical (both are formed "
+                "from release r2; PAP §8.3 D19), so the two designs have the same membership "
+                f"and the B rows are the A_r2 portfolios over a {len(months_by['B'])}-month "
+                f"sub-window ({months_by['B'][0]:%Y-%m} to {months_by['B'][-1]:%Y-%m}) of "
+                f"A_r2's {len(months_by['A_r2'])} months. They are not independent evidence.")
+        else:
+            out.append("- In this run the Design B and Design A_r2 exposures, memberships or "
+                       "windows differ, so the B rows are not a sub-window of A_r2.")
+    if len(run) >= 2:
+        close = [f"{w} {st_by[('A_r2', w)]['sr_monthly']:.4f} vs "
+                 f"{st_by[('A_pooled', w)]['sr_monthly']:.4f}"
+                 for w in ("cap", "ew") if ("A_r2", w) in st_by and ("A_pooled", w) in st_by]
+        parts = []
+        if "B" in designs and "A_r2" in designs and same_b_a:
+            parts.append("the B variants are nested in the A_r2 variants (above)")
+        if close:
+            parts.append("A_r2 and A_pooled are nearly the same portfolios (monthly SR, A_r2 vs "
+                         f"A_pooled: {'; '.join(close)})")
+        out.append(
+            f"- The DSR's N = {len(run)} counts every variant run as an independent trial, "
+            "which overstates the number of independent trials"
+            + (f": {', and '.join(parts)}." if parts else "."))
+    b_runs = [(d, w) for d, w in run if d == "B"]
+    if b_runs:
+        st = st_by[b_runs[0]]
+        k = len(MODELS["FF5+UMD"][1]) + 1
+        T = st["T"]
+        out.append(
+            f"- Design B's FF5+UMD alpha rests on T = {T} months with {k} parameters "
+            f"({T - k} residual df, NW lag {st['alpha']['FF5+UMD']['lag']}), so the spread "
+            "between its CAPM, FF3 and FF5+UMD alphas is model-fragile; and PSR(0) uses a "
+            f"normal approximation on {T} monthly returns.")
+    return out
+
+
 def _md(run: list[tuple[str, str]], st_by: dict, dsr_by: dict, legs_by: dict, nulls: dict,
-        months_by: dict, designs: list[str], zero: pl.DataFrame | None, gaps: list[str]
-        ) -> str:
+        months_by: dict, designs: list[str], zero: pl.DataFrame | None, gaps: list[str],
+        caveats: list[str] | None = None) -> str:
     lines = [HEADING, "", generated_line(GENERATOR), "",
              "Exploratory analysis (PAP §8.3, D19). Design B rows are secondary and Design A "
              "rows exploratory; A_pooled is labelled look-ahead, because r3-r6 were published "
@@ -327,6 +372,7 @@ def _md(run: list[tuple[str, str]], st_by: dict, dsr_by: dict, legs_by: dict, nu
              "recorded.", "",
              "These portfolios are measurement devices, not strategies (spec §5.4).", "",
              "## Method", "", *_method_lines(), "",
+             *(["## Caveats", "", *caveats, ""] if caveats else []),
              "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
              "## Members", "", *_member_lines(legs_by, nulls),
              "## Months", ""]
@@ -428,7 +474,8 @@ def run_terciles(out_dir: Path, months: dict[str, Sequence[date]] | None = None,
               "ci_hi": pl.Float64, "p": pl.Float64, "T": pl.Int64}
     df = pl.DataFrame(rows, schema=schema).select(COLUMNS)
     gaps = _gap_lines(ret, chars, legs_by, months_by)
-    text = _md(run, st_by, dsr_by, legs_by, nulls, months_by, designs, zero, gaps)
+    caveats = _caveat_lines(run, st_by, legs_by, months_by, identical_exposure(expo))
+    text = _md(run, st_by, dsr_by, legs_by, nulls, months_by, designs, zero, gaps, caveats)
     check_text(text)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(df, out_dir / "terciles.csv")

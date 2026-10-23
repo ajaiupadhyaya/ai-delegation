@@ -202,3 +202,46 @@ def test_zero_assigned_bullets_one_rule():
     ]
     with pytest.raises(ValueError, match="Design A_pooled"):
         report.zero_assigned_lines(["A_pooled"], zero)
+
+
+def test_summary_writes_the_record_commit_file(tmp_path):
+    out, record = _synthetic_docs(tmp_path)
+    report.write_summary(out, record=record, commit="a" * 40)
+    assert (out / report.RECORD_COMMIT_NAME).read_text(encoding="utf-8") == "a" * 40 + "\n"
+    assert report.RECORD_COMMIT_NAME not in (out / "summary.md").read_text(encoding="utf-8")
+
+
+def test_record_commit_without_git_reads_the_committed_file(tmp_path):
+    record = tmp_path / "docs/results/confirmatory_h5.md"
+    record.parent.mkdir(parents=True)
+    record.write_text(_RECORD, encoding="utf-8")
+    with pytest.raises(ValueError, match="RECORD_COMMIT"):
+        report._record_commit(record, repo=tmp_path)
+    f = tmp_path / report.RECORD_COMMIT_FILE
+    f.parent.mkdir(parents=True)
+    f.write_text("b" * 40 + "\n", encoding="utf-8")
+    assert report._record_commit(record, repo=tmp_path) == "b" * 40
+
+
+def test_record_commit_with_git_uses_git_log():
+    assert report._record_commit() == "ebe59beeb21577f8263d915688258ebdf83a6a09"
+
+
+def test_fmt_p_floors_tiny_p_values():
+    assert report.fmt_p(0.04321) == "0.0432"
+    assert report.fmt_p(0.0001) == "0.0001"
+    assert report.fmt_p(0.00004) == "< 0.0001"
+    assert report.fmt_p(0.0) == "< 0.0001"
+
+
+def test_identical_exposure():
+    expo = pl.DataFrame(
+        {
+            "design": ["B", "B", "A_r2", "A_r2", "A_pooled", "A_pooled"],
+            "ff49_short": ["x", "y", "y", "x", "x", "y"],
+            "z_delegation": [1.0, -1.0, -1.0, 1.0, 0.9, -0.9],
+        }
+    )
+    assert report.identical_exposure(expo)
+    assert not report.identical_exposure(expo, "B", "A_pooled")
+    assert not report.identical_exposure(expo.filter(pl.col("design") != "B"))

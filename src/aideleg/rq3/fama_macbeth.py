@@ -39,7 +39,7 @@ from scipy import stats as _st
 
 from aideleg.results.common import WORDING, check_text, generated_line, write_csv
 from aideleg.rq3 import data, stats
-from aideleg.rq3.report import zero_assigned_bullets
+from aideleg.rq3.report import fmt_p, identical_exposure, zero_assigned_bullets
 from aideleg.rq3.terciles import WINDOWS, window_months
 
 GENERATOR = "uv run python -m aideleg.rq3 fm"
@@ -294,13 +294,30 @@ def _table(res: dict) -> list[str]:
     for r, v in res.items():
         ann = f"{PERIODS * v['mean']:.3f}" if r == "z" else "-"
         lines.append(f"| {r} | {v['mean']:.3f} | {ann} | {v['se']:.3f} | "
-                     f"[{v['ci95'][0]:.3f}, {v['ci95'][1]:.3f}] | {v['p']:.4f} | {v['T']} | "
+                     f"[{v['ci95'][0]:.3f}, {v['ci95'][1]:.3f}] | {fmt_p(v['p'])} | {v['T']} | "
                      f"{v['n_mean']:.1f} | {v['skipped']} |")
     return lines
 
 
+def _caveat_lines(run: list[tuple[str, str]], months_by: dict, same_b_a: bool) -> list[str]:
+    designs = [d for d, _ in run]
+    if not ("B" in designs and "A_r2" in designs):
+        return []
+    mb, ma = months_by["B"], months_by["A_r2"]
+    if same_b_a and set(mb) <= set(ma):
+        return [
+            "- Design B and Design A_r2 exposures are numerically identical (both are formed "
+            "from release r2; PAP §8.3 D19), so the B regressions are the A_r2 regressions, "
+            f"with the same industries and exposure values, over a {len(mb)}-month sub-window "
+            f"({mb[0]:%Y-%m} to {mb[-1]:%Y-%m}) of A_r2's {len(ma)} months. They are not "
+            "independent evidence."]
+    return ["- In this run the Design B and Design A_r2 exposures or windows differ, so the B "
+            "regressions are not a sub-window of A_r2."]
+
+
 def _md(run: list[tuple[str, str]], res_by: dict, panels: dict, skipped_by: dict,
-        months_by: dict, zero: pl.DataFrame | None, nonpos: dict) -> str:
+        months_by: dict, zero: pl.DataFrame | None, nonpos: dict,
+        caveats: list[str] | None = None) -> str:
     designs = [d for d, _ in run]
     lines = [HEADING, "", generated_line(GENERATOR), "",
              "Exploratory analysis (PAP §8.3). Every design here is exploratory; A_pooled is "
@@ -313,8 +330,9 @@ def _md(run: list[tuple[str, str]], res_by: dict, panels: dict, skipped_by: dict
                   f"({PERIODS * ann['mean']:.3f} annualised pp per 1 SD), 95% CI "
                   f"[{ann['ci95'][0]:.3f}, {ann['ci95'][1]:.3f}] pp per month "
                   f"([{PERIODS * ann['ci95'][0]:.3f}, {PERIODS * ann['ci95'][1]:.3f}] "
-                  f"annualised), p = {ann['p']:.4f}, T = {ann['T']}, NW lag {ann['lag']}.", ""]
+                  f"annualised), p = {fmt_p(ann['p'])}, T = {ann['T']}, NW lag {ann['lag']}.", ""]
     lines += ["## Method", "", *_method_lines(), "",
+              *(["## Caveats", "", *caveats, ""] if caveats else []),
               "## Exposure", "", *zero_assigned_bullets(designs, zero), "",
               "## Months", ""]
     for d, w in run:
@@ -380,7 +398,8 @@ def run_fm(out_dir: Path, months: dict[str, Sequence[date]] | None = None,
     df = pl.DataFrame(rows, schema=schema).select(COLUMNS)
     all_months = sorted({m for ms in months_by.values() for m in ms})
     nonpos = nonpositive(data.characteristics(), data.beme(keep_nonpositive=True), all_months)
-    text = _md(run, res_by, panels, skipped_by, months_by, zero, nonpos)
+    caveats = _caveat_lines(run, months_by, identical_exposure(expo))
+    text = _md(run, res_by, panels, skipped_by, months_by, zero, nonpos, caveats)
     check_text(text)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(df, out_dir / "fama_macbeth.csv")

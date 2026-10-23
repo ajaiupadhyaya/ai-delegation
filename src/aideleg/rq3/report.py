@@ -13,6 +13,7 @@ from pathlib import Path
 
 import polars as pl
 
+from aideleg import power
 from aideleg.config import ROOT
 from aideleg.results.common import FORBIDDEN_PHRASES, WORDING, check_text, generated_line
 
@@ -20,6 +21,8 @@ __all__ = [
     "FORBIDDEN_PHRASES",
     "WORDING",
     "fixed_wording",
+    "fmt_p",
+    "identical_exposure",
     "md_table",
     "write_summary",
     "zero_assigned_bullets",
@@ -29,7 +32,11 @@ __all__ = [
 RECORD = ROOT / "docs/results/confirmatory_h5.md"
 TITLE = "RQ3: what the market evidence can and cannot yet say"
 GENERATOR = "uv run python -m aideleg.rq3 summary"
-PLAUSIBILITY_PP = 5.0  # D11: the plausibility threshold, pp of annualised alpha per 1 SD
+# D11: the plausibility threshold, pp of annualised alpha per 1 SD (frozen in `power`)
+PLAUSIBILITY_PP = power.PLAUSIBILITY_PP
+# The record's commit, written by `summary` beside summary.md; read only when there is no .git
+RECORD_COMMIT_NAME = "RECORD_COMMIT"
+RECORD_COMMIT_FILE = f"docs/results/rq3/{RECORD_COMMIT_NAME}"
 _WORDING_PREFIX = "  - Fixed wording:"
 _MDE = re.compile(r"departure from H0 of at least ([0-9.]+) pp per 1 SD")
 PASSED_EXPO_LINE = (
@@ -65,6 +72,26 @@ def zero_assigned_bullets(designs: Sequence[str], zero: pl.DataFrame | None) -> 
     return [f"- {line}" for line in zero_assigned_lines(designs, zero)]
 
 
+def fmt_p(p: float, digits: int = 4) -> str:
+    """A nominal p-value for a doc: `digits` decimals, and "< 0.0001" (for digits = 4) below
+    that floor rather than a misleading 0.0000. CSVs keep full precision."""
+    floor = 10.0**-digits
+    return f"< {floor:.{digits}f}" if p < floor else f"{p:.{digits}f}"
+
+
+def identical_exposure(
+    expo: pl.DataFrame, a: str = "B", b: str = "A_r2", col: str = "z_delegation"
+) -> bool:
+    """True when designs `a` and `b` hold the same industries with exactly equal `col`
+    (PAP §8.3 D19: A_r2 is formed from r2, as Design B is, and is numerically identical)."""
+
+    def vec(d: str) -> pl.DataFrame:
+        return expo.filter(pl.col("design") == d).select("ff49_short", col).sort("ff49_short")
+
+    va, vb = vec(a), vec(b)
+    return va.height > 0 and va.equals(vb)
+
+
 def _cell(v, floats: int) -> str:
     if v is None:
         return "—"
@@ -86,7 +113,16 @@ def fixed_wording(text: str) -> list[str]:
 
 
 def _record_commit(record: Path = RECORD, repo: Path = ROOT) -> str:
-    """The last commit that touched the confirmatory record."""
+    """The last commit that touched the confirmatory record. Without `.git` (a replication
+    archive) it is read from the committed `RECORD_COMMIT_FILE` instead."""
+    repo = Path(repo)
+    if not (repo / ".git").exists():
+        f = repo / RECORD_COMMIT_FILE
+        if not f.is_file():
+            raise ValueError(
+                f"no .git in {repo} and no {RECORD_COMMIT_FILE}: the record's commit is unknown"
+            )
+        return f.read_text(encoding="utf-8").strip()
     out = subprocess.run(
         [
             "git",
@@ -194,4 +230,5 @@ def write_summary(out_dir: Path, *, record: Path = RECORD, commit: str | None = 
     check_text(text)
     path = out_dir / "summary.md"
     path.write_text(text, encoding="utf-8")
+    (out_dir / RECORD_COMMIT_NAME).write_text(commit + "\n", encoding="utf-8")
     return path
