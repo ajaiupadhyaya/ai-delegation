@@ -66,10 +66,10 @@ Slope on z: 0.171 pp per month per 1 SD (2.046 annualised pp per 1 SD), 95% CI [
 ## Industry-months missing a value
 
 - B:
-  - Smoke: BE/ME (all months)
+  - Smoke: BE/ME <= 0 (all months)
 - A_r2:
-  - Smoke: BE/ME (all months)
+  - Smoke: BE/ME <= 0 (all months)
 - A_pooled (look-ahead):
-  - Smoke: BE/ME (all months)
+  - Smoke: BE/ME <= 0 (all months)
 
 AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market.

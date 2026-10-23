@@ -172,16 +172,10 @@ def monthly_slopes(panel: pl.DataFrame, regressors: Sequence[str] = REGRESSORS
     return pl.DataFrame(out, schema=schema), skipped
 
 
-def skipped_months(panel: pl.DataFrame, regressors: Sequence[str] = REGRESSORS) -> list[date]:
-    """Months with n <= len(regressors) + 1 complete industries."""
-    k = len(regressors)
-    return [t for t in sorted(set(panel["date"].to_list()))
-            if _complete(panel.filter(pl.col("date") == t), regressors).height <= k + 1]
-
-
 def fama_macbeth(panel: pl.DataFrame, regressors: Sequence[str] = REGRESSORS
                  ) -> dict[str, dict]:
-    """Per regressor: `mean, se, ci95, p, T, n_mean, skipped` of the monthly slopes."""
+    """Per regressor: `mean, se, ci95, p, T, n_mean, skipped` of the monthly slopes, plus
+    `skipped_months` (the skipped month ends) and the NW `lag`."""
     slopes, skipped = monthly_slopes(panel, regressors)
     T = slopes.height
     if T < 2:
@@ -196,7 +190,7 @@ def fama_macbeth(panel: pl.DataFrame, regressors: Sequence[str] = REGRESSORS
         mean, se = float(np.mean(c)), float(h["se"][0])
         out[r] = {"mean": mean, "se": se, "ci95": (mean - tc * se, mean + tc * se),
                   "p": float(h["p"][0]), "T": T, "n_mean": n_mean, "skipped": len(skipped),
-                  "lag": h["lag"]}
+                  "skipped_months": list(skipped), "lag": h["lag"]}
     return out
 
 
@@ -260,18 +254,47 @@ _REASONS = (("ret_x", "return"), ("z", "exposure"), ("log_size", "size"),
             ("log_beme", "BE/ME"), ("mom", "momentum"))
 
 
-def _drop_lines(panel: pl.DataFrame) -> list[str]:
-    """Industry-months missing a value, by industry and reason."""
+def nonpositive(chars: pl.DataFrame, be_raw: pl.DataFrame, months: Sequence[date]
+                ) -> dict[str, set[tuple[date, str]]]:
+    """(month, industry) pairs whose size or BE/ME is present but <= 0, by panel column.
+
+    `be_raw` is `data.beme(keep_nonpositive=True)`. Used only to label the drop list."""
+    size = {(r["me_date"], r["ff49_short"]): r["avg_size"]
+            for r in chars.select("me_date", "ff49_short", "avg_size").iter_rows(named=True)}
+    bm = {(r["year"], r["ff49_short"]): r["beme"] for r in be_raw.iter_rows(named=True)}
+    out: dict[str, set[tuple[date, str]]] = {"log_size": set(), "log_beme": set()}
+    names = sorted({k[1] for k in size} | {k[1] for k in bm})
+    for t in months:
+        for nm in names:
+            s = size.get((_prior_month_end(t), nm))
+            if _ok(s) and s <= 0:
+                out["log_size"].add((t, nm))
+            b = bm.get((beme_year(t), nm))
+            if _ok(b) and b <= 0:
+                out["log_beme"].add((t, nm))
+    return out
+
+
+def _months_text(ms: list[date], total: int) -> str:
+    return "all months" if len(ms) == total else ", ".join(f"{m:%Y-%m}" for m in ms)
+
+
+def _drop_lines(panel: pl.DataFrame, nonpos: dict[str, set[tuple[date, str]]]) -> list[str]:
+    """Industry-months missing a value, by industry and reason; a size or BE/ME that is present
+    but <= 0 is labelled apart from an absent one."""
     items = []
     for nm in sorted(set(panel["ff49_short"].to_list())):
         g = panel.filter(pl.col("ff49_short") == nm).sort("date")
         parts = []
         for col, why in _REASONS:
             ms = g.filter(pl.col(col).is_null() | pl.col(col).is_nan())["date"].to_list()
-            if len(ms) == g.height:
-                parts.append(f"{why} (all months)")
-            elif ms:
-                parts.append(f"{why} ({', '.join(f'{m:%Y-%m}' for m in ms)})")
+            flagged = nonpos.get(col, set())
+            le0 = [m for m in ms if (m, nm) in flagged]
+            absent = [m for m in ms if (m, nm) not in flagged]
+            if absent:
+                parts.append(f"{why} ({_months_text(absent, g.height)})")
+            if le0:
+                parts.append(f"{why} <= 0 ({_months_text(le0, g.height)})")
         if parts:
             items.append(f"{nm}: {'; '.join(parts)}")
     return [f"  - {i}" for i in items] or ["  - none"]
@@ -290,7 +313,7 @@ def _table(res: dict) -> list[str]:
 
 
 def _md(run: list[tuple[str, str]], res_by: dict, panels: dict, skipped_by: dict,
-        months_by: dict, zero: pl.DataFrame | None) -> str:
+        months_by: dict, zero: pl.DataFrame | None, nonpos: dict) -> str:
     designs = [d for d, _ in run]
     lines = [HEADING, "", generated_line(GENERATOR), "",
              "Exploratory analysis (PAP §8.3). Every design here is exploratory; A_pooled is "
@@ -315,7 +338,7 @@ def _md(run: list[tuple[str, str]], res_by: dict, panels: dict, skipped_by: dict
                      f"{', '.join(f'{m:%Y-%m}' for m in sk) or 'none'}")
     lines += ["", "## Industry-months missing a value", ""]
     for d, _ in run:
-        lines += [f"- {_label(d)}:", *_drop_lines(panels[d])]
+        lines += [f"- {_label(d)}:", *_drop_lines(panels[d], nonpos)]
     lines += ["", WORDING, ""]
     return "\n".join(lines)
 
@@ -358,7 +381,7 @@ def run_fm(out_dir: Path, months: dict[str, Sequence[date]] | None = None,
         panel = fm_panel(expo.filter(pl.col("design") == d), ms)
         res = fama_macbeth(panel)
         panels[d], res_by[d], months_by[d] = panel, res, ms
-        skipped_by[d] = skipped_months(panel)
+        skipped_by[d] = res[REGRESSORS[0]]["skipped_months"]
         for r, v in res.items():
             rows.append({"design": d, "window": w, "regressor": r, "mean": v["mean"],
                          "se": v["se"], "ci_lo": v["ci95"][0], "ci_hi": v["ci95"][1],
@@ -368,7 +391,9 @@ def run_fm(out_dir: Path, months: dict[str, Sequence[date]] | None = None,
               "mean": pl.Float64, "se": pl.Float64, "ci_lo": pl.Float64, "ci_hi": pl.Float64,
               "p": pl.Float64, "T": pl.Int64, "n_mean": pl.Float64, "skipped": pl.Int64}
     df = pl.DataFrame(rows, schema=schema).select(COLUMNS)
-    text = _md(run, res_by, panels, skipped_by, months_by, zero)
+    all_months = sorted({m for ms in months_by.values() for m in ms})
+    nonpos = nonpositive(data.characteristics(), data.beme(keep_nonpositive=True), all_months)
+    text = _md(run, res_by, panels, skipped_by, months_by, zero, nonpos)
     check_text(text)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(df, out_dir / "fama_macbeth.csv")

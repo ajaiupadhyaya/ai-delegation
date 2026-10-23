@@ -68,7 +68,13 @@ def _synth(seed: int = 3, start=date(2021, 1, 31), end=date(2026, 8, 31), names=
 def _patch(monkeypatch, ret, ff, chars, be, expo=None):
     monkeypatch.setattr(data, "monthly", lambda weighting="VW": (ret, ff))
     monkeypatch.setattr(data, "characteristics", lambda: chars)
-    monkeypatch.setattr(data, "beme", lambda: be)
+    def beme(keep_nonpositive=False):
+        if keep_nonpositive:
+            return be
+        return be.with_columns(pl.when(pl.col("beme") > 0).then(pl.col("beme")).otherwise(None)
+                               .alias("beme"))
+
+    monkeypatch.setattr(data, "beme", beme)
     if expo is None:
         monkeypatch.setattr(data, "exposures", lambda: pytest.fail("exposures() called"))
         monkeypatch.setattr(data, "zero_assigned",
@@ -84,7 +90,7 @@ def _patch(monkeypatch, ret, ff, chars, be, expo=None):
 
 
 def _mom_ret(plant: int | None) -> pl.DataFrame:
-    months = _month_ends(date(2023, 1, 31), date(2024, 1, 31))  # 13 months; t = 2024-01-31
+    months = _month_ends(date(2022, 12, 31), date(2024, 1, 31))  # 14 months; t = 2024-01-31
     r = [1.0] * len(months)
     if plant is not None:
         r[len(months) - 1 - plant] = 50.0
@@ -107,6 +113,8 @@ def test_momentum_skips_most_recent_month():
     # t - 12 is in the window, t - 13 is not
     assert _mom_at(fama_macbeth.momentum_12_2(_mom_ret(12)), t) == pytest.approx(
         1.01 ** 10 * 1.5 - 1)
+    assert _mom_at(fama_macbeth.momentum_12_2(_mom_ret(13)), t) == pytest.approx(
+        _mom_at(base, t))
 
 
 def test_momentum_null_unless_all_eleven_present():
@@ -263,7 +271,8 @@ def test_month_with_too_few_complete_industries_is_skipped_and_counted():
     res = fama_macbeth.fama_macbeth(panel)
     assert res["z"]["skipped"] == 1
     assert res["z"]["T"] == 29
-    assert fama_macbeth.skipped_months(panel) == [first]
+    assert res["z"]["skipped_months"] == [first]
+    assert res["log_size"]["skipped_months"] == [first]
     # with two regressors, n = 5 > 3 complete industries is enough
     assert fama_macbeth.fama_macbeth(panel, ("z", "log_size"))["z"]["skipped"] == 0
 
@@ -370,3 +379,21 @@ def test_main_has_fm_subcommand(monkeypatch):
     monkeypatch.setattr(fama_macbeth, "run_fm", fake)
     assert cli.main(["fm"]) == 0
     assert called["out"] == cli.OUT_DIR
+
+
+def test_drop_list_labels_nonpositive_apart_from_absent(monkeypatch, tmp_path):
+    ret, ff, chars, be = _synth()
+    be = be.with_columns(
+        pl.when(pl.col("ff49_short") == "I01").then(-0.05)
+        .when((pl.col("ff49_short") == "I02") & (pl.col("year") == 2025)).then(None)
+        .otherwise(pl.col("beme")).alias("beme"))
+    chars = chars.with_columns(
+        pl.when((pl.col("ff49_short") == "I04") & (pl.col("me_date") == date(2025, 7, 31)))
+        .then(0.0).otherwise(pl.col("avg_size")).alias("avg_size"))
+    _patch(monkeypatch, ret, ff, chars, be, expo=None)
+    fama_macbeth.run_fm(tmp_path, expo=_expo(designs=("B",)))
+    md = (tmp_path / "fama_macbeth.md").read_text(encoding="utf-8")
+    assert "  - I01: BE/ME <= 0 (all months)" in md
+    assert "  - I02: BE/ME (2025-07, 2025-08, 2025-09, 2025-10, 2025-11, 2025-12, 2026-01, " \
+        "2026-02, 2026-03, 2026-04, 2026-05, 2026-06)" in md
+    assert "  - I04: size <= 0 (2025-08)" in md

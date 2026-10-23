@@ -107,12 +107,15 @@ def characteristics() -> pl.DataFrame:
         "ff49_short", "date")
 
 
-def beme() -> pl.DataFrame:
-    """Long `year, ff49_short, beme` from "Sum of BE / Sum of ME"; values <= 0 become null."""
+def beme(keep_nonpositive: bool = False) -> pl.DataFrame:
+    """Long `year, ff49_short, beme` from "Sum of BE / Sum of ME"; values <= 0 become null
+    unless `keep_nonpositive` (used only to label why a value is unusable)."""
     guard.assert_confirmatory_recorded()
     wide = _read_french_annual(_monthly_file(), "Sum of BE / Sum of ME")
     names = [c for c in wide.columns if c != "year"]
     long = wide.unpivot(names, index="year", variable_name="ff49_short", value_name="beme")
+    if keep_nonpositive:
+        return long.sort("ff49_short", "year")
     return long.with_columns(
         pl.when(pl.col("beme") > 0).then(pl.col("beme")).otherwise(None).alias("beme")
     ).sort("ff49_short", "year")
