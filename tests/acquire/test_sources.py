@@ -20,7 +20,12 @@ REQUIRED = (
     | {f"aei_r{n}_{s}" for n in (3, 4, 5, 6) for s in ("claude_ai", "api", "docs")}
     | {f"{p}_{f}" for p in ("ff49", "ff5", "mom") for f in ("daily", "monthly")}
     | {f"census_naics{p}" for p in ("97_02", "02_07", "07_12", "12_17", "17_22")}
+    | {f"sec_formidx_{y}q{q}" for y in range(2019, 2026) for q in range(1, 5)}
+    | {"sec_submissions_bulk"}
 )
+
+# Zips read in place (members opened with zipfile), never extracted.
+READ_IN_PLACE = {"sec_submissions_bulk"}
 
 
 def test_keys_unique_and_dests_unique():
@@ -45,7 +50,8 @@ def test_by_key():
 
 
 def test_zip_flags():
-    assert all(s.unzip == s.dest.endswith(".zip") for s in sources.SOURCES)
+    assert all(s.unzip == (s.dest.endswith(".zip") and s.key not in READ_IN_PLACE)
+               for s in sources.SOURCES)
 
 
 def test_no_robot_or_task_penetration_files():
@@ -66,3 +72,16 @@ def test_new_geo_keys_registered():
         assert sources.by_key(key).unzip
     assert sources.by_key("ne_admin0_50m").dest == "geo/ne_50m_admin_0_countries.zip"
     assert sources.by_key("census_states_20m").dest == "geo/cb_2023_us_state_20m.zip"
+
+
+def test_sources_include_full_index_and_bulk():
+    for y in range(2019, 2026):
+        for q in range(1, 5):
+            s = sources.by_key(f"sec_formidx_{y}q{q}")
+            assert s.url == f"https://www.sec.gov/Archives/edgar/full-index/{y}/QTR{q}/form.idx"
+            assert s.dest == f"sec/full-index/{y}/QTR{q}/form.idx"
+            assert not s.unzip
+    bulk = sources.by_key("sec_submissions_bulk")
+    assert bulk.url == "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"
+    assert bulk.dest == "sec/submissions.zip"
+    assert not bulk.unzip

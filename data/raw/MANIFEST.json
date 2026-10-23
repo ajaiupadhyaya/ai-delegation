@@ -407,6 +407,238 @@
     "bytes": 1197935,
     "sha256": "6cb7098b09a6a03cc730b544bd7a17b1eac5d0b5beda947c4f901c42f5a713d6"
   },
+  "sec_formidx_2019q1": {
+    "key": "sec_formidx_2019q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2019/QTR1/form.idx",
+    "dest": "sec/full-index/2019/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:27Z",
+    "bytes": 46348993,
+    "sha256": "88901ad5ec510ebf9c74f58f50fc94bfe44c2ccd2bab94680864a5a1a6323ff2"
+  },
+  "sec_formidx_2019q2": {
+    "key": "sec_formidx_2019q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2019/QTR2/form.idx",
+    "dest": "sec/full-index/2019/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:28Z",
+    "bytes": 38937900,
+    "sha256": "64a108ce2f798cbf1ef23bc7a24ff15a88d4bd19b2f80acd80765f8751baf68c"
+  },
+  "sec_formidx_2019q3": {
+    "key": "sec_formidx_2019q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2019/QTR3/form.idx",
+    "dest": "sec/full-index/2019/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:29Z",
+    "bytes": 30960533,
+    "sha256": "2a2b2ac46d85e10b7f9ef04b2acb1ab3fc3eba939a625e208ea42a6dca26da8f"
+  },
+  "sec_formidx_2019q4": {
+    "key": "sec_formidx_2019q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2019/QTR4/form.idx",
+    "dest": "sec/full-index/2019/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:29Z",
+    "bytes": 32230060,
+    "sha256": "a8e6d873ff24cd31ea8036e990274e9e18d045cfbfc8c7c07d85f94a4cab9e28"
+  },
+  "sec_formidx_2020q1": {
+    "key": "sec_formidx_2020q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2020/QTR1/form.idx",
+    "dest": "sec/full-index/2020/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:30Z",
+    "bytes": 50685481,
+    "sha256": "593cbf371d422fe526408a74142f00e1e13f22efe63e4b71b48011e077f9af2a"
+  },
+  "sec_formidx_2020q2": {
+    "key": "sec_formidx_2020q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2020/QTR2/form.idx",
+    "dest": "sec/full-index/2020/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:31Z",
+    "bytes": 41419860,
+    "sha256": "038d6eb07e7fca5b37b8d8f3e0f899f16e1e3cc3a3a38c22a5ffb0ed4fdbec50"
+  },
+  "sec_formidx_2020q3": {
+    "key": "sec_formidx_2020q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2020/QTR3/form.idx",
+    "dest": "sec/full-index/2020/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:32Z",
+    "bytes": 34590653,
+    "sha256": "d378841b0abbe2d2161d8c9bbd3cb2b99bb4d386eee13118c17f21bae57bbc5f"
+  },
+  "sec_formidx_2020q4": {
+    "key": "sec_formidx_2020q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2020/QTR4/form.idx",
+    "dest": "sec/full-index/2020/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:33Z",
+    "bytes": 36414292,
+    "sha256": "84aa7452907f241582e01db0d589314af070f434ee0e1884a2e3f14960a56142"
+  },
+  "sec_formidx_2021q1": {
+    "key": "sec_formidx_2021q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/form.idx",
+    "dest": "sec/full-index/2021/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:34Z",
+    "bytes": 56365441,
+    "sha256": "78b6719feb4d8da28f7c2f1ca2a40de5f31d6c71339215d90e1b666ca23938d0"
+  },
+  "sec_formidx_2021q2": {
+    "key": "sec_formidx_2021q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2021/QTR2/form.idx",
+    "dest": "sec/full-index/2021/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:36Z",
+    "bytes": 46825572,
+    "sha256": "9bddf421721ec657e66ebbce9e460a62e31bfe2a609f1411a602dd0a3b892d4f"
+  },
+  "sec_formidx_2021q3": {
+    "key": "sec_formidx_2021q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2021/QTR3/form.idx",
+    "dest": "sec/full-index/2021/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:37Z",
+    "bytes": 39349433,
+    "sha256": "8c8ef9f8be2acdc39b73b5ffeb262c27ffc804a56de3caefdbf43282560ce3d6"
+  },
+  "sec_formidx_2021q4": {
+    "key": "sec_formidx_2021q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2021/QTR4/form.idx",
+    "dest": "sec/full-index/2021/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:38Z",
+    "bytes": 40299160,
+    "sha256": "025be2086f7e01181f1b6560d3731e65268eca1a7e4e8511a2ef2eae2d436d67"
+  },
+  "sec_formidx_2022q1": {
+    "key": "sec_formidx_2022q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2022/QTR1/form.idx",
+    "dest": "sec/full-index/2022/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:39Z",
+    "bytes": 55621633,
+    "sha256": "3fa246248e37398a3690a83b0730690a9a332db515b734480326a1bc8b5d98ee"
+  },
+  "sec_formidx_2022q2": {
+    "key": "sec_formidx_2022q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2022/QTR2/form.idx",
+    "dest": "sec/full-index/2022/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:39Z",
+    "bytes": 45498636,
+    "sha256": "6b72ce7a562225bc06c255b9a99ff3035017e291080ac521ea75ae0fd4c7fee0"
+  },
+  "sec_formidx_2022q3": {
+    "key": "sec_formidx_2022q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2022/QTR3/form.idx",
+    "dest": "sec/full-index/2022/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:40Z",
+    "bytes": 37094765,
+    "sha256": "bce3e54373776e8038aa0007a37cc1680e12c98ca405d8318a2ae12d194ef7a9"
+  },
+  "sec_formidx_2022q4": {
+    "key": "sec_formidx_2022q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2022/QTR4/form.idx",
+    "dest": "sec/full-index/2022/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:41Z",
+    "bytes": 35987632,
+    "sha256": "e4fa292fcd6e15eb9d0f4552613ebc189ea3b166a8a3b5b550641785f69ec1c2"
+  },
+  "sec_formidx_2023q1": {
+    "key": "sec_formidx_2023q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2023/QTR1/form.idx",
+    "dest": "sec/full-index/2023/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:43Z",
+    "bytes": 54362089,
+    "sha256": "0f11bf75dd8c43d66a9bb9dd7498fab0cd18316d468f6a941418358efc84d895"
+  },
+  "sec_formidx_2023q2": {
+    "key": "sec_formidx_2023q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2023/QTR2/form.idx",
+    "dest": "sec/full-index/2023/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:44Z",
+    "bytes": 48017880,
+    "sha256": "de6bea77f33fd87c9489ae0cf5936d902159797aeaf733d851eea006737894c1"
+  },
+  "sec_formidx_2023q3": {
+    "key": "sec_formidx_2023q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2023/QTR3/form.idx",
+    "dest": "sec/full-index/2023/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:45Z",
+    "bytes": 39411989,
+    "sha256": "58e7d1100b2f7f6ba4733d0e82b42f0fa9589c651b5c30682c037895ccc448c7"
+  },
+  "sec_formidx_2023q4": {
+    "key": "sec_formidx_2023q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2023/QTR4/form.idx",
+    "dest": "sec/full-index/2023/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:46Z",
+    "bytes": 39211372,
+    "sha256": "a6fde5999151322606a428cc2dd5b40a7abe5d263d5ddef4b7e108cbb7b73cf0"
+  },
+  "sec_formidx_2024q1": {
+    "key": "sec_formidx_2024q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2024/QTR1/form.idx",
+    "dest": "sec/full-index/2024/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:47Z",
+    "bytes": 57770533,
+    "sha256": "5f91755d27d18df08a2f8497c7b092174285e30b24ea8297b0ec5e17daa0a553"
+  },
+  "sec_formidx_2024q2": {
+    "key": "sec_formidx_2024q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2024/QTR2/form.idx",
+    "dest": "sec/full-index/2024/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:48Z",
+    "bytes": 49302228,
+    "sha256": "a213f3926c23261d493f88956d23ea20ebf98ac9751a78452b01bc12aeba07f8"
+  },
+  "sec_formidx_2024q3": {
+    "key": "sec_formidx_2024q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2024/QTR3/form.idx",
+    "dest": "sec/full-index/2024/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:49Z",
+    "bytes": 42269441,
+    "sha256": "2c6e48b5c6a26450366436a2677589dd62bc59a5608c3c8e1ca071c51953fc56"
+  },
+  "sec_formidx_2024q4": {
+    "key": "sec_formidx_2024q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2024/QTR4/form.idx",
+    "dest": "sec/full-index/2024/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:50Z",
+    "bytes": 44336440,
+    "sha256": "a94001eef171b013dc7971dd59e51763fa8555a870ea81b66f1fca087ec205f0"
+  },
+  "sec_formidx_2025q1": {
+    "key": "sec_formidx_2025q1",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.idx",
+    "dest": "sec/full-index/2025/QTR1/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:52Z",
+    "bytes": 53059957,
+    "sha256": "becca6a54875c22d1621310c6b3ad69f9927f0b0b882ab1e1c24cb860a992d89"
+  },
+  "sec_formidx_2025q2": {
+    "key": "sec_formidx_2025q2",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2025/QTR2/form.idx",
+    "dest": "sec/full-index/2025/QTR2/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:53Z",
+    "bytes": 51759696,
+    "sha256": "78a2722d7d483bfe45496179a84c37bf46bcf27ba2183a463adf05f92844cf92"
+  },
+  "sec_formidx_2025q3": {
+    "key": "sec_formidx_2025q3",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2025/QTR3/form.idx",
+    "dest": "sec/full-index/2025/QTR3/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:54Z",
+    "bytes": 44912705,
+    "sha256": "924d6992695d0337af57d79cbb64b7957520f8c1e24f59de9523d02f62ab6faf"
+  },
+  "sec_formidx_2025q4": {
+    "key": "sec_formidx_2025q4",
+    "url": "https://www.sec.gov/Archives/edgar/full-index/2025/QTR4/form.idx",
+    "dest": "sec/full-index/2025/QTR4/form.idx",
+    "retrieved_utc": "2026-10-23T01:14:54Z",
+    "bytes": 43155988,
+    "sha256": "8555ad43d2a491e1280060c7fa7954eae0b18db5ce414684674e69cd77265ddb"
+  },
+  "sec_submissions_bulk": {
+    "key": "sec_submissions_bulk",
+    "url": "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip",
+    "dest": "sec/submissions.zip",
+    "retrieved_utc": "2026-10-23T01:19:58Z",
+    "bytes": 1570500398,
+    "sha256": "b6534bf3efaca6ea2a0a9509deb9eb4c612cb9aa12d4913fdb641a526cc4b033"
+  },
   "sec_tickers": {
     "key": "sec_tickers",
     "url": "https://www.sec.gov/files/company_tickers_exchange.json",

@@ -1504,6 +1504,180 @@ primary result (§0.5).
 - URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip
 - Retrieved (UTC): 2026-10-22T21:55:15Z; bytes: 13065; SHA-256: `593f4fbef03181bc0b22ff6292f217689dd1fb79355049ca905d95b262040a66`
 
+### A-4. Addition: `sec_formidx_2019q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2019/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:27Z; bytes: 46348993; SHA-256: `88901ad5ec510ebf9c74f58f50fc94bfe44c2ccd2bab94680864a5a1a6323ff2`
+
+### A-5. Addition: `sec_formidx_2019q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2019/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:28Z; bytes: 38937900; SHA-256: `64a108ce2f798cbf1ef23bc7a24ff15a88d4bd19b2f80acd80765f8751baf68c`
+
+### A-6. Addition: `sec_formidx_2019q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2019/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:29Z; bytes: 30960533; SHA-256: `2a2b2ac46d85e10b7f9ef04b2acb1ab3fc3eba939a625e208ea42a6dca26da8f`
+
+### A-7. Addition: `sec_formidx_2019q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2019/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:29Z; bytes: 32230060; SHA-256: `a8e6d873ff24cd31ea8036e990274e9e18d045cfbfc8c7c07d85f94a4cab9e28`
+
+### A-8. Addition: `sec_formidx_2020q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2020/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:30Z; bytes: 50685481; SHA-256: `593cbf371d422fe526408a74142f00e1e13f22efe63e4b71b48011e077f9af2a`
+
+### A-9. Addition: `sec_formidx_2020q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2020/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:31Z; bytes: 41419860; SHA-256: `038d6eb07e7fca5b37b8d8f3e0f899f16e1e3cc3a3a38c22a5ffb0ed4fdbec50`
+
+### A-10. Addition: `sec_formidx_2020q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2020/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:32Z; bytes: 34590653; SHA-256: `d378841b0abbe2d2161d8c9bbd3cb2b99bb4d386eee13118c17f21bae57bbc5f`
+
+### A-11. Addition: `sec_formidx_2020q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2020/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:33Z; bytes: 36414292; SHA-256: `84aa7452907f241582e01db0d589314af070f434ee0e1884a2e3f14960a56142`
+
+### A-12. Addition: `sec_formidx_2021q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:34Z; bytes: 56365441; SHA-256: `78b6719feb4d8da28f7c2f1ca2a40de5f31d6c71339215d90e1b666ca23938d0`
+
+### A-13. Addition: `sec_formidx_2021q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2021/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:36Z; bytes: 46825572; SHA-256: `9bddf421721ec657e66ebbce9e460a62e31bfe2a609f1411a602dd0a3b892d4f`
+
+### A-14. Addition: `sec_formidx_2021q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2021/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:37Z; bytes: 39349433; SHA-256: `8c8ef9f8be2acdc39b73b5ffeb262c27ffc804a56de3caefdbf43282560ce3d6`
+
+### A-15. Addition: `sec_formidx_2021q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2021/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:38Z; bytes: 40299160; SHA-256: `025be2086f7e01181f1b6560d3731e65268eca1a7e4e8511a2ef2eae2d436d67`
+
+### A-16. Addition: `sec_formidx_2022q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2022/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:39Z; bytes: 55621633; SHA-256: `3fa246248e37398a3690a83b0730690a9a332db515b734480326a1bc8b5d98ee`
+
+### A-17. Addition: `sec_formidx_2022q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2022/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:39Z; bytes: 45498636; SHA-256: `6b72ce7a562225bc06c255b9a99ff3035017e291080ac521ea75ae0fd4c7fee0`
+
+### A-18. Addition: `sec_formidx_2022q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2022/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:40Z; bytes: 37094765; SHA-256: `bce3e54373776e8038aa0007a37cc1680e12c98ca405d8318a2ae12d194ef7a9`
+
+### A-19. Addition: `sec_formidx_2022q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2022/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:41Z; bytes: 35987632; SHA-256: `e4fa292fcd6e15eb9d0f4552613ebc189ea3b166a8a3b5b550641785f69ec1c2`
+
+### A-20. Addition: `sec_formidx_2023q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2023/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:43Z; bytes: 54362089; SHA-256: `0f11bf75dd8c43d66a9bb9dd7498fab0cd18316d468f6a941418358efc84d895`
+
+### A-21. Addition: `sec_formidx_2023q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2023/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:44Z; bytes: 48017880; SHA-256: `de6bea77f33fd87c9489ae0cf5936d902159797aeaf733d851eea006737894c1`
+
+### A-22. Addition: `sec_formidx_2023q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2023/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:45Z; bytes: 39411989; SHA-256: `58e7d1100b2f7f6ba4733d0e82b42f0fa9589c651b5c30682c037895ccc448c7`
+
+### A-23. Addition: `sec_formidx_2023q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2023/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:46Z; bytes: 39211372; SHA-256: `a6fde5999151322606a428cc2dd5b40a7abe5d263d5ddef4b7e108cbb7b73cf0`
+
+### A-24. Addition: `sec_formidx_2024q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2024/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:47Z; bytes: 57770533; SHA-256: `5f91755d27d18df08a2f8497c7b092174285e30b24ea8297b0ec5e17daa0a553`
+
+### A-25. Addition: `sec_formidx_2024q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2024/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:48Z; bytes: 49302228; SHA-256: `a213f3926c23261d493f88956d23ea20ebf98ac9751a78452b01bc12aeba07f8`
+
+### A-26. Addition: `sec_formidx_2024q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2024/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:49Z; bytes: 42269441; SHA-256: `2c6e48b5c6a26450366436a2677589dd62bc59a5608c3c8e1ca071c51953fc56`
+
+### A-27. Addition: `sec_formidx_2024q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2024/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:50Z; bytes: 44336440; SHA-256: `a94001eef171b013dc7971dd59e51763fa8555a870ea81b66f1fca087ec205f0`
+
+### A-28. Addition: `sec_formidx_2025q1` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:52Z; bytes: 53059957; SHA-256: `becca6a54875c22d1621310c6b3ad69f9927f0b0b882ab1e1c24cb860a992d89`
+
+### A-29. Addition: `sec_formidx_2025q2` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2025/QTR2/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:53Z; bytes: 51759696; SHA-256: `78a2722d7d483bfe45496179a84c37bf46bcf27ba2183a463adf05f92844cf92`
+
+### A-30. Addition: `sec_formidx_2025q3` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2025/QTR3/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:54Z; bytes: 44912705; SHA-256: `924d6992695d0337af57d79cbb64b7957520f8c1e24f59de9523d02f62ab6faf`
+
+### A-31. Addition: `sec_formidx_2025q4` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/full-index/2025/QTR4/form.idx
+- Retrieved (UTC): 2026-10-23T01:14:54Z; bytes: 43155988; SHA-256: `8555ad43d2a491e1280060c7fa7954eae0b18db5ce414684674e69cd77265ddb`
+
+### A-32. Addition: `sec_submissions_bulk` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 denominator and SIC (D18), Plan 3 Task 10
+- URL: https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip
+- Retrieved (UTC): 2026-10-23T01:19:58Z; bytes: 1570500398; SHA-256: `b6534bf3efaca6ea2a0a9509deb9eb4c612cb9aa12d4913fdb641a526cc4b033`
+
 ### Clarifications (pre-result)
 
 ### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)
@@ -1795,5 +1969,11 @@ primary result (§0.5).
 - Fixed by: Plan 3 Task 9 review fix, before any H6 output was produced
 - Results seen: RQ1 and H5 confirmatory results seen; event-study, tercile and Fama–MacBeth results seen; H6 not yet run
 - Rule: Defaults for the D12 matching rules where the PAP is silent, fixed in code before any H6 output was produced: (a) the contents of ix:header, script and style elements are dropped; (b) every other tag is replaced by a space; (c) the acronym gate is a raw, case-insensitive occurrence of a GATE term (with the space/hyphen rule, and plural rule for plural terms), independent of the terms argument and of overlap resolution, so 'generative artificial intelligence' alone gates; (d) primary terms and acronyms are resolved jointly, longest span then leftmost, non-overlapping; (e) a space in a term matches any run of whitespace and hyphens, including U+2010 and U+2011, and soft hyphens (U+00AD) and zero-width spaces (U+200B) are deleted in cleaning; (f) acronym boundaries are Unicode letters and digits (an underscore is not a boundary character); (g) n_words is the number of non-whitespace tokens (\S+) after cleaning. Plain-text documents go through clean_text with html=False (note for Task 13).
+
+### C-49. Clarification: H6 denominator defaults: forms, year, co-registrants, SIC member, unmapped, index layout (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 10, before any H6 output was produced (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results seen; event-study, tercile and Fama–MacBeth results seen; H6 not yet run
+- Rule: Defaults Task 10 fixed for the H6 denominator where PAP §6 D18 and C-40 are silent, fixed in code before any H6 output was produced: (1) a filing counts if its full-index Form Type equals 10-K, 10-K405 or 10-KT exactly (10-K/A, 10-K405/A, 10-KT/A and NT 10-K are excluded); (2) year = the calendar year of the full index's Date Filed, as D18 says (filed in calendar years 2019-2025), and all of 2025 is used (the 2025-03-27 cut is R29 only); (3) a filing that form.idx lists under several CIKs (co-registrants) counts for each listed CIK, and a CIK with several such filings in a year counts once in that year (D18: distinct CIKs); every filing is kept in filers.parquet; (4) SIC = int of the sic field of member CIK{cik:010d}.json of the bulk submissions.zip (C-40: the current SIC, applied to every year); the -submissions-NNN.json members are not read; a CIK with no member, or whose sic is absent or empty, has no SIC; (5) no SIC, or a SIC in no Siccodes49 range, leaves ff49 null: such CIKs are counted under ff49 = null in the denominator and reported per year (no SIC vs SIC outside every range), never assigned to an industry; (6) form.idx rows are read at their measured column offsets 0/17/79/91/103, which differ from the header labels' offsets 0/12/74/86/98, and the parser refuses a header or row off that layout (all 28 quarters 2019-2025 parse).
 
 ### Deviations after the freeze

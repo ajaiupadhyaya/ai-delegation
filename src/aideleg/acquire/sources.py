@@ -20,6 +20,7 @@ FF = "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp"
 BLS = "https://www.bls.gov/oes/special-requests"
 CENSUS = "https://www.census.gov/naics/concordances"
 ONET = "https://www.onetcenter.org"
+SEC_ARCHIVES = "https://www.sec.gov/Archives/edgar"
 
 
 def _aei(key: str, release: str, path: str, tree: str) -> Source:
@@ -127,6 +128,17 @@ SOURCES: list[Source] = [
     # SEC
     Source("sec_tickers", "https://www.sec.gov/files/company_tickers_exchange.json",
            "sec/company_tickers_exchange.json"),
+    # SEC EDGAR full index, one form.idx per quarter: the H6 denominator (PAP §6, D18; §9.4)
+    *[
+        Source(f"sec_formidx_{y}q{q}", f"{SEC_ARCHIVES}/full-index/{y}/QTR{q}/form.idx",
+               f"sec/full-index/{y}/QTR{q}/form.idx")
+        for y in range(2019, 2026)
+        for q in range(1, 5)
+    ],
+    # The bulk form of the submissions API (the SIC of every CIK, C-40). Several GB; its
+    # members are read in place with zipfile and never extracted, hence unzip=False.
+    Source("sec_submissions_bulk", f"{SEC_ARCHIVES}/daily-index/bulkdata/submissions.zip",
+           "sec/submissions.zip"),
 ]
 
 _BY_KEY = {s.key: s for s in SOURCES}

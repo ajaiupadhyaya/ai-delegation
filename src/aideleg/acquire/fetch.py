@@ -109,6 +109,9 @@ def _download(src: Source, part: Path) -> None:
     raise FetchError(f"{src.url}: gave up after {ATTEMPTS} attempts ({last})")
 
 
+download = _download  # public: callers that stream to a path of their own (H6 sets)
+
+
 def fetch(src: Source, raw_dir: Path = RAW, force: bool = False) -> FetchRecord:
     raw_dir = Path(raw_dir)
     target = raw_dir / src.dest
