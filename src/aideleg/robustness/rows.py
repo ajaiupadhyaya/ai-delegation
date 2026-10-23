@@ -533,9 +533,10 @@ _R35_NOTES = (
     "[(X_w′X_w)⁻¹]₁₁ is the intercept element of the common factor design, ω the OLS weight "
     "vector with b = ω′α ([1, z] for H5, [1, z, z_aioe] for H5b), SE_Σ,w = 252·√(c_w·ω′Σ_wω), "
     "and κ = sd_w(b_w)/median_w(SE_Σ,w), the same sd as s.",
-    "In the confirmatory window SE_Σ is computed the same way; stat = T_stud = (b̂ − b₀)/(κ·SE_Σ) "
-    "with b₀ = b̄ (D21), p from t₂₁, and the t₂₁ criticals of §3.3. The scale column is κ·SE_Σ "
-    "in pp and the interval is b̂ ± t₂₁,0.975·κ·SE_Σ (the §3.3 interval form with this scale).",
+    "[default] In the confirmatory window SE_Σ is computed the same way; stat = T_stud = "
+    "(b̂ − b₀)/(κ·SE_Σ) with b₀ = b̄ (D21), p from t₂₁, and the t₂₁ criticals of §3.3. The "
+    "scale column is κ·SE_Σ in pp and the interval is b̂ ± t₂₁,0.975·κ·SE_Σ, the §3.3 interval "
+    "form with this scale, a presentation-only reading (PAP §11 C-75).",
     _MARKET_ROW_NOTE,
 )
 
@@ -576,7 +577,8 @@ def _r35_records(frame: pl.DataFrame) -> list[dict]:
             "row_id": "R35",
             "part": part,
             "variant": (
-                f"returns={rs}; z=z_delegation; control={control}; statistic=T_stud; criticals=t21"
+                f"returns={rs}; z=z_delegation; control={control}; scale=kappa*SE_Sigma; "
+                f"first={power.FIRST_START}; drop=none; statistic=T_stud; criticals=t21"
             ),
             "applies_to": hyp,
             "label": "robustness",

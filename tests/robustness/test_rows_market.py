@@ -228,3 +228,16 @@ def test_r34_scales_match_power():
     assert (round(h5_69.s * 100, 2), round(h5_63.s * 100, 2)) == (2.51, 2.72)
     assert (round(h5b_69.s * 100, 2), round(h5b_63.s * 100, 2)) == (3.00, 3.53)
     assert (h5_69.n_windows, h5_63.n_windows) == (624, 696)
+
+
+@pytest.mark.data
+def test_kappa_sd_equals_frozen_s():
+    names = [n for n in returns.load_return_set("ff49_vw", power.END).columns if n != "date"]
+    expo = power.load_exposure().rename({"ff49_short": "industry"})
+    by = {r["industry"]: r for r in expo.iter_rows(named=True)}
+    z = np.array([by[n]["z_delegation"] for n in names])
+    c = np.array([by[n]["z_aioe"] for n in names])
+    for ctl, v in ((None, "s_h5"), (c, "s_h5b")):
+        b, se = studentised._history_b_se(z, ctl, "ff49_vw", names)
+        assert len(b) == len(se) == 378
+        assert float(np.std(b, ddof=1)) == confirm_h5.FROZEN[v]
