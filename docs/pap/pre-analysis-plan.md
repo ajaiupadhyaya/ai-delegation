@@ -2234,6 +2234,12 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, and the Task 11 rows R10, R23, R24, R26, R27, R31, R38 (25480d9) seen
 - Rule: Presentation only; every numeric column of R10, R23, R24, R26, R27, R31 and R38 .csv stays byte-identical to commit 25480d9 (R10's market lines to d2da8f1). The RQ1 rows' .md tables name each coefficient (e.g. education, log wage, p_H1); the units sentence states each row's own outcome unit (R23: ai_autonomy_mean scale points); the notes say n_dropped is not reported for RQ1 rows because Plan 2 records drops as usage shares (C-2). R38's p_H1 is H1's D17 operator (the larger of the two coefficient p-values) applied to R38's one-way occupation-cluster p-values, which is how the brief's 'p_H1 = res.p_family' is read under se_key (§8.1: an RQ1 row uses the inference of the hypothesis it varies).
 
+### C-79. Clarification: R37 zero-weight tasks; R23 H2 estimand label (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 12 (R37 rule in rq1.within_r6 and its tests at 59242bf, before R37 ran; recorded after; plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, the Task 11 rows, and the Task 12 rows R22, R23, R36, R37 (f8ea9d1) seen
+- Rule: (1) R37 leaves out r6 tasks whose mean pct over April and May is 0 (r6 task pct is published rounded to 0.01 and shows 0.00 in both months), as D13 and C-30 (b) do for H1/H3 and as Plan 2's H2 builder does (a zero-usage task-release has no D13 value). Such tasks carry no weight in the WLS fit; n_tasks, G_task and the df (G_task − 1) count tasks with positive weight. With these data 1,141 tasks are left out and 1,133 kept. A task-month whose metric is published but whose pct is null counts as pct 0 in the fixed task weight. (2) Presentation only: R23's H2 record names its estimand in ai_autonomy_mean scale points per year (it said pp), and R23.md's label line separates the H1 and H2 labels by part; every numeric column of R23.csv stays byte-identical to f8ea9d1.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
