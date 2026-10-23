@@ -169,10 +169,15 @@ def sic_to_ff49(siccodes: pl.DataFrame) -> Callable[[int], int | None]:
     return lookup
 
 
-def _siccodes() -> pl.DataFrame:
+SICCODES_KEY = "ff_siccodes49"  # the primary industry definition; 30/48 are robustness (R6)
+
+
+def _siccodes(siccodes_key: str = SICCODES_KEY) -> pl.DataFrame:
+    """The Fama-French industry definition file `siccodes_key` (`ff_siccodes49`, `30`, `48`).
+    Its industry numbers are returned in the `ff49` column whatever the granularity."""
     from aideleg.market.french import _single_file, read_siccodes
 
-    return read_siccodes(_single_file("ff_siccodes49"))
+    return read_siccodes(_single_file(siccodes_key))
 
 
 HQ_NAICS = "5511"  # Management of Companies and Enterprises
@@ -181,11 +186,11 @@ Status = Literal["private", "government", "management_of_companies"]
 
 
 @cache
-def _split6() -> pl.DataFrame:
+def _split6(siccodes_key: str = SICCODES_KEY) -> pl.DataFrame:
     """6-digit NAICS 2022 -> FF49 split, every NAICS 2022 code in the 2017->2022 target list
     included: a code the chain never reaches (no SIC 1987 source: 112130, 481219, 541120,
     551114) gets one null-`ff49` row at weight 1, i.e. it is wholly unmapped."""
-    lookup = sic_to_ff49(_siccodes())
+    lookup = sic_to_ff49(_siccodes(siccodes_key))
     xw = naics_to_sic(2022).with_columns(
         ff49=pl.col("sic").map_elements(lookup, return_dtype=pl.Int64)
     )
@@ -209,8 +214,9 @@ def _to_digits(df6: pl.DataFrame, digits: int) -> pl.DataFrame:
 
 
 @cache
-def _excluded(method: str, digits: int) -> pl.DataFrame:
-    out = _to_digits(_split6(), digits).filter(~pl.col("naics").str.starts_with(HQ_NAICS))
+def _excluded(method: str, digits: int, siccodes_key: str = SICCODES_KEY) -> pl.DataFrame:
+    out = _to_digits(_split6(siccodes_key), digits).filter(
+        ~pl.col("naics").str.starts_with(HQ_NAICS))
     if method == "majority":
         out = majority(out)
     return out.select("naics", "ff49", "weight").sort("naics", "ff49", nulls_last=True)
@@ -223,11 +229,11 @@ def _default_employment() -> pl.DataFrame:
     return load_industry_matrix(2024, 4)
 
 
-def hq_shares(employment: pl.DataFrame, method: Literal["split", "majority"] = "split"
-              ) -> pl.DataFrame:
+def hq_shares(employment: pl.DataFrame, method: Literal["split", "majority"] = "split", *,
+              siccodes_key: str = SICCODES_KEY) -> pl.DataFrame:
     """`ff49, weight`: each FF49 industry's share of mapped private employment (OEWS codes
     outside government, `NO_PUBLIC_EQUITY` and 5511), under the 5511-excluded crosswalk."""
-    by = _oews_ff49(employment, _excluded(method, 4), "exclude")
+    by = _oews_ff49(employment, _excluded(method, 4, siccodes_key), "exclude")
     emp = (by.filter((pl.col("status") == "private") & pl.col("ff49").is_not_null())
            .group_by("ff49").agg(e=pl.col("emp").sum()))
     return emp.select("ff49", weight=pl.col("e") / pl.col("e").sum()).sort("ff49")
@@ -236,7 +242,8 @@ def hq_shares(employment: pl.DataFrame, method: Literal["split", "majority"] = "
 def naics_to_ff49(method: Literal["split", "majority"] = "split",
                   digits: Literal[4, 6] = 4,
                   hq: Literal["exclude", "redistribute"] = "exclude", *,
-                  employment: pl.DataFrame | None = None) -> pl.DataFrame:
+                  employment: pl.DataFrame | None = None,
+                  siccodes_key: str = SICCODES_KEY) -> pl.DataFrame:
     """NAICS 2022 -> FF49: `naics, ff49, weight`. `ff49` is null for the weight that reaches
     no FF49 industry, so weights sum to 1 per NAICS code.
 
@@ -253,6 +260,9 @@ def naics_to_ff49(method: Literal["split", "majority"] = "split",
     omitted it is `load_industry_matrix(2024, 4)` (May 2024 OEWS). Under `"majority"` the
     5511 rows stay proportional: the redistribution is not a concordance share to round.
 
+    `siccodes_key` picks the industry definition (`ff_siccodes49` default; `ff_siccodes30` /
+    `ff_siccodes48` for R6); the `ff49` column then holds that file's industry numbers.
+
     Equal-split artifacts. Weights are structural, not employment-based: the inversion gives
     each SIC equal mass, so a SIC that maps to a single NAICS outweighs one spread over
     several. E.g. 488111 (Air Traffic Control) is 2/3 SIC 9621 (government regulation of
@@ -263,11 +273,11 @@ def naics_to_ff49(method: Literal["split", "majority"] = "split",
         raise ValueError(f"method must be 'split' or 'majority', not {method!r}")
     if hq not in ("exclude", "redistribute"):
         raise ValueError(f"hq must be 'exclude' or 'redistribute', not {hq!r}")
-    out = _excluded(method, digits)
+    out = _excluded(method, digits, siccodes_key)
     if hq == "redistribute":
         shares = hq_shares(employment if employment is not None else _default_employment(),
-                           method)
-        codes = (_to_digits(_split6(), digits).select("naics").unique()
+                           method, siccodes_key=siccodes_key)
+        codes = (_to_digits(_split6(siccodes_key), digits).select("naics").unique()
                  .filter(pl.col("naics").str.starts_with(HQ_NAICS)))
         out = pl.concat([out, codes.join(shares, how="cross").select(out.columns)])
     return out.sort("naics", "ff49", nulls_last=True)
