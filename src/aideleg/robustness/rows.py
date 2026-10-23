@@ -24,11 +24,17 @@ terciles, Fama–MacBeth and event slopes, so each Design A part runs those runn
 (`upstream.run_terciles`, `run_fm`, `run_events`) on the variant exposure, with `out_dir` under
 the untracked `WORK_DIR` and no figure directory. All are exploratory.
 
+H1/H3 rows (Task 11): R10 (RQ1 parts `h1_lb`, `h1_ub`, `h3_lb`, `h3_ub`, written beside the
+committed market parts, which are carried verbatim and never re-run), R23 (part `h1`), R24,
+R26, R27, R31 and R38, each through Plan 2's `build_task_rows` and `estimate_h1` /
+`estimate_h3` (via the adapter) after `guards.require_rq1_run_committed()`.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
 
 import calendar
+import csv
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field, fields
 from datetime import date
@@ -38,7 +44,16 @@ import numpy as np
 import polars as pl
 
 from aideleg import confirm_h5, power
-from aideleg.robustness import market, registry, report, returns, studentised, upstream
+from aideleg.robustness import (
+    guards,
+    market,
+    registry,
+    report,
+    returns,
+    rq1,
+    studentised,
+    upstream,
+)
 from aideleg.robustness.exposure_variants import (
     ZERO_ASSIGNED_NOTE,
     ExposureSpec,
@@ -729,7 +744,8 @@ run_R32 = _newdata_runner("R32")
 
 run_R05 = _market_runner("R5")
 run_R07 = _market_runner("R7")
-run_R10 = _market_runner("R10")
+# Task 8's market parts of R10; Task 11's `run_R10` carries their committed records
+run_R10_market = _market_runner("R10")
 run_R18 = _market_runner("R18")
 run_R19 = _market_runner("R19")
 run_R21 = _market_runner("R21")
@@ -1285,6 +1301,270 @@ def run_R09(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     return report.write_row("R9", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
 
 
+# --- Task 11: H1/H3 rows R10 (RQ1 parts), R23 (H1), R24, R26, R27, R31, R38 ----------------
+
+H1_COVARIATES = ("human_education_years_mean", "log_wage")
+_RQ1_NOTE = (
+    "RQ1 parts: Plan 2's `estimate_h1` / `estimate_h3` on Plan 2's `build_task_rows` (through "
+    "the adapter), with the inference of the hypothesis varied (PAP §8.1): WLS with IWA fixed "
+    "effects unless the row says otherwise, two-way cluster-robust SEs by occupation (soc6) and "
+    "task, t with min(G_occ, G_task) − 1 df and the PAP §4 non-PSD rule (each use is in the "
+    "record's note). `scale` is the SE, `stat` the t statistic, intervals 95%, p two-sided; "
+    "p_H1 = max(p_educ, p_wage) (D17). Coefficients are in pp of the outcome share per unit of "
+    "the regressor. `n` is the number of (task, occupation, family) rows; `dropped` lists the "
+    "non-zero drop shares in % of total task usage, structural then variable-level (PAP §4.1, "
+    "§11 C-2, C-30)."
+)
+_R23_ALWAYS = (
+    "R23 is reported beside H1 (PAP §4.1): the H1 decision uses `automation_pct` only and is "
+    "unchanged. The PAP §4.1 disagreement sentence is printed below only if each R23 "
+    "coefficient (education, log wage) has the sign opposite to the committed primary H1 "
+    "coefficient (P-RQ1 record) and p < 0.05, a mechanical check."
+)
+
+
+def _rq1_part(
+    row_id: str,
+    part: str,
+    tr: upstream.TaskRows,
+    res: upstream.HypothesisResult,
+    *,
+    extra: Sequence[str] = (),
+    se_key: str | None = None,
+    label: str = "robustness",
+) -> list[dict]:
+    variant = "; ".join(
+        [
+            f"release={tr.release}",
+            f"source={tr.source}",
+            f"family={tr.family_level}",
+            f"outcome={res.outcome}",
+            *extra,
+        ]
+    )
+    recs = rq1.rq1_records(row_id, part, res, label=label, se_key=se_key)
+    return [r | {"variant": variant} for r in recs]
+
+
+def _both(row_id: str, part: str, tr: upstream.TaskRows) -> list[dict]:
+    """H1 then H3, primary specification, on `tr`."""
+    return [
+        *_rq1_part(row_id, part, tr, upstream.estimate_h1(tr)),
+        *_rq1_part(row_id, part, tr, upstream.estimate_h3(tr)),
+    ]
+
+
+def _write(row_id: str, records: list[dict], notes: list[str], out_dir: Path | None):
+    return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+_FLOAT_COLS = frozenset(
+    ("estimate", "scale", "ci_lo", "ci_hi", "stat", "p", "crit_0025", "crit_005")
+)
+_INT_COLS = frozenset(("n", "n_dropped"))
+R10_MARKET_PARTS = ("market_lb", "market_ub")
+
+
+def _csv_value(col: str, v: str):
+    if col in _FLOAT_COLS:
+        return float(v) if v != "" else None
+    if col in _INT_COLS:
+        return int(v) if v != "" else None
+    return v
+
+
+def r10_market_carry(out_dir: Path) -> tuple[list[dict], list[str]]:
+    """Task 8's committed R10 market records and notes, read back from `R10.csv` / `R10.md`
+    (no market read): the `market_*` records verbatim, and the notes Task 8 wrote (its row
+    notes, the market-row note and the zero-assigned line)."""
+    csv_path, md_path = Path(out_dir) / "R10.csv", Path(out_dir) / "R10.md"
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        rdr = csv.DictReader(f)
+        if rdr.fieldnames != report.ROBUSTNESS_COLUMNS:
+            raise ValueError(f"{csv_path}: columns differ from ROBUSTNESS_COLUMNS")
+        records = [
+            {k: _csv_value(k, v) for k, v in row.items()}
+            for row in rdr
+            if row["part"] in R10_MARKET_PARTS
+        ]
+    if sorted({r["part"] for r in records}) != sorted(R10_MARKET_PARTS):
+        raise ValueError(f"{csv_path}: the committed market parts {R10_MARKET_PARTS} are missing")
+    lines = md_path.read_text(encoding="utf-8").splitlines()
+    i, j = lines.index("## Notes"), lines.index("## Results")
+    known = {*MARKET_ROWS["R10"].notes, _MARKET_ROW_NOTE}
+    zero = ZERO_ASSIGNED_NOTE.split("{")[0]
+    notes = [
+        ln[2:]
+        for ln in lines[i + 1 : j]
+        if ln.startswith("- ") and (ln[2:] in known or ln[2:].startswith(zero))
+    ]
+    if len(notes) != len(known) + 1:
+        raise ValueError(f"{md_path}: Task 8's market notes not found ({len(notes)} of 3)")
+    return records, notes
+
+
+def run_R10(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R10: the RQ1 parts (H1 and H3 on the D1 suppression bounds) beside the
+    committed market parts, which are carried, not re-run."""
+    guards.require_rq1_run_committed()
+    out = OUT_DIR if out_dir is None else Path(out_dir)
+    market_records, market_notes = r10_market_carry(out)
+    tr = upstream.task_rows()
+    records: list[dict] = []
+    for b in ("lb", "ub"):
+        res = upstream.estimate_h1(tr, outcome=f"automation_share_all_{b}")
+        records += _rq1_part("R10", f"h1_{b}", tr, res)
+    bounds = rq1.validation_bounds(upstream.rq1_inputs().panel, release="r6", source="claude_ai")
+    tv = rq1.with_validation_bounds(tr, bounds)
+    for b in ("lb", "ub"):
+        res = upstream.estimate_h3(tv, outcome=f"validation_share_all_{b}")
+        records += _rq1_part("R10", f"h3_{b}", tv, res)
+    notes = [
+        "RQ1 parts of R10 (PAP §8.2 R10, D1): H1 with `automation_share_all_lb` / `_ub` in "
+        "place of `automation_pct` (parts h1_lb, h1_ub); Plan 2's builder computes the bounds "
+        "per period with r6's suppression component (`none_pct`) and then D13-averages them "
+        "(PAP §11 C-4).",
+        "[default] H3 with `validation_share_all_lb` = v·(100 − s)/100 and `_ub` = lb + s in "
+        "place of `validation_pct` (parts h3_lb, h3_ub), v = `validation_pct` and s = r6's "
+        "suppression share (`none_pct`), per period and then D13-averaged, as for the "
+        "automation bounds (PAP §11 C-57).",
+        _RQ1_NOTE,
+    ]
+    return _write("R10", market_records + records, market_notes + notes, out)
+
+
+def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R23, H1 part: `ai_autonomy_mean` as H1's delegation measure."""
+    guards.require_rq1_run_committed()
+    tr = upstream.task_rows()
+    res = upstream.estimate_h1(tr, outcome="ai_autonomy_mean")
+    records = _rq1_part("R23", "h1", tr, res)
+    primary = {
+        n: float(c["estimate"])
+        for n, c in upstream.committed_rq1()["results"]["H1"]["coefs"].items()
+    }
+    notes = [
+        "`ai_autonomy_mean` (D13-averaged, r6 `claude_ai`) in place of `automation_pct` as H1's "
+        "outcome (PAP §8.2 R23, spec §5.4.1); same predictors, sample rule, fixed effects and "
+        "inference. Coefficients are in ai_autonomy_mean scale points per year of education and "
+        "per log point of wage. R23's H2 part is a separate Plan 4 task.",
+        _R23_ALWAYS,
+    ]
+    if rq1.r23_disagrees(res, primary):
+        notes.append(
+            "R23's education and log-wage coefficients both have the sign opposite to H1's "
+            f"and are significant at nominal 0.05, so {rq1.R23_DISAGREE} (PAP §4.1); the H1 "
+            "decision is unchanged."
+        )
+    notes.append(_RQ1_NOTE)
+    return _write("R23", records, notes, out_dir)
+
+
+R24_PARTS: tuple[tuple[str, dict], ...] = (
+    ("r4", {"release": "r4"}),
+    ("r5", {"release": "r5"}),
+    ("r6_1p_api", {"source": "1p_api"}),
+)
+R26_PARTS: tuple[tuple[str, dict], ...] = (
+    ("gwa", {"family_level": "gwa"}),
+    ("dwa", {"family_level": "dwa"}),
+)
+
+
+def run_R24(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R24: H1 and H3 on r4 and r5 `claude_ai` and on r6 `1p_api` (D13)."""
+    guards.require_rq1_run_committed()
+    records: list[dict] = []
+    for part, kw in R24_PARTS:
+        records += _both("R24", part, upstream.task_rows(**kw))
+    notes = [
+        "D13 alternatives (PAP §8.2 R24): release r4 `claude_ai` (part r4), r5 `claude_ai` "
+        "(r5) and r6 `1p_api` (r6_1p_api), each through Plan 2's builder for that release and "
+        "source (D13 averaging over the release's periods; the R7 suppression components of "
+        "that release), H1 and H3 with the primary specification otherwise.",
+        _RQ1_NOTE,
+    ]
+    return _write("R24", records, notes, out_dir)
+
+
+def run_R26(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R26: H1 and H3 with GWA and with DWA task-family fixed effects (D14)."""
+    guards.require_rq1_run_committed()
+    records: list[dict] = []
+    for part, kw in R26_PARTS:
+        records += _both("R26", part, upstream.task_rows(**kw))
+    notes = [
+        "GWA (part gwa) and DWA (part dwa) task-family fixed effects in place of IWA (PAP §8.2 "
+        "R26, D14), from Plan 2's `task_families(level)`; a task linked to several families is "
+        "split equally across them and the family set is the union over the task's candidate "
+        "Task IDs, as for IWA (D14, PAP §11 C-9).",
+        _RQ1_NOTE,
+    ]
+    return _write("R26", records, notes, out_dir)
+
+
+def run_R27(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R27: H3 with the continuous O*NET Consequence of Error (D15 alternative)."""
+    guards.require_rq1_run_committed()
+    tr = upstream.task_rows()
+    coe = rq1.consequence_of_error()
+    tc = rq1.with_coe(tr, coe)
+    res = upstream.estimate_h3(tc, indicator="coe")
+    records = _rq1_part("R27", "coe", tc, res, extra=("indicator=coe",))
+    socs = set(tr.rows["soc6"].to_list())
+    missing = len(socs - set(coe.drop_nulls("coe")["soc6"].to_list()))
+    notes = [
+        "[default] H3 with the O*NET 29.3 Work Context element Consequence of Error (`CX`, the "
+        "mean `Data Value` over the O*NET-SOC codes within soc6) in place of the D15 indicator, "
+        "z-scored across the distinct soc6 codes of the H3 rows that have a value (population "
+        "SD), so γ is in pp of validation share per 1 SD (PAP §8.2 R27, §11 C-58). Rows without "
+        "a value are dropped and reported as `missing_coe`.",
+        f"{missing} of the {len(socs)} soc6 codes of the H3 rows have no Consequence of Error "
+        "value.",
+        _RQ1_NOTE,
+    ]
+    return _write("R27", records, notes, out_dir)
+
+
+def run_R31(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R31: H3 with H1's covariates (education, log wage) added (P13)."""
+    guards.require_rq1_run_committed()
+    tr = upstream.task_rows()
+    res = upstream.estimate_h3(tr, covariates=H1_COVARIATES)
+    records = _rq1_part(
+        "R31", "covariates", tr, res, extra=(f"covariates={', '.join(H1_COVARIATES)}",)
+    )
+    notes = [
+        "H3 with H1's covariates `human_education_years_mean` and `log_wage` added (PAP §8.2 "
+        "R31, P13); the H3 sample then requires both covariates (Plan 2's drop rule on the "
+        "estimator's own variables, PAP §11 C-12). The non-PSD rule is applied to γ's block "
+        "alone and the covariate coefficients come from a second call on the same design, so "
+        "the covariates never change γ's inference (PAP §11 C-14).",
+        _RQ1_NOTE,
+    ]
+    return _write("R31", records, notes, out_dir)
+
+
+def run_R38(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R38: H1 and H3 with SEs clustered by occupation only (spec §5.2, P18)."""
+    guards.require_rq1_run_committed()
+    tr = upstream.task_rows()
+    kw = {"extra": ("se=oneway_occ",), "se_key": "se_oneway_occ"}
+    records = [
+        *_rq1_part("R38", "oneway_occ", tr, upstream.estimate_h1(tr), **kw),
+        *_rq1_part("R38", "oneway_occ", tr, upstream.estimate_h3(tr), **kw),
+    ]
+    notes = [
+        "SEs clustered by occupation (soc6) only, the spec's §5.2 rule (PAP §4 departure, §8.2 "
+        "R38, P18): SE and p are Plan 2's one-way diagnostics `se_oneway_occ` / `p_oneway_occ` "
+        "of the primary H1 and H3 fits, df = G_occ − 1, interval estimate ± t(0.975, G_occ − "
+        "1)·SE; point estimates are the primary ones. p_H1 is D17's max of the two one-way "
+        "p-values. Reported only; used in no decision.",
+        _RQ1_NOTE,
+    ]
+    return _write("R38", records, notes, out_dir)
+
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -1311,5 +1591,11 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R8", run_R08),
         ("R9", run_R09),
         ("R16", run_R16),
+        ("R23", run_R23),
+        ("R24", run_R24),
+        ("R26", run_R26),
+        ("R27", run_R27),
+        ("R31", run_R31),
+        ("R38", run_R38),
     )
 }

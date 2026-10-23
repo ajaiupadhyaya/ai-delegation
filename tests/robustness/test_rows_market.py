@@ -82,7 +82,9 @@ def stubbed(monkeypatch, tmp_path):
 
 
 def _run(row_id):
-    csv, md = rows.RUNNERS[row_id]()
+    # R10's market parts are Task 8's `run_R10_market`; RUNNERS["R10"] (Task 11) carries them
+    run = rows.run_R10_market if row_id == "R10" else rows.RUNNERS[row_id]
+    csv, md = run()
     return pl.read_csv(csv), md.read_text(encoding="utf-8")
 
 
