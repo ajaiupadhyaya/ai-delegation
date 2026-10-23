@@ -13,6 +13,8 @@ diagnostics the PAP assigns to the period after the confirmatory run (§3.3, P11
 AEI data are conversations matched to O*NET tasks; nothing here speaks to the labour market.
 """
 
+import hashlib
+import json
 import re
 from pathlib import Path
 
@@ -49,18 +51,34 @@ def _cache_path() -> Path:
     return DERIVED / "rq3/historical_alphas.npz"
 
 
+def _fingerprint(windows: list, returns: pl.DataFrame, factors: pl.DataFrame,
+                 names: list[str]) -> str:
+    """SHA-256 of the inputs the historical matrix depends on: the window count and first and
+    last window dates, the shape and date span of the pre-seal return and factor frames, and
+    `names`."""
+    def frame(df: pl.DataFrame) -> list:
+        return [list(df.shape), str(df["date"].min()), str(df["date"].max())]
+
+    key = {"windows": [len(windows), str(windows[0][0]), str(windows[-1][1])],
+           "returns": frame(returns), "factors": frame(factors), "names": list(names)}
+    return hashlib.sha256(json.dumps(key, sort_keys=True).encode()).hexdigest()
+
+
 def historical_alphas(names: list[str]) -> np.ndarray:
     """The 378 x len(names) pre-seal alpha matrix (power.historical_windows), columns as
-    `names`. Cached with `names`; recomputed when they differ."""
+    `names`. Cached with an input fingerprint (`_fingerprint`); recomputed when it differs."""
     path = _cache_path()
+    windows = power.historical_windows()
+    returns, factors = power._load_returns()
+    fp = _fingerprint(windows, returns, factors, names)
     if path.is_file():
         with np.load(path, allow_pickle=False) as f:
-            if f["names"].tolist() == list(names):
+            if "fingerprint" in f and str(f["fingerprint"]) == fp \
+                    and f["names"].tolist() == list(names):
                 return f["alphas"]
-    returns, factors = power._load_returns()
-    A = power._alpha_matrix(power.historical_windows(), returns, factors, list(names))
+    A = power._alpha_matrix(windows, returns, factors, list(names))
     path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(path, alphas=A, names=np.array(list(names), dtype=str))
+    np.savez(path, alphas=A, names=np.array(list(names), dtype=str), fingerprint=np.array(fp))
     return A
 
 
@@ -79,6 +97,13 @@ def vector_test(alphas: np.ndarray, z: np.ndarray, names: list[str],
     Nominal and single-test: no Holm step."""
     alphas = np.asarray(alphas, dtype=float)
     z = np.asarray(z, dtype=float)
+    lens = {"alphas": len(alphas), "z": len(z), "names": len(names)}
+    if control is not None:
+        lens["control"] = len(control)
+    if hist is not None:
+        lens["hist columns"] = np.asarray(hist).shape[1]
+    if len(set(lens.values())) != 1:
+        raise ValueError(f"vector_test: lengths differ: {lens}")
     ok = ~np.isnan(alphas)
     kept = [n for n, k in zip(names, ok, strict=True) if k]
     dropped = [n for n, k in zip(names, ok, strict=True) if not k]
@@ -223,7 +248,7 @@ def main_influence(out_dir: Path) -> pl.DataFrame:
         raise ValueError("no zero-assigned share for Design B")
     text = _report(df, b, dropped, float(za["no_usage_emp_pct"][0]))
     check_text(text)
-    write_csv(df, out_dir / "influence.csv")
     out_dir.mkdir(parents=True, exist_ok=True)
+    write_csv(df, out_dir / "influence.csv")
     (out_dir / "influence.md").write_text(text, encoding="utf-8")
     return df

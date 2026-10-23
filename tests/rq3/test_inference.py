@@ -143,16 +143,31 @@ def test_check_matches_confirmatory_raises_on_missing_row():
                                              TEXT.replace("| H5b |", "| H5c |"))
 
 
-def test_historical_alphas_caches_and_recomputes_on_new_names(tmp_path, monkeypatch):
+def _frames(n_days=5):
+    from datetime import date, timedelta
+
+    d = [date(2000, 1, 3) + timedelta(days=i) for i in range(n_days)]
+    return (pl.DataFrame({"date": d, "A": [0.0] * n_days}),
+            pl.DataFrame({"date": d, "rf": [0.0] * n_days}))
+
+
+@pytest.fixture
+def fake_hist(tmp_path, monkeypatch):
     calls = []
+    frames = {"v": _frames()}
 
     def fake_matrix(windows, returns, factors, names):
         calls.append(list(names))
         return np.arange(len(windows) * len(names), dtype=float).reshape(len(windows), -1)
 
     monkeypatch.setattr(inference, "DERIVED", tmp_path)
-    monkeypatch.setattr(power, "_load_returns", lambda: (None, None))
+    monkeypatch.setattr(power, "_load_returns", lambda: frames["v"])
     monkeypatch.setattr(power, "_alpha_matrix", fake_matrix)
+    return calls, frames, tmp_path
+
+
+def test_historical_alphas_caches_and_recomputes_on_new_names(fake_hist):
+    calls, _, tmp_path = fake_hist
     a1 = inference.historical_alphas(["A", "B"])
     assert a1.shape == (len(power.historical_windows()), 2)
     assert (tmp_path / "rq3/historical_alphas.npz").is_file()
@@ -161,6 +176,34 @@ def test_historical_alphas_caches_and_recomputes_on_new_names(tmp_path, monkeypa
     np.testing.assert_array_equal(a1, a2)
     a3 = inference.historical_alphas(["A", "B", "C"])
     assert len(calls) == 2 and a3.shape[1] == 3
+
+
+def test_historical_alphas_recomputes_when_inputs_change(fake_hist, monkeypatch):
+    calls, frames, tmp_path = fake_hist
+    inference.historical_alphas(["A", "B"])
+    frames["v"] = _frames(6)  # the pre-seal frames changed shape and span
+    inference.historical_alphas(["A", "B"])
+    assert len(calls) == 2
+    inference.historical_alphas(["A", "B"])
+    assert len(calls) == 2
+    w = power.historical_windows()
+    monkeypatch.setattr(power, "historical_windows", lambda: w[:-1])
+    assert inference.historical_alphas(["A", "B"]).shape[0] == len(w) - 1
+    assert len(calls) == 3
+    # a cache written without a fingerprint (or with a stale one) is never served
+    np.savez(tmp_path / "rq3/historical_alphas.npz", alphas=np.zeros((1, 2)),
+             names=np.array(["A", "B"]))
+    assert inference.historical_alphas(["A", "B"]).shape[0] == len(w) - 1
+    assert len(calls) == 4
+
+
+@pytest.mark.parametrize("what", ["alphas", "z", "names", "control", "hist"])
+def test_vector_test_rejects_mismatched_lengths(synth, what):
+    a, z, c, names, hist = synth
+    args = {"alphas": a, "z": z, "names": names, "control": c, "hist": hist}
+    args[what] = args[what][:, :-1] if what == "hist" else args[what][:-1]
+    with pytest.raises(ValueError, match="lengths differ"):
+        inference.vector_test(**args)
 
 
 @pytest.mark.data
