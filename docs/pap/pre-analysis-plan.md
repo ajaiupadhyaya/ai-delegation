@@ -2192,6 +2192,24 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
 - Rule: Under the frozen majority rule (each NAICS code to the FF49 industry with the largest weight; ties to the lowest industry number) Guns (26), Gold (27) and Boxes (40) receive no NAICS code. R20 therefore reports on the 46 industries it assigns, with z re-standardised over those 46 (as the variant's own industry set, like R6); the market part removes the three from the window and from the 378-window history before the null scales are computed (the market runner's drop list).
 
+### C-72. Clarification: R2 replaces employment by the wage bill in every industry weight (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R2 row run. Before this entry the implementation computed max |Δ z_delegation| against the primary under this rule (0.607) and under the alternative below (0.415); no H5, H5b or RQ2 estimate was computed under either
+- Rule: R2's wage bill (TOT_EMP × A_MEAN, C-66) replaces OEWS employment in both weights of the industry aggregation: the occupation shares within each OEWS NAICS code, and the code weight (crosswalk weight × code total) that combines codes into an FF49 industry. w_oj is therefore o's share of FF49 industry j's crosswalk-weighted wage bill, as in the primary it is o's share of j's employment (§2.1). The benchmarks are re-aggregated with the same weights (C-65), and emp_covered_share is wage-bill weighted. U_o keeps national employment shares (C-66). Not used: wage-bill shares within codes combined with employment code weights, which is no industry's wage-bill share.
+
+### C-73. Clarification: R14 maps AIOE's 19-1020 by its O*NET successor (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R14 row run
+- Rule: AIOE's 19-1020 (from O*NET-SOC 2010 19-1020.01 Biologists) is not a SOC 2010 detailed code and is absent from the BLS SOC 2010→2018 crosswalk; it is the only AIOE code the BLS file lacks. It is mapped by its O*NET-SOC 2010→2019 successor 19-1029 (Biological Scientists, All Other; May 2024 employment 59,710, 0.04% of detailed employment), where it is averaged with AIOE's own 19-1029 (0.752 and 1.010 give 0.881), exactly as in the primary mapping. Every other AIOE code uses the BLS crosswalk.
+
+### C-74. Clarification: R32's O*NET part is identical to the primary (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R32 row run
+- Rule: The O*NET 29.2 Task Statements file (db_29_2_text, retrieved 2026-10-23) is byte-identical to the 29.3 file used by the primary (SHA-256 fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a, 2,759,559 bytes; latest task Date 08/2024). R32's task index therefore equals the primary's, and R32 differs from the primary only through the OEWS May 2023 weights (oesm23in4, oesm23nat). It is still run and reported as specified (§8.1) with this note. That 29.3 left task statements unchanged is inferred from the byte identity and the task dates, not from O*NET's release notes.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
