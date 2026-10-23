@@ -2030,6 +2030,84 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results seen; all Plan 3 exploratory and H6 results seen
 - Rule: Ajai approved D-1 (the re-fetch of two truncated 10-K primary documents, H6 secondary measure) in chat on 2026-10-23, after the before and after values in D-1 were reported to him. D-1 itself is unchanged (§11 is append-only); this entry is the approval its 'Approved by Ajai' field records as not sought at filing. No other entry, specification or estimate changes.
 
+### C-56. Clarification: Unbalanced H2 panel (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 12 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: The unbalanced panel (R22) keeps every (task, release) row with a non-null outcome for tasks with such rows in at least two of the listed releases (Plan 2's `build_h2_panel(balanced=False)`); there is no other unbalanced rule.
+
+### C-57. Clarification: R10 for H3 (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 11 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: H3's bounds use `validation_share_all_lb = v·(100 − s)/100` and `_ub = lb + s`, with s the release's suppression share (the components of `occupations.SUPPRESSION[release]`), computed per period and then D13-averaged, as for the automation bounds.
+
+### C-58. Clarification: R27 standardisation (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 11 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: Consequence of Error = the mean `Data Value` (`CX`) over O\*NET-SOC codes within soc6, z-scored across the distinct sample occupations (population SD); rows without a value are dropped and reported as `missing_coe`.
+
+### C-59. Clarification: R28 r4/r5 countries (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 13 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: r4/r5 publish no country usage index or GWA rows: log AUI = ln(usage_pct_c / wap_c) (its scale moves only the intercept); s_cg from the country's `onet_task` pct aggregated to GWAs through the D14 files (equal split over a task's GWAs), renormalised over GWAs with an ā_g; ā_g = the same release's global task automation aggregated to GWA by D13 weights; then Plan 2's `estimate_h4`.
+
+### C-60. Clarification: R9 scope (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 10 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: Placebo day-0 dates are the 14 event month-days in 2017, 2018, 2019 and 2021 (56); slopes on A_r2 `z_delegation` at horizons 5 and 20 via Plan 3's `run_events`; per horizon, the actual events' mean slope and its empirical percentile among the 56 placebo slopes, descriptive.
+
+### C-61. Clarification: R29 denominator (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 14 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: `pre_formation_2025` counts filings dated 2025-01-01 to 2025-03-26 in both numerator and denominator; `float_weighted` = Σ float·1[talks] / Σ float over 2024 filers with a CY2024Q2I public float (the R29 cap proxy).
+
+### C-62. Clarification: R30 lists (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 14 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: The plural rule applies to the primary list only; `broad` is computed for 2024 (T_j's year) only.
+
+### C-63. Clarification: R7 (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 8 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: Dropping Hardw, Softw and Chips does not re-standardise z (as R13).
+
+### C-64. Clarification: R18 (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 4 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: `nonoverlap_max`: s = the largest of the 17 offset sds; b̄ stays the 378-window mean; q is recomputed with the new s.
+
+### C-65. Clarification: Exposure-variant benchmarks (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 5 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: AIOE and Eloundou are re-aggregated with the variant's matrix, crosswalk and industry set (R1, R2, R6, R15, R20, R32, R33); occupation-level variants (R3, R11, R16) keep the primary benchmark; `1p_api` pools r3–r6 for A_pooled.
+
+### C-66. Clarification: Wage-bill weights (R2) (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: `A_MEAN` `#` is set to $239,200 as for the median; `*`/`**` give a null wage bill excluded from the shares; R2 changes w_oj only (the U_o denominators stay national employment shares).
+
+### C-67. Clarification: Employment-weighted crosswalk (R33) (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: Children without published employment share the residual max(E₄ − Σ published, 0) equally; with no published child, the primary equal split.
+
+### C-68. Clarification: RQ2 variant bootstrap (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 7 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: A variant's Spearman CIs use Plan 2's `bootstrap_indices(n)["B"]` draw set, so the primary rows reproduce.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
