@@ -2210,6 +2210,12 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R32 row run
 - Rule: The O*NET 29.2 Task Statements file (db_29_2_text, retrieved 2026-10-23) is byte-identical to the 29.3 file used by the primary (SHA-256 fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a, 2,759,559 bytes; latest task Date 08/2024). R32's task index therefore equals the primary's, and R32 differs from the primary only through the OEWS May 2023 weights (oesm23in4, oesm23nat). It is still run and reported as specified (§8.1) with this note. That 29.3 left task statements unchanged is inferred from the byte identity and the task dates, not from O*NET's release notes.
 
+### C-75. Clarification: R35 interval (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 8 review (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, and the Task 8 rows including R35 (d2da8f1) seen
+- Rule: R35 reports the interval b̂ ± t₂₁,0.975·κ·SE_Σ,2025–26 (pp): the §3.3 P14 interval form with R35's scale κ·SE_Σ in place of s and R35's t₂₁ critical, i.e. the set of null values b₀ that T_stud does not reject at level 0.05. It is presentation only: T_stud, its p-value (t₂₁), the criticals and the scale are as PAP §8.2 R35 specifies and do not change; R35.csv is unchanged. As for every Plan 4 market row, the single reported interval uses c_0.05.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
