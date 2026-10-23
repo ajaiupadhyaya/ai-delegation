@@ -72,7 +72,12 @@ def psr(r: np.ndarray, sr_star: float = 0.0) -> float:
     s = sr(r)
     g3 = float(_st.skew(r, bias=True))
     g4 = float(_st.kurtosis(r, fisher=False, bias=True))
-    denom = np.sqrt(1 - g3 * s + (g4 - 1) / 4 * s**2)
+    var_term = 1 - g3 * s + (g4 - 1) / 4 * s**2
+    if not var_term > 0:
+        raise ValueError(
+            f"psr: non-positive variance term {var_term!r} (skew={g3}, kurt={g4}, sr={s})"
+        )
+    denom = np.sqrt(var_term)
     return float(_st.norm.cdf((s - sr_star) * np.sqrt(T - 1) / denom))
 
 

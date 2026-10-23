@@ -8,6 +8,7 @@ import math
 import numpy as np
 import pytest
 import statsmodels.api as sm
+from scipy import stats as _st
 
 from aideleg.config import SEED
 from aideleg.rq3 import stats
@@ -31,6 +32,16 @@ def test_hac_lag0_equals_hc0():
     assert np.allclose(out["se"], ref.bse, atol=1e-10, rtol=0)
     assert np.allclose(out["coef"], ref.params, atol=1e-10, rtol=0)
     assert out["lag"] == 0 and out["T"] == 60
+
+
+def test_hac_p_is_t_based():
+    rng = np.random.default_rng(2)
+    X = rng.normal(size=(40, 2))
+    y = X @ np.array([0.4, 0.1]) + rng.normal(size=40)
+    out = stats.hac_regression(y, X)
+    k = 3
+    expected = 2 * _st.t.sf(np.abs(out["t"]), 40 - k)
+    assert np.allclose(out["p"], expected, atol=1e-12, rtol=0)
 
 
 def test_hac_mean_only():
@@ -66,6 +77,23 @@ def test_dsr_below_psr_zero():
         stats.dsr(r, np.array([0.1]))
 
 
+def test_dsr_matches_hand_sr0():
+    r = _series()
+    v = np.array([0.1, 0.2, 0.3])
+    g, N = 0.5772156649, 3
+    sr0 = v.std(ddof=1) * (
+        (1 - g) * _st.norm.ppf(1 - 1 / N) + g * _st.norm.ppf(1 - 1 / (N * math.e))
+    )
+    assert stats.dsr(r, v) == pytest.approx(stats.psr(r, sr0), abs=1e-12, rel=0)
+
+
+def test_psr_raises_on_non_positive_variance_term(monkeypatch):
+    # With sample moments the term is (1 - g3*s/2)^2 + ... >= 0, so force it via a huge skew.
+    monkeypatch.setattr(stats._st, "skew", lambda r, bias=True: 1e6)
+    with pytest.raises(ValueError, match="non-positive variance term"):
+        stats.psr(_series() + 0.5)
+
+
 def test_stationary_bootstrap_mean_block_length():
     rng = np.random.default_rng(SEED)
     n, runs, steps = 1000, 0, 0
@@ -88,6 +116,13 @@ def test_bootstrap_reproducible():
     for k in a:
         assert a[k].shape == (50,)
         assert np.array_equal(a[k], b[k])
+
+
+def test_bootstrap_same_draw_for_every_statistic():
+    out = stats.bootstrap(
+        _series(), {"a": np.mean, "b": np.mean}, 30, 3.0, np.random.default_rng(SEED)
+    )
+    assert np.array_equal(out["a"], out["b"])
 
 
 def test_percentile_ci():
