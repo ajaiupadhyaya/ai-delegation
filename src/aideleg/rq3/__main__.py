@@ -29,9 +29,18 @@ def _print_terciles(df) -> None:
               f"p={p} T={r['T']}")
 
 
+def _print_fm(df) -> None:
+    print(f"{df.height} rows -> {(OUT_DIR / 'fama_macbeth.md').relative_to(ROOT)}, "
+          "fama_macbeth.csv (exploratory)")
+    for r in df.iter_rows(named=True):
+        print(f"  {r['design']:<8} {r['regressor']:<9} mean={r['mean']:8.3f} se={r['se']:7.3f} "
+              f"CI=[{r['ci_lo']:8.3f}, {r['ci_hi']:8.3f}] p={r['p']:.4f} T={r['T']} "
+              f"n={r['n_mean']:.1f} skipped={r['skipped']}")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="python -m aideleg.rq3")
-    p.add_argument("command", choices=["influence", "events", "terciles"])
+    p.add_argument("command", choices=["influence", "events", "terciles", "fm"])
     args = p.parse_args(argv)
     if args.command == "influence":
         from aideleg.rq3 import inference
@@ -51,6 +60,11 @@ def main(argv: list[str] | None = None) -> int:
 
         df = terciles.run_terciles(OUT_DIR, fig_dir=FIGURES_DIR)
         _print_terciles(df)
+    elif args.command == "fm":
+        from aideleg.rq3 import fama_macbeth
+
+        df = fama_macbeth.run_fm(OUT_DIR)
+        _print_fm(df)
     return 0
 
 
