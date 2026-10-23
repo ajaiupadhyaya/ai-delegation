@@ -109,7 +109,10 @@ def _download(src: Source, part: Path) -> None:
     raise FetchError(f"{src.url}: gave up after {ATTEMPTS} attempts ({last})")
 
 
-download = _download  # public: callers that stream to a path of their own (H6 sets)
+def download(src: Source, path: Path) -> None:
+    """Stream `src` to `path` with the retries and checks of `fetch`, without the MANIFEST
+    (public: callers that save to a path of their own, such as the H6 sets)."""
+    _download(src, Path(path))
 
 
 def fetch(src: Source, raw_dir: Path = RAW, force: bool = False) -> FetchRecord:

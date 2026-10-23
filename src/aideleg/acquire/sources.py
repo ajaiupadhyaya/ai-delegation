@@ -135,7 +135,7 @@ SOURCES: list[Source] = [
         for y in range(2019, 2026)
         for q in range(1, 5)
     ],
-    # The bulk form of the submissions API (the SIC of every CIK, C-40). Several GB; its
+    # The bulk form of the submissions API (the SIC of every CIK, C-40). About 1.6 GB; its
     # members are read in place with zipfile and never extracted, hence unzip=False.
     Source("sec_submissions_bulk", f"{SEC_ARCHIVES}/daily-index/bulkdata/submissions.zip",
            "sec/submissions.zip"),

@@ -41,6 +41,7 @@ from aideleg.config import DERIVED, RAW
 
 FORMS: tuple[str, ...] = ("10-K", "10-K405", "10-KT")
 YEARS: tuple[int, ...] = tuple(range(2019, 2026))
+FF49_INDUSTRIES: tuple[int, ...] = tuple(range(1, 50))  # Siccodes49 numbers its industries 1..49
 FILERS = DERIVED / "h6/filers.parquet"
 
 HEADER = (
@@ -202,10 +203,20 @@ def build_filers(
 
 
 def denominator(filers: pl.DataFrame) -> pl.DataFrame:
-    """Distinct CIKs per (year, ff49); unmapped CIKs are the `ff49 = null` row."""
+    """Distinct CIKs per (year, ff49): every FF49 industry 1..49 of every year present, with
+    n_filers = 0 where it has no filer, then the `ff49 = null` row of the unmapped CIKs (also
+    present when it is 0)."""
+    counts = filers.group_by("year", "ff49").agg(
+        pl.col("cik").n_unique().cast(pl.Int64).alias("n_filers")
+    )
+    years = filers.select(pl.col("year").cast(pl.Int64)).unique()
+    cells = years.join(
+        pl.DataFrame({"ff49": [*FF49_INDUSTRIES, None]}, schema={"ff49": pl.Int64}), how="cross"
+    )
     return (
-        filers.group_by("year", "ff49")
-        .agg(pl.col("cik").n_unique().cast(pl.Int64).alias("n_filers"))
+        cells.join(counts, on=["year", "ff49"], how="left", nulls_equal=True)
+        .with_columns(pl.col("n_filers").fill_null(0))
+        .select("year", "ff49", "n_filers")
         .sort("year", "ff49", nulls_last=True)
     )
 

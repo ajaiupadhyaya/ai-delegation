@@ -152,8 +152,35 @@ def test_denominator_counts_distinct_ciks():
             "ff49": [36, 36, 36, 36],
         }
     )
-    den = edgar.denominator(filers).sort("year")
-    assert den.rows() == [(2023, 36, 1), (2024, 36, 2)]
+    den = edgar.denominator(filers)
+    assert den.filter(pl.col("ff49") == 36).rows() == [(2023, 36, 1), (2024, 36, 2)]
+
+
+def test_denominator_has_every_industry_and_the_null_row():
+    filers = pl.DataFrame(
+        {
+            "year": [2024, 2024],
+            "cik": [1, 2],
+            "adsh": ["a", "b"],
+            "form": ["10-K", "10-K"],
+            "date_filed": [date(2024, 1, 2), date(2024, 5, 1)],
+            "sic": [7372, 7371],
+            "ff49": [36, 36],
+        }
+    )
+    den = edgar.denominator(filers)
+    assert den.height == 50
+    assert den["ff49"].to_list() == [*range(1, 50), None]
+    assert den["n_filers"].sum() == 2
+    assert den.filter(pl.col("ff49") == 1)["n_filers"].to_list() == [0]
+    assert den.filter(pl.col("ff49").is_null())["n_filers"].to_list() == [0]
+    assert den.schema["n_filers"] == pl.Int64
+
+
+@pytest.mark.data
+def test_real_siccodes49_asset_backed_unmapped():
+    assert edgar.ff49_of(6189) is None  # asset-backed securities: in no Siccodes49 range
+    assert edgar.ff49_of(6199) == 45
 
 
 def test_build_filers_end_to_end(tmp_path: Path, submissions_zip: Path):
@@ -169,7 +196,11 @@ def test_build_filers_end_to_end(tmp_path: Path, submissions_zip: Path):
         assert edgar.missing_from_zip([4444444], zf) == [4444444]
 
 
-def test_fetch_download_is_public_alias():
+def test_fetch_download_takes_src_and_path_by_keyword(tmp_path: Path, monkeypatch):
     from aideleg.acquire import fetch
 
-    assert fetch.download is fetch._download
+    calls = []
+    monkeypatch.setattr(fetch, "_download", lambda src, part: calls.append((src, part)))
+    src = fetch.Source("k", "https://www.sec.gov/x", "sec/x")
+    assert fetch.download(src=src, path=tmp_path / "x") is None
+    assert calls == [(src, tmp_path / "x")]
