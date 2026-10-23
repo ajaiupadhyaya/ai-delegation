@@ -21,6 +21,7 @@ BLS = "https://www.bls.gov/oes/special-requests"
 CENSUS = "https://www.census.gov/naics/concordances"
 ONET = "https://www.onetcenter.org"
 SEC_ARCHIVES = "https://www.sec.gov/Archives/edgar"
+SEC_DATA = "https://data.sec.gov/api/xbrl"
 
 
 def _aei(key: str, release: str, path: str, tree: str) -> Source:
@@ -139,6 +140,25 @@ SOURCES: list[Source] = [
     # members are read in place with zipfile and never extracted, hence unzip=False.
     Source("sec_submissions_bulk", f"{SEC_ARCHIVES}/daily-index/bulkdata/submissions.zip",
            "sec/submissions.zip"),
+    # Post-freeze robustness inputs (Plan 4, D20; PAP §11 A-entries). All but the public-float
+    # frame are pre-specified in §9.4; the frame is R29's cap proxy (outside §9.4).
+    Source("bls_soc_2010_2018", "https://www.bls.gov/soc/2018/soc_2010_to_2018_crosswalk.xlsx",
+           "bls/soc_2010_to_2018_crosswalk.xlsx"),
+    Source("onet_29_3_work_context",
+           f"{ONET}/dl_files/database/db_29_3_text/Work%20Context.txt",
+           "onet/db_29_3_work_context.txt"),
+    Source("onet_29_2_tasks", f"{ONET}/dl_files/database/db_29_2_text/Task%20Statements.txt",
+           "onet/db_29_2_task_statements.txt"),
+    _zip("oews_2025_nat", f"{BLS}/oesm25nat.zip", "bls"),
+    _zip("oews_2023_nat", f"{BLS}/oesm23nat.zip", "bls"),
+    _zip("oews_2023_ind", f"{BLS}/oesm23in4.zip", "bls"),
+    _zip("ff30_daily", f"{FF}/30_Industry_Portfolios_daily_CSV.zip", "french"),
+    _zip("ff48_daily", f"{FF}/48_Industry_Portfolios_daily_CSV.zip", "french"),
+    _zip("ff_siccodes30", f"{FF}/Siccodes30.zip", "french"),
+    _zip("ff_siccodes48", f"{FF}/Siccodes48.zip", "french"),
+    Source("sec_public_float_cy2024q2",
+           f"{SEC_DATA}/frames/dei/EntityPublicFloat/USD/CY2024Q2I.json",
+           "sec/public_float_CY2024Q2I.json"),
 ]
 
 _BY_KEY = {s.key: s for s in SOURCES}

@@ -215,6 +215,14 @@
     "bytes": 170359,
     "sha256": "c123b4c64840aff3568ae6c97256678719b88a74d45b6362dbefb5af34667b95"
   },
+  "bls_soc_2010_2018": {
+    "key": "bls_soc_2010_2018",
+    "url": "https://www.bls.gov/soc/2018/soc_2010_to_2018_crosswalk.xlsx",
+    "dest": "bls/soc_2010_to_2018_crosswalk.xlsx",
+    "retrieved_utc": "2026-10-23T15:27:35Z",
+    "bytes": 46630,
+    "sha256": "f3a847561562d3e5a30eb848f2902a5f7b02e9c48b3d7f2cc8879899fbc242a7"
+  },
   "census_naics02_07": {
     "key": "census_naics02_07",
     "url": "https://www.census.gov/naics/concordances/2002_to_2007_NAICS.xls",
@@ -279,6 +287,14 @@
     "bytes": 126022,
     "sha256": "40c74f53de40aec91c0017d80690cbba915f83a8bb414bcf2f884692f1749acb"
   },
+  "ff30_daily": {
+    "key": "ff30_daily",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/30_Industry_Portfolios_daily_CSV.zip",
+    "dest": "french/30_Industry_Portfolios_daily_CSV.zip",
+    "retrieved_utc": "2026-10-23T15:27:44Z",
+    "bytes": 2597362,
+    "sha256": "04a7a74fcd7c12e90461718e5ba8490e99d18c3e9323182b6c7a7b320e6cd34a"
+  },
   "ff3_monthly": {
     "key": "ff3_monthly",
     "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip",
@@ -286,6 +302,14 @@
     "retrieved_utc": "2026-10-22T21:55:15Z",
     "bytes": 13065,
     "sha256": "593f4fbef03181bc0b22ff6292f217689dd1fb79355049ca905d95b262040a66"
+  },
+  "ff48_daily": {
+    "key": "ff48_daily",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/48_Industry_Portfolios_daily_CSV.zip",
+    "dest": "french/48_Industry_Portfolios_daily_CSV.zip",
+    "retrieved_utc": "2026-10-23T15:27:45Z",
+    "bytes": 4098912,
+    "sha256": "95b65f678bfe12bedd32d60495b017482311de91c0e1f467d56762535e5e56e5"
   },
   "ff49_daily": {
     "key": "ff49_daily",
@@ -319,6 +343,22 @@
     "bytes": 11964,
     "sha256": "36756c5c2559648519ac4b22913d860c6afd865cfebce920e3e8927f8e2d10b7"
   },
+  "ff_siccodes30": {
+    "key": "ff_siccodes30",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes30.zip",
+    "dest": "french/Siccodes30.zip",
+    "retrieved_utc": "2026-10-23T15:27:45Z",
+    "bytes": 9244,
+    "sha256": "eddab10956ef97c8e5cb867ddf5c89e8126e75ea5cb889b2607941c52a2b6272"
+  },
+  "ff_siccodes48": {
+    "key": "ff_siccodes48",
+    "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes48.zip",
+    "dest": "french/Siccodes48.zip",
+    "retrieved_utc": "2026-10-23T15:27:45Z",
+    "bytes": 9551,
+    "sha256": "f37edffc024fe7b91b794dd933244430da2de212df2549dc448c0dfcca45d740"
+  },
   "ff_siccodes49": {
     "key": "ff_siccodes49",
     "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes49.zip",
@@ -351,6 +391,22 @@
     "bytes": 799734,
     "sha256": "5fed433373581fa648920435f937d95f2d3c0200e067409c6478dcdf1b853139"
   },
+  "oews_2023_ind": {
+    "key": "oews_2023_ind",
+    "url": "https://www.bls.gov/oes/special-requests/oesm23in4.zip",
+    "dest": "bls/oesm23in4.zip",
+    "retrieved_utc": "2026-10-23T15:27:44Z",
+    "bytes": 31801148,
+    "sha256": "2da9b5426eba1a3a58aa9eab26accbd3b81c3b48b1a6084dd1a0b73c60a49c06"
+  },
+  "oews_2023_nat": {
+    "key": "oews_2023_nat",
+    "url": "https://www.bls.gov/oes/special-requests/oesm23nat.zip",
+    "dest": "bls/oesm23nat.zip",
+    "retrieved_utc": "2026-10-23T15:27:43Z",
+    "bytes": 271583,
+    "sha256": "8ce5e8277c3ba68a19f468fec9b4da21170593d5ad9693a813f1afc04c80efa2"
+  },
   "oews_2024_ind": {
     "key": "oews_2024_ind",
     "url": "https://www.bls.gov/oes/special-requests/oesm24in4.zip",
@@ -375,6 +431,14 @@
     "bytes": 31514940,
     "sha256": "3ef0e42fab1b42a7dac8a3a9b3e7024f5d7a07eff308bff5fc91808061ec08e1"
   },
+  "oews_2025_nat": {
+    "key": "oews_2025_nat",
+    "url": "https://www.bls.gov/oes/special-requests/oesm25nat.zip",
+    "dest": "bls/oesm25nat.zip",
+    "retrieved_utc": "2026-10-23T15:27:43Z",
+    "bytes": 279525,
+    "sha256": "b5855a37f3e03e779f6fbf173d3bbc94aeeff33426aef32fa95ce6d025bab1af"
+  },
   "onet_2010_2019_crosswalk": {
     "key": "onet_2010_2019_crosswalk",
     "url": "https://www.onetcenter.org/taxonomy/2019/walk/2010_to_2019_Crosswalk.csv?fmt=csv",
@@ -382,6 +446,14 @@
     "retrieved_utc": "2026-10-21T21:54:31Z",
     "bytes": 108052,
     "sha256": "8f026a33134bfde5770308d1c6117cf70d9dd41c2b3467e6dd271d65bdeecc5a"
+  },
+  "onet_29_2_tasks": {
+    "key": "onet_29_2_tasks",
+    "url": "https://www.onetcenter.org/dl_files/database/db_29_2_text/Task%20Statements.txt",
+    "dest": "onet/db_29_2_task_statements.txt",
+    "retrieved_utc": "2026-10-23T15:27:43Z",
+    "bytes": 2759559,
+    "sha256": "fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a"
   },
   "onet_29_3_dwa_reference": {
     "key": "onet_29_3_dwa_reference",
@@ -406,6 +478,14 @@
     "retrieved_utc": "2026-10-22T02:15:59Z",
     "bytes": 1197935,
     "sha256": "6cb7098b09a6a03cc730b544bd7a17b1eac5d0b5beda947c4f901c42f5a713d6"
+  },
+  "onet_29_3_work_context": {
+    "key": "onet_29_3_work_context",
+    "url": "https://www.onetcenter.org/dl_files/database/db_29_3_text/Work%20Context.txt",
+    "dest": "onet/db_29_3_work_context.txt",
+    "retrieved_utc": "2026-10-23T15:27:42Z",
+    "bytes": 35975227,
+    "sha256": "dbe428983db68eef798bc6684f28cbb37bd42f485a5de26dfafe67fed7d99ecb"
   },
   "sec_docs_index": {
     "key": "sec_docs_index",
@@ -2918,6 +2998,14 @@
     "retrieved_utc": "2026-10-23T01:45:53Z",
     "bytes": 8842,
     "sha256": "9df314fcc258597e7c60d18cb7651f5a9409d6a23ae552d1a79b9617d2d53d0e"
+  },
+  "sec_public_float_cy2024q2": {
+    "key": "sec_public_float_cy2024q2",
+    "url": "https://data.sec.gov/api/xbrl/frames/dei/EntityPublicFloat/USD/CY2024Q2I.json",
+    "dest": "sec/public_float_CY2024Q2I.json",
+    "retrieved_utc": "2026-10-23T15:27:45Z",
+    "bytes": 578973,
+    "sha256": "d5ef310add8635a1f18c0362fcf6c10c11e830cad9549e615c8a59c622996c75"
   },
   "sec_submissions_bulk": {
     "key": "sec_submissions_bulk",

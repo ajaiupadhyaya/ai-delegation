@@ -1696,6 +1696,72 @@ primary result (§0.5).
 - Records: 47946; retrieved (UTC) from 2026-10-23T02:20:56Z to 2026-10-23T09:58:41Z
 - Set digest: `c416d6bcba7e41cf92d042d2ec5b09cea75ecd8bae5861f201044953ce3b5fed`
 
+### A-36. Addition: `bls_soc_2010_2018` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R14
+- URL: https://www.bls.gov/soc/2018/soc_2010_to_2018_crosswalk.xlsx
+- Retrieved (UTC): 2026-10-23T15:27:35Z; bytes: 46630; SHA-256: `f3a847561562d3e5a30eb848f2902a5f7b02e9c48b3d7f2cc8879899fbc242a7`
+
+### A-37. Addition: `onet_29_3_work_context` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R27
+- URL: https://www.onetcenter.org/dl_files/database/db_29_3_text/Work%20Context.txt
+- Retrieved (UTC): 2026-10-23T15:27:42Z; bytes: 35975227; SHA-256: `dbe428983db68eef798bc6684f28cbb37bd42f485a5de26dfafe67fed7d99ecb`
+
+### A-38. Addition: `oews_2025_nat` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R1
+- URL: https://www.bls.gov/oes/special-requests/oesm25nat.zip
+- Retrieved (UTC): 2026-10-23T15:27:43Z; bytes: 279525; SHA-256: `b5855a37f3e03e779f6fbf173d3bbc94aeeff33426aef32fa95ce6d025bab1af`
+
+### A-39. Addition: `oews_2023_nat` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R32
+- URL: https://www.bls.gov/oes/special-requests/oesm23nat.zip
+- Retrieved (UTC): 2026-10-23T15:27:43Z; bytes: 271583; SHA-256: `8ce5e8277c3ba68a19f468fec9b4da21170593d5ad9693a813f1afc04c80efa2`
+
+### A-40. Addition: `oews_2023_ind` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R32
+- URL: https://www.bls.gov/oes/special-requests/oesm23in4.zip
+- Retrieved (UTC): 2026-10-23T15:27:44Z; bytes: 31801148; SHA-256: `2da9b5426eba1a3a58aa9eab26accbd3b81c3b48b1a6084dd1a0b73c60a49c06`
+
+### A-41. Addition: `onet_29_2_tasks` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R32
+- URL: https://www.onetcenter.org/dl_files/database/db_29_2_text/Task%20Statements.txt
+- Retrieved (UTC): 2026-10-23T15:27:43Z; bytes: 2759559; SHA-256: `fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a`
+
+### A-42. Addition: `ff30_daily` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R6
+- URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/30_Industry_Portfolios_daily_CSV.zip
+- Retrieved (UTC): 2026-10-23T15:27:44Z; bytes: 2597362; SHA-256: `04a7a74fcd7c12e90461718e5ba8490e99d18c3e9323182b6c7a7b320e6cd34a`
+
+### A-43. Addition: `ff48_daily` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R6
+- URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/48_Industry_Portfolios_daily_CSV.zip
+- Retrieved (UTC): 2026-10-23T15:27:45Z; bytes: 4098912; SHA-256: `95b65f678bfe12bedd32d60495b017482311de91c0e1f467d56762535e5e56e5`
+
+### A-44. Addition: `ff_siccodes30` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R6
+- URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes30.zip
+- Retrieved (UTC): 2026-10-23T15:27:45Z; bytes: 9244; SHA-256: `eddab10956ef97c8e5cb867ddf5c89e8126e75ea5cb889b2607941c52a2b6272`
+
+### A-45. Addition: `ff_siccodes48` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R6
+- URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/Siccodes48.zip
+- Retrieved (UTC): 2026-10-23T15:27:45Z; bytes: 9551; SHA-256: `f37edffc024fe7b91b794dd933244430da2de212df2549dc448c0dfcca45d740`
+
+### A-46. Addition: `sec_public_float_cy2024q2` (2026-10-23)
+- Type: addition under D20 (outside §9.4; R29 cap proxy; not a deviation)
+- Used by: R29
+- URL: https://data.sec.gov/api/xbrl/frames/dei/EntityPublicFloat/USD/CY2024Q2I.json
+- Retrieved (UTC): 2026-10-23T15:27:45Z; bytes: 578973; SHA-256: `d5ef310add8635a1f18c0362fcf6c10c11e830cad9549e615c8a59c622996c75`
+
 ### Clarifications (pre-result)
 
 ### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)

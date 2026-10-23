@@ -1,3 +1,5 @@
+import json
+import subprocess
 from urllib.parse import urlparse
 
 import pytest
@@ -23,6 +25,15 @@ REQUIRED = (
     | {f"sec_formidx_{y}q{q}" for y in range(2019, 2026) for q in range(1, 5)}
     | {"sec_submissions_bulk"}
 )
+
+# Post-freeze robustness inputs (Plan 4 Task 3, D20): logged as PAP §11 A-entries.
+POST_FREEZE = {
+    "bls_soc_2010_2018", "onet_29_3_work_context", "onet_29_2_tasks",
+    "oews_2025_nat", "oews_2023_nat", "oews_2023_ind",
+    "ff30_daily", "ff48_daily", "ff_siccodes30", "ff_siccodes48",
+    "sec_public_float_cy2024q2",
+}
+REQUIRED = REQUIRED | POST_FREEZE
 
 # Zips read in place (members opened with zipfile), never extracted.
 READ_IN_PLACE = {"sec_submissions_bulk"}
@@ -85,3 +96,40 @@ def test_sources_include_full_index_and_bulk():
     assert bulk.url == "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"
     assert bulk.dest == "sec/submissions.zip"
     assert not bulk.unzip
+
+
+def test_post_freeze_keys_registered():
+    onet, ff = "https://www.onetcenter.org/dl_files/database", sources.FF
+    bls = "https://www.bls.gov/oes/special-requests"
+    expected = {
+        "bls_soc_2010_2018": ("https://www.bls.gov/soc/2018/soc_2010_to_2018_crosswalk.xlsx",
+                              "bls/soc_2010_to_2018_crosswalk.xlsx", False),
+        "onet_29_3_work_context": (f"{onet}/db_29_3_text/Work%20Context.txt",
+                                   "onet/db_29_3_work_context.txt", False),
+        "onet_29_2_tasks": (f"{onet}/db_29_2_text/Task%20Statements.txt",
+                            "onet/db_29_2_task_statements.txt", False),
+        "oews_2025_nat": (f"{bls}/oesm25nat.zip", "bls/oesm25nat.zip", True),
+        "oews_2023_nat": (f"{bls}/oesm23nat.zip", "bls/oesm23nat.zip", True),
+        "oews_2023_ind": (f"{bls}/oesm23in4.zip", "bls/oesm23in4.zip", True),
+        "ff30_daily": (f"{ff}/30_Industry_Portfolios_daily_CSV.zip",
+                       "french/30_Industry_Portfolios_daily_CSV.zip", True),
+        "ff48_daily": (f"{ff}/48_Industry_Portfolios_daily_CSV.zip",
+                       "french/48_Industry_Portfolios_daily_CSV.zip", True),
+        "ff_siccodes30": (f"{ff}/Siccodes30.zip", "french/Siccodes30.zip", True),
+        "ff_siccodes48": (f"{ff}/Siccodes48.zip", "french/Siccodes48.zip", True),
+        "sec_public_float_cy2024q2": (
+            "https://data.sec.gov/api/xbrl/frames/dei/EntityPublicFloat/USD/CY2024Q2I.json",
+            "sec/public_float_CY2024Q2I.json", False),
+    }
+    assert set(expected) == POST_FREEZE
+    for key, (url, dest, unzip) in expected.items():
+        s = sources.by_key(key)
+        assert (s.url, s.dest, s.unzip) == (url, dest, unzip), key
+
+
+def test_post_freeze_keys_are_robustness_only():
+    frozen = subprocess.run(
+        ["git", "show", "pap-v1:data/raw/MANIFEST.json"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert not POST_FREEZE & set(json.loads(frozen))
