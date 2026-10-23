@@ -2,6 +2,7 @@
 inputs, rel = 1e-12), and an import scan that keeps the adapter a pure re-export layer."""
 
 import ast
+import importlib
 import json
 import math
 import sys
@@ -73,11 +74,16 @@ def test_h2_reproduces_committed():
 def test_h4_reproduces_committed():
     committed = up.committed_rq1()["results"]["H4"]
     res = up.estimate_h4(up.geo_sample().frame)
+    # PAP §11 C-32 / C-69: H4's `mix` is order-dependent at ~1e-14, which moves p-values by up
+    # to ~1e-12 relative (p_family = 4.8e-24 is an extreme F tail). Estimates, SEs and F are
+    # compared raw at rel 1e-12; every p is compared through -log10 p at rel 1e-12, which allows
+    # about 5.4e-11 relative on p_family.
     for n in ("log_aui", "log_income"):
-        _close(res.coefs[n].estimate, committed["coefs"][n]["estimate"])
+        c, w = res.coefs[n], committed["coefs"][n]
+        _close(c.estimate, w["estimate"])
+        _close(c.se, w["se"])
+        _close(-math.log10(c.p), -math.log10(w["p"]))
     _close(res.diagnostics["F"], committed["diagnostics"]["F"])
-    # PAP §11 C-32 / C-69: H4's `mix` is order-dependent at ~1e-14, which moves a p of 4.8e-24
-    # by ~1e-12 relative; -log10 p spreads ~1e-14 relative, so this is an equality check.
     _close(-math.log10(res.p_family), -math.log10(committed["p_family"]))
 
 
@@ -138,50 +144,50 @@ def test_adapter_paths_and_reexports():
     assert up.RQ3_DIR == ROOT / "docs/results/rq3"
     assert up.H6_DIR == ROOT / "docs/results/h6"
     assert up.WORK_DIR == DERIVED / "robustness"
-    names = [
-        "assert_confirmatory_recorded",
-        "ConfirmatoryNotRecorded",
-        "WORDING",
-        "FORBIDDEN_PHRASES",
-        "build_task_rows",
-        "TaskRows",
-        "task_families",
-        "two_month_mean",
-        "estimate_h1",
-        "estimate_h3",
-        "build_h2_panel",
-        "estimate_h2",
-        "build_geo_sample",
-        "estimate_h4",
-        "holm",
-        "HypothesisResult",
-        "Coef",
-        "spearman_bootstrap",
-        "bootstrap_indices",
-        "by_wage_decile",
-        "Event",
-        "EVENTS",
-        "run_events",
-        "run_terciles",
-        "run_fm",
-        "WINDOWS",
-        "vector_test",
-        "exposures",
-        "zero_assigned",
-        "zero_assigned_lines",
-        "PRIMARY_TERMS",
-        "fts_phrases",
-        "fts_hits",
-        "hits_from_saved",
-        "saved_ranges",
-        "numerator",
-        "denominator",
-        "FORMS",
-        "talk_table",
-        "gap",
-        "spearman_ci",
-        "gap_returns",
-        "T_YEAR",
+    # Each re-export is the upstream object itself (identity), not a copy or a wrapper.
+    reexports = {
+        "aideleg.rq3.guard": ["assert_confirmatory_recorded", "ConfirmatoryNotRecorded"],
+        "aideleg.results.common": ["WORDING", "FORBIDDEN_PHRASES"],
+        "aideleg.rq1.rows": ["build_task_rows", "TaskRows"],
+        "aideleg.rq1.inputs": ["task_families", "two_month_mean"],
+        "aideleg.rq1.h1h3": ["estimate_h1", "estimate_h3"],
+        "aideleg.rq1.h2": ["build_h2_panel", "estimate_h2"],
+        "aideleg.rq1.h4": ["build_geo_sample", "estimate_h4", "GeoSample"],
+        "aideleg.rq1.family": ["holm"],
+        "aideleg.rq1.result": ["HypothesisResult", "Coef"],
+        "aideleg.rq1.confirm": ["Inputs"],
+        "aideleg.describe.rq2": [
+            "spearman_bootstrap",
+            "bootstrap_indices",
+            "AEI_COLS",
+            "BENCH_COLS",
+        ],
+        "aideleg.describe.anatomy": ["by_wage_decile"],
+        "aideleg.rq3.events": ["Event", "EVENTS", "run_events"],
+        "aideleg.rq3.terciles": ["run_terciles", "WINDOWS"],
+        "aideleg.rq3.fama_macbeth": ["run_fm"],
+        "aideleg.rq3.inference": ["vector_test"],
+        "aideleg.rq3.data": ["exposures", "zero_assigned"],
+        "aideleg.rq3.report": ["zero_assigned_lines"],
+        "aideleg.h6.dictionary": ["PRIMARY_TERMS", "fts_phrases"],
+        "aideleg.h6.edgar": [
+            "fts_hits",
+            "hits_from_saved",
+            "saved_ranges",
+            "numerator",
+            "denominator",
+            "FORMS",
+        ],
+        "aideleg.h6.talk": ["talk_table", "gap", "spearman_ci", "gap_returns", "T_YEAR"],
+    }
+    not_same = [
+        f"{mod}.{n}"
+        for mod, names in reexports.items()
+        for n in names
+        if getattr(up, n, None) is not getattr(importlib.import_module(mod), n)
+    ]
+    assert not not_same, not_same
+    own = [
         "rq1_inputs",
         "task_rows",
         "h2_panel",
@@ -191,8 +197,8 @@ def test_adapter_paths_and_reexports():
         "rq2_correlations",
         "to_rq3_expo",
     ]
-    missing = [n for n in names if not hasattr(up, n)]
-    assert not missing, missing
+    assert all(callable(getattr(up, n, None)) for n in own)
+    names = [n for ns in reexports.values() for n in ns] + own
     assert set(names) <= set(up.__all__)
 
 
