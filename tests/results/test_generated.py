@@ -73,9 +73,10 @@ def test_figures_regenerate_identically(runs):
     (_, _, f1), (_, _, f2) = runs
     names = sorted(p.name for p in f1.iterdir())
     assert names == sorted(p.name for p in f2.iterdir())
-    # Only the RQ1/RQ2 figures these generators write; Plan 3's fig_rq3_* share FIG_DIR.
+    # Later plans' figures share FIG_DIR; only their known prefixes are excluded, so an orphan
+    # figure is still caught.
     assert names == sorted(p.name for p in FIG_DIR.iterdir() if p.suffix in (".pdf", ".png")
-                           and p.name.startswith(("fig_rq1_", "fig_rq2_")))
+                           and not p.name.startswith(("fig_rq3_", "fig_h6_")))
     differ = [n for n in names if (f1 / n).read_bytes() != (f2 / n).read_bytes()]
     assert not differ, f"figures differ between two runs: {differ}"
     stale = [n for n in names if not _figures_equal(FIG_DIR / n, f1 / n)]

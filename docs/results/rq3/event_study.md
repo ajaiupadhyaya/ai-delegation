@@ -7,10 +7,11 @@ Exploratory analysis (PAP §8.3, D19). Nothing here is a confirmatory test; the 
 ## The event rule (D19)
 
 The events are ChatGPT (2022-11-30), which the spec names (§5.4), and every flagship model announcement by OpenAI, Anthropic or Google's AI labs (listed as "Google" or "Google DeepMind") in a named source between 2022-11-30 and 2025-03-31 (PAP §8.3 D19, P7).
-- **Named source.** Wikipedia, "List of large language models", revision 1381207107.
+- **Named source.** Wikipedia, "List of large language models", revision 1381207107 [facts §4].
 - **Flagship.** Every row of that source from those developers, except open-weights small models (Gemma) and a tier of a model family already listed (Gemini Ultra, a tier of Gemini 1.0).
-- **Day.** The source's date where it gives a day. Otherwise the developer's own announcement date in the source's month. Where the developer's page and the developer's own model identifier disagree on the day, the earlier date is used; this applies only to Claude 3.5 (page 2024-06-21, identifier `claude-3-5-sonnet-20240620`), so 2024-06-20 is used.
-- **Trading days.** Day 0 is the announcement date; if that is not a trading day, day 0 is the next trading day, checked mechanically against the dates present in both the frozen industry and factor files (the table below).
+- **Day.** The source's date where it gives a day. Otherwise the developer's own announcement date in the source's month, verified in the facts file. Where the developer's page and the developer's own model identifier disagree on the day, the earlier date is used, so that the [0, +k] window contains the announcement either way. This applies only to Claude 3.5: the page shows 2024-06-21 and the identifier `claude-3-5-sonnet-20240620` gives 2024-06-20.
+- **Trading days.** Day 0 is the announcement date; if that is not a trading day, day 0 is the next trading day. Whether any date is an NYSE holiday is unverified for 2022–2025 [facts §4]. It is checked mechanically after the tag against the dates in the frozen files.
+- The mechanical check is the event-days table below: day 0 is the first date on or after the announcement present in both the industry and the factor files.
 - Gemini 2.0 uses the source's date, 2025-02-05; the first 2.0 Flash Experimental announcement, 2024-12-11, is not used.
 - Only model-release dates are used, never dates chosen from market reactions.
 
@@ -147,6 +148,8 @@ Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled `z_deleg
 
 ## Dropped industries
 
+For a missing return (per event; reason in brackets):
+
 - ChatGPT: none
 - GPT-4: none
 - PaLM 2: none
@@ -161,5 +164,10 @@ Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled `z_deleg
 - Claude 3.7: none
 - GPT-4.5: none
 - Gemini 2.5: none
+
+For a missing exposure value (every event):
+
+- Exposure missing (z_delegation, Design A_r2): none; excluded from those regressions' n
+- Exposure missing (z_delegation, Design A_pooled): none; excluded from those regressions' n
 
 AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market.

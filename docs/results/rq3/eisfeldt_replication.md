@@ -36,6 +36,14 @@ A_r2 first, then A_pooled (look-ahead).
 
 ## Dropped industries
 
+For a missing return (reason in brackets):
+
 - ChatGPT: none
+
+For a missing exposure value:
+
+- Exposure missing (z_aioe, Design A_r2 rows): none; excluded from those regressions' n
+- Exposure missing (z_delegation, Design A_r2): none; excluded from those regressions' n
+- Exposure missing (z_delegation, Design A_pooled): none; excluded from those regressions' n
 
 AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market.

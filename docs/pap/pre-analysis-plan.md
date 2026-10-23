@@ -1766,4 +1766,10 @@ primary result (§0.5).
 - Results seen: RQ1 confirmatory results seen; H5/H6 not yet run
 - Rule: `python -m aideleg.h6 all` = build + talk + secondary + summary from saved raw files, with no network; acquisition is the separate `h6-data` target.
 
+### C-44. Clarification: Event-study defaults: returns, HC3 reference, event-window drops (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 5 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results seen; event-study results seen
+- Rule: Three defaults Task 5 fixed where PAP §8.3 D19 is silent: (1) industry returns are the daily value-weighted FF49 returns, following §3.1; (2) each CAR-on-exposure regression's HC3 95% CI and p use the normal reference (statsmodels cov_type="HC3" default), matching Plan 2's H4; (3) an industry missing any return in the event window [0, max k] is dropped at every horizon of that event (as is one missing any return in [-250, -21]). These were fixed in code before any event-study output was read and are unchanged. After the outputs were seen, one label sentence in event_study.md was corrected (A_pooled pools r2-r6, as exposure.POOLED_RELEASES says, not r3-r6); no estimate was affected.
+
 ### Deviations after the freeze

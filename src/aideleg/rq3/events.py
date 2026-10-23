@@ -92,17 +92,24 @@ RULE = [
     "The events are ChatGPT (2022-11-30), which the spec names (§5.4), and every flagship model "
     "announcement by OpenAI, Anthropic or Google's AI labs (listed as \"Google\" or \"Google "
     "DeepMind\") in a named source between 2022-11-30 and 2025-03-31 (PAP §8.3 D19, P7).",
-    "- **Named source.** Wikipedia, \"List of large language models\", revision 1381207107.",
+    "- **Named source.** Wikipedia, \"List of large language models\", revision 1381207107 "
+    "[facts §4].",
     "- **Flagship.** Every row of that source from those developers, except open-weights small "
     "models (Gemma) and a tier of a model family already listed (Gemini Ultra, a tier of Gemini "
     "1.0).",
+    # Day and Trading days: PAP §8.3 D19, verbatim.
     "- **Day.** The source's date where it gives a day. Otherwise the developer's own "
-    "announcement date in the source's month. Where the developer's page and the developer's own "
-    "model identifier disagree on the day, the earlier date is used; this applies only to Claude "
-    "3.5 (page 2024-06-21, identifier `claude-3-5-sonnet-20240620`), so 2024-06-20 is used.",
+    "announcement date in the source's month, verified in the facts file. Where the developer's "
+    "page and the developer's own model identifier disagree on the day, the earlier date is "
+    "used, so that the [0, +k] window contains the announcement either way. This applies only "
+    "to Claude 3.5: the page shows 2024-06-21 and the identifier `claude-3-5-sonnet-20240620` "
+    "gives 2024-06-20.",
     "- **Trading days.** Day 0 is the announcement date; if that is not a trading day, day 0 is "
-    "the next trading day, checked mechanically against the dates present in both the frozen "
-    "industry and factor files (the table below).",
+    "the next trading day. Whether any date is an NYSE holiday is unverified for 2022–2025 "
+    "[facts §4]. It is checked mechanically after the tag against the dates in the frozen "
+    "files.",
+    "- The mechanical check is the event-days table below: day 0 is the first date on or after "
+    "the announcement present in both the industry and the factor files.",
     "- Gemini 2.0 uses the source's date, 2025-02-05; the first 2.0 Flash Experimental "
     "announcement, 2024-12-11, is not used.",
     "- Only model-release dates are used, never dates chosen from market reactions.",
@@ -301,6 +308,20 @@ def _method_lines(n_ind: int) -> list[str]:
     ]
 
 
+def _exposure_missing(expo: pl.DataFrame, names: list[str], design: str, col: str
+                      ) -> list[str]:
+    """Industries in `names` with no `col` value for `design` in `expo` (null or absent)."""
+    ex = expo.filter(pl.col("design") == design).select("ff49_short", col)
+    have = {r["ff49_short"] for r in ex.iter_rows(named=True) if r[col] is not None}
+    return [n for n in names if n not in have]
+
+
+def _exposure_lines(missing: dict[str, list[str]]) -> list[str]:
+    return [f"- Exposure missing ({key}): "
+            f"{', '.join(f'{n} (exposure)' for n in v) or 'none'}; excluded from those "
+            "regressions' n" for key, v in missing.items()]
+
+
 def _dropped_lines(drops: dict[str, pl.DataFrame]) -> list[str]:
     out = []
     for ev, cars in drops.items():
@@ -312,7 +333,8 @@ def _dropped_lines(drops: dict[str, pl.DataFrame]) -> list[str]:
 
 def _event_study_md(df: pl.DataFrame, ed: pl.DataFrame, events: Sequence[Event],
                     designs: Sequence[str], zero: pl.DataFrame | None,
-                    drops: dict[str, pl.DataFrame], n_ind: int) -> str:
+                    drops: dict[str, pl.DataFrame], n_ind: int,
+                    missing: dict[str, list[str]]) -> str:
     is_d19 = tuple(events) == EVENTS
     ev_title = (f"The {len(EVENTS)} dates under the rule" if is_d19
                 else f"Events in this run ({len(events)}; not the D19 list)")
@@ -342,14 +364,16 @@ def _event_study_md(df: pl.DataFrame, ed: pl.DataFrame, events: Sequence[Event],
         "Per event and horizon: CAR on A_r2 `z_delegation`, then CAR on A_pooled "
         "`z_delegation` (look-ahead), each alone. Full precision in `event_study.csv`.", "",
         *_TABLE_HEAD, *[_fmt_row(r) for r in main.iter_rows(named=True)], "",
-        "## Dropped industries", "", *_dropped_lines(drops), "",
+        "## Dropped industries", "",
+        "For a missing return (per event; reason in brackets):", "", *_dropped_lines(drops), "",
+        "For a missing exposure value (every event):", "", *_exposure_lines(missing), "",
         WORDING, "",
     ]
     return "\n".join(lines)
 
 
 def _esz_md(df: pl.DataFrame, day0: date, designs: Sequence[str], zero: pl.DataFrame | None,
-            cars: pl.DataFrame) -> str:
+            cars: pl.DataFrame, missing: dict[str, list[str]]) -> str:
     esz = df.filter(pl.col("horizon") == ESZ_HORIZON)
     alone = esz.filter(pl.col("design").is_null()).row(0, named=True)
     sign = "positive" if alone["b"] > 0 else "negative" if alone["b"] < 0 else "zero"
@@ -376,7 +400,9 @@ def _esz_md(df: pl.DataFrame, day0: date, designs: Sequence[str], zero: pl.DataF
         "## Step 2: horse race, `z_aioe` with `z_delegation`", "",
         "A_r2 first, then A_pooled (look-ahead).", "",
         *_TABLE_HEAD, *[_fmt_row(r) for r in race.iter_rows(named=True)], "",
-        "## Dropped industries", "", *_dropped_lines({ESZ_EVENT: cars}), "",
+        "## Dropped industries", "",
+        "For a missing return (reason in brackets):", "", *_dropped_lines({ESZ_EVENT: cars}), "",
+        "For a missing exposure value:", "", *_exposure_lines(missing), "",
         WORDING, "",
     ]
     return "\n".join(lines)
@@ -464,12 +490,17 @@ def run_events(out_dir: Path, events: Sequence[Event] = EVENTS,
               "se": pl.Float64, "ci_lo": pl.Float64, "ci_hi": pl.Float64, "p": pl.Float64,
               "n": pl.Int64}
     df = pl.DataFrame(rows, schema=schema).select(COLUMNS)
-    n_ind = len([c for c in returns.columns if c != "date"])
-    text = _event_study_md(df, ed, events, designs, zero, drops, n_ind)
+    ind = [c for c in returns.columns if c != "date"]
+    n_ind = len(ind)
+    missing = {f"z_delegation, Design {d}": _exposure_missing(expo, ind, d, "z_delegation")
+               for d in designs}
+    text = _event_study_md(df, ed, events, designs, zero, drops, n_ind, missing)
     check_text(text)
     esz_text = None
     if esz_cars is not None:
-        esz_text = _esz_md(df, d0[ESZ_EVENT], designs, zero, esz_cars)
+        esz_missing = {f"z_aioe, Design {designs[0]} rows":
+                       _exposure_missing(expo, ind, designs[0], "z_aioe"), **missing}
+        esz_text = _esz_md(df, d0[ESZ_EVENT], designs, zero, esz_cars, esz_missing)
         check_text(esz_text)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_csv(df, out_dir / "event_study.csv")

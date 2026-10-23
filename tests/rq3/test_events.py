@@ -270,3 +270,29 @@ def test_rerun_is_byte_identical(monkeypatch, tmp_path):
     for f in ("event_study.md", "event_study.csv", "event_days.csv", "eisfeldt_replication.md",
               "fig_rq3_event_slopes.png", "fig_rq3_event_slopes.pdf"):
         assert (a / f).read_bytes() == (b / f).read_bytes(), f
+
+
+def test_missing_exposure_is_listed_not_silent(monkeypatch, tmp_path):
+    returns, factors = _synth(noise=0.5)
+    expo = _expo().with_columns(
+        pl.when((pl.col("ff49_short") == "I3") & (pl.col("design") == "A_r2"))
+        .then(None).otherwise(pl.col("z_delegation")).alias("z_delegation"))
+    _patch(monkeypatch, returns, factors, expo)
+    df = events.run_events(tmp_path, events=(EVENTS[0],), expo=expo)
+    main = df.filter(pl.col("horizon") == 5)
+    assert dict(zip(main["design"], main["n"], strict=True)) == {"A_r2": 9, "A_pooled": 10}
+    md = (tmp_path / "event_study.md").read_text(encoding="utf-8")
+    assert "- Exposure missing (z_delegation, Design A_r2): I3 (exposure)" in md
+    assert "- Exposure missing (z_delegation, Design A_pooled): none" in md
+    esz = (tmp_path / "eisfeldt_replication.md").read_text(encoding="utf-8")
+    assert "I3 (exposure)" in esz
+
+
+def test_rule_copies_d19_day_and_trading_day_clauses():
+    text = "\n".join(events.RULE)
+    for phrase in ("verified in the facts file",
+                   "so that the [0, +k] window contains the announcement either way",
+                   "Whether any date is an NYSE holiday is unverified for 2022–2025",
+                   "It is checked mechanically after the tag against the dates in the frozen "
+                   "files."):
+        assert phrase in text, phrase
