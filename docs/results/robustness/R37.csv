@@ -1,0 +1,2 @@
+row_id,part,variant,applies_to,label,estimand,unit,estimate,scale,ci_lo,ci_hi,stat,p,null,crit_0025,crit_005,n,n_dropped,dropped,note
+R37,within_r6,"release=r6; source=claude_ai; outcome=automation_pct; periods=2026-04-01,2026-05-01",H2,robustness; descriptive,May minus April (pp),pp of automation_pct,-0.13163543630090402,0.09695921035742815,-0.32187540248455304,0.058604529882745005,-1.3576372560754801,0.1748493875373886,May minus April = 0,,,2266,,"","SE clustered by task, df 1132, G_task 1133; n_tasks 1133"
