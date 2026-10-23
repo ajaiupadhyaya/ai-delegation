@@ -12,6 +12,7 @@ from __future__ import annotations
 import html as _html
 import re
 import unicodedata
+from bisect import bisect_left
 from collections.abc import Sequence
 
 PRIMARY_TERMS: tuple[str, ...] = (
@@ -51,24 +52,26 @@ _TAG = re.compile(r"<[^>]*>")
 
 
 def clean_text(raw: str, html: bool = True) -> str:
-    """Drop header/script/style blocks, blank remaining tags, unescape, NFKC-normalise."""
+    """Drop header/script/style blocks, blank remaining tags, unescape, NFKC-normalise,
+    then delete soft hyphens (U+00AD) and zero-width spaces (U+200B)."""
     text = raw
     if html:
         text = _BLOCKS.sub(" ", text)
         text = _TAG.sub(" ", text)
         text = _html.unescape(text)
-    return unicodedata.normalize("NFKC", text)
+    text = unicodedata.normalize("NFKC", text)
+    return text.replace("\u00ad", "").replace("\u200b", "")
 
 
 def _primary_re(term: str, plural: bool) -> re.Pattern[str]:
-    body = r"[\s-]+".join(re.escape(w) for w in term.split(" "))
+    body = r"[\s\-\u2010\u2011]+".join(re.escape(w) for w in term.split(" "))
     if plural:
         body += "s?"
     return re.compile(r"(?<!\w)" + body + r"(?!\w)", re.IGNORECASE)
 
 
 def _acronym_re(acr: str) -> re.Pattern[str]:
-    return re.compile(r"(?<![A-Za-z0-9])" + re.escape(acr) + r"(?![A-Za-z0-9])")
+    return re.compile(r"(?<![^\W_])" + re.escape(acr) + r"(?![^\W_])")
 
 
 def count_terms(text: str, terms: Sequence[str] = PRIMARY_TERMS) -> dict:
@@ -82,13 +85,16 @@ def count_terms(text: str, terms: Sequence[str] = PRIMARY_TERMS) -> dict:
             spans.append((m.start(), m.end(), "acronym", a))
 
     spans.sort(key=lambda s: (-(s[1] - s[0]), s[0]))
-    taken: list[tuple[int, int]] = []
+    starts: list[int] = []  # accepted spans, disjoint, kept sorted by start
+    ends: list[int] = []
     primary = {t: 0 for t in terms}
     acronym = {a: 0 for a in ACRONYMS}
     for start, end, kind, name in spans:
-        if any(start < e and s < end for s, e in taken):
+        i = bisect_left(starts, start)
+        if (i > 0 and ends[i - 1] > start) or (i < len(starts) and starts[i] < end):
             continue
-        taken.append((start, end))
+        starts.insert(i, start)
+        ends.insert(i, end)
         (primary if kind == "primary" else acronym)[name] += 1
 
     # The gate looks for any occurrence of a GATE term, whatever the span resolution

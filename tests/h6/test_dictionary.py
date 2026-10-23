@@ -121,3 +121,50 @@ def test_clean_text_plain():
 @pytest.mark.parametrize("text,n", [("a  b\nc", 3), ("", 0)])
 def test_word_count(text, n):
     assert count_terms(text)["n_words"] == n
+
+
+def test_unicode_hyphens_and_invisible_characters():
+    assert count_terms("machine‑learning, machine‐learning")["primary"]["machine learning"] == 2
+    out = clean_text("artificial intel&shy;ligence and zero​width")
+    assert out == "artificial intelligence and zerowidth"
+    assert count_terms(out)["primary"]["artificial intelligence"] == 1
+    assert "­" not in clean_text("a­b", html=False)
+
+
+def test_acronym_boundary_is_unicode_letter_or_digit():
+    c = count_terms("artificial intelligence éAI AIé _AI_ (AI)")
+    assert c["acronym"]["AI"] == 2
+
+
+def test_generative_artificial_intelligence_alone_gates():
+    c = count_terms("generative artificial intelligence and AI")
+    assert c["gated"] is True
+    assert c["acronym"]["AI"] == 1
+
+
+def _naive(text):
+
+    from aideleg.h6 import dictionary as d
+
+    spans = []
+    for t in d.PRIMARY_TERMS:
+        spans += [(m.start(), m.end(), t) for m in d._primary_re(t, t in d.PLURAL).finditer(text)]
+    for a in d.ACRONYMS:
+        spans += [(m.start(), m.end(), a) for m in d._acronym_re(a).finditer(text)]
+    spans.sort(key=lambda s: (-(s[1] - s[0]), s[0]))
+    taken, n = [], {}
+    for s, e, name in spans:
+        if any(s < te and ts < e for ts, te in taken):
+            continue
+        taken.append((s, e))
+        n[name] = n.get(name, 0) + 1
+    return n
+
+
+def test_overlap_resolution_matches_naive():
+    unit = "Generative AI, generative artificial intelligence, AI, LLMs, A.I. neural networks. "
+    text = unit * 300
+    c = count_terms(text)
+    got = {k: v for k, v in {**c["primary"], **c["acronym"]}.items() if v}
+    assert got == _naive(text)
+    assert c["primary"]["generative AI"] == 300

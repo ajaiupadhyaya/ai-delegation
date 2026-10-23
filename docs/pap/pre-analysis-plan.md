@@ -1790,4 +1790,10 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results seen; event-study, tercile and Fama–MacBeth results seen
 - Rule: After the Fama–MacBeth outputs were seen, the drop list in fama_macbeth.md was changed to label a size or BE/ME that is present but <= 0 apart from an absent one (data.beme gained keep_nonpositive, used only for this label); Smoke, whose Sum of BE / Sum of ME is negative in every year used, now reads 'BE/ME <= 0 (all months)' instead of 'BE/ME (all months)'. The exclusion rule (C-46 (3)) is unchanged; no estimate changed: fama_macbeth.csv is byte-identical to commit 575b093 and only that label differs in fama_macbeth.md.
 
+### C-48. Clarification: H6 dictionary matching defaults (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 3 Task 9 review fix, before any H6 output was produced
+- Results seen: RQ1 and H5 confirmatory results seen; event-study, tercile and Fama–MacBeth results seen; H6 not yet run
+- Rule: Defaults for the D12 matching rules where the PAP is silent, fixed in code before any H6 output was produced: (a) the contents of ix:header, script and style elements are dropped; (b) every other tag is replaced by a space; (c) the acronym gate is a raw, case-insensitive occurrence of a GATE term (with the space/hyphen rule, and plural rule for plural terms), independent of the terms argument and of overlap resolution, so 'generative artificial intelligence' alone gates; (d) primary terms and acronyms are resolved jointly, longest span then leftmost, non-overlapping; (e) a space in a term matches any run of whitespace and hyphens, including U+2010 and U+2011, and soft hyphens (U+00AD) and zero-width spaces (U+200B) are deleted in cleaning; (f) acronym boundaries are Unicode letters and digits (an underscore is not a boundary character); (g) n_words is the number of non-whitespace tokens (\S+) after cleaning. Plain-text documents go through clean_text with html=False (note for Task 13).
+
 ### Deviations after the freeze
