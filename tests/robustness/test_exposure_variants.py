@@ -46,7 +46,7 @@ def test_pooled_default_equals_exposure_module():
         ff49="industry", z_delegation="z_delegation", z_usage="z_usage"
     )
     want = build_exposure("A_pooled").select("ff49", "z_delegation", "z_usage")
-    assert_frame_equal(got.sort("ff49"), want.sort("ff49"))
+    assert_frame_equal(got.sort("ff49"), want.sort("ff49"), check_exact=True)
 
 
 @pytest.mark.data

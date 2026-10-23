@@ -1,8 +1,8 @@
 """Exposure variants for the PAP §8.2 rows that rebuild an exposure index (Plan 4 Tasks 5-6).
 
 AEI data are conversations matched to O*NET tasks. A variant index measures the same thing
-as the primary one under a different, pre-specified construction; it says nothing about job
-risk or displacement in the labour market.
+as the primary one under a different, pre-specified construction. The study's one
+disclaimer is `aideleg.results.common.WORDING`.
 
 `ExposureSpec()` is the primary Design B construction, and `variant_exposure(ExposureSpec())`
 reproduces the frozen vector (PAP §9.3). Each option maps onto an existing parameter:
