@@ -3,12 +3,12 @@
 - `acquire [--filers] [--fts] [--docs]` is the only network step: `--filers` fetches the EDGAR
   full-index `form.idx` files and the bulk submissions zip, `--fts` the full-text-search numerator
   (one MANIFEST record per response; saved responses are not refetched), `--docs` the 10-K
-  documents of the secondary measure (Plan 3 Task 13; until then it says so and does nothing).
-  With no flag, all three.
+  primary documents of the secondary measure (`secondary.download_documents`: resumable, one
+  `sec_docs_index` MANIFEST record for INDEX.jsonl). With no flag, all three.
 - `build [--filers] [--fts]` is offline: `--filers` writes `data/derived/h6/filers.parquet` from
   the saved files, `--fts` writes `fts_hits.parquet` from the saved responses; with no flag, both.
 - `talk`, `secondary`, `summary` are offline, from the derived files; outputs go to
-  docs/results/h6/. `secondary` is Plan 3 Task 13; until then it says so and writes nothing.
+  docs/results/h6/. `secondary` reads the saved 10-K documents only (Plan 3 Task 13).
 - `all` = build + talk + secondary + summary, with no acquisition (C-43).
 """
 
@@ -19,7 +19,6 @@ import zipfile
 from aideleg.config import RAW, ROOT
 
 OUT_DIR = ROOT / "docs/results/h6"
-NOT_YET = "not implemented until Plan 3 Task 13; nothing was done"
 
 
 def _print_filers(df) -> None:
@@ -55,7 +54,16 @@ def acquire(filers: bool, fts: bool, docs: bool) -> None:
             "(H6 numerator input, exploratory)"
         )
     if docs:
-        print(f"acquire --docs (secondary measure): {NOT_YET}", file=sys.stderr)
+        import polars as pl
+
+        from aideleg.h6 import secondary as sec
+
+        out = sec.download_documents(pl.read_parquet(edgar.FILERS))
+        counts = out.group_by("status").len().sort("status")
+        print(
+            "10-K primary documents (H6 secondary, exploratory): "
+            + ", ".join(f"{r['status']}={r['len']}" for r in counts.iter_rows(named=True))
+        )
 
 
 def build(filers: bool, fts: bool) -> None:
@@ -100,7 +108,18 @@ def talk() -> None:
 
 
 def secondary() -> None:
-    print(f"secondary talk measure: {NOT_YET}", file=sys.stderr)
+    from aideleg.figures.save import FIGURES_DIR
+    from aideleg.h6 import secondary as sec
+
+    r = sec.run_secondary(OUT_DIR, fig_dir=FIGURES_DIR)
+    print(f"-> {OUT_DIR.relative_to(ROOT)}/secondary_talk.md, secondary_talk.csv (exploratory)")
+    for s in r["series"].iter_rows(named=True):
+        print(
+            f"  {s['year']} rated filings={s['n_rated']}/{s['n_filings']} CIKs={s['n_ciks']} "
+            f"mean per 10k words={s['rate_firms']:.4f} industries={s['rate_industries']:.4f}"
+        )
+    sp = r["spearman"]
+    print(f"  Spearman(secondary {sec.T_YEAR}, T) = {sp['rho']:.4f} n={sp['n']} (descriptive)")
 
 
 def summary() -> None:
