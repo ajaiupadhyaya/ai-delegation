@@ -2180,6 +2180,18 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
 - Rule: The adapter's H4 parity check (`tests/robustness/test_upstream.py`) compares `b` for `log_aui` and `log_income` and the joint F statistic at rel 1e-12, and `p_family` through −log10 p at rel 1e-12, because H4's `mix` is order-dependent at about 1e-14 (C-32), which moves a p of 4.8e-24 by about 1e-12 relative. No estimate, specification or committed output changes.
 
+### C-70. Clarification: R15 is identical to the primary by construction (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 7 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: R15 (hq="redistribute", D7) is run as the PAP specifies: NAICS 5511's own occupation mix is added to each FF49 industry with weight proportional to that industry's mapped private employment (c = emp_5511 / mapped private employment = 2.02%). Because the weight is the same fraction of every industry, each industry index moves by the same affine map E_j' = (E_j + c·E_5511)/(1 + c), so the population-SD z (z_delegation, z_usage, z_aioe), every Spearman rank and therefore every H5, H5b and RQ2 estimate are identical to the primary (max |Δz| 8.9e-16; same §9.3 vector hash); only coverage and index levels change. R15 is still run and reported (§8.1) with this note. No non-proportional allocation is substituted: that would be a new specification.
+
+### C-71. Clarification: R20 on the 46 industries the majority rule assigns (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 7 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: Under the frozen majority rule (each NAICS code to the FF49 industry with the largest weight; ties to the lowest industry number) Guns (26), Gold (27) and Boxes (40) receive no NAICS code. R20 therefore reports on the 46 industries it assigns, with z re-standardised over those 46 (as the variant's own industry set, like R6); the market part removes the three from the window and from the 378-window history before the null scales are computed (the market runner's drop list).
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
