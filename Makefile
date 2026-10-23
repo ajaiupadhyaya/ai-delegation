@@ -90,6 +90,12 @@ results-rq2:
 
 results: results-rq1 results-rq2
 
+# RQ3 (plan 3 Task 8): influence, events, terciles, fm, then summary.md. Exploratory and
+# diagnostic outputs only; it never runs a confirmatory script.
+.PHONY: rq3
+rq3: data/derived/exposure_ff49.parquet
+	uv run python -m aideleg.rq3 all
+
 # fails if a figure has a PDF without a PNG, or the reverse
 figures-check:
 	@uv run python -c "from pathlib import Path; d = Path('docs/paper/figures'); \

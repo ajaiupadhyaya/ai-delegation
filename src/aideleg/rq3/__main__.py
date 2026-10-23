@@ -40,8 +40,13 @@ def _print_fm(df) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="python -m aideleg.rq3")
-    p.add_argument("command", choices=["influence", "events", "terciles", "fm"])
+    p.add_argument("command", choices=["influence", "events", "terciles", "fm", "summary", "all"])
     args = p.parse_args(argv)
+    if args.command == "all":
+        # never runs a confirmatory script; the summary reads the committed record
+        for cmd in ("influence", "events", "terciles", "fm", "summary"):
+            main([cmd])
+        return 0
     if args.command == "influence":
         from aideleg.rq3 import inference
 
@@ -65,6 +70,10 @@ def main(argv: list[str] | None = None) -> int:
 
         df = fama_macbeth.run_fm(OUT_DIR)
         _print_fm(df)
+    elif args.command == "summary":
+        from aideleg.rq3 import report
+
+        print(f"-> {report.write_summary(OUT_DIR).relative_to(ROOT)}")
     return 0
 
 
