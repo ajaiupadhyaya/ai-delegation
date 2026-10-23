@@ -33,6 +33,11 @@ H2 rows (Task 12): R22, R23 (part `h2`, beside Task 11's `h1` part, which is car
 from the committed files and never re-estimated), R36 through Plan 2's `build_h2_panel` and
 `estimate_h2`, and R37 through Plan 4's own `rq1.within_r6`.
 
+H4 rows (Task 13): R28 (US states, r4 and r5 countries, usage-weighted, IWA mix), each ending
+in Plan 2's `estimate_h4` on Plan 2's `build_geo_sample` frame or, for r4/r5, on Plan 4's own
+`rq1.h4_frame_r45` (PAP §11 C-59); and R25, the five-member split family, Plan 2's `holm` on
+the committed primary p-values (nothing is re-estimated).
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
@@ -1338,6 +1343,9 @@ RQ1_LABELS = {
     rq1.H2_ESTIMAND: "trend β",
     rq1.H2_AUTONOMY_ESTIMAND: "trend β",
     rq1.R37_ESTIMAND: "May minus April",
+    "log_aui": "log AUI",
+    "log_income": "log income",
+    rq1.H4_WALD: "joint Wald",
 }
 _R23_ALWAYS = (
     "R23 is reported beside H1 (PAP §4.1): the H1 decision uses `automation_pct` only and is "
@@ -1399,7 +1407,7 @@ def _both(row_id: str, part: str, tr: upstream.TaskRows) -> list[dict]:
 
 def _md_label(r: dict) -> dict:
     """An RQ1 record with its coefficient leading the note cell (PAP §11 C-78)."""
-    if r["applies_to"] not in ("H1", "H2", "H3"):
+    if r["applies_to"] not in ("H1", "H2", "H3", "H4"):
         return r
     name = RQ1_LABELS.get(r["estimand"], r["estimand"])
     return r | {"note": f"{name}: {r['note']}" if r["note"] else name}
@@ -1897,6 +1905,158 @@ def run_R37(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     return _write("R37", [rec], notes, out_dir)
 
 
+# --- Task 13: H4 rows R28 and the split family R25 -----------------------------------------
+
+R28_PARTS = ("us_states", "r4_countries", "r5_countries", "usage_weighted", "iwa_mix")
+_R28_NOTES = (
+    "H4 alternatives (PAP §4.4 D16, §8.2 R28), each part ending in Plan 2's `estimate_h4` "
+    "(through the adapter) with H4's inference (PAP §8.1): OLS of the geography's overall "
+    "automation_pct on [1, log AUI, log income, mix] with HC3 covariance (WLS in "
+    "usage_weighted); b₁ (log AUI) and b₂ (log income) carry normal-reference HC3 95% "
+    "intervals and two-sided p; p_wald (joint Wald) is the joint HC3 Wald F test of "
+    "b₁ = b₂ = 0 with (2, n − 4) df (D17), whose `stat` is F. Coefficients are in pp of the "
+    "automation share per unit of the log regressor. Each table row's note cell starts with "
+    "its coefficient (PAP §11 C-78). `n` is the number of geographies in the fit; `n_dropped` "
+    "is the number excluded and `dropped` the count by first failing reason, in Plan 2's order "
+    "(missing_month, missing_income, missing_mix); the excluded geographies are listed below. "
+    "Reported only, not a decision: the H4 decision is P-RQ1's.",
+    "us_states: r6 `claude_ai` subregions whose `geo_id` starts `US-`, by Plan 2's "
+    '`build_geo_sample(geo="us_state")`: the published state `usage_per_capita_index`, 2024 '
+    "state GDP per working-age person from the AEI r3 state files, and the GWA mix.",
+    "[default] r4_countries, r5_countries: Plan 4's `h4_frame_r45` (PAP §11 C-59), because r4 "
+    "and r5 publish no country usage index and no country GWA rows. log AUI = ln(usage_pct_c / "
+    "working-age population_c); AEI's index is the usage share over the working-age population "
+    "share, so the common scale moves only the intercept. s_cg is the country's `onet_task` pct "
+    'aggregated to GWAs through the D14 files (`task_families("gwa")`), each task split '
+    "equally over its GWAs, then renormalised over the GWAs with an ā_g. ā_g is the same "
+    "release's global task `automation_pct` aggregated to GWA with D13 weights (the task's "
+    "global pct, split equally over its GWAs). Income is 2024 GDP per working-age person (D16, "
+    "the r3 inputs Plan 2 uses). Each release has one published period, so nothing is "
+    "averaged over months. Inclusion as D16: overall automation_pct and usage_pct published, "
+    "income, and a mix.",
+    "[default] In r4_countries and r5_countries a task's GWAs are the union over its candidate "
+    "Task IDs (its panel Task ID and every Task ID carrying its statement), as Plan 2's H1/H3 "
+    "task rows apply D14 (PAP §11 C-9, C-59); unmatched task nodes and tasks with no DWA link "
+    "carry no GWA.",
+    "usage_weighted: the D16 r6 country frame, estimated by WLS with weights = the country's "
+    "two-month mean overall `usage_pct` (PAP §4.4 'weights = country usage_pct'); the sample is "
+    "the primary one.",
+    "iwa_mix: the D16 r6 country sample with the task-mix control built over IWA (`onet_iwa`) "
+    'nodes in place of GWAs, by Plan 2\'s builder (`mix_level="iwa"`), with the same formula '
+    "(PAP §4.4 'IWA-level mix control where published').",
+    "The mix control (Plan 2's, and Plan 4's r4/r5 mix built the same way) sums over an "
+    "unordered group_by, so mix and the estimates reproduce only to about 1e-14 between runs "
+    "(PAP §11 C-32), far below the printed precision.",
+)
+
+
+def _excluded_line(part: str, excluded: dict[str, list[str]]) -> str:
+    hit = [f"{k} {len(v)} ({', '.join(v)})" for k, v in excluded.items() if v]
+    return f"{part}: excluded {'; '.join(hit)}" if hit else f"{part}: none excluded"
+
+
+def _h4_part(
+    part: str, frame: pl.DataFrame, excluded: dict[str, list[str]], variant: str, est_kw: dict
+) -> list[dict]:
+    """One R28 part: Plan 2's `estimate_h4(frame, **est_kw)` and its three records."""
+    res = upstream.estimate_h4(frame, **est_kw)
+    recs = rq1.h4_records("R28", part, res)
+    n_drop = sum(len(v) for v in excluded.values())
+    dropped = "; ".join(f"{k} {len(v)}" for k, v in excluded.items() if v)
+    return [r | {"variant": variant, "n_dropped": n_drop, "dropped": dropped} for r in recs]
+
+
+def run_R28(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R28 (D16 alternatives): US states, r4 and r5 countries, usage-weighted and the
+    IWA-level mix, each through Plan 2's `estimate_h4`."""
+    guards.require_rq1_run_committed()
+    records: list[dict] = []
+    lines: list[str] = []
+
+    def part(name: str, frame, excluded, variant: str, est_kw: dict) -> None:
+        records.extend(_h4_part(name, frame, excluded, variant, est_kw))
+        lines.append(_excluded_line(name, excluded))
+
+    s = upstream.geo_sample(geo="us_state")
+    part("us_states", s.frame, s.excluded, "release=r6; geo=us_state; mix=gwa; weights=none", {})
+    inp = upstream.rq1_inputs()
+    gwa = upstream.task_families("gwa")
+    for rel in ("r4", "r5"):
+        frame, excluded = rq1.h4_sample_r45(
+            inp.panel, rel, wap=inp.wap_country, gdp=inp.gdp_country, gwa=gwa, index=inp.index
+        )
+        variant = f"release={rel}; geo=country; mix=gwa (from onet_task); weights=none"
+        part(f"{rel}_countries", frame, excluded, variant, {})
+    s = upstream.geo_sample()
+    variant = "release=r6; geo=country; mix=gwa; weights=usage_pct"
+    part("usage_weighted", s.frame, s.excluded, variant, {"weights": "usage_pct"})
+    s = upstream.geo_sample(mix_level="iwa")
+    part("iwa_mix", s.frame, s.excluded, "release=r6; geo=country; mix=iwa; weights=none", {})
+    return _write("R28", records, [*_R28_NOTES, *lines], out_dir)
+
+
+_R25_NOTES = (
+    "R25 (PAP §4.0 D17 alternative, §8.2 R25): H1 and H4 split into separate coefficients, "
+    "giving the five-member Holm family {H1a: education, H1b: log wage, H3: error cost, H4a: "
+    "log AUI, H4b: log income}, tested by Plan 2's `holm` at family-wise 0.0375 (D22): the "
+    "k-th smallest p of the five (ties by name) is compared with 0.0375/(5 − k + 1), step-down, "
+    "exactly on the printed decimals. Each p is the committed P-RQ1 fit's two-sided coefficient "
+    "p (`confirmatory_rq1.json`): H1's two-way cluster t p-values, H3's indicator p, and H4's "
+    "normal-reference HC3 p-values of log AUI and log income. Nothing is re-estimated; the "
+    "estimates, SEs and intervals are the committed ones.",
+    "H2 is outside this family and is tested on its own at 0.0125 (D22). 'rejected under R25' "
+    "is the Holm step alone, with no sign condition; it is reported only and is not a "
+    "decision: the RQ1 decisions are P-RQ1's (D17).",
+    "Coefficients are in pp of the outcome share per unit of the regressor (H3: validation "
+    "share). Each table row's note cell starts with its coefficient (PAP §11 C-78). `n` is the "
+    "committed primary sample: (task, occupation, family) rows for H1 and H3, countries for H4; "
+    "`dropped` shows none and `n_dropped` is not reported, because the samples are the primary "
+    "ones (PAP §11 C-78).",
+)
+
+
+def run_R25(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """PAP §8.2 R25: the five-member Holm family {H1a, H1b, H3, H4a, H4b} at 0.0375 on the
+    committed primary p-values (Plan 2's `holm`); nothing is re-estimated."""
+    guards.require_rq1_run_committed()
+    results = upstream.committed_rq1()["results"]
+    members = rq1.r25_members(results)
+    steps = rq1.r25_holm({m: float(c["p"]) for m, (_, _, c) in members.items()})
+    m_total = len(members)
+    records = []
+    for m, (h, name, c) in members.items():
+        st = steps[m]
+        sample = results[h]["sample"]
+        n = sample["n"] if h == "H4" else sample["n_rows"]
+        rec = {
+            "row_id": "R25",
+            "part": m,
+            "variant": "family=" + ",".join(rq1.R25_MEMBERS) + "; Holm family-wise 0.0375; "
+            "p from the committed P-RQ1 fits",
+            "applies_to": h,
+            "label": "robustness",
+            "estimand": name,
+            "unit": rq1.RQ1_UNIT,
+            "estimate": float(c["estimate"]),
+            "scale": float(c["se"]),
+            "ci_lo": float(c["ci_low"]),
+            "ci_hi": float(c["ci_high"]),
+            "stat": float(c["estimate"]) / float(c["se"]),
+            "p": float(c["p"]),
+            "null": rq1.NULL,
+            "crit_0025": None,
+            "crit_005": None,
+            "n": int(n),
+            "n_dropped": None,
+            "dropped": "",
+            "note": f"Holm level {st.level:g}; rejected under R25: "
+            f"{'yes' if st.rejected else 'no'}; not a decision; Holm rank {st.rank} of {m_total}",
+        }
+        report.check_record(rec)
+        records.append(rec)
+    return _write("R25", records, list(_R25_NOTES), out_dir)
+
+
 RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
     rid: fn
     for rid, fn in (
@@ -1932,5 +2092,7 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R22", run_R22),
         ("R36", run_R36),
         ("R37", run_R37),
+        ("R25", run_R25),
+        ("R28", run_R28),
     )
 }
