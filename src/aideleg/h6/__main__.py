@@ -2,7 +2,9 @@
 
 `build --filers` builds `data/derived/h6/filers.parquet` from saved raw files (no network)
 and prints the 10-K filers and unmapped CIKs per year. Acquisition is separate
-(`python -m aideleg.acquire`).
+(`python -m aideleg.acquire`), except `acquire --fts`: the EDGAR full-text-search numerator
+(network; one MANIFEST record per response; resumable, saved responses are not refetched),
+written to `data/derived/h6/fts_hits.parquet`.
 """
 
 import argparse
@@ -33,7 +35,19 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="command", required=True)
     b = sub.add_parser("build", help="build H6 derived files from saved raw files")
     b.add_argument("--filers", action="store_true", help="the full-index denominator (D18)")
+    a = sub.add_parser("acquire", help="network acquisitions of H6 inputs")
+    a.add_argument("--fts", action="store_true", help="EDGAR full-text search (D18 numerator)")
     args = p.parse_args(argv)
+    if args.command == "acquire":
+        if not args.fts:
+            p.error("acquire: name what to acquire (--fts)")
+        from aideleg.h6 import edgar
+
+        hits = edgar.acquire_fts()
+        print(
+            f"{hits.height} hit rows -> {edgar.FTS_HITS.relative_to(ROOT)} "
+            "(H6 numerator input, exploratory)"
+        )
     if args.command == "build":
         parts = [k for k in ("filers",) if getattr(args, k)] or ["filers"]
         if "filers" in parts:

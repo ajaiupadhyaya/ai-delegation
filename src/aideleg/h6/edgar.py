@@ -22,7 +22,9 @@ start at the header labels' offsets: the header puts `Company Name`, `CIK`, `Dat
 both). The parser uses the row offsets, checks the header text, and refuses a row whose
 fields do not sit in those columns.
 
-Pure functions over saved files; no network.
+The denominator functions are pure functions over saved files (no network). The numerator
+(EDGAR full-text search, below) fetches through `acquire.fetch`, one MANIFEST record per
+response, and `hits_from_saved` rebuilds it offline.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ from __future__ import annotations
 import json
 import zipfile
 from collections.abc import Callable, Iterable, Sequence
-from datetime import date
+from datetime import date, timedelta
 from functools import cache
 from pathlib import Path
 
@@ -236,4 +238,326 @@ def unmapped_report(filers: pl.DataFrame) -> pl.DataFrame:
             .alias("n_sic_outside"),
         )
         .sort("year")
+    )
+
+
+# --- numerator: EDGAR full-text search (D18) ------------------------------------------------
+#
+# Live layout (checked 2026-10-22 on `"computer vision"`, 2024-01, tests/fixtures/sec/
+# fts_sample.json): `hits.total = {value, relation}`; each `hits.hits[]` is ONE DOCUMENT of a
+# filing (`_id = "{adsh}:{file name}"`), with `_source.ciks` (zero-padded strings), `adsh`,
+# `form` (the filing's form: a `10-K/A` is returned by `forms=10-K` since the server filters on
+# `root_forms`), `file_type` (the document's type: `10-K`, `EX-99.1`, ...) and `file_date`. The
+# server pages 100 hits (`size`) and filters `file_date` with `gte startdt, lte enddt`; `from`
+# cannot reach 10,000 (FTS_CAP), so a capped range is bisected until every leaf is exact.
+
+FTS_URL = "https://efts.sec.gov/LATEST/search-index"
+FTS_PAGE = 100
+FTS_CAP = 10_000
+FTS_HITS = DERIVED / "h6/fts_hits.parquet"
+_HITS_SCHEMA = {
+    "phrase": pl.String,
+    "cik": pl.Int64,
+    "adsh": pl.String,
+    "form": pl.String,
+    "file_date": pl.Date,
+    "file_type": pl.String,
+    "_id": pl.String,
+}
+_HIT_COLUMNS = [c for c in _HITS_SCHEMA if c != "_id"]
+_SORT = ["phrase", "file_date", "adsh", "file_type", "cik"]
+
+
+class FtsCapError(RuntimeError):
+    """A single day still reaches the FTS cap: the D18 numerator is not computable as written."""
+
+
+class FtsPageError(RuntimeError):
+    """The pages of a range do not add up to its exact total (the index changed mid-query)."""
+
+
+def _slug(phrase: str) -> str:
+    return phrase.lower().replace(" ", "_")
+
+
+def fts_url(phrase: str, start: date, end: date, offset: int) -> str:
+    from urllib.parse import quote, urlencode
+
+    params = {
+        "q": f'"{phrase}"',
+        "dateRange": "custom",
+        "startdt": start.isoformat(),
+        "enddt": end.isoformat(),
+        "forms": ",".join(FORMS),
+        "from": offset,
+    }
+    return f"{FTS_URL}?{urlencode(params, quote_via=quote)}"
+
+
+def fts_source(phrase: str, start: date, end: date, offset: int):
+    from aideleg.acquire.fetch import Source
+
+    slug = _slug(phrase)
+    return Source(
+        f"sec_fts/{start}_{end}/{slug}/{offset:05d}",
+        fts_url(phrase, start, end, offset),
+        f"sec/fts/{start.year}/{slug}/{start}_{end}_{offset:05d}.json",
+    )
+
+
+class FtsServerError(RuntimeError):
+    """The server kept answering with an error body instead of search results."""
+
+
+FTS_ATTEMPTS = 5
+FTS_RETRY_SECONDS = 30.0
+FTS_PAUSE = 0.5  # seconds before each request not yet saved: gentler than the 0.1 s SEC floor
+_ERROR_BODIES: list[str] = []  # keys whose response was an error body at least once (logged)
+
+
+def _get_json(src) -> dict:
+    """Fetch `src` once (MANIFEST record per response, D18) and read the saved file.
+
+    The server can answer HTTP 200 with an error JSON (`errorType`, no `hits`; seen
+    2026-10-23, `getaddrinfo EBUSY` from its search backend). Such a body is refetched (backoff
+    FTS_RETRY_SECONDS x attempt); if it persists its file and MANIFEST record are removed, so
+    no error body is ever kept or used, and FtsServerError is raised (a resumed run fetches it
+    again). A request not yet saved waits FTS_PAUSE first."""
+    import time
+
+    from aideleg.acquire import fetch
+
+    if src.key not in fetch.load_manifest(RAW):
+        time.sleep(FTS_PAUSE)
+    js: dict = {}
+    for attempt in range(FTS_ATTEMPTS):
+        if attempt:
+            _ERROR_BODIES.append(src.key)
+            print(f"  error body for {src.key} ({str(js)[:80]}); retry {attempt}", flush=True)
+            time.sleep(FTS_RETRY_SECONDS * attempt)
+        rec = fetch.fetch(src, RAW, force=bool(attempt))
+        js = json.loads((Path(RAW) / rec.dest).read_text())
+        if isinstance(js, dict) and "hits" in js:
+            return js
+    manifest = fetch.load_manifest(RAW)
+    manifest.pop(src.key, None)
+    fetch.write_manifest(RAW, manifest)
+    (Path(RAW) / src.dest).unlink(missing_ok=True)
+    raise FtsServerError(f"{src.key}: {FTS_ATTEMPTS} error bodies, last {str(js)[:300]}")
+
+
+def _total(js: dict) -> tuple[int, str]:
+    t = js["hits"]["total"]
+    return int(t["value"]), str(t["relation"])
+
+
+def _capped(js: dict) -> bool:
+    value, relation = _total(js)
+    return relation != "eq" or value >= FTS_CAP
+
+
+def parse_fts(js: dict, phrase: str) -> pl.DataFrame:
+    """One row per (hit, CIK in `_source.ciks`), every form kept, with the document `_id`."""
+    rows = []
+    for h in js["hits"]["hits"]:
+        s = h["_source"]
+        adsh = s.get("adsh") or h["_id"].split(":", 1)[0]
+        fd = date.fromisoformat(s["file_date"])
+        for c in s.get("ciks") or []:
+            rows.append((phrase, int(c), adsh, s["form"], fd, s["file_type"], h["_id"]))
+    return pl.DataFrame(rows, schema=_HITS_SCHEMA, orient="row")
+
+
+def _n_no_cik(js: dict) -> int:
+    return sum(1 for h in js["hits"]["hits"] if not h["_source"].get("ciks"))
+
+
+def _keep_forms(df: pl.DataFrame, phrase: str, label: str, n_no_cik: int, log) -> pl.DataFrame:
+    """Distinct (document, CIK) rows with form in FORMS; the other forms are counted and logged."""
+    df = df.unique(["_id", "cik"], keep="first")
+    other = (
+        df.filter(~pl.col("form").is_in(FORMS)).unique("_id").group_by("form").len().sort("form")
+    )
+    if other.height or n_no_cik:
+        parts = [f"{r['form']}={r['len']}" for r in other.iter_rows(named=True)]
+        if n_no_cik:
+            parts.append(f"no CIK={n_no_cik}")
+        log(f"  {phrase!r} {label}: not counted (documents): {', '.join(parts)}")
+    return df.filter(pl.col("form").is_in(FORMS))
+
+
+def _range_hits(phrase: str, start: date, end: date, log, stats: dict) -> tuple[pl.DataFrame, int]:
+    """Raw rows (all forms) of [start, end] and the hits without a CIK, bisecting capped ranges."""
+    first = _get_json(fts_source(phrase, start, end, 0))
+    stats["requests"] += 1
+    if _capped(first):
+        if start == end:
+            value, relation = _total(first)
+            raise FtsCapError(
+                f"{phrase!r} on {start}: total {value} ({relation}) reaches the cap {FTS_CAP}"
+            )
+        mid = start + (end - start) // 2
+        stats["splits"].append((str(start), str(end)))
+        a, na = _range_hits(phrase, start, mid, log, stats)
+        b, nb = _range_hits(phrase, mid + timedelta(days=1), end, log, stats)
+        return pl.concat([a, b]), na + nb
+    value, _ = _total(first)
+    pages = [first]
+    for off in range(FTS_PAGE, value, FTS_PAGE):
+        js = _get_json(fts_source(phrase, start, end, off))
+        stats["requests"] += 1
+        if _total(js) != _total(first):
+            raise FtsPageError(f"{phrase!r} {start}..{end}: total changed at from={off}")
+        pages.append(js)
+    df = pl.concat([parse_fts(js, phrase) for js in pages])
+    ids = {h["_id"] for js in pages for h in js["hits"]["hits"]}
+    if len(ids) != value:
+        raise FtsPageError(
+            f"{phrase!r} {start}..{end}: {len(ids)} distinct documents over the pages, "
+            f"total {value}"
+        )
+    return df, sum(_n_no_cik(js) for js in pages)
+
+
+def fts_hits(phrase: str, start: date, end: date, *, log=print, stats: dict | None = None):
+    """Hits of `phrase` filed in [start, end]: columns phrase, cik, adsh, form, file_date,
+    file_type; one row per (document hit, CIK); form in FORMS only."""
+    stats = stats if stats is not None else {}
+    stats.setdefault("requests", 0)
+    stats.setdefault("splits", [])
+    raw, n_no_cik = _range_hits(phrase, start, end, log, stats)
+    df = _keep_forms(raw, phrase, f"{start}..{end}", n_no_cik, log)
+    stats["documents"] = raw["_id"].n_unique() + n_no_cik if raw.height else n_no_cik
+    return df.select(_HIT_COLUMNS).sort(_SORT)
+
+
+def acquire_fts(
+    years: Sequence[int] = YEARS,
+    phrases: Sequence[str] | None = None,
+    *,
+    out: Path | None = FTS_HITS,
+    log=print,
+) -> pl.DataFrame:
+    """Network: every phrase x calendar year through `fts_hits`; written to `out`."""
+    import time
+
+    from aideleg.h6.dictionary import fts_phrases
+
+    phrases = list(phrases) if phrases is not None else fts_phrases()
+    parts = []
+    t0 = time.monotonic()
+    total_requests = 0
+    for phrase in phrases:
+        for y in years:
+            st: dict = {}
+            df = fts_hits(phrase, date(y, 1, 1), date(y, 12, 31), log=log, stats=st)
+            total_requests += st["requests"]
+            log(
+                f"{phrase!r} {y}: documents={st['documents']} kept rows={df.height} "
+                f"CIKs={df['cik'].n_unique()} requests={st['requests']} "
+                f"splits={st['splits'] or 'none'} "
+                f"[{total_requests} requests, {time.monotonic() - t0:.0f}s]"
+            )
+            parts.append(df)
+    hits = pl.concat(parts).sort(_SORT)
+    if out is not None:
+        out = Path(out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        hits.write_parquet(out)
+    return hits
+
+
+def _parse_fts_key(key: str) -> tuple[date, date, str, int]:
+    _, rng, slug, off = key.split("/")
+    s, e = rng.split("_")
+    return date.fromisoformat(s), date.fromisoformat(e), slug, int(off)
+
+
+def hits_from_saved(
+    phrases: Sequence[str] | None = None, start: date | None = None, end: date | None = None
+) -> pl.DataFrame:
+    """The `fts_hits` frame rebuilt offline from the saved `sec_fts/` responses of the MANIFEST
+    (leaf ranges only: an exact page 0 below the cap, with all its pages), optionally restricted
+    to `phrases` and to hits with file_date in [start, end]."""
+    from aideleg.acquire import fetch
+    from aideleg.h6.dictionary import fts_phrases
+
+    names = {_slug(p): p for p in fts_phrases()}
+    if phrases is not None:
+        names.update({_slug(p): p for p in phrases})
+        wanted = {_slug(p) for p in phrases}
+    manifest = fetch.load_manifest(RAW)
+    ranges: dict[tuple[date, date, str], dict[int, str]] = {}
+    for key, rec in manifest.items():
+        if key.startswith("sec_fts/"):
+            s, e, slug, off = _parse_fts_key(key)
+            if phrases is None or slug in wanted:
+                ranges.setdefault((s, e, slug), {})[off] = rec.dest
+    parts = []
+    for (s, e, slug), pages in sorted(ranges.items()):
+        if 0 not in pages:
+            continue  # only deeper pages of a range: never a leaf on its own
+        phrase = names.get(slug, slug.replace("_", " "))
+        first = json.loads((Path(RAW) / pages[0]).read_text())
+        if _capped(first):
+            continue
+        value, _ = _total(first)
+        for off in range(0, value, FTS_PAGE):
+            if off not in pages:
+                raise FileNotFoundError(f"sec_fts/{s}_{e}/{slug}/{off:05d}: page not saved")
+        for off in range(0, value, FTS_PAGE):
+            js = first if off == 0 else json.loads((Path(RAW) / pages[off]).read_text())
+            parts.append(parse_fts(js, phrase))
+    if not parts:
+        return pl.DataFrame(schema={c: _HITS_SCHEMA[c] for c in _HIT_COLUMNS})
+    df = pl.concat(parts).unique(["phrase", "_id", "cik"], keep="first")
+    df = df.filter(pl.col("form").is_in(FORMS))
+    if start is not None:
+        df = df.filter(pl.col("file_date") >= start)
+    if end is not None:
+        df = df.filter(pl.col("file_date") <= end)
+    return df.select(_HIT_COLUMNS).sort(_SORT)
+
+
+def _hit_ciks(hits: pl.DataFrame) -> pl.DataFrame:
+    """year (of file_date), cik, exhibit (the hit's document is not a FORMS document); the
+    hits with form in FORMS only."""
+    return hits.filter(pl.col("form").is_in(FORMS)).select(
+        pl.col("file_date").dt.year().cast(pl.Int64).alias("year"),
+        pl.col("cik").cast(pl.Int64),
+        (~pl.col("file_type").is_in(FORMS)).alias("exhibit"),
+    )
+
+
+def numerator(hits: pl.DataFrame, filers: pl.DataFrame) -> pl.DataFrame:
+    """Distinct hit CIKs per (year, ff49) among that year's filers (n_talk), and those whose every
+    hit is in an exhibit (n_exhibit_only, C-39: also in n_talk). Same grid as `denominator`."""
+    per_cik = (
+        _hit_ciks(hits)
+        .group_by("year", "cik")
+        .agg(pl.col("exhibit").all().alias("exhibit_only"))
+        .join(filers.select("year", "cik", "ff49").unique(), on=["year", "cik"], how="inner")
+    )
+    counts = per_cik.group_by("year", "ff49").agg(
+        pl.len().cast(pl.Int64).alias("n_talk"),
+        pl.col("exhibit_only").sum().cast(pl.Int64).alias("n_exhibit_only"),
+    )
+    return (
+        denominator(filers)
+        .select("year", "ff49")
+        .join(counts, on=["year", "ff49"], how="left", nulls_equal=True)
+        .with_columns(pl.col("n_talk", "n_exhibit_only").fill_null(0))
+        .select("year", "ff49", "n_talk", "n_exhibit_only")
+        .sort("year", "ff49", nulls_last=True)
+    )
+
+
+def out_of_denominator(hits: pl.DataFrame, filers: pl.DataFrame) -> pl.DataFrame:
+    """year, cik of hit CIKs (form in FORMS) that are not that year's filers: reported only."""
+    return (
+        _hit_ciks(hits)
+        .select("year", "cik")
+        .unique()
+        .join(filers.select("year", "cik").unique(), on=["year", "cik"], how="anti")
+        .sort("year", "cik")
     )

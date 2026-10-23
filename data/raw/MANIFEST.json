@@ -631,6 +631,2286 @@
     "bytes": 43155988,
     "sha256": "8555ad43d2a491e1280060c7fa7954eae0b18db5ce414684674e69cd77265ddb"
   },
+  "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/artificial_intelligence/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:35:03Z",
+    "bytes": 59179,
+    "sha256": "9a746f20ea86db0317b5d90df543147c1f30fac1f547526a75d91d5e25652c84"
+  },
+  "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2019/artificial_intelligence/2019-01-01_2019-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:35:03Z",
+    "bytes": 58234,
+    "sha256": "f2a8c2a0c6cf6096f42427fa369c0ff02181d79a4868072daae3d0b0cdace9b3"
+  },
+  "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2019/artificial_intelligence/2019-01-01_2019-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:35:03Z",
+    "bytes": 58118,
+    "sha256": "d912ce7d2a3ae4944de86143a8820d495b0b8427f73545273ed8a114015d08ae"
+  },
+  "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2019/artificial_intelligence/2019-01-01_2019-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:35:04Z",
+    "bytes": 58242,
+    "sha256": "2c67ed1b36493cefbdf0fe3fa3581b3163256813b7818fd6efbec5509218529a"
+  },
+  "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2019-01-01_2019-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2019/artificial_intelligence/2019-01-01_2019-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:35:04Z",
+    "bytes": 31000,
+    "sha256": "12d1b26aaf53d87ebd4a83a69cbbeaf623213bf7e5b9d97fd426304b52027b1b"
+  },
+  "sec_fts/2019-01-01_2019-12-31/chatgpt/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/chatgpt/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:05Z",
+    "bytes": 1066,
+    "sha256": "63674063ffb86215fd910088298a7351fc316f6cea5f3cf33ba114b65fb32a92"
+  },
+  "sec_fts/2019-01-01_2019-12-31/computer_vision/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/computer_vision/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:11Z",
+    "bytes": 17316,
+    "sha256": "9a5d4f1660abff79180e916c2f9036e16de96ba3c1d9a9dd9d1ff2698aa3e583"
+  },
+  "sec_fts/2019-01-01_2019-12-31/deep_learning/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/deep_learning/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:39:57Z",
+    "bytes": 24840,
+    "sha256": "beb7963b579fe586c22bb3d33cb327c1945a734b0bdb9b87b5d5ee936da17eb7"
+  },
+  "sec_fts/2019-01-01_2019-12-31/foundation_model/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/foundation_model/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:54Z",
+    "bytes": 1075,
+    "sha256": "228c9fb326b3244443e4b2f48e6cbd4d64402854e790492c158f3caab20ba3fb"
+  },
+  "sec_fts/2019-01-01_2019-12-31/foundation_models/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/foundation_models/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:59Z",
+    "bytes": 1076,
+    "sha256": "ca29d6a27572a9238f6fae7015fc5f186e61ebd316b4ec0ffdce96612b5ca0f8"
+  },
+  "sec_fts/2019-01-01_2019-12-31/generative_ai/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/generative_ai/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:18Z",
+    "bytes": 1073,
+    "sha256": "dc8239f67e754da0b692c25acadfac8c39489ddd879626bceb602e58fc74f4d1"
+  },
+  "sec_fts/2019-01-01_2019-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/generative_artificial_intelligence/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:35Z",
+    "bytes": 1093,
+    "sha256": "b83ab6b420bcd4cf7ff86f9fddcf5ada5a5fa72290a63ae694840d90ae65ee81"
+  },
+  "sec_fts/2019-01-01_2019-12-31/large_language_model/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/large_language_model/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:48Z",
+    "bytes": 1079,
+    "sha256": "94125b80b1a848cf088b3517d8d25a6cab1439beaeb02e4c657a7bd145d023cc"
+  },
+  "sec_fts/2019-01-01_2019-12-31/large_language_models/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/large_language_models/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:54Z",
+    "bytes": 1080,
+    "sha256": "14f2b24d434876d92c98684308d011c36a7567a2a9bc9f87d8b64224ed9481db"
+  },
+  "sec_fts/2019-01-01_2019-12-31/machine_learning/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/machine_learning/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:47Z",
+    "bytes": 58158,
+    "sha256": "b24b7751bdff5f15895292ea5b8a0d61fb61d995d6f07ed2a119d7b229d14ef2"
+  },
+  "sec_fts/2019-01-01_2019-12-31/machine_learning/00100": {
+    "key": "sec_fts/2019-01-01_2019-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2019/machine_learning/2019-01-01_2019-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:47Z",
+    "bytes": 58029,
+    "sha256": "e42080f2b6954ef2abf15b8f5f4e2f6f5a0bee06154f09a437dc61a5adbb4872"
+  },
+  "sec_fts/2019-01-01_2019-12-31/machine_learning/00200": {
+    "key": "sec_fts/2019-01-01_2019-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2019/machine_learning/2019-01-01_2019-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:48Z",
+    "bytes": 57939,
+    "sha256": "fac29f493c2128688cd4c34b8d073c6b492573e38ebd2e75dc3e8bfab309d941"
+  },
+  "sec_fts/2019-01-01_2019-12-31/machine_learning/00300": {
+    "key": "sec_fts/2019-01-01_2019-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2019/machine_learning/2019-01-01_2019-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:48Z",
+    "bytes": 37499,
+    "sha256": "4943a56d90ef605d2e4ec18e073c67e494ec3112fc954f94de12817826d3e600"
+  },
+  "sec_fts/2019-01-01_2019-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/natural_language_processing/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:03Z",
+    "bytes": 21614,
+    "sha256": "84f384e5a0bb3a6f5e5e9afc92e621dff0568dff5419ea52ce51f14591bfbbc5"
+  },
+  "sec_fts/2019-01-01_2019-12-31/neural_network/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/neural_network/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:05Z",
+    "bytes": 14346,
+    "sha256": "897f20402fbd5dc76105230c63c4a8215c58ed45eaccb0a4ce6af6d50cff7d6a"
+  },
+  "sec_fts/2019-01-01_2019-12-31/neural_networks/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/neural_networks/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:11Z",
+    "bytes": 9799,
+    "sha256": "8fb7af41046e1c6ada50a1c243296c8224e8ec0985fb0e2a76b80113e9eac53d"
+  },
+  "sec_fts/2019-01-01_2019-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2019-01-01_2019-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2019-01-01&enddt=2019-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2019/reinforcement_learning/2019-01-01_2019-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:42:47Z",
+    "bytes": 1777,
+    "sha256": "f3a27f3200ca453235a51e0d59f8b9631c5118e565bfe1e977a449cdcbf6d89c"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:35:05Z",
+    "bytes": 58979,
+    "sha256": "a8cc8107cd4967c32f6b6d3a150547983d16ad9b289a837440f9cecc46811c2b"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:35:05Z",
+    "bytes": 58059,
+    "sha256": "c2369134560b23f50cc8b975a0c2675d431fe78a3116e092370548965d18254d"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:35:05Z",
+    "bytes": 58045,
+    "sha256": "88627c60478c46797b6889f08c456d23c1e0ac501fd5a2ba22389ff8eb09cd5e"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:35:06Z",
+    "bytes": 58080,
+    "sha256": "d491eebeafe3bad24e116522eefb9ad8abd722577d56637e2f034a08a04ef8f6"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:35:06Z",
+    "bytes": 58222,
+    "sha256": "7e698c060a04cb26bbd72597737411ef7b0b7092c5bbf4586b03dc9bdc7a45ed"
+  },
+  "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2020-01-01_2020-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2020/artificial_intelligence/2020-01-01_2020-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:35:06Z",
+    "bytes": 35922,
+    "sha256": "0c90ac81019f0653918a2c56ba3a6ac0d12359a6c7f12178e36f3c576c70a1d1"
+  },
+  "sec_fts/2020-01-01_2020-12-31/chatgpt/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/chatgpt/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:05Z",
+    "bytes": 1066,
+    "sha256": "36ad6da964f73b7a453173d5436f2f0f2fae9f81f14e2591ea266be0f9a40220"
+  },
+  "sec_fts/2020-01-01_2020-12-31/computer_vision/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/computer_vision/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:11Z",
+    "bytes": 21782,
+    "sha256": "bb60576fa8e1eecdce6d3e2dd2afef7143da068f232412a3cadce33ab325ccfa"
+  },
+  "sec_fts/2020-01-01_2020-12-31/deep_learning/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/deep_learning/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:39:58Z",
+    "bytes": 26474,
+    "sha256": "d00b1e2a8cb8820bb1dd21f856299e34c8ad28e3484ed8ec56c742584f652a29"
+  },
+  "sec_fts/2020-01-01_2020-12-31/foundation_model/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/foundation_model/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:54Z",
+    "bytes": 1075,
+    "sha256": "2534c5db4cb5545faa509f9bb081c34fe45eccaa0e522e2cc238e807dfaf5bbe"
+  },
+  "sec_fts/2020-01-01_2020-12-31/foundation_models/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/foundation_models/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:00Z",
+    "bytes": 1076,
+    "sha256": "dd0a71c546c319cbf8ff59dff74f7fc65e625321ca60c778a55cec4633f225e1"
+  },
+  "sec_fts/2020-01-01_2020-12-31/generative_ai/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/generative_ai/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:19Z",
+    "bytes": 1072,
+    "sha256": "78dab2f5fb6bf1fe06e06b64a94323e6d8160275711b6aba138c7b12197469f8"
+  },
+  "sec_fts/2020-01-01_2020-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/generative_artificial_intelligence/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:36Z",
+    "bytes": 1093,
+    "sha256": "32dbedf81936cc6e9c2315d638994b4dbceb1d9dfb7ae7c634c1d9e4f3239ccf"
+  },
+  "sec_fts/2020-01-01_2020-12-31/large_language_model/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/large_language_model/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:49Z",
+    "bytes": 1079,
+    "sha256": "277f22d35c2f4e65876adc0e710bf7b6a6bd8167e09c3979c742f3bb82bac159"
+  },
+  "sec_fts/2020-01-01_2020-12-31/large_language_models/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/large_language_models/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:55Z",
+    "bytes": 1080,
+    "sha256": "ddec42a14af03a3a921a14a4017e996d80fdd8897fa95aefa455d1d1f80a3298"
+  },
+  "sec_fts/2020-01-01_2020-12-31/machine_learning/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/machine_learning/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:48Z",
+    "bytes": 57879,
+    "sha256": "ecdf27ec508abbabcac1577696c3313fa21b51461624527152aa9cdb41f6372a"
+  },
+  "sec_fts/2020-01-01_2020-12-31/machine_learning/00100": {
+    "key": "sec_fts/2020-01-01_2020-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2020/machine_learning/2020-01-01_2020-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:49Z",
+    "bytes": 57942,
+    "sha256": "94addb54fdd5b98fc973186ca33883eb2450c903dd55ad3b08bbceb86c2c1afd"
+  },
+  "sec_fts/2020-01-01_2020-12-31/machine_learning/00200": {
+    "key": "sec_fts/2020-01-01_2020-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2020/machine_learning/2020-01-01_2020-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:49Z",
+    "bytes": 57752,
+    "sha256": "84ad8aa82ab06fb0e9934a28f5f7345afe9a407df9a6bc17ace945557c7ba1d2"
+  },
+  "sec_fts/2020-01-01_2020-12-31/machine_learning/00300": {
+    "key": "sec_fts/2020-01-01_2020-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2020/machine_learning/2020-01-01_2020-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:49Z",
+    "bytes": 57851,
+    "sha256": "02be30beec95291c940d36ef273d50affe7052c653a199d7e0dbb35a441183ab"
+  },
+  "sec_fts/2020-01-01_2020-12-31/machine_learning/00400": {
+    "key": "sec_fts/2020-01-01_2020-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2020/machine_learning/2020-01-01_2020-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:49Z",
+    "bytes": 25800,
+    "sha256": "89dc32ace57f4631328f9ae789ce99178b47aeee32640c7f74f6e1d2f06f2a66"
+  },
+  "sec_fts/2020-01-01_2020-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/natural_language_processing/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:04Z",
+    "bytes": 24861,
+    "sha256": "760d194ef70432a6a0eda558cdb5d57cc9386aaf6ec25e5c3421e215181df982"
+  },
+  "sec_fts/2020-01-01_2020-12-31/neural_network/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/neural_network/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:06Z",
+    "bytes": 16079,
+    "sha256": "34a395f0b871c53625dbf3ad8683d2d6f38844c6811d3d3e70e88463e820143f"
+  },
+  "sec_fts/2020-01-01_2020-12-31/neural_networks/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/neural_networks/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:12Z",
+    "bytes": 14273,
+    "sha256": "752650e4ce45a48eb024cea069bc6151542ac0b1de88ed2cd5ca407640392e3b"
+  },
+  "sec_fts/2020-01-01_2020-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2020-01-01_2020-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2020-01-01&enddt=2020-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2020/reinforcement_learning/2020-01-01_2020-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:44:19Z",
+    "bytes": 3046,
+    "sha256": "62405c14e79d6c7056343033b129782c905ea4055a1f10de621fd29883b769f3"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:35:07Z",
+    "bytes": 58942,
+    "sha256": "29fa4384788cce7e17030a01b284735103e75d6b936725f3b0faac5bdf229b3f"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:35:07Z",
+    "bytes": 58622,
+    "sha256": "8a96fda341c77f56d44a847cf403eda1962a37e9c22bd16ba9ebccac02396b1e"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:35:08Z",
+    "bytes": 58494,
+    "sha256": "bc864ecc024c5581b4f03989145a9979bfac032f97994d0f0189ba5e3898404d"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:35:08Z",
+    "bytes": 58216,
+    "sha256": "2d478757ec6b1c82ac16b8f8fe83ea50952fd6c1fba09af33cceb86c2e5919ec"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:35:09Z",
+    "bytes": 58799,
+    "sha256": "00970b0626a42a32f0ef8c9722d49c08343f55b23699ab458742c419b3b7341f"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:35:09Z",
+    "bytes": 58637,
+    "sha256": "82f545dfccf0ea07f045d715c9999f199bf97936a0981bdaa7c16360f4b06e45"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00600": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:35:09Z",
+    "bytes": 58815,
+    "sha256": "2cff4cae85142ec0f0b95caada80ea5e7bcb0ac95fbfc4c7d1c99950cf133920"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00700": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:35:10Z",
+    "bytes": 58588,
+    "sha256": "d33ec991ded54116b73d9d61f5fcdc10549022c70f5b550d8b1cd78d7db1a966"
+  },
+  "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00800": {
+    "key": "sec_fts/2021-01-01_2021-12-31/artificial_intelligence/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2021/artificial_intelligence/2021-01-01_2021-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:35:10Z",
+    "bytes": 32564,
+    "sha256": "8e5face49d0868ac3c923cdde28649d09336302f2ed0b1a424b51e625f06bea8"
+  },
+  "sec_fts/2021-01-01_2021-12-31/chatgpt/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/chatgpt/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:06Z",
+    "bytes": 1066,
+    "sha256": "63b7443b4b6341d7f241dd9a8ff05468560dfec66fb9a7f216c8bfcca23dcb68"
+  },
+  "sec_fts/2021-01-01_2021-12-31/computer_vision/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/computer_vision/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:12Z",
+    "bytes": 29490,
+    "sha256": "62b6dc04ff01b88d4b02e445509f0927ae181aca73ff031ea8186995df695c6e"
+  },
+  "sec_fts/2021-01-01_2021-12-31/deep_learning/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/deep_learning/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:39:59Z",
+    "bytes": 39576,
+    "sha256": "e1b4fc18b58aed18987c79bc0e58ee31e0c82f9162abe1a9d1797a56f72c2ef3"
+  },
+  "sec_fts/2021-01-01_2021-12-31/foundation_model/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/foundation_model/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:55Z",
+    "bytes": 1075,
+    "sha256": "1f09f637b7b81848ecedfc9203747b1a2a0909a9919d34f0926121f58f9e5161"
+  },
+  "sec_fts/2021-01-01_2021-12-31/foundation_models/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/foundation_models/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:00Z",
+    "bytes": 1076,
+    "sha256": "85504136339886521aa109d3e400e35d7bc150f902a59ffb9b57433ae39847c3"
+  },
+  "sec_fts/2021-01-01_2021-12-31/generative_ai/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/generative_ai/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:20Z",
+    "bytes": 1754,
+    "sha256": "386edf916b844914ec5684e5f9b9ed66da5833f0ba423fc23ad730ad2db0bf3a"
+  },
+  "sec_fts/2021-01-01_2021-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/generative_artificial_intelligence/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:37Z",
+    "bytes": 1093,
+    "sha256": "97fbe7d19b434f2516b6c603730ae9d915075b1a2b857f92c3971c6b8d71cadd"
+  },
+  "sec_fts/2021-01-01_2021-12-31/large_language_model/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/large_language_model/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:50Z",
+    "bytes": 1079,
+    "sha256": "e2b82ae3025784018d8da533cf16e0baa73430f50b69fd9057f9b639192e66f0"
+  },
+  "sec_fts/2021-01-01_2021-12-31/large_language_models/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/large_language_models/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:55Z",
+    "bytes": 1080,
+    "sha256": "1f58357dfeb2e109f3e596d4d5ee75d77fb41cab62a18dec8be405ff2beffbad"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:50Z",
+    "bytes": 58067,
+    "sha256": "7352b98eddc79d70caf195003d2b5ee32c5d5ea72047014ecbd9228350fdc20a"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00100": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:50Z",
+    "bytes": 58002,
+    "sha256": "ba66716c345b14982e3e1b1d37b9b6e0ef3f4e18681717b168da585dcd07cdf2"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00200": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:50Z",
+    "bytes": 57880,
+    "sha256": "debb5ce792c47fa61f9ff5656a5b3e5b1a98802c728e6d0bbf8cfd0bcf2ef193"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00300": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:51Z",
+    "bytes": 58462,
+    "sha256": "4041212d5d0bf8053b9647a6c5c0d12af935e5c633788db70576eb22c5f63307"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00400": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:51Z",
+    "bytes": 58056,
+    "sha256": "9d81d2dba2661cbb5b3b8cfe00d1776e14560be8fb5487e8326daa400caaecd9"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00500": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:36:51Z",
+    "bytes": 58317,
+    "sha256": "158aea0d0ee0cf253c9556af8c14f4ef5f673c0e875a75abfa8ef37e71a39194"
+  },
+  "sec_fts/2021-01-01_2021-12-31/machine_learning/00600": {
+    "key": "sec_fts/2021-01-01_2021-12-31/machine_learning/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2021/machine_learning/2021-01-01_2021-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:36:51Z",
+    "bytes": 16401,
+    "sha256": "fa4592f49249d91166cbe6b8c7bdcdba505b906e7114d145d797b2c6ab90d41b"
+  },
+  "sec_fts/2021-01-01_2021-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/natural_language_processing/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:05Z",
+    "bytes": 32349,
+    "sha256": "3b0aa2c77d1b9dc40b724612f749b03fb3087c9f1990cee4bdf9b9292e721a29"
+  },
+  "sec_fts/2021-01-01_2021-12-31/neural_network/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/neural_network/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:07Z",
+    "bytes": 14506,
+    "sha256": "7bbaa9d9a74171e4241a4d4ad5aefd9c99ec7cb261e9eaa46cf55bcb879ffe88"
+  },
+  "sec_fts/2021-01-01_2021-12-31/neural_networks/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/neural_networks/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:13Z",
+    "bytes": 16977,
+    "sha256": "c934f0d9270b4a8c52559c4dd896db29eb8f5c4d80f06fc6a22f948e3e496427"
+  },
+  "sec_fts/2021-01-01_2021-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2021-01-01_2021-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2021-01-01&enddt=2021-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2021/reinforcement_learning/2021-01-01_2021-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:44:19Z",
+    "bytes": 2417,
+    "sha256": "ecd8a0cb7a55ecc0a38fdbbe699b5fd13cba01fcee09086a4c029b82bfc1811b"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:35:10Z",
+    "bytes": 59074,
+    "sha256": "f4f3cb4b2a152add1247a25a3ff3fbdc341c537509625ba68b8ea5b50db58172"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:35:11Z",
+    "bytes": 58342,
+    "sha256": "111b431c9342f6b856636a82099a93475ee85c9bfc4757f1d766c7175a5d55ee"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:35:11Z",
+    "bytes": 58255,
+    "sha256": "298ba8cb0d02ea411166e20ab8527ce1372ed88951734d006c24dc6d969cd21f"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:35:12Z",
+    "bytes": 58742,
+    "sha256": "002642deb6cc8cec7888810a721c3eb16cc1b376d30e6a1e94efeb773734e62d"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:35:12Z",
+    "bytes": 58264,
+    "sha256": "27579970e7593e44ad484d6f064e8f97507fab71a8b33b996cb789ac4f8d0757"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:35:13Z",
+    "bytes": 58586,
+    "sha256": "f99214c333a2645ccf6c1dfa48dadee44ae5e0ed24f521aa98394a39ac31b454"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00600": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:35:13Z",
+    "bytes": 58665,
+    "sha256": "5d91fe90ad57c92d247c2e162f676ad12be563356fb9c2214479d036e23cb4a4"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00700": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:36:20Z",
+    "bytes": 58443,
+    "sha256": "996abfee87b88eb76c789f4cf8a78fe4cd8732f0a3ba073c2d574541e519454e"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00800": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:36:21Z",
+    "bytes": 58441,
+    "sha256": "04aaf96faa95d65d94eb293a2782df43ef069f430f42ceee2703f76bda319a5a"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00900": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:36:21Z",
+    "bytes": 58521,
+    "sha256": "7ffaaa1beadfa99d44f6bcbf5eb899f200c7c8e4e07239a8a35beb5dbf5c85ec"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/01000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:36:21Z",
+    "bytes": 58218,
+    "sha256": "fe2241560a4de722ba4a0519c39e57bb8981ea1f0dca2733d98d837224e33af9"
+  },
+  "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/01100": {
+    "key": "sec_fts/2022-01-01_2022-12-31/artificial_intelligence/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2022/artificial_intelligence/2022-01-01_2022-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:36:22Z",
+    "bytes": 36926,
+    "sha256": "adfd15f2221cd275e70147de8b3f8923952366e09c033ae2a4a5ada15e2248e9"
+  },
+  "sec_fts/2022-01-01_2022-12-31/chatgpt/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/chatgpt/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:07Z",
+    "bytes": 1066,
+    "sha256": "3f86a553d988cf2c580feb488c8a4e1d256c9f6b45fc4d98b6565e56b4601d16"
+  },
+  "sec_fts/2022-01-01_2022-12-31/computer_vision/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/computer_vision/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:42:43Z",
+    "bytes": 46244,
+    "sha256": "eeb53f34022fe8762a2177e89a1f60efb04e300c979a2f3b584faf1b9f84a64b"
+  },
+  "sec_fts/2022-01-01_2022-12-31/deep_learning/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/deep_learning/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:00Z",
+    "bytes": 47814,
+    "sha256": "70e46f8229dd7fa9e8672f8616fb0c4358ba793e6e2c512dec3e5dd3ba8a713c"
+  },
+  "sec_fts/2022-01-01_2022-12-31/foundation_model/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/foundation_model/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:56Z",
+    "bytes": 1766,
+    "sha256": "3688541c91627e2c8af5a5077d3ff53a5230f0f245eec4b9ebed91e360946571"
+  },
+  "sec_fts/2022-01-01_2022-12-31/foundation_models/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/foundation_models/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:01Z",
+    "bytes": 1077,
+    "sha256": "5e633dcbe127f1463c2a2381fd8ca9742ca8095f33126bded366e4565a204c9e"
+  },
+  "sec_fts/2022-01-01_2022-12-31/generative_ai/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/generative_ai/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:20Z",
+    "bytes": 2351,
+    "sha256": "8fe8bce49b77d620dca952f406dcab0fb29ed8279f0ebd96e44790e02a512d95"
+  },
+  "sec_fts/2022-01-01_2022-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/generative_artificial_intelligence/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:38Z",
+    "bytes": 1094,
+    "sha256": "b5cbd804cb22668e4e59c0d99544999f1c738447cd13725329d032827d74e379"
+  },
+  "sec_fts/2022-01-01_2022-12-31/large_language_model/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/large_language_model/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:51Z",
+    "bytes": 1079,
+    "sha256": "2b49f89c0a85987a920fb87b300991cbda2cd7f1231071d3208d8159a4c13cc5"
+  },
+  "sec_fts/2022-01-01_2022-12-31/large_language_models/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/large_language_models/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:56Z",
+    "bytes": 1080,
+    "sha256": "c02ed8b08354c0cf0ff3b590115bdeef9d119ae8ff41f0f2fb64154518438a0a"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:52Z",
+    "bytes": 58269,
+    "sha256": "4fc1a9bec8ffc1fb3f2ae5386c6632c7af534649886876559cb04ec27daa305f"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00100": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:52Z",
+    "bytes": 58159,
+    "sha256": "f15f5ec311084feaaf31dcc34195e44658cd8807eb0e39bc8857b05ed82a6c4d"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00200": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:52Z",
+    "bytes": 58097,
+    "sha256": "02c389c20c07fb44b50ea6ad03d5bf18d9e7c00b9c6cd8e94fcf850fc31b01ee"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00300": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:53Z",
+    "bytes": 58067,
+    "sha256": "4125a45a55085e332f6a591552aacf82faeeabcacdc87a3cfb4868115c6dac88"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00400": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:53Z",
+    "bytes": 58436,
+    "sha256": "22a61f4ffafc3dc44c659a6ae12946b6c38416f11798a5ad41180f9decd319a5"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00500": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:36:53Z",
+    "bytes": 58062,
+    "sha256": "baa699eb2b11ab2c8dc246e0a9d29cc0cfe8da0cdb13626b94fd7af987db90a3"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00600": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:36:54Z",
+    "bytes": 58164,
+    "sha256": "df773a07058c328978d86fea2545bb5f615610720311a7807928bc8ce414c484"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00700": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:36:54Z",
+    "bytes": 58189,
+    "sha256": "1121cd6fa375339bcd948dec7e7819d9363c457b8aa729f71f195ac041004150"
+  },
+  "sec_fts/2022-01-01_2022-12-31/machine_learning/00800": {
+    "key": "sec_fts/2022-01-01_2022-12-31/machine_learning/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2022/machine_learning/2022-01-01_2022-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:36:54Z",
+    "bytes": 42237,
+    "sha256": "d142b9f8fa4e45a6828e9bc579f7df80fd099dd1b7536605b680c0181ed1896a"
+  },
+  "sec_fts/2022-01-01_2022-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/natural_language_processing/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:06Z",
+    "bytes": 48113,
+    "sha256": "afa1d6920b25779c94101037e5f848769613dd2048f1d4f3a2833519e6a7945b"
+  },
+  "sec_fts/2022-01-01_2022-12-31/neural_network/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/neural_network/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:08Z",
+    "bytes": 20536,
+    "sha256": "61a5b8a1ff078323eda65c8fba89eedb3c72548e500ab73cd95e120336dafdd6"
+  },
+  "sec_fts/2022-01-01_2022-12-31/neural_networks/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/neural_networks/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:14Z",
+    "bytes": 25625,
+    "sha256": "ce31b22c0ac6d55189707643d928303e150eab5f2e868c5158075356882dc41c"
+  },
+  "sec_fts/2022-01-01_2022-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2022-01-01_2022-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2022-01-01&enddt=2022-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2022/reinforcement_learning/2022-01-01_2022-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:44:20Z",
+    "bytes": 4229,
+    "sha256": "5aa8637b1575e28df12ea0dbdc05143f816ac7a3ea92a803e88764e634665c17"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:22Z",
+    "bytes": 59166,
+    "sha256": "1c1053c7573a6c7acdf7bad830412f935a2ec81fb1c0466ed7095737bcd35366"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:23Z",
+    "bytes": 58374,
+    "sha256": "5e63acf5c4bc2f0b10ea3e23a1fbf2b2a0d98bb0d3625ada5e657ab7ca011fca"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:23Z",
+    "bytes": 58551,
+    "sha256": "728f7ea091dd80a0353b5f8d95efb053d843f59a059a4eaa7a35e9bf417908cf"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:24Z",
+    "bytes": 58417,
+    "sha256": "eafbdc06e51f262f2e1db2bff1333a22a35c125594e2d3f355141640fbb667f2"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:24Z",
+    "bytes": 58536,
+    "sha256": "729d42b36f688e863544da239eee6f9fea036ecaf595fc1702e90d69d3405c95"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:36:25Z",
+    "bytes": 58642,
+    "sha256": "736a567bee1407bfc166604c24df11c5323df76c130ef2ad970a387d796acfc4"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00600": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:36:25Z",
+    "bytes": 58552,
+    "sha256": "8d317b25c2534ba7a47c79e5456e056b590939f989451651d412d2218a68ffc7"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00700": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:36:26Z",
+    "bytes": 58516,
+    "sha256": "486684237462d3876dbe6c343e02e38c7a75db59c856e782fe40dbca35684cfd"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00800": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:36:26Z",
+    "bytes": 58460,
+    "sha256": "581c970a9c38a127c85dfe840d5b85cf600915ca9972fa9268e804a81f05e327"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00900": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:36:27Z",
+    "bytes": 58391,
+    "sha256": "bace48b9dfe0bf0249d0b0eb439cc06e4eb32eabaf3a9b775e13725e95da09e5"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:36:27Z",
+    "bytes": 58586,
+    "sha256": "c37c7333b9b9eead166dfe4b4e20c4c293631ea1c3d73fd3d79fcff52ef1e373"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01100": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:36:27Z",
+    "bytes": 58342,
+    "sha256": "024658291031aeba6822b40a2fd1fa22529bf9d9fe23a3ce63c02950fe78c414"
+  },
+  "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01200": {
+    "key": "sec_fts/2023-01-01_2023-12-31/artificial_intelligence/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2023/artificial_intelligence/2023-01-01_2023-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T01:36:28Z",
+    "bytes": 58051,
+    "sha256": "ec42716ab386afaa1409f98f2bd52fe5d3090a744e31bc5639c4caa2d9948ac0"
+  },
+  "sec_fts/2023-01-01_2023-12-31/chatgpt/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/chatgpt/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:08Z",
+    "bytes": 9319,
+    "sha256": "167cfc6205167e12639aca4a80b7c4574cb13b9a282995c5c69fa9992e0539b3"
+  },
+  "sec_fts/2023-01-01_2023-12-31/computer_vision/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/computer_vision/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:42:44Z",
+    "bytes": 52372,
+    "sha256": "78725776802c9cc9de25d5e33d6fa84d9c055b20f8ddabce8bcb0013f8b11dcd"
+  },
+  "sec_fts/2023-01-01_2023-12-31/deep_learning/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/deep_learning/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:00Z",
+    "bytes": 51532,
+    "sha256": "443c3d93aab50351b9aefa2c23f5add729c986105bc3b219558762275e1b0c6a"
+  },
+  "sec_fts/2023-01-01_2023-12-31/foundation_model/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/foundation_model/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:57Z",
+    "bytes": 2446,
+    "sha256": "e4304a39bc336009a0a55886e6fb28c04dda8b8a99aa1ad69a986fed149e8974"
+  },
+  "sec_fts/2023-01-01_2023-12-31/foundation_models/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/foundation_models/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:02Z",
+    "bytes": 3606,
+    "sha256": "91a37ac243f8b443b4061eb1ecb70e677ad6ba5575f7d5a501a263e205cbfcb6"
+  },
+  "sec_fts/2023-01-01_2023-12-31/generative_ai/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/generative_ai/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:21Z",
+    "bytes": 40933,
+    "sha256": "c80c0a25a292ad37dd1e4aa710d5b9c81b701562e23643339fc22059a1b0460d"
+  },
+  "sec_fts/2023-01-01_2023-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/generative_artificial_intelligence/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:39Z",
+    "bytes": 13647,
+    "sha256": "3c43282b32989e1ea24dacac38954f18ab80bdfae504bdfc04ebcd377bc3b2a2"
+  },
+  "sec_fts/2023-01-01_2023-12-31/large_language_model/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/large_language_model/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:51Z",
+    "bytes": 4830,
+    "sha256": "82fe217ba1f9b45bdc4b67249f3fa455821541c3c097f7acb28cd3e20b60c196"
+  },
+  "sec_fts/2023-01-01_2023-12-31/large_language_models/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/large_language_models/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:57Z",
+    "bytes": 14855,
+    "sha256": "ab0cd446251f61de706f51c2e9293857b0a554a1758b873c1b4f70ee35582e0f"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:55Z",
+    "bytes": 58040,
+    "sha256": "9a4579d21f2e621e54e79dc5a578d5301c28bb876fd0dff5208d4efbd69f7f1d"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00100": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:55Z",
+    "bytes": 58025,
+    "sha256": "4ead53d2a93ac1b2324c778b7ada2f711d4db089e92a1f4db0530a58897f857b"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00200": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:55Z",
+    "bytes": 58214,
+    "sha256": "b62e4d8ac06a8532be4086621d1f31bfa0c51ce33823effeea5a94613f52dfa6"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00300": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:37:57Z",
+    "bytes": 58096,
+    "sha256": "330e3ae0e3b9539078c150ba3104bbda0d1e419f74b0d3e45ec48c4917a0ea18"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00400": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:37:58Z",
+    "bytes": 58254,
+    "sha256": "fc8f22f508257fdfd6fc109403675902dc5a3a1a778f6d120234fb8c691e7223"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00500": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:37:59Z",
+    "bytes": 58345,
+    "sha256": "8c6b0e9874c276eabf1100b1086cee61023ad8c6c879850299f893e9936e0ee2"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00600": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:39:30Z",
+    "bytes": 58141,
+    "sha256": "8838bf997dd05def98b926c137aa2e60c2e560521a48349a9b9cd7f9c49b2638"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00700": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:39:31Z",
+    "bytes": 58456,
+    "sha256": "5353ee14e314794d74d0afee1aaa9ba7deacbfa94daf55f17e18d3eb564e3bee"
+  },
+  "sec_fts/2023-01-01_2023-12-31/machine_learning/00800": {
+    "key": "sec_fts/2023-01-01_2023-12-31/machine_learning/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2023/machine_learning/2023-01-01_2023-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:39:32Z",
+    "bytes": 57199,
+    "sha256": "599b6cdff0621878de18deb94df93f89256cdc5b11d9feb7f62f3c2f9f373d76"
+  },
+  "sec_fts/2023-01-01_2023-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/natural_language_processing/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:07Z",
+    "bytes": 46194,
+    "sha256": "03f7bc3ebfb7c3e9e3e30f8463ab5896aa7f3dc5f72a61a00a2ba9581e3211ac"
+  },
+  "sec_fts/2023-01-01_2023-12-31/neural_network/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/neural_network/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:09Z",
+    "bytes": 18780,
+    "sha256": "1e35a18d333fd79fc31d54821c062ba81ab3115d258477b73fb97158e0c8558f"
+  },
+  "sec_fts/2023-01-01_2023-12-31/neural_networks/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/neural_networks/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:15Z",
+    "bytes": 27746,
+    "sha256": "3bbb726cb1db0a34cb427611b20df2585ca5ed9b658cacaa5863b45d9aaa228c"
+  },
+  "sec_fts/2023-01-01_2023-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2023-01-01_2023-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2023-01-01&enddt=2023-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2023/reinforcement_learning/2023-01-01_2023-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:44:21Z",
+    "bytes": 5032,
+    "sha256": "7e0bad99387107542e3a9bc37918a0920384593b8a851a243b876b443a537093"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:28Z",
+    "bytes": 58817,
+    "sha256": "bb938854ebc892961d272ab434d99ba24b2dae732e36420c5045c7e07979344e"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:29Z",
+    "bytes": 58405,
+    "sha256": "5db2a314f15269cc8a952ceee2c494053819db7e599e52459fd4265f2534b239"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:29Z",
+    "bytes": 58270,
+    "sha256": "62bab6346beea45f7b682dacdc8c784ed201eed06c048f08ae4bd6c5f39f68dc"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:29Z",
+    "bytes": 58625,
+    "sha256": "8afbdb8eb7da2ac3d9da1e1cb21df03b01bfa5c5ddfaec4eebe71c69e4c139d5"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:29Z",
+    "bytes": 58448,
+    "sha256": "127b0f4ff2647f0ae2dd8fa748a1216aebc8a1dee5c33ef8c00d7af9b27b1264"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:36:30Z",
+    "bytes": 58460,
+    "sha256": "f595638eb9deceecae101f42fdb83cafb3e9d22c4a127d5fa2cc449396f6fb0f"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00600": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:36:30Z",
+    "bytes": 58502,
+    "sha256": "3ae9dc55c8e11fffdc95ca2fdd87745fce01fd2b92c02f5a6a4d6b3ec8e3c432"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00700": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:36:30Z",
+    "bytes": 58565,
+    "sha256": "9fb6e0aca95e50a5a8bdffc8fd9f25330c796806eb5806f59b61c55b0c90e59a"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00800": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:36:31Z",
+    "bytes": 58688,
+    "sha256": "902e5ddb9ef288a6f994a382f5e125f7d801bca2a22eb178bd6e99264ae6cf83"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00900": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:36:31Z",
+    "bytes": 58622,
+    "sha256": "c6231e63897281cfc83d6671ce867def0e3f1978468da7387adc6238efa5ffc8"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:36:31Z",
+    "bytes": 58741,
+    "sha256": "84ad9e92b0112448346743cdfb11ff8c06d12a205c34e0aac23d343f7921e119"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:36:31Z",
+    "bytes": 58587,
+    "sha256": "32759a78cce4eeabe63b95aae5661d081bf9e7bcf5551b078f6334ff5d3706cc"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T01:36:32Z",
+    "bytes": 58998,
+    "sha256": "d016a1476f5a91962d706422c799b9c8ac83a0d3c02821ed95b8e0eff8e5aad1"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1300",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01300.json",
+    "retrieved_utc": "2026-10-23T01:36:32Z",
+    "bytes": 58738,
+    "sha256": "5637848a2e2d39d43c738d0d83d8e883caed8df3da5c17d3f6a7517c04bd572b"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1400",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01400.json",
+    "retrieved_utc": "2026-10-23T01:36:32Z",
+    "bytes": 59117,
+    "sha256": "135b9a7405a1a6a9d38e6c739a60beac50ee2c32138a03460bb93ee09889417f"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1500",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01500.json",
+    "retrieved_utc": "2026-10-23T01:36:33Z",
+    "bytes": 58930,
+    "sha256": "5d3323742234a1dd360a7d7d9e285307de0955e675b29fb646b62f2446eb2271"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01600": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1600",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01600.json",
+    "retrieved_utc": "2026-10-23T01:36:33Z",
+    "bytes": 58917,
+    "sha256": "e42cd2f34d53e195a3553149066e5860472e8e0df4904b15da3ce13bfbf2ab58"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01700": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1700",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01700.json",
+    "retrieved_utc": "2026-10-23T01:36:33Z",
+    "bytes": 58541,
+    "sha256": "c7b2573881cacd77bf04157093b80e4e33b17434dc18f311af053245b7c0f2d9"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01800": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1800",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01800.json",
+    "retrieved_utc": "2026-10-23T01:36:34Z",
+    "bytes": 59235,
+    "sha256": "9b7a31f5fb3516683bd6ec1f663617e6ae10f911c820dd0fbad8a8fa3c14c506"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01900": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/01900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1900",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_01900.json",
+    "retrieved_utc": "2026-10-23T01:36:34Z",
+    "bytes": 58686,
+    "sha256": "ade4aa1620da802b90da8445ebbd63ce64812bf2c9e0b885d2a5f349921b3626"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=2000",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_02000.json",
+    "retrieved_utc": "2026-10-23T01:36:34Z",
+    "bytes": 58523,
+    "sha256": "49170292e2527fd5fa1d6ab05dd959463d3fd6590f5e17a53b5d7c07048dec9f"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=2100",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_02100.json",
+    "retrieved_utc": "2026-10-23T01:36:35Z",
+    "bytes": 59461,
+    "sha256": "3232a877fbd5d6bdb5ec02c1c17ff299d0d4fb418aa6694aa3a1bd67a58f8b44"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=2200",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_02200.json",
+    "retrieved_utc": "2026-10-23T01:36:35Z",
+    "bytes": 59173,
+    "sha256": "d6fe77429e8988580e5740c091cbe128cdb8a60705ce4cca80f173398a73d61e"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=2300",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_02300.json",
+    "retrieved_utc": "2026-10-23T01:36:35Z",
+    "bytes": 59270,
+    "sha256": "688ced7032ed63e65002578a18407f7255c05b168b1b8acea82064625ce27f31"
+  },
+  "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/artificial_intelligence/02400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=2400",
+    "dest": "sec/fts/2024/artificial_intelligence/2024-01-01_2024-12-31_02400.json",
+    "retrieved_utc": "2026-10-23T01:36:36Z",
+    "bytes": 29947,
+    "sha256": "e3988aac23186f131fe2caea306cbb083ba08e17372a8c85821bd06d18ff6f94"
+  },
+  "sec_fts/2024-01-01_2024-12-31/chatgpt/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/chatgpt/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:09Z",
+    "bytes": 37951,
+    "sha256": "bf46fe2af24afd8741b81c9f2fb4d3eea4248de4be6e919fe2a7ff0bad531df6"
+  },
+  "sec_fts/2024-01-01_2024-12-31/computer_vision/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/computer_vision/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:42:45Z",
+    "bytes": 51645,
+    "sha256": "6828e051b993e3c26cbb0aab9ac1daed85413530fdf64b06e25d40381ae46a71"
+  },
+  "sec_fts/2024-01-01_2024-12-31/deep_learning/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/deep_learning/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:02Z",
+    "bytes": 54336,
+    "sha256": "ec56a5e2e4c5d2dd9b6b35fb73cb74e8f0a2480b7ec4d6774dd43c7181a2f732"
+  },
+  "sec_fts/2024-01-01_2024-12-31/foundation_model/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/foundation_model/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:57Z",
+    "bytes": 3094,
+    "sha256": "568d6680880b2c7b5186118da2d0ff299ebd7ba91b026ec9235e4a660bf40655"
+  },
+  "sec_fts/2024-01-01_2024-12-31/foundation_models/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/foundation_models/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:03Z",
+    "bytes": 13064,
+    "sha256": "e794dd02fd1ce5c17755317ccd17cde22d3bcb38248e49a52a96d7edc0d3671e"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:22Z",
+    "bytes": 57694,
+    "sha256": "b7916c97bb8d1c0e866942ae010c94e2b928f3bba3de71ba5912069b60324685"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:23Z",
+    "bytes": 57934,
+    "sha256": "406cb26e7a538ec9dfb2c88bdbe30ea449be4bd2bed761c5a8b55122e4b8a4a5"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:40:24Z",
+    "bytes": 58056,
+    "sha256": "9a5d2ae9edb3de5b8c5ac391fb6991add0f6a6bf8c69cb55abc5c3eaf049c2a8"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:40:25Z",
+    "bytes": 58213,
+    "sha256": "3487ccd132e42c0429cfa35bf1993d8dbc4cb5b752a5abb6b2b21fc7ba590a74"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:40:25Z",
+    "bytes": 58107,
+    "sha256": "edc117c4a67a4dbb61a38212a7897ce636abc803f9c92743f7566eb2d7881c8b"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_ai/00500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_ai/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2024/generative_ai/2024-01-01_2024-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:40:26Z",
+    "bytes": 12724,
+    "sha256": "59be9e5156cdbd38590d02323d70700cf02e2df5fb28178cca9b83b789d87b86"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/generative_artificial_intelligence/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:40Z",
+    "bytes": 58197,
+    "sha256": "d217b15709740a6c06fed6d6926ed744a0e7eae177ec21ae31e1343ade4dd8c3"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/generative_artificial_intelligence/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:40Z",
+    "bytes": 58302,
+    "sha256": "d2580982a924e43070eed16f8af098cf32274595ee49a69a57b0e4292fda3d5c"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/generative_artificial_intelligence/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:40:41Z",
+    "bytes": 58164,
+    "sha256": "3210437f70ffdab6986fae89acf5bd295e19b801ad89e8c6e1496aab9845dfa4"
+  },
+  "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/generative_artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/generative_artificial_intelligence/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:40:42Z",
+    "bytes": 33400,
+    "sha256": "40782f16b19a418053ff36adfbd3a3f8509cc3f93a0dd28b7bc1648fdf56a60c"
+  },
+  "sec_fts/2024-01-01_2024-12-31/large_language_model/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/large_language_model/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:52Z",
+    "bytes": 20139,
+    "sha256": "aa47c74214afae08e93d61529f78600243960fd9a52f65a7f954bd5c5cd302d8"
+  },
+  "sec_fts/2024-01-01_2024-12-31/large_language_models/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/large_language_models/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:58Z",
+    "bytes": 58155,
+    "sha256": "8327c69f7ac7105f382e3a1ad83afe5953886bab6267645424ea148c97e67f00"
+  },
+  "sec_fts/2024-01-01_2024-12-31/large_language_models/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/large_language_models/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/large_language_models/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:59Z",
+    "bytes": 22737,
+    "sha256": "87f8b059f362d0c21d3abd514dd989b320be69e0c8ae2c6fdb423eb9096279ac"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:39:33Z",
+    "bytes": 58129,
+    "sha256": "e22531cda6c52134ede2a51ba5e223572060a920631a771aaa08e23f51f29876"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:39:33Z",
+    "bytes": 58126,
+    "sha256": "de20eeb14714035faa5946b8123f3dff5501454604be05553e0b23f69da2a255"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:39:34Z",
+    "bytes": 58323,
+    "sha256": "7ee0eeb9a337f2ea1debeddaef02a899ec6bc44198a40bcce20ff383d10cb897"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:39:35Z",
+    "bytes": 58119,
+    "sha256": "7a681c3e98bee93e90e1b436c6e8ecee9bf33cf7d465aafb4629ddd67f873c93"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:39:36Z",
+    "bytes": 58631,
+    "sha256": "9b0f2ab15a714704f4610393458b2b4ac55140a0cf282c197a1eb54298209ca2"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:39:37Z",
+    "bytes": 58276,
+    "sha256": "c306fb51d7da2194d729366bc58cdfa287951fbb49b5713b9952b388e9cef704"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00600": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:39:37Z",
+    "bytes": 58528,
+    "sha256": "856c2e2ca97052ced492fbae5e8c6480e3d9dcea20f37f86d6c2bb2bd53ea607"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00700": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:39:38Z",
+    "bytes": 58539,
+    "sha256": "b0d02a84927bd388f06879759deb19c91b506107fbf28a0467ccbfd7aa444d61"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00800": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:39:39Z",
+    "bytes": 58606,
+    "sha256": "a21008d7614ca09d17597db797ebc8e677803252c4778f27f1cf8b194aeffe39"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/00900": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:39:40Z",
+    "bytes": 58195,
+    "sha256": "2b79f8fbb42af9c4d8ed11f5edf00f01460285ba283e9a59472cd456d2de328a"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/01000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:39:41Z",
+    "bytes": 58299,
+    "sha256": "a8006ea81efced8ac503608b374572065961f3dda94adabce988171bf39619ca"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/01100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:39:42Z",
+    "bytes": 58513,
+    "sha256": "a6c6c87797e29cf3f0d949eaec7118b6cc9c79f2c79f32e7684a14fe5731febd"
+  },
+  "sec_fts/2024-01-01_2024-12-31/machine_learning/01200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/machine_learning/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2024/machine_learning/2024-01-01_2024-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T01:39:42Z",
+    "bytes": 32021,
+    "sha256": "5d3be6a0bb67624d34b4a6aa90f96a7d403a2f139ec45b9bd29818387601c8c1"
+  },
+  "sec_fts/2024-01-01_2024-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/natural_language_processing/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:08Z",
+    "bytes": 58056,
+    "sha256": "b1d0eafca42b4034af389e85fa3d3ae263592ca0c7ebd71ffc3b5b27c22f23a0"
+  },
+  "sec_fts/2024-01-01_2024-12-31/natural_language_processing/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/natural_language_processing/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/natural_language_processing/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:41:09Z",
+    "bytes": 7100,
+    "sha256": "13838a23f95173873c1be1dedc2338689d4f31c77a3617638ba3fa4752cb7127"
+  },
+  "sec_fts/2024-01-01_2024-12-31/neural_network/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/neural_network/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:10Z",
+    "bytes": 20079,
+    "sha256": "7c7f8c733a65083af01cdf1e304737149f9ddb8db4f9951095dee88c9a458ff0"
+  },
+  "sec_fts/2024-01-01_2024-12-31/neural_networks/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/neural_networks/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:16Z",
+    "bytes": 28740,
+    "sha256": "6b943664c3c4121b9a7f9fd60c6285078eaf40325fa7b8e9f46b49457cf748ce"
+  },
+  "sec_fts/2024-01-01_2024-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/reinforcement_learning/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:52Z",
+    "bytes": 7560,
+    "sha256": "db0f6c7ad2863e75d039b6fc6c8f841bde3722c56c7c2a2051c9ef9895bd1ce0"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:36:36Z",
+    "bytes": 58860,
+    "sha256": "fe9acb7f5cecb4f0bb1bbadd84fc52b88facd72528915737ed9860c649f2544c"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:36:37Z",
+    "bytes": 58317,
+    "sha256": "31642e7e3d65364c4e8a5d3057ca8a4f0bc0760ecd7f5b4a4522af9d639f0794"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:36:37Z",
+    "bytes": 58522,
+    "sha256": "9069b37931b424a6739bfbb1749937d617be3018dc7e9382c44c914d7008c76e"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:36:37Z",
+    "bytes": 58754,
+    "sha256": "c62a023ada010af402abd8a1fb95eb3f3730da724bd907fa49e6b16de7b19f99"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:36:38Z",
+    "bytes": 58398,
+    "sha256": "12d874403148d706117d1f78783f1ba8511455e3ce4c9af9901ad69e9b66f1b5"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:36:38Z",
+    "bytes": 58539,
+    "sha256": "3c82ca2bff25d90b27ec9e6a0d51698b314267b81a24daf6d9203dc0fec0cee0"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:36:38Z",
+    "bytes": 58237,
+    "sha256": "f9253906fd2ae1acd3b94cff449f94be2db64b3081514da61e7c29fce515b7e2"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00700": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:36:39Z",
+    "bytes": 58529,
+    "sha256": "726a10f36b07cb512ab7460ff973c92b0ed25eb39cc76c9e952a5021f135ad57"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00800": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:36:39Z",
+    "bytes": 58417,
+    "sha256": "6d4b73026450588121b6dbd926e6a12aaf6af1b11c69298556f148ea9dc682fa"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00900": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:36:39Z",
+    "bytes": 58554,
+    "sha256": "f1a863a18d72702d5738c0d2949cfe846d7e9787e7284e6a3c4a4a690cdcdf1d"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:36:39Z",
+    "bytes": 58246,
+    "sha256": "962cb83d2355a0565a6f41895a5df0da571c35392fd535271831ed8238fc1afd"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:36:40Z",
+    "bytes": 58724,
+    "sha256": "9560e8a45dad72fa417b37ea0e6cde10788e441a9b2651e6c01f36cf0dd65fad"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T01:36:40Z",
+    "bytes": 58897,
+    "sha256": "20f1b1274eec60aecb67ae3f6ba06def08308dbd82df5e3d5ed54dd0ddf87903"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1300",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01300.json",
+    "retrieved_utc": "2026-10-23T01:36:40Z",
+    "bytes": 58189,
+    "sha256": "d05f1c29bce5579f7f449c0e3f1ffdda76855f3e43d424a6cdb5920eacfc86c2"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1400",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01400.json",
+    "retrieved_utc": "2026-10-23T01:36:41Z",
+    "bytes": 58642,
+    "sha256": "601be316e8233b8e238349c8df94f46982f5f96f678f3bcfd7ebbcc5212f4c14"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1500",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01500.json",
+    "retrieved_utc": "2026-10-23T01:36:41Z",
+    "bytes": 58189,
+    "sha256": "5be4a6c399c5b7218b24cd9c53bc023ec0d5771a56cbbf4423158981a8c8a56a"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1600",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01600.json",
+    "retrieved_utc": "2026-10-23T01:36:41Z",
+    "bytes": 59097,
+    "sha256": "4ab285510190baae73cfa745c760de73a450be06c52f364332f77dc67e2fd1de"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01700": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1700",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01700.json",
+    "retrieved_utc": "2026-10-23T01:36:42Z",
+    "bytes": 58505,
+    "sha256": "f37814a4ab9360e0622f4b4dafaf44be2f9e8b931fb62abca18185cd6202ab66"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01800": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1800",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01800.json",
+    "retrieved_utc": "2026-10-23T01:36:42Z",
+    "bytes": 59128,
+    "sha256": "496ddaaac55b5570cc92483456b3d91f4021507a417fca52f3dd52e9a527f587"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01900": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/01900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1900",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_01900.json",
+    "retrieved_utc": "2026-10-23T01:36:42Z",
+    "bytes": 58731,
+    "sha256": "27c1e6cdaa182842f678cd245fa27d6f7a0c6ce95cea825fbb96470f2cd48b84"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2000",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02000.json",
+    "retrieved_utc": "2026-10-23T01:36:43Z",
+    "bytes": 59323,
+    "sha256": "4c99b497e5332a42c40076a3249ea2ba37c71781139c1e1335932ddee25eb476"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2100",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02100.json",
+    "retrieved_utc": "2026-10-23T01:36:43Z",
+    "bytes": 59557,
+    "sha256": "6175d40f5ff0209fa2a921f1545459b3000019bd032a930282a3089d3dc7beb4"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2200",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02200.json",
+    "retrieved_utc": "2026-10-23T01:36:44Z",
+    "bytes": 58613,
+    "sha256": "58bcaf1ddba1f83b564c1b97f627162b3277517e7d611d41ef6edba4026041bf"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2300",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02300.json",
+    "retrieved_utc": "2026-10-23T01:36:44Z",
+    "bytes": 58691,
+    "sha256": "6ebb865e6bd6f106c58af2c69d52694b15d357188e8f0814f68148b223ea1ef0"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2400",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02400.json",
+    "retrieved_utc": "2026-10-23T01:36:44Z",
+    "bytes": 58888,
+    "sha256": "07726194fb279bd785cd45c5dc83bb14fb4ad4cbb65fd391fa68e12139692f54"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2500",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02500.json",
+    "retrieved_utc": "2026-10-23T01:36:44Z",
+    "bytes": 58796,
+    "sha256": "1794527f1c562217b8aa27017c1a7741de2cd0354ff87731ddc19e8ea103cc4f"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2600",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02600.json",
+    "retrieved_utc": "2026-10-23T01:36:45Z",
+    "bytes": 59422,
+    "sha256": "27ef4ab48e01cce464c4408318d84f64152f1f800333c635a95f6e6cc720dbcd"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02700": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2700",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02700.json",
+    "retrieved_utc": "2026-10-23T01:36:45Z",
+    "bytes": 59046,
+    "sha256": "ba886065b505596e98a837a95e5f6e0a0da5d384ca408b0c94d4f6560bbd39d2"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02800": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2800",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02800.json",
+    "retrieved_utc": "2026-10-23T01:36:45Z",
+    "bytes": 58745,
+    "sha256": "6c8f99b0855c68a4ee9e1cadb31cdeb6a6870c1970c41f1f877cb2aa84ae6689"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02900": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/02900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=2900",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_02900.json",
+    "retrieved_utc": "2026-10-23T01:36:46Z",
+    "bytes": 58901,
+    "sha256": "1543e9b3a3f26c6f6c12f66254b76e5f15a780b92064735749f249e99c6864fd"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=3000",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_03000.json",
+    "retrieved_utc": "2026-10-23T01:36:46Z",
+    "bytes": 59753,
+    "sha256": "ea5d2690b74ef859887d398fa94b23e368fe67bbed0581a9c2e653173298b6f7"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=3100",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_03100.json",
+    "retrieved_utc": "2026-10-23T01:36:46Z",
+    "bytes": 58902,
+    "sha256": "e466781789a4f2663ea1d33d93b619c69b627252c3ab02dc62646c7cc347a381"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=3200",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_03200.json",
+    "retrieved_utc": "2026-10-23T01:36:47Z",
+    "bytes": 60731,
+    "sha256": "0647f796c173dda5bfb6a26754dfb9e64470a40175bdf3030a1988327bc1d593"
+  },
+  "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/03300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=3300",
+    "dest": "sec/fts/2025/artificial_intelligence/2025-01-01_2025-12-31_03300.json",
+    "retrieved_utc": "2026-10-23T01:36:47Z",
+    "bytes": 20353,
+    "sha256": "8e34f85eb7a0ee87fb98dc0dbf301648f72acec5af83a26b92f2e1383eb0e4b6"
+  },
+  "sec_fts/2025-01-01_2025-12-31/chatgpt/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/chatgpt/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/chatgpt/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:09Z",
+    "bytes": 43202,
+    "sha256": "caceb87a236e91ea293945288bc5f9e810ac0426d4d4032bd0df8c670e4dcb67"
+  },
+  "sec_fts/2025-01-01_2025-12-31/computer_vision/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/computer_vision/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22computer%20vision%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/computer_vision/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:42:46Z",
+    "bytes": 55360,
+    "sha256": "c35690f64842fbf7687b9fbd706c878ed6bcd485ec44d3f70d98e48d75874290"
+  },
+  "sec_fts/2025-01-01_2025-12-31/deep_learning/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/deep_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/deep_learning/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:03Z",
+    "bytes": 58095,
+    "sha256": "7e4f73f0f28503446fae737bf1be2d81d5750c2bd6d2e37e4fbeb49ff5ec1650"
+  },
+  "sec_fts/2025-01-01_2025-12-31/deep_learning/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/deep_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22deep%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/deep_learning/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:04Z",
+    "bytes": 5428,
+    "sha256": "31575b862747b7ae55b8b1e4838519527aababe6c91ac7bb0c3b3bd955f18d03"
+  },
+  "sec_fts/2025-01-01_2025-12-31/foundation_model/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/foundation_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20model%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/foundation_model/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:58Z",
+    "bytes": 5584,
+    "sha256": "4da6fa5df0c28dfef1ab70cf87ae269cb8f6c44c865458c35ecb71b12a498f23"
+  },
+  "sec_fts/2025-01-01_2025-12-31/foundation_models/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/foundation_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22foundation%20models%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/foundation_models/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:46:04Z",
+    "bytes": 30323,
+    "sha256": "3bf9ee8e64764735eac523aaae3402b8d347007f5d92fb3fe44d64878282b04f"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:27Z",
+    "bytes": 57752,
+    "sha256": "4d0ad5b47642093efb63526a659cc14703bdb23645bafbad1d6aeda965381c01"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:28Z",
+    "bytes": 58047,
+    "sha256": "4a875dd3beeb2b2d4c4dad97db6fb9b2c1590fa6869d6ba23ef5bdce48727614"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:40:29Z",
+    "bytes": 58276,
+    "sha256": "cebcd6c1bb7913aa5d6792eb78feb45f018e12231cd85dc74c4c266e5031b145"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:40:30Z",
+    "bytes": 58214,
+    "sha256": "72fbb510017299a7f40aa745d182808e72ebc00ea6f3b3e4bfe06958e3a37e16"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:40:31Z",
+    "bytes": 58262,
+    "sha256": "49e6c2143cfaeec7d41d470d78f3d942d5bba97bce15f58e0d208c2cfd3728e4"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:40:32Z",
+    "bytes": 58527,
+    "sha256": "b9b3be393dcbaa9d4a4167ed25d6f9127664464b93604b92c689a0ecee154c25"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:40:33Z",
+    "bytes": 58389,
+    "sha256": "7c8b0b6d68449fdcca57b47fe0866a5c8172b11e1dcb3468b9095251ab162f71"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00700": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:40:34Z",
+    "bytes": 58598,
+    "sha256": "9526280c7feac8cad85ca639e668230c762cb216ae479d8bcf73899d27d24890"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_ai/00800": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_ai/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20AI%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2025/generative_ai/2025-01-01_2025-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:40:34Z",
+    "bytes": 46255,
+    "sha256": "983b03abdf02b20a89ab4d6bb8e0cb3629d2a872fa8ab0f55221b341875b1e27"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:43Z",
+    "bytes": 58681,
+    "sha256": "a87520cb0c052027f996db81332c7207a4294f385608589855e2bb856e9ed51f"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:40:44Z",
+    "bytes": 58158,
+    "sha256": "9df97cbddfc0e627cc2abf0a13625e25ba4c590b6e11e1978f0c9554416536c4"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:40:45Z",
+    "bytes": 58702,
+    "sha256": "e322bdf8bed8ce87514f5df190b0026ef906295d4b79c6fe86127db37d3aac8b"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:40:46Z",
+    "bytes": 58287,
+    "sha256": "43f259c7efec10b7452ceae97fb5e32e2d8c92c5d41d21ad598e94874dc3b711"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:40:46Z",
+    "bytes": 58689,
+    "sha256": "e7817b89e17dc61fb3d871bddca7f5e85cb71650ab5db4702cc2739cc9055a71"
+  },
+  "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/generative_artificial_intelligence/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22generative%20artificial%20intelligence%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2025/generative_artificial_intelligence/2025-01-01_2025-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:40:47Z",
+    "bytes": 28160,
+    "sha256": "6768687e30f9aa47686a2b5109a14d88d7d34875b709136baae9585143c3c052"
+  },
+  "sec_fts/2025-01-01_2025-12-31/large_language_model/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/large_language_model/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20model%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/large_language_model/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:53Z",
+    "bytes": 27681,
+    "sha256": "914c993cc037cd10b0b48f391dbcbb30a651001fc299dc85aec624d8a3adee47"
+  },
+  "sec_fts/2025-01-01_2025-12-31/large_language_models/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/large_language_models/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/large_language_models/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:00Z",
+    "bytes": 58338,
+    "sha256": "3dabc7fbc1de665d2d0cf6a937b349171bbf506639296fa77718ae24f20cc852"
+  },
+  "sec_fts/2025-01-01_2025-12-31/large_language_models/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/large_language_models/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/large_language_models/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:41:01Z",
+    "bytes": 58638,
+    "sha256": "207a88a358c0bd18d4e004fc47a4a53e84874a7187f294c207909609181e4fa0"
+  },
+  "sec_fts/2025-01-01_2025-12-31/large_language_models/00200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/large_language_models/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22large%20language%20models%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2025/large_language_models/2025-01-01_2025-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:41:02Z",
+    "bytes": 8297,
+    "sha256": "4676c463a16f313c51b0d929004fb09021e7d6e9abb81193cc8018edec94a4aa"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:39:43Z",
+    "bytes": 58329,
+    "sha256": "0bc82a878a4505172bdfda6069a16763301d538f912ee285a6fb74f548fe0200"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T01:39:44Z",
+    "bytes": 58166,
+    "sha256": "8afb773916c0dd15fd59a87445efa0dd58d3c7e91f0bdd448c73648494264688"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T01:39:45Z",
+    "bytes": 58151,
+    "sha256": "a62870d4f7e4c53b1b729138df6873cc28ffbdf359763edc65f78eba83efee92"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T01:39:46Z",
+    "bytes": 58449,
+    "sha256": "3ae8eecbf54b0af445aa029f35e05a9c8636838efd3a5b649942557cbaedcec0"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T01:39:46Z",
+    "bytes": 58295,
+    "sha256": "5b7e06665bbe1ccc9e92c37f009a0b484923dd425d0d64fbd6dfc662a6f8590d"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T01:39:47Z",
+    "bytes": 58403,
+    "sha256": "e5da2321e20c11ad7556679372b41e598e53737e4eb4a5d8a113f1a306c3fbfa"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T01:39:48Z",
+    "bytes": 58372,
+    "sha256": "c7a81f4e87f9db4bafe57d5879895f4038b14b05dc6f350df2dc9cf8fdc740e2"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00700": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T01:39:49Z",
+    "bytes": 58402,
+    "sha256": "bde9e7fd18e281cbbd8f0f6bac3010cab4042cccd780d1f4135cc2eec7c339c5"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00800": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T01:39:50Z",
+    "bytes": 58404,
+    "sha256": "a8f1df8aa7f55cbab8c38a791a84bede49856e8ba5c6d2762c908be9fbf6e8f5"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/00900": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T01:39:51Z",
+    "bytes": 58413,
+    "sha256": "27325ffca22e5e6faa8a70d917dfe6f131f1d238fe25e02913f619f6cfaf5ff4"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T01:39:51Z",
+    "bytes": 58422,
+    "sha256": "c030c4b5be63b29feed9bd6e5347583d46a15d70e1dbc2b8d23cd21dc7978d08"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01100": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T01:39:52Z",
+    "bytes": 58580,
+    "sha256": "2c050d2d427b7a88cd27a7d0f9872e6d877e83cada43b4e0f0168d57b3a444b3"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01200": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T01:39:53Z",
+    "bytes": 58388,
+    "sha256": "948f4c3b95132a6132168b1fb2dc323a7ab5a1b46308a0eabc86aed4c39cc404"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01300": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1300",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01300.json",
+    "retrieved_utc": "2026-10-23T01:39:54Z",
+    "bytes": 59326,
+    "sha256": "f7aee8a98ced4b8e16f188555e2ee476aaf1a332afd9a2780742ad55be9e145d"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01400": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1400",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01400.json",
+    "retrieved_utc": "2026-10-23T01:39:54Z",
+    "bytes": 58549,
+    "sha256": "441862aabf408fb515d10966aeca0358baebffb5df7eea0e254f6cac323adb2a"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01500": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1500",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01500.json",
+    "retrieved_utc": "2026-10-23T01:39:55Z",
+    "bytes": 59684,
+    "sha256": "0664475ff863a181b66aaa72af842d2436903d4e22d15e9eb62eca42d0cac3aa"
+  },
+  "sec_fts/2025-01-01_2025-12-31/machine_learning/01600": {
+    "key": "sec_fts/2025-01-01_2025-12-31/machine_learning/01600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22machine%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=1600",
+    "dest": "sec/fts/2025/machine_learning/2025-01-01_2025-12-31_01600.json",
+    "retrieved_utc": "2026-10-23T01:39:56Z",
+    "bytes": 30471,
+    "sha256": "75484eb32f54d1d24d81d9e54e3ff50cffa246eebad2f13257b851e0703909bd"
+  },
+  "sec_fts/2025-01-01_2025-12-31/natural_language_processing/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/natural_language_processing/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22natural%20language%20processing%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/natural_language_processing/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:41:10Z",
+    "bytes": 57572,
+    "sha256": "833da0aa7d70bdc9f01ce99e2b83091403c062550af0d2b2dbb6208b99e8683a"
+  },
+  "sec_fts/2025-01-01_2025-12-31/neural_network/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/neural_network/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20network%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/neural_network/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:10Z",
+    "bytes": 20521,
+    "sha256": "cc38a1fb0b4fdd122b1ca77b467f693714199210064aa9697ef7a397eebcfd21"
+  },
+  "sec_fts/2025-01-01_2025-12-31/neural_networks/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/neural_networks/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22neural%20networks%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/neural_networks/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:40:17Z",
+    "bytes": 27079,
+    "sha256": "70d593126d7b5959f536b7cb3a8b9fd39056f08b63101f6f0170a5f73850a54c"
+  },
+  "sec_fts/2025-01-01_2025-12-31/reinforcement_learning/00000": {
+    "key": "sec_fts/2025-01-01_2025-12-31/reinforcement_learning/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22reinforcement%20learning%22&dateRange=custom&startdt=2025-01-01&enddt=2025-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2025/reinforcement_learning/2025-01-01_2025-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T01:45:53Z",
+    "bytes": 8842,
+    "sha256": "9df314fcc258597e7c60d18cb7651f5a9409d6a23ae552d1a79b9617d2d53d0e"
+  },
   "sec_submissions_bulk": {
     "key": "sec_submissions_bulk",
     "url": "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip",
