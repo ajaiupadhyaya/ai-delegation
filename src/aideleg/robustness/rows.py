@@ -762,7 +762,12 @@ _FM_UNITS = {
     "mom": "pp per month per unit of the 12-2 return (decimal)",
 }
 _EVENT_UNIT = "pp of CAR per 1 SD"
-_APPLIES = {"terciles": "terciles", "fm": "Fama-MacBeth", "events": "event studies"}
+_APPLIES = {
+    "terciles": "terciles",
+    "fm": "Fama-MacBeth",
+    "events": "event studies",
+    "placebo": "event studies",
+}
 
 _DESIGN_A_NOTE = (
     "Design A parts run Plan 3's own runners on the exposure frame passed: `run_terciles` "
@@ -778,6 +783,13 @@ _DESIGN_A_COLUMNS = (
     "terciles and Fama–MacBeth and the number of industries for event slopes. Null 0, nominal "
     "and single-test; no error control across records or rows (PAP §8.1). Sharpe, PSR and DSR "
     "carry no p; PSR and DSR carry no interval."
+)
+_R9_COLUMNS = (
+    "Columns: placebo records hold the CAR slope as estimate, its HC3 SE in the scale column, "
+    "and the interval and p as Plan 3's `run_events` returns them, with n the number of "
+    "industries and null 0, nominal and single-test. Summary records hold the mean actual "
+    "slope as estimate and its percentile in the stat column, with n the number of placebo "
+    "slopes and no null, interval or p. No error control across records or rows (PAP §8.1)."
 )
 _R4_BOOT = (
     "Bootstrap draws: `run_terciles` consumes one `default_rng(SEED)` in `VARIANTS` order "
@@ -975,6 +987,20 @@ def design_a_records(
     return out
 
 
+def _dsr_note(records: list[dict]) -> str:
+    n = len(
+        {
+            (r["estimand"].split()[1], r["estimand"].split()[2])
+            for r in records
+            if r["part"] == "terciles"
+        }
+    )
+    return (
+        f"DSR here is against the {n} tercile variants run in this row (the primary used 6, "
+        "C-37); not comparable with the primary's DSR (PAP §11 C-76)."
+    )
+
+
 def _with_note(records: list[dict], part: str, extra: str) -> list[dict]:
     return [r | {"note": f"{r['note']}; {extra}"} if r["part"] == part else r for r in records]
 
@@ -1112,15 +1138,12 @@ def _pooled_row(
         "industries with both values; descriptive.",
         _DESIGN_A_NOTE,
         _DESIGN_A_COLUMNS,
+        _dsr_note(records),
     ]
     return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
 
 
-_R16_BOOT = (
-    "Bootstrap draws: as for R4, `run_terciles` consumes one `default_rng(SEED)` in `VARIANTS` "
-    "order (PAP §11 C-37); with only A_pooled passed its variants draw first, so the mean and "
-    "Sharpe bootstrap CIs use different draws from the primary run's A_pooled rows."
-)
+_R16_BOOT = _R4_BOOT  # the same mechanism, the same wording (PAP §11 C-76)
 
 
 def run_R04(*, out_dir: Path | None = None) -> tuple[Path, Path]:
@@ -1181,6 +1204,7 @@ def run_R08(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         _R8_BOOT,
         _DESIGN_A_NOTE,
         _DESIGN_A_COLUMNS,
+        _dsr_note(records),
     ]
     return report.write_row("R8", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
 
@@ -1230,9 +1254,9 @@ def run_R09(*, out_dir: Path | None = None) -> tuple[Path, Path]:
             "n_dropped": None,
             "dropped": None,
             "note": (
-                f"mean of the {len(a)} actual D19 slopes at h{h}; stat = its empirical "
+                f"[default] mean of the {len(a)} actual D19 slopes at h{h}; stat = its empirical "
                 f"percentile among the {len(p)} placebo slopes (100 × share of placebo slopes ≤ "
-                "the mean); n = placebo slopes; descriptive"
+                f"the mean, out of {len(p)}; PAP §11 C-76); n = placebo slopes; descriptive"
             ),
         }
         report.check_record(rec)
@@ -1252,9 +1276,11 @@ def run_R09(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "the mean A_r2 slope over the 14 actual D19 events (a second `run_events` on the same "
         "exposure) and its empirical percentile among the 56 placebo slopes, in the stat "
         "column; descriptive, no p (PAP §11 C-60).",
+        "[default] Percentile convention: 100 × the share of the 56 placebo slopes ≤ the actual "
+        "mean slope, per horizon (PAP §11 C-76).",
         "Exposure: Plan 3's primary A_r2 `z_delegation`; this row rebuilds no index.",
         *_primary_zero_lines(("A_r2",)),
-        _DESIGN_A_COLUMNS,
+        _R9_COLUMNS,
     ]
     return report.write_row("R9", records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
 

@@ -225,6 +225,7 @@ def test_r8_passes_months_to_terciles_and_fm(stubbed):
     assert "Zero-assigned employment share, Design A_r2: 1.50% (D3)" in md
     assert "Zero-assigned employment share, Design A_pooled: 2.25% (D3)" in md
     assert "C-37" in md
+    assert "DSR here is against the 4 tercile variants run in this row" in md
     terc = df.filter(pl.col("part") == "terciles")
     assert all("C-37" in n for n in terc["note"])
 
@@ -248,6 +249,7 @@ def test_r4_requires_api_pool(stubbed, monkeypatch):
     assert set(df["part"]) == {"rq2", "index", "terciles", "fm", "events"}
     assert "Zero-assigned employment share (D3): 12.35%" in md
     assert "C-65" in md and "C-37" in md
+    assert "DSR here is against the 2 tercile variants run in this row" in md
     terc = df.filter(pl.col("part") == "terciles")
     assert all("C-37" in n for n in terc["note"])
     assert set(terc["estimand"]) >= {"alpha_CAPM A_pooled cap", "sharpe A_pooled ew"}
@@ -301,6 +303,8 @@ def test_r9_runs_placebo_and_actual_on_a_r2(stubbed):
     slopes = df.filter(pl.col("part") == "placebo")
     assert slopes.height == 56 * 2
     assert all(e.startswith("CAR slope") for e in slopes["estimand"])
+    assert set(df["applies_to"]) == {"event studies"}
+    assert "C-76" in md
     summ = df.filter(pl.col("part") == "summary")
     assert summ.height == 2
     for r in summ.iter_rows(named=True):
