@@ -306,6 +306,9 @@ def test_run_secondary_writes_labelled_docs(world, tmp_path):
 def test_completeness_needs_the_end_marker():
     assert secondary.check_complete(b"<html><body>x</body></html>\n", "a.htm") == (True, "")
     assert secondary.check_complete(b"<html>x</HTML>\n<!-- c -->\r\n", "a.htm")[0]
+    assert secondary.check_complete(b"<html>x</html>\n</TEXT>\n</DOCUMENT>\n", "a.htm")[0]
+    ok, note = secondary.check_complete(b"<p>x</p><body>\n</TEXT>\n</DOCUMENT>\n", "a.htm")
+    assert ok and "accepted" in note
     ok, note = secondary.check_complete(b'<html><body><ix:context id="c', "a.htm")
     assert not ok and "truncated" in note
     assert secondary.check_complete(b"<DOCUMENT>x</DOCUMENT>\n", "a.txt") == (True, "")

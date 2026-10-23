@@ -69,7 +69,11 @@ ERROR_MARKERS = (
     b"access denied",
 )
 # a complete document ends with its closing tag, then only whitespace and comments
-_HTML_END = re.compile(rb"</html\s*>(?:\s|<!--.*?-->)*\Z", re.IGNORECASE | re.DOTALL)
+# (EDGAR wraps some .htm bodies in SGML: `</html>` is then followed by `</TEXT></DOCUMENT>`)
+_HTML_END = re.compile(
+    rb"</html\s*>(?:\s|<!--.*?-->|</(?:text|document)\s*>)*\Z", re.IGNORECASE | re.DOTALL
+)
+_SGML_END = re.compile(rb"</document\s*>\s*\Z", re.IGNORECASE)
 _TEXT_END = re.compile(rb"</(?:document|text)\s*>(?:\s|<!--.*?-->)*\Z", re.IGNORECASE | re.DOTALL)
 TAIL_BYTES = 64 * 1024  # the end marker is looked for in the last TAIL_BYTES of the body
 COMPLETE_ATTEMPTS = 3  # requests of one document before an incomplete body goes to ERRORS
@@ -208,12 +212,16 @@ def is_error_body(body: bytes) -> bool:
 
 def check_complete(body: bytes, doc: str) -> tuple[bool, str]:
     """Whether a document body is whole: an .htm/.html body must end with `</html>` (any case,
-    then only whitespace or comments); a .txt body with `</document>` or `</text>`, and one
+    then only whitespace, comments or the SGML closers `</TEXT>`, `</DOCUMENT>`), or else end
+    with EDGAR's `</DOCUMENT>` closer (a filer's malformed HTML, accepted with the reason
+    stated); a .txt body with `</document>` or `</text>`, and one
     with neither is accepted with the reason stated. (ok, note); note is "" for a plain pass."""
     tail = body[-TAIL_BYTES:]
     if doc_kind(doc) == "html":
         if _HTML_END.search(tail):
             return True, ""
+        if _SGML_END.search(tail):
+            return True, "no </html>, but the EDGAR </DOCUMENT> closer ends the body: accepted"
         return False, f"truncated: no </html> at the end (last bytes {tail[-60:]!r})"
     if _TEXT_END.search(tail):
         return True, ""
