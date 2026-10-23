@@ -234,22 +234,48 @@ def _published_n4() -> list[str]:
 
 @pytest.mark.data
 def test_bls_crosswalk_covers_aioe():
+    import pandas as pd
+
+    from aideleg.acquire.sources import by_key
     from aideleg.benchmarks import _structure, coverage, load_aioe
     from aideleg.bls.oews import load_national
+    from aideleg.config import RAW
 
     xw = bls_soc_crosswalk()
     assert xw.columns == ["o2010", "o2019"]
     assert xw["o2010"].str.contains(r"^\d{2}-\d{4}$").all()
     assert xw["o2019"].str.contains(r"^\d{2}-\d{4}$").all()
     a = load_aioe(crosswalk=xw)
+    # C-73: exactly one 2010 code is mapped by its O*NET successor, 19-1020 -> 19-1029
+    bls = pl.from_pandas(pd.read_excel(RAW / by_key("bls_soc_2010_2018").dest, header=8, dtype=str))
+    fallback = xw.filter(~pl.col("o2010").is_in(bls["2010 SOC Code"].implode()))
+    assert fallback.rows() == [("19-1020", "19-1029")]
     assert coverage(a, load_national(2024), _structure()) >= 0.9
 
 
 @pytest.mark.data
 def test_index_29_2_builds():
-    idx = index_29_2()
-    assert sum(idx.provenance().values()) == len(idx._occ_by_id) + idx.provenance()["unresolved"]
-    assert idx.provenance()["onet_2019"] > 0
+    from aideleg.acquire.sources import by_key
+    from aideleg.config import RAW
+
+    prov = index_29_2().provenance()
+
+    # Task IDs held: those of the 29.2 file, plus the legacy (AEI r2) IDs it lacks, each
+    # resolved through the crosswalk or counted unresolved -- read independently here
+    def ids(key, sep):
+        return set(
+            pl.read_csv(
+                RAW / by_key(key).dest,
+                separator=sep,
+                quote_char=None if sep == "\t" else '"',
+                columns=["Task ID"],
+                schema_overrides={"Task ID": pl.Int64},
+            )["Task ID"]
+        )
+
+    new, old = ids("onet_29_2_tasks", "\t"), ids("aei_onet_tasks", ",")
+    assert prov["onet_2019"] == len(new)
+    assert sum(prov.values()) == len(new | old)
 
 
 @pytest.mark.data

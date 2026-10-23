@@ -78,7 +78,8 @@ def wage_bill_matrix(year: int = 2024, *, path: Path | None = None) -> pl.DataFr
     `exposure.aggregate_to_ff49` the FF49 weight of an occupation is
     sum_c xw_c * tot_emp_c * share_oc / sum_c xw_c * tot_emp_c over the OEWS codes c of the
     industry, i.e. o's share of FF49 industry j's employment; with this matrix it is o's share
-    of j's wage bill. The across-code weight is part of w_oj, so it is replaced too.
+    of j's wage bill. The across-code weight is part of w_oj, so it is replaced too
+    (PAP §11 C-72: the wage bill in every industry weight).
     """
     df = _wage_bill(year, path)
     total = pl.col("wage_bill").sum().over("naics")
@@ -307,15 +308,19 @@ def emp_weighted_naics_ff49(
 # --- R14: BLS SOC 2010 -> 2018 crosswalk --------------------------------------------------
 
 
+ONET_FALLBACK = frozenset({"19-1020"})  # C-73: the only non-SOC-2010 code AIOE carries
+
+
 @cache
 def bls_soc_crosswalk() -> pl.DataFrame:
     """`o2010, o2019`: the BLS SOC 2010 -> 2018 crosswalk (`bls_soc_2010_2018`), 7-character
     codes, the shape `benchmarks.map_soc2010_to_2018` takes (R14, the D6 alternative).
 
-    [default, C-entry pending] A 2010 code the BLS file does not list is not a SOC 2010
+    [default, PAP §11 C-73] A 2010 code the BLS file does not list is not a SOC 2010
     detailed code but an O*NET-SOC one (AIOE's `19-1020`, from O*NET-SOC `19-1020.01`
     Biologists). Such a code takes its O*NET 2010 -> 2019 successors, so that AIOE can be
-    mapped in full; every SOC 2010 code keeps the BLS mapping.
+    mapped in full; every SOC 2010 code keeps the BLS mapping. The fallback codes must be
+    exactly `ONET_FALLBACK` (ValueError otherwise), so its scope cannot widen silently.
     """
     import pandas as pd
 
@@ -341,6 +346,10 @@ def bls_soc_crosswalk() -> pl.DataFrame:
         o2019=pl.col("O*NET-SOC 2019 Code").str.slice(0, 7),
     )
     extra = onet.filter(~pl.col("o2010").is_in(bls["o2010"].implode()))
+    if set(extra["o2010"]) != ONET_FALLBACK:
+        raise ValueError(
+            f"O*NET fallback codes {sorted(set(extra['o2010']))} != {sorted(ONET_FALLBACK)} (C-73)"
+        )
     return pl.concat([bls, extra]).unique().sort("o2010", "o2019")
 
 
@@ -353,7 +362,8 @@ def index_29_2():
     statements public at the formation date, O*NET 29.2, February 2025).
 
     The downloaded 29.2 `Task Statements.txt` is byte-identical to the 29.3 file (SHA-256
-    fecdcda8...; latest task `Date` 08/2024), so this index equals `default_index()`.
+    fecdcda8...; latest task `Date` 08/2024), so this index equals `default_index()` and R32's
+    O*NET part is identical to the primary (PAP §11 C-74).
     """
     from aideleg.aei.tasks import TaskIndex
 
