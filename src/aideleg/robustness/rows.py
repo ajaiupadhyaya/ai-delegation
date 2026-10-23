@@ -14,6 +14,10 @@ R35. Each runs on the primary Design B exposure (`ExposureSpec()`) and varies on
 the return set, the industries, the exposure column, the null scale, the history start, or (R35)
 the statistic.
 
+New-data rows (Task 9): R6 rebuilds the exposure on the FF30 / FF48 industries and runs on the
+`ff30_vw` / `ff48_vw` files (parts `ff30`, `ff48`); R32 is strict real-time Design B (OEWS May
+2023 weights, O*NET 29.2 task statements) on `ff49_vw`. Market parts only.
+
 Every record is reported as robustness; no row changes a confirmatory decision (PAP §8.1).
 AEI data are conversations matched to O*NET tasks.
 """
@@ -623,6 +627,99 @@ def _market_runner(row_id: str) -> Callable[..., tuple[Path, Path]]:
     return run
 
 
+# --- Task 9: new-data market rows R6 (FF30/FF48) and R32 (strict real-time Design B) -----
+
+_FF_VINTAGE = (
+    "FF30/FF48 files retrieved after the freeze; their history may reflect French's later "
+    "revisions. French's newer download vintage applies to these files only: FF49 and the "
+    "factors stay the frozen files (PAP §8.2 R6, §9.1)."
+)
+_NEWDATA_MARKET_NOTE = (
+    "Market parts: H5 and H5b on each part's return set with s, b̄ and q recomputed for the "
+    "part's exposure vector on the same 378 pre-seal windows with the same code, the critical "
+    "max(t₂₁, q) and the D21 null b₀ = b̄ (PAP §3.3, §8.1); industries with a missing return "
+    "in the confirmatory window are dropped and z is not re-standardised after a drop. The "
+    "secondary b = 0 statistic is in each record's note."
+)
+
+
+@dataclass(frozen=True)
+class NewDataRow:
+    row_id: str
+    parts: tuple[tuple[str, ExposureSpec, str], ...]  # (part, exposure spec, return set)
+    notes: tuple[str, ...]
+    label: str = "robustness"
+
+
+NEWDATA_ROWS: dict[str, NewDataRow] = {
+    r.row_id: r
+    for r in (
+        NewDataRow(
+            "R6",
+            (
+                ("ff30", ExposureSpec(industries=30), "ff30_vw"),
+                ("ff48", ExposureSpec(industries=48), "ff48_vw"),
+            ),
+            (
+                "FF30 and FF48 industry granularity (PAP §8.2 R6): the exposure is rebuilt on "
+                "the 30 / 48 industries of Siccodes30 / Siccodes48 with the same split "
+                "crosswalk, z re-standardised across those industries; alphas from the 30- / "
+                "48-industry daily value-weighted files; s, b̄ and q from the same 378 windows "
+                "on those files.",
+                _FF_VINTAGE,
+                _BENCH_REAGG,
+            ),
+        ),
+        NewDataRow(
+            "R32",
+            (("market", ExposureSpec(oews_year=2023, onet="29.2"), RETURN_SET),),
+            (
+                "Strict real-time Design B (PAP §8.2 R32, P15): release r2 with OEWS May 2023 "
+                "weights (oesm23in4, oesm23nat) and O*NET task statements ≤ 29.2, i.e. inputs "
+                "public at 2025-03-27; s, b̄ and q recomputed.",
+                "The O*NET 29.2 Task Statements file is byte-identical to the 29.3 file of the "
+                "primary, so R32's task index equals the primary's and R32 differs from the "
+                "primary only through the OEWS May 2023 weights (PAP §11 C-74).",
+                _BENCH_REAGG,
+            ),
+        ),
+    )
+}
+
+
+def run_newdata_row(row_id: str, *, out_dir: Path | None = None) -> tuple[Path, Path]:
+    """Run a Task 9 row: each part rebuilds its exposure and runs H5/H5b on its return set."""
+    row = NEWDATA_ROWS[row_id]
+    records: list[dict] = []
+    variant_lines: list[str] = []
+    zero_lines: list[str] = []
+    for part, spec, rs in row.parts:
+        desc = describe_spec(spec)
+        expo = variant_exposure(spec)
+        frame = expo.select(pl.col("industry_short").alias("industry"), "z_delegation", "z_aioe")
+        recs = market_variant(row_id, part, frame, rs=rs, label=row.label)
+        records += [r | {"variant": f"{desc}; {r['variant']}"} for r in recs]
+        variant_lines.append(
+            f"Variant {part}: {desc} on {rs} ({expo.height} industries); every other "
+            "construction choice is the primary Design B one."
+        )
+        zero_lines.append(f"{part}: " + ZERO_ASSIGNED_NOTE.format(zero_assigned_share(spec)))
+    notes = [*variant_lines, *row.notes, *zero_lines, _NEWDATA_MARKET_NOTE]
+    return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+
+
+def _newdata_runner(row_id: str) -> Callable[..., tuple[Path, Path]]:
+    def run(*, out_dir: Path | None = None) -> tuple[Path, Path]:
+        return run_newdata_row(row_id, out_dir=out_dir)
+
+    run.__name__ = f"run_{registry.output_stem(row_id)}"
+    run.__doc__ = f"PAP §8.2 {row_id} (new data)."
+    return run
+
+
+run_R06 = _newdata_runner("R6")
+run_R32 = _newdata_runner("R32")
+
 run_R05 = _market_runner("R5")
 run_R07 = _market_runner("R7")
 run_R10 = _market_runner("R10")
@@ -651,5 +748,7 @@ RUNNERS: dict[str, Callable[..., tuple[Path, Path]]] = {
         ("R21", run_R21),
         ("R34", run_R34),
         ("R35", run_R35),
+        ("R6", run_R06),
+        ("R32", run_R32),
     )
 }
