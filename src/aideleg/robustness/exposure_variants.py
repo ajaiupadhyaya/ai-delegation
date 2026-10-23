@@ -11,16 +11,16 @@ reproduces the frozen vector (PAP §9.3). Each option maps onto an existing para
 |---|---|---|
 | `design` | (R4, R16) | `exposure.design_occupations` logic; A_pooled is the `_average` pool |
 | `oews_year` | R1, R32 | `load_national(year)`, `load_industry_matrix(year, 4)` |
-| `weights="wage_bill"` | R2 | Task 6 `wage_bill_matrix` (the matrix only; U_o keeps employment) |
+| `weights="wage_bill"` | R2 | `inputs.wage_bill_matrix` (the matrix only; U_o keeps employment) |
 | `unmatched` | R3 | `occupation_exposure(unmatched=)` |
-| `allocation="employment"` | R11 | Task 6 `employment_allocation_table` (task-basis tables) |
-| `crosswalk` | R20, R33 | `naics_to_ff49(method=)`; `emp_weighted` is Task 6 |
+| `allocation="employment"` | R11 | `inputs.employment_allocation_table` (task-basis tables) |
+| `crosswalk` | R20, R33 | `naics_to_ff49(method=)`; `inputs.emp_weighted_naics_ff49` |
 | `hq` | R15 | `naics_to_ff49(hq=, employment=<variant matrix>)` |
 | `industries` | R6 | `naics_to_ff49(siccodes_key=)`, names from that Siccodes file |
 | `source="1p_api"` | R4 | the A_pooled pool over r3-r6 (Design B has no API source) |
 | `r6_basis="tasks"` | R16 | `occupation_table(..., basis="tasks")` for r6 in the pool |
-| `onet="29.2"` | R32 | Task 6 `index_29_2` |
-| `aioe_crosswalk="bls"` | R14 | Task 6 `bls_soc_crosswalk` into `load_aioe(crosswalk=)` |
+| `onet="29.2"` | R32 | `inputs.index_29_2` |
+| `aioe_crosswalk="bls"` | R14 | `inputs.bls_soc_crosswalk` into `load_aioe(crosswalk=)` |
 
 Benchmarks (PAP §11 C-65, [default]): AIOE and Eloundou are re-aggregated with the variant's
 matrix, crosswalk and industry set (`benchmark_ff49(occ_values=, matrix=, crosswalk=)`), and
@@ -100,33 +100,45 @@ class ExposureSpec:
                 raise ValueError(f"{name} must be one of {ok}, not {getattr(self, name)!r}")
 
 
-# --- Task 6 constructions (stubs until Task 6 wires them in) ----------------------------
+# --- Task 6 constructions (`aideleg.robustness.inputs`) ---------------------------------
 
 
 def _wage_bill_matrix(year: int) -> pl.DataFrame:
-    raise NotImplementedError("weights='wage_bill' needs Task 6 inputs.wage_bill_matrix")
+    """R2 (C-66): the wage-bill matrix replaces employment in the industry weights only."""
+    from aideleg.robustness.inputs import wage_bill_matrix
+
+    return wage_bill_matrix(year)
 
 
 def _employment_allocation_table(
     panel: pl.DataFrame, release: str, index, national: pl.DataFrame
 ) -> pl.DataFrame:
-    raise NotImplementedError(
-        "allocation='employment' needs Task 6 inputs.employment_allocation_table"
-    )
+    """R11 (D4 alternative), task-basis tables only; `_release_table` keeps r6's published SOC
+    rows as published. Employment is the spec year's national `tot_emp`."""
+    from aideleg.robustness.inputs import employment_allocation_table
+
+    return employment_allocation_table(panel, release, index, national, soc_structure=_structure())
 
 
 def _emp_weighted_naics_ff49(siccodes_key: str) -> pl.DataFrame:
-    raise NotImplementedError(
-        "crosswalk='emp_weighted' needs Task 6 inputs.emp_weighted_naics_ff49"
-    )
+    """R33 (C-67)."""
+    from aideleg.robustness.inputs import emp_weighted_naics_ff49
+
+    return emp_weighted_naics_ff49(siccodes_key)
 
 
 def _bls_soc_crosswalk() -> pl.DataFrame:
-    raise NotImplementedError("aioe_crosswalk='bls' needs Task 6 inputs.bls_soc_crosswalk")
+    """R14 (D6 alternative)."""
+    from aideleg.robustness.inputs import bls_soc_crosswalk
+
+    return bls_soc_crosswalk()
 
 
 def _index_29_2():
-    raise NotImplementedError("onet='29.2' needs Task 6 inputs.index_29_2")
+    """R32: O*NET 29.2 task statements."""
+    from aideleg.robustness.inputs import index_29_2
+
+    return index_29_2()
 
 
 # --- inputs -------------------------------------------------------------------------------
