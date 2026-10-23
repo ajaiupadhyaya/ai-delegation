@@ -267,3 +267,34 @@ def test_agreement_counts_filer_years():
     assert (a["both"], a["fts_only"], a["text_only"], a["neither"]) == (0, 1, 1, 1)
     assert a["no_text"] == 1 and a["no_text_fts"] == 1
     assert a["agreement"] == pytest.approx(1 / 3)
+
+
+def test_run_secondary_writes_labelled_docs(world, tmp_path):
+    from aideleg.acquire.sources import by_key
+    from aideleg.results.common import WORDING
+
+    raw, zp, _ = world
+    secondary.download_documents(_filers(), raw=raw, zip_path=zp, log=lambda s: None)
+    dest = raw / by_key("sec_submissions_bulk").dest
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(zp, dest)
+    hits = pl.DataFrame(
+        {
+            "phrase": ["x"],
+            "cik": [1],
+            "adsh": [A1],
+            "form": ["10-K"],
+            "file_date": [date(2024, 3, 1)],
+            "file_type": ["10-K"],
+        }
+    )
+    out = tmp_path / "out"
+    r = secondary.run_secondary(out, filers=_filers(), hits=hits, raw=raw, workers=1)
+    md = (out / "secondary_talk.md").read_text(encoding="utf-8")
+    assert "exploratory (PAP §6, D18)" in md.splitlines()[0]
+    assert md.count(WORDING) == 1
+    assert (out / "secondary_talk.csv").exists()
+    s24 = r["series"].row(0, named=True)
+    assert s24["n_filings"] == 5 and s24["n_rated"] == 4
+    a = r["agreement"].row(0, named=True)
+    assert (a["both"], a["fts_only"], a["text_only"], a["neither"]) == (1, 0, 2, 0)

@@ -1684,6 +1684,12 @@ primary result (§0.5).
 - Records: 285; retrieved (UTC) from 2026-10-23T01:35:03Z to 2026-10-23T01:46:09Z
 - Set digest: `3e6b069bfe3b2248b4acd25ddf5bdbfe231c26ae82d1f0e792cb77061cc96638`
 
+### A-34. Addition (set): `sec_docs_index` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: H6 secondary measure, Plan 3 Task 13 (INDEX.jsonl lines; digest = SHA-256 of INDEX.jsonl)
+- Records: 47946; retrieved (UTC) from 2026-10-23T02:20:56Z to 2026-10-23T09:30:11Z
+- Set digest: `b3380262e475a3bc888b2257dfc6d8a1025dc08c48b16b56afc57849eabb7153`
+
 ### Clarifications (pre-result)
 
 ### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)

@@ -407,6 +407,14 @@
     "bytes": 1197935,
     "sha256": "6cb7098b09a6a03cc730b544bd7a17b1eac5d0b5beda947c4f901c42f5a713d6"
   },
+  "sec_docs_index": {
+    "key": "sec_docs_index",
+    "url": "https://www.sec.gov/Archives/edgar/data/",
+    "dest": "sec/docs/INDEX.jsonl",
+    "retrieved_utc": "2026-10-23T09:30:11Z",
+    "bytes": 16077300,
+    "sha256": "b3380262e475a3bc888b2257dfc6d8a1025dc08c48b16b56afc57849eabb7153"
+  },
   "sec_formidx_2019q1": {
     "key": "sec_formidx_2019q1",
     "url": "https://www.sec.gov/Archives/edgar/full-index/2019/QTR1/form.idx",
