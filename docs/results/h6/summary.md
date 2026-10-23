@@ -8,6 +8,7 @@ H6 is exploratory (PAP §6 D18): no H6 output is a confirmatory test. The gap–
 
 - [gap.md](gap.md): H6 AI-washing gap and talk–use divergence — exploratory (PAP §6, D18)
 - [gap_returns.md](gap_returns.md): H6 gap–return association — exploratory (PAP §6, D18); nominal p-values, in no testing family
+- [secondary_talk.md](secondary_talk.md): H6 secondary talk measure per 10,000 words of the 10-K primary document — exploratory (PAP §6, D18)
 - [talk_index.md](talk_index.md): H6 talk index by filing year — exploratory (PAP §6, D18)
 
 AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market.
