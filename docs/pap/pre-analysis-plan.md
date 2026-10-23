@@ -2174,6 +2174,12 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
 - Rule: A variant's Spearman CIs use Plan 2's `bootstrap_indices(n)["B"]` draw set, so the primary rows reproduce.
 
+### C-69. Clarification: H4 parity metric (2026-10-23)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 2 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no robustness row run
+- Rule: The adapter's H4 parity check (`tests/robustness/test_upstream.py`) compares `b` for `log_aui` and `log_income` and the joint F statistic at rel 1e-12, and `p_family` through −log10 p at rel 1e-12, because H4's `mix` is order-dependent at about 1e-14 (C-32), which moves a p of 4.8e-24 by about 1e-12 relative. No estimate, specification or committed output changes.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
