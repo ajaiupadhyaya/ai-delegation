@@ -44,6 +44,7 @@ import numpy as np
 import polars as pl
 
 from aideleg import confirm_h5, power
+from aideleg.occupations import SUPPRESSION
 from aideleg.robustness import (
     guards,
     market,
@@ -1304,23 +1305,58 @@ def run_R09(*, out_dir: Path | None = None) -> tuple[Path, Path]:
 # --- Task 11: H1/H3 rows R10 (RQ1 parts), R23 (H1), R24, R26, R27, R31, R38 ----------------
 
 H1_COVARIATES = ("human_education_years_mean", "log_wage")
-_RQ1_NOTE = (
+_RQ1_NOTE_TEMPLATE = (
     "RQ1 parts: Plan 2's `estimate_h1` / `estimate_h3` on Plan 2's `build_task_rows` (through "
     "the adapter), with the inference of the hypothesis varied (PAP §8.1): WLS with IWA fixed "
     "effects unless the row says otherwise, two-way cluster-robust SEs by occupation (soc6) and "
     "task, t with min(G_occ, G_task) − 1 df and the PAP §4 non-PSD rule (each use is in the "
     "record's note). `scale` is the SE, `stat` the t statistic, intervals 95%, p two-sided; "
-    "p_H1 = max(p_educ, p_wage) (D17). Coefficients are in pp of the outcome share per unit of "
-    "the regressor. `n` is the number of (task, occupation, family) rows; `dropped` lists the "
-    "non-zero drop shares in % of total task usage, structural then variable-level (PAP §4.1, "
-    "§11 C-2, C-30)."
+    "p_H1 = max(p_educ, p_wage) (D17). Coefficients are in {units}. Each table row's note "
+    "cell starts with its coefficient (PAP §11 C-78). `n` is the number of (task, occupation, "
+    "family) rows; `dropped` lists the non-zero drop shares in % of total task usage, structural "
+    "then variable-level (PAP §4.1, §11 C-2, C-30); `n_dropped` is not reported for RQ1 rows, "
+    "because Plan 2 records drops as usage shares, not row counts (PAP §11 C-2, C-78)."
 )
+_PP_UNITS = "pp of the outcome share per unit of the regressor"
+
+
+def _rq1_note(units: str = _PP_UNITS) -> str:
+    return _RQ1_NOTE_TEMPLATE.format(units=units)
+
+
+# names of the coefficients in the RQ1 .md tables (PAP §11 C-78); the CSV keeps `estimand`
+RQ1_LABELS = {
+    "human_education_years_mean": "education",
+    "log_wage": "log wage",
+    "p_H1": "p_H1",
+    "error_cost": "error cost",
+    "coe": "Consequence of Error",
+}
 _R23_ALWAYS = (
     "R23 is reported beside H1 (PAP §4.1): the H1 decision uses `automation_pct` only and is "
     "unchanged. The PAP §4.1 disagreement sentence is printed below only if each R23 "
     "coefficient (education, log wage) has the sign opposite to the committed primary H1 "
-    "coefficient (P-RQ1 record) and p < 0.05, a mechanical check."
+    "coefficient (P-RQ1 record) and p < 0.05, a mechanical check (PAP §11 C-77)."
 )
+_R23_SIGN_LINE = (
+    "Sign check against the committed primary H1 (P-RQ1): education R23 {b_e} vs primary "
+    "{b0_e}, {s_e} sign, p {p_e}; log wage R23 {b_w} vs primary {b0_w}, {s_w} sign, p {p_w} "
+    "(PAP §11 C-77)"
+)
+
+
+def r23_sign_line(res: upstream.HypothesisResult, primary: dict[str, float]) -> str:
+    """The R23 sign comparison, printed whatever `rq1.r23_disagrees` returns (PAP §11 C-77)."""
+    vals = {}
+    for key, name in (("e", "human_education_years_mean"), ("w", "log_wage")):
+        c, b0 = res.coefs[name], primary[name]
+        vals |= {
+            f"b_{key}": report.fmt_pp(c.estimate),
+            f"b0_{key}": report.fmt_pp(b0),
+            f"s_{key}": "opposite" if c.estimate * b0 < 0 else "same",
+            f"p_{key}": report.fmt_p(c.p),
+        }
+    return _R23_SIGN_LINE.format(**vals)
 
 
 def _rq1_part(
@@ -1354,8 +1390,25 @@ def _both(row_id: str, part: str, tr: upstream.TaskRows) -> list[dict]:
     ]
 
 
+def _md_label(r: dict) -> dict:
+    """An RQ1 record with its coefficient leading the note cell (PAP §11 C-78)."""
+    if r["applies_to"] not in ("H1", "H3"):
+        return r
+    name = RQ1_LABELS.get(r["estimand"], r["estimand"])
+    return r | {"note": f"{name}: {r['note']}" if r["note"] else name}
+
+
 def _write(row_id: str, records: list[dict], notes: list[str], out_dir: Path | None):
-    return report.write_row(row_id, records, notes, out_dir=OUT_DIR if out_dir is None else out_dir)
+    """`write_row` with the RQ1 coefficients labelled in the `.md` table only; the CSV is then
+    rewritten from the unlabelled records, so it keeps `estimand` and the plain notes (C-78)."""
+    out = OUT_DIR if out_dir is None else out_dir
+    labelled = [_md_label(r) for r in records]
+    csv_path, md_path = report.write_row(row_id, labelled, notes, out_dir=out)
+    df = pl.DataFrame(
+        [{k: r[k] for k in report.ROBUSTNESS_COLUMNS} for r in records], infer_schema_length=None
+    )
+    report.write_csv(df.select(report.ROBUSTNESS_COLUMNS), csv_path)
+    return csv_path, md_path
 
 
 _FLOAT_COLS = frozenset(
@@ -1403,6 +1456,9 @@ def r10_market_carry(out_dir: Path) -> tuple[list[dict], list[str]]:
     return records, notes
 
 
+_R6_SUPP = " + ".join(f"`{c}`" for c in SUPPRESSION["r6"])
+
+
 def run_R10(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     """PAP §8.2 R10: the RQ1 parts (H1 and H3 on the D1 suppression bounds) beside the
     committed market parts, which are carried, not re-run."""
@@ -1422,13 +1478,13 @@ def run_R10(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     notes = [
         "RQ1 parts of R10 (PAP §8.2 R10, D1): H1 with `automation_share_all_lb` / `_ub` in "
         "place of `automation_pct` (parts h1_lb, h1_ub); Plan 2's builder computes the bounds "
-        "per period with r6's suppression component (`none_pct`) and then D13-averages them "
+        f"per period with r6's suppression component ({_R6_SUPP}) and then D13-averages them "
         "(PAP §11 C-4).",
         "[default] H3 with `validation_share_all_lb` = v·(100 − s)/100 and `_ub` = lb + s in "
         "place of `validation_pct` (parts h3_lb, h3_ub), v = `validation_pct` and s = r6's "
-        "suppression share (`none_pct`), per period and then D13-averaged, as for the "
+        f"suppression share ({_R6_SUPP}), per period and then D13-averaged, as for the "
         "automation bounds (PAP §11 C-57).",
-        _RQ1_NOTE,
+        _rq1_note(),
     ]
     return _write("R10", market_records + records, market_notes + notes, out)
 
@@ -1446,9 +1502,9 @@ def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
     notes = [
         "`ai_autonomy_mean` (D13-averaged, r6 `claude_ai`) in place of `automation_pct` as H1's "
         "outcome (PAP §8.2 R23, spec §5.4.1); same predictors, sample rule, fixed effects and "
-        "inference. Coefficients are in ai_autonomy_mean scale points per year of education and "
-        "per log point of wage. R23's H2 part is a separate Plan 4 task.",
+        "inference. R23's H2 part is a separate Plan 4 task.",
         _R23_ALWAYS,
+        r23_sign_line(res, primary),
     ]
     if rq1.r23_disagrees(res, primary):
         notes.append(
@@ -1456,7 +1512,12 @@ def run_R23(*, out_dir: Path | None = None) -> tuple[Path, Path]:
             f"and are significant at nominal 0.05, so {rq1.R23_DISAGREE} (PAP §4.1); the H1 "
             "decision is unchanged."
         )
-    notes.append(_RQ1_NOTE)
+    notes.append(
+        _rq1_note(
+            "ai_autonomy_mean scale points per unit of the regressor (per year of education, "
+            "per log point of wage)"
+        )
+    )
     return _write("R23", records, notes, out_dir)
 
 
@@ -1482,7 +1543,7 @@ def run_R24(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "(r5) and r6 `1p_api` (r6_1p_api), each through Plan 2's builder for that release and "
         "source (D13 averaging over the release's periods; the R7 suppression components of "
         "that release), H1 and H3 with the primary specification otherwise.",
-        _RQ1_NOTE,
+        _rq1_note(),
     ]
     return _write("R24", records, notes, out_dir)
 
@@ -1498,7 +1559,7 @@ def run_R26(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "R26, D14), from Plan 2's `task_families(level)`; a task linked to several families is "
         "split equally across them and the family set is the union over the task's candidate "
         "Task IDs, as for IWA (D14, PAP §11 C-9).",
-        _RQ1_NOTE,
+        _rq1_note(),
     ]
     return _write("R26", records, notes, out_dir)
 
@@ -1521,7 +1582,7 @@ def run_R27(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "a value are dropped and reported as `missing_coe`.",
         f"{missing} of the {len(socs)} soc6 codes of the H3 rows have no Consequence of Error "
         "value.",
-        _RQ1_NOTE,
+        _rq1_note("pp of validation share per 1 SD of Consequence of Error"),
     ]
     return _write("R27", records, notes, out_dir)
 
@@ -1540,7 +1601,7 @@ def run_R31(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "estimator's own variables, PAP §11 C-12). The non-PSD rule is applied to γ's block "
         "alone and the covariate coefficients come from a second call on the same design, so "
         "the covariates never change γ's inference (PAP §11 C-14).",
-        _RQ1_NOTE,
+        _rq1_note(),
     ]
     return _write("R31", records, notes, out_dir)
 
@@ -1560,7 +1621,7 @@ def run_R38(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "of the primary H1 and H3 fits, df = G_occ − 1, interval estimate ± t(0.975, G_occ − "
         "1)·SE; point estimates are the primary ones. p_H1 is D17's max of the two one-way "
         "p-values. Reported only; used in no decision.",
-        _RQ1_NOTE,
+        _rq1_note(),
     ]
     return _write("R38", records, notes, out_dir)
 

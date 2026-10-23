@@ -425,3 +425,32 @@ def test_r38_matches_plan2_p_oneway_occ():
         assert set(got) == set(want)
         for n, p in want.items():
             assert got[n] == pytest.approx(p, rel=1e-12, abs=0.0), (h, n)
+
+
+# --- review fixes (PAP §11 C-77, C-78) ---------------------------------------------------
+
+
+def test_r23_sign_line_printed_either_way(stubbed, monkeypatch):
+    for signs, s in (((1.0, 1.0), "opposite"), ((-1.0, -1.0), "same")):
+        md = _r23_md(stubbed, monkeypatch, signs, (0.0001, 0.2))
+        b = report.fmt_pp(signs[0] * 1.5)
+        assert (
+            f"Sign check against the committed primary H1 (P-RQ1): education R23 {b} vs primary "
+            f"-1.00, {s} sign, p < 0.001; log wage R23 {report.fmt_pp(signs[1] * 1.5)} vs "
+            f"primary -1.00, {s} sign, p 0.200 (PAP §11 C-77)"
+        ) in md
+    assert "scale points" in md and "pp of the outcome share" not in md.split("## Results")[0]
+
+
+def test_md_labels_coefficients_csv_plain(stubbed):
+    csv_path, md_path = rows.run_R31()
+    md = md_path.read_text(encoding="utf-8")
+    for lab in ("| error cost: SE", "| education: SE", "| log wage: SE"):
+        assert lab in md, lab
+    df = pl.read_csv(csv_path)
+    assert all(n.startswith("SE ") for n in df["note"].to_list())
+    _, md10 = rows.run_R10()
+    text = md10.read_text(encoding="utf-8")
+    assert "| p_H1: p_H1 = max" in text and "| education: SE" in text
+    assert "n_dropped` is not reported for RQ1 rows" in text and "C-78" in text
+    assert "`none_pct`" in text
