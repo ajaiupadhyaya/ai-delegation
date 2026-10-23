@@ -37,7 +37,7 @@ def _print_filers(df) -> None:
         )
 
 
-def acquire(filers: bool, fts: bool, docs: bool) -> None:
+def acquire(filers: bool, fts: bool, docs: bool, refetch_incomplete: bool = False) -> None:
     """Network only."""
     from aideleg.acquire import fetch, sources
     from aideleg.h6 import edgar
@@ -58,7 +58,14 @@ def acquire(filers: bool, fts: bool, docs: bool) -> None:
 
         from aideleg.h6 import secondary as sec
 
-        out = sec.download_documents(pl.read_parquet(edgar.FILERS))
+        refetch: set[str] = set()
+        if refetch_incomplete:
+            flagged = sec.scan_incomplete()
+            for f in flagged:
+                print(f"  {'accepted' if f['ok'] else 'flagged'} {f['dest']}: {f['reason'][:160]}")
+            refetch = {f["key"] for f in flagged if not f["ok"]}
+            print(f"{len(refetch)} incomplete documents to fetch again")
+        out = sec.download_documents(pl.read_parquet(edgar.FILERS), refetch=refetch)
         counts = out.group_by("status").len().sort("status")
         print(
             "10-K primary documents (H6 secondary, exploratory): "
@@ -135,6 +142,11 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--filers", action="store_true", help="full-index form.idx and submissions")
     a.add_argument("--fts", action="store_true", help="EDGAR full-text search (D18 numerator)")
     a.add_argument("--docs", action="store_true", help="10-K documents (secondary measure)")
+    a.add_argument(
+        "--refetch-incomplete",
+        action="store_true",
+        help="with --docs: scan the saved documents and fetch the incomplete ones again",
+    )
     b = sub.add_parser("build", help="build H6 derived files from saved raw files (offline)")
     b.add_argument("--filers", action="store_true", help="the full-index denominator (D18)")
     b.add_argument("--fts", action="store_true", help="the numerator hits from saved responses")
@@ -143,7 +155,10 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     if args.command == "acquire":
         flags = (args.filers, args.fts, args.docs)
-        acquire(*(flags if any(flags) else (True, True, True)))
+        acquire(
+            *(flags if any(flags) else (True, True, True)),
+            refetch_incomplete=args.refetch_incomplete,
+        )
     elif args.command == "build":
         flags = (args.filers, args.fts)
         build(*(flags if any(flags) else (True, True)))

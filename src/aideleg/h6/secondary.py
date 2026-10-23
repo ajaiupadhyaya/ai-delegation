@@ -21,6 +21,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+import re
 import shutil
 import time
 import zipfile
@@ -47,7 +48,7 @@ INDEX_KEY = "sec_docs_index"
 ARCHIVES = "https://www.sec.gov/Archives/edgar/data"
 DOC_PAUSE = 0.05  # seconds before each document request, on top of the 0.1 s SEC spacing
 BLOCKED_PAUSE = 60.0  # seconds to wait after an access-denied answer before trying again
-BLOCKED_LIMIT = 3  # consecutive access-denied answers that stop the run
+BLOCKED_LIMIT = 3  # consecutive denied or unavailable answers that stop the run
 DISK_EVERY = 100  # documents between disk checks
 SHORT_WORDS = 2_000
 T_YEAR = 2024
@@ -67,6 +68,11 @@ ERROR_MARKERS = (
     b"your request originates",
     b"access denied",
 )
+# a complete document ends with its closing tag, then only whitespace and comments
+_HTML_END = re.compile(rb"</html\s*>(?:\s|<!--.*?-->)*\Z", re.IGNORECASE | re.DOTALL)
+_TEXT_END = re.compile(rb"</(?:document|text)\s*>(?:\s|<!--.*?-->)*\Z", re.IGNORECASE | re.DOTALL)
+TAIL_BYTES = 64 * 1024  # the end marker is looked for in the last TAIL_BYTES of the body
+COMPLETE_ATTEMPTS = 3  # requests of one document before an incomplete body goes to ERRORS
 STATUSES = ("ok", "no_primary_document", "pdf", "other_type", "not_downloaded", "zero_words")
 RATE_COLUMNS = [
     "year",
@@ -93,7 +99,7 @@ _RATE_SCHEMA = {
 
 
 class BlockedError(RuntimeError):
-    """SEC keeps denying access: the acquisition stops (BLOCKED)."""
+    """SEC keeps denying access or stays unavailable: the acquisition stops (BLOCKED)."""
 
 
 # --- locating documents --------------------------------------------------------------------
@@ -200,6 +206,59 @@ def is_error_body(body: bytes) -> bool:
     return any(m in low for m in ERROR_MARKERS)
 
 
+def check_complete(body: bytes, doc: str) -> tuple[bool, str]:
+    """Whether a document body is whole: an .htm/.html body must end with `</html>` (any case,
+    then only whitespace or comments); a .txt body with `</document>` or `</text>`, and one
+    with neither is accepted with the reason stated. (ok, note); note is "" for a plain pass."""
+    tail = body[-TAIL_BYTES:]
+    if doc_kind(doc) == "html":
+        if _HTML_END.search(tail):
+            return True, ""
+        return False, f"truncated: no </html> at the end (last bytes {tail[-60:]!r})"
+    if _TEXT_END.search(tail):
+        return True, ""
+    return True, "plain text without </document> or </text> at the end: accepted"
+
+
+def scan_incomplete(raw: Path = RAW, workers: int | None = None) -> list[dict]:
+    """Offline: every INDEX document whose saved body fails `check_complete`, as
+    {key, dest, bytes, reason}; plain-text acceptances are returned too, with ok True."""
+    from concurrent.futures import ProcessPoolExecutor
+
+    raw = Path(raw)
+    recs = list(read_index(raw / "sec/docs/INDEX.jsonl").values())
+    jobs = [(str(raw / r["dest"]), r["dest"][: -len(".gz")]) for r in recs]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(_check_file, jobs, chunksize=64))
+    return [
+        {"key": r["key"], "dest": r["dest"], "bytes": r["bytes"], "ok": ok, "reason": note}
+        for r, (ok, note) in zip(recs, res, strict=True)
+        if not ok or note
+    ]
+
+
+def _check_file(args: tuple[str, str]) -> tuple[bool, str]:
+    path, doc = args
+    with gzip.open(path, "rb") as f:
+        return check_complete(f.read(), doc)
+
+
+def compact_index(index: Path) -> None:
+    """Rewrite INDEX.jsonl with one line per key: the latest record, at the key's first
+    position (a re-fetched document replaces its line in place)."""
+    order: list[str] = []
+    last: dict[str, str] = {}
+    for line in Path(index).read_text().splitlines():
+        if line.strip():
+            k = json.loads(line)["key"]
+            if k not in last:
+                order.append(k)
+            last[k] = line
+    tmp = Path(index).with_name(Path(index).name + ".tmp")
+    tmp.write_text("".join(last[k] + "\n" for k in order))
+    tmp.replace(index)
+
+
 def save_gzip(body: bytes, target: Path) -> None:
     """Write `body` gzip-compressed to `target` (mtime 0, so equal bodies give equal files),
     through a temporary file renamed into place."""
@@ -268,6 +327,7 @@ def download_documents(
     raw: Path = RAW,
     zip_path: Path | None = None,
     limit: int | None = None,
+    refetch: set[str] | frozenset[str] = frozenset(),
     log: Callable[[str], None] = print,
 ) -> pl.DataFrame:
     """Network: download every filing's primary document not yet in INDEX.jsonl.
@@ -275,7 +335,10 @@ def download_documents(
     Returns one row per accession number: adsh, cik, doc, kind, status, where status is
     "indexed" (already in the index), "downloaded", a skip ("no_primary_document", "pdf",
     "other_type") or "error" (not indexed, logged in ERRORS.jsonl; a later run retries it).
-    `limit` caps the number of documents requested (the pilot). Raises BlockedError after
+    `limit` caps the number of documents requested (the pilot). Keys in `refetch` are requested
+    again although indexed, and their INDEX lines are replaced in place. A body that fails
+    `check_complete` is requested again, COMPLETE_ATTEMPTS times in all, then logged in
+    ERRORS.jsonl and never indexed. Raises BlockedError after
     BLOCKED_LIMIT consecutive access-denied answers and OSError below MIN_FREE_GIB."""
     raw = Path(raw)
     docs_dir = raw / "sec/docs"
@@ -292,7 +355,7 @@ def download_documents(
     for r in plan.iter_rows(named=True):
         if r["kind"] not in ("html", "text"):
             status[r["adsh"]] = r["kind"]
-        elif r["adsh"] in done:
+        elif r["adsh"] in done and r["adsh"] not in refetch:
             status[r["adsh"]] = "indexed"
         else:
             todo.append(r)
@@ -319,13 +382,14 @@ def download_documents(
             target.parent.mkdir(parents=True, exist_ok=True)
             body = None
             reason = ""
+            incomplete = 0
             while body is None:
                 time.sleep(DOC_PAUSE)
                 try:
                     got = _fetch_body(url, part)
                 except Exception as exc:  # FetchError and anything below it
                     if _denied(exc):
-                        got, reason = None, f"access denied: {exc}"
+                        got, reason = None, f"denied or unavailable: {exc}"
                     else:
                         reason = f"{type(exc).__name__}: {exc}"
                         break
@@ -333,13 +397,25 @@ def download_documents(
                     if is_error_body(got):
                         got, reason = None, f"error body: {got[:200]!r}"
                     else:
-                        body, denied = got, 0
-                        break
+                        denied = 0
+                        ok, note = check_complete(got, doc)
+                        if ok:
+                            body = got
+                            if note:
+                                log(f"  {adsh}: {note}")
+                            break
+                        incomplete += 1
+                        reason = note
+                        log(f"  {adsh}: {note[:200]} (attempt {incomplete})")
+                        if incomplete >= COMPLETE_ATTEMPTS:
+                            break
+                        continue
                 denied += 1
                 log(f"  {adsh}: {reason[:200]} ({denied} in a row)")
                 if denied >= BLOCKED_LIMIT:
                     raise BlockedError(
-                        f"{denied} consecutive access-denied answers; last {url}: {reason[:300]}"
+                        f"{denied} consecutive denied or unavailable answers; last {url}: "
+                        f"{reason[:300]}"
                     )
                 time.sleep(BLOCKED_PAUSE)
             if body is None:
@@ -374,6 +450,8 @@ def download_documents(
                     f"{shutil.disk_usage(docs_dir).free / 2**30:.0f} GiB"
                 )
     if index.exists():
+        if refetch:
+            compact_index(index)
         _record_manifest(raw, index)
     out = plan.with_columns(
         pl.col("adsh").replace_strict(status, default="indexed").alias("status")
@@ -450,16 +528,11 @@ def filing_rates(
         else:
             from concurrent.futures import ProcessPoolExecutor
 
-            ex = ProcessPoolExecutor(max_workers=workers)
-            res = ex.map(_count_file, jobs, chunksize=16)
+            with ProcessPoolExecutor(max_workers=workers) as ex:
+                res = list(ex.map(_count_file, jobs, chunksize=16))
         for k, c in zip(keys, res, strict=True):
             counts[k] = c
-            if c["n_words"] == 0:
-                kinds[k] = "zero_words"
-            else:
-                kinds[k] = "ok"
-        if workers != 1:
-            ex.shutdown()
+            kinds[k] = "zero_words" if c["n_words"] == 0 else "ok"
     doc_rows = [
         (
             k,
@@ -595,8 +668,8 @@ def agreement(rates: pl.DataFrame, filers: pl.DataFrame, hits: pl.DataFrame) -> 
     fy = filers.select("year", "cik").unique()
     fts = (
         edgar._hit_ciks(hits)
-        .select("year", "cik")
-        .unique()
+        .group_by("year", "cik")
+        .agg(pl.col("exhibit").all().alias("exhibit_only"))
         .join(fy, on=["year", "cik"], how="inner")
         .with_columns(pl.lit(True).alias("fts"))
     )
@@ -615,6 +688,10 @@ def agreement(rates: pl.DataFrame, filers: pl.DataFrame, hits: pl.DataFrame) -> 
             (~has & pl.col("fts")).sum().cast(pl.Int64).alias("no_text_fts"),
             (has & pl.col("fts") & pl.col("any_primary")).sum().cast(pl.Int64).alias("both"),
             (has & pl.col("fts") & ~pl.col("any_primary")).sum().cast(pl.Int64).alias("fts_only"),
+            (has & pl.col("fts") & ~pl.col("any_primary") & pl.col("exhibit_only"))
+            .sum()
+            .cast(pl.Int64)
+            .alias("fts_only_exhibit"),
             (has & ~pl.col("fts") & pl.col("any_primary")).sum().cast(pl.Int64).alias("text_only"),
             (has & ~pl.col("fts") & ~pl.col("any_primary")).sum().cast(pl.Int64).alias("neither"),
             (has & (pl.col("any_term") != pl.col("any_primary")))
@@ -692,6 +769,8 @@ def _md(
             f"({r['no_text_fts']}) |"
         )
     n_acr = int(agr["acronym_differs"].sum())
+    n_fo = int(agr["fts_only"].sum())
+    n_fo_x = int(agr["fts_only_exhibit"].sum())
     nulls24 = grid.filter(
         (pl.col("year") == T_YEAR) & pl.col("ff49").is_not_null() & pl.col("rate").is_null()
     )["ff49_short"].to_list()
@@ -760,7 +839,12 @@ def _md(
         "year, any document of the filing, C-50); text = at least one primary-term hit in a "
         "primary document of the CIK that year with a rate. Agreement = (both + neither) / the "
         "filer-years with a rated document. Gated acronyms need a gate term, itself a primary "
-        f"term, so counting them changes the text indicator in {n_acr} filer-years.",
+        f"term, so counting them changes the text indicator in {n_acr} filer-years. Both "
+        "indicators look for the same primary phrases in the same filings, and the text "
+        "indicator reads the primary document that FTS also searches, so an agreement near 1 "
+        "is a replication check of the FTS numerator, not two constructs converging. Of the "
+        f"{n_fo} FTS-only filer-years, {n_fo_x} are CIKs whose every hit that year is in an "
+        "exhibit (C-39), which the primary document does not contain.",
         "",
         *a_lines,
         "",

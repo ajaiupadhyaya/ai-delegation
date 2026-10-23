@@ -37,7 +37,9 @@ def test_build_flags_select_parts(monkeypatch):
 
 def test_acquire_flags_select_parts(monkeypatch):
     seen: list[tuple] = []
-    monkeypatch.setattr(cli, "acquire", lambda filers, fts, docs: seen.append((filers, fts, docs)))
+    monkeypatch.setattr(
+        cli, "acquire", lambda filers, fts, docs, **k: seen.append((filers, fts, docs))
+    )
     cli.main(["acquire"])
     cli.main(["acquire", "--fts"])
     assert seen == [(True, True, True), (False, True, False)]

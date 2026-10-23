@@ -146,8 +146,8 @@ def _filers() -> pl.DataFrame:
 
 
 BODIES = {
-    "a.htm": b"<p>artificial intelligence</p> " + b"w " * 9_998,
-    "b.htm": b"<p>nothing</p> " + b"w " * 9_999,
+    "a.htm": b"<html><p>artificial intelligence</p> " + b"w " * 9_998 + b"</html>\n",
+    "b.htm": b"<html><p>nothing</p> " + b"w " * 9_999 + b"</HTML> <!-- end -->\n",
     "c.txt": b"machine learning and AI with artificial intelligence " + b"w " * 9_993,
 }
 
@@ -266,6 +266,9 @@ def test_agreement_counts_filer_years():
     a = secondary.agreement(rates, filers, hits).row(0, named=True)
     assert (a["both"], a["fts_only"], a["text_only"], a["neither"]) == (0, 1, 1, 1)
     assert a["no_text"] == 1 and a["no_text_fts"] == 1
+    assert a["fts_only_exhibit"] == 0
+    ex = hits.with_columns(pl.lit("EX-99.1").alias("file_type"))
+    assert secondary.agreement(rates, filers, ex).row(0, named=True)["fts_only_exhibit"] == 1
     assert a["agreement"] == pytest.approx(1 / 3)
 
 
@@ -298,3 +301,57 @@ def test_run_secondary_writes_labelled_docs(world, tmp_path):
     assert s24["n_filings"] == 5 and s24["n_rated"] == 4
     a = r["agreement"].row(0, named=True)
     assert (a["both"], a["fts_only"], a["text_only"], a["neither"]) == (1, 0, 2, 0)
+
+
+def test_completeness_needs_the_end_marker():
+    assert secondary.check_complete(b"<html><body>x</body></html>\n", "a.htm") == (True, "")
+    assert secondary.check_complete(b"<html>x</HTML>\n<!-- c -->\r\n", "a.htm")[0]
+    ok, note = secondary.check_complete(b'<html><body><ix:context id="c', "a.htm")
+    assert not ok and "truncated" in note
+    assert secondary.check_complete(b"<DOCUMENT>x</DOCUMENT>\n", "a.txt") == (True, "")
+    ok, note = secondary.check_complete(b"plain text with no marker", "a.txt")
+    assert ok and "accepted" in note
+
+
+def test_truncated_bodies_are_retried_then_sent_to_errors(world, monkeypatch):
+    raw, zp, calls = world
+    cut = {"a.htm": BODIES["a.htm"][:500]}
+
+    def download(src, path):
+        calls.append(src.url)
+        name = src.url.rsplit("/", 1)[-1]
+        Path(path).write_bytes(cut.get(name, BODIES[name]))
+
+    monkeypatch.setattr(fetch, "download", download)
+    out = secondary.download_documents(_filers(), raw=raw, zip_path=zp, log=lambda s: None)
+    st = dict(zip(out["adsh"], out["status"], strict=True))
+    assert st[A1] == "error"
+    assert sum(u.endswith("/a.htm") for u in calls) == secondary.COMPLETE_ATTEMPTS
+    assert A1 not in secondary.read_index(raw / "sec/docs/INDEX.jsonl")
+    errs = (raw / "sec/docs/ERRORS.jsonl").read_text()
+    assert A1 in errs and "truncated" in errs
+    # a later run retries it and, once whole, indexes it
+    cut.clear()
+    secondary.download_documents(_filers(), raw=raw, zip_path=zp, log=lambda s: None)
+    assert A1 in secondary.read_index(raw / "sec/docs/INDEX.jsonl")
+
+
+def test_refetch_replaces_index_lines_in_place(world, monkeypatch):
+    raw, zp, calls = world
+    secondary.download_documents(_filers(), raw=raw, zip_path=zp, log=lambda s: None)
+    index = raw / "sec/docs/INDEX.jsonl"
+    before = [json.loads(x)["key"] for x in index.read_text().splitlines()]
+    # simulate a truncated saved body, then find it offline and fetch it again
+    rec = secondary.read_index(index)[A2]
+    secondary.save_gzip(BODIES["b.htm"][:300], raw / rec["dest"])
+    flagged = secondary.scan_incomplete(raw, workers=1)
+    assert [f["key"] for f in flagged if not f["ok"]] == [A2]
+    assert [f["key"] for f in flagged if f["ok"]] == [A3]  # plain text, accepted and noted
+    calls.clear()
+    secondary.download_documents(_filers(), raw=raw, zip_path=zp, refetch={A2}, log=lambda s: None)
+    assert len(calls) == 1 and calls[0].endswith("/b.htm")
+    after = [json.loads(x)["key"] for x in index.read_text().splitlines()]
+    assert after == before
+    assert secondary.scan_incomplete(raw, workers=1) == [f for f in flagged if f["ok"]]
+    man = fetch.load_manifest(raw)
+    assert man["sec_docs_index"].sha256 == hashlib.sha256(index.read_bytes()).hexdigest()
