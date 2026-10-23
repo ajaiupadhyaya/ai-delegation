@@ -34,7 +34,13 @@ def test_every_addition_logged():
             assert len(hits) == 1, f"{key}: covered by {len(hits)} entries"
             logged = re.search(r"SHA-256: `([0-9a-f]{64})`", hits[0]["body"])
             assert logged and logged[1] == manifest[key]["sha256"], key
+    # The index-file set is one MANIFEST record, so only its latest entry can match the
+    # current file; an earlier one is the superseded state it records (A-34 -> A-35).
+    index_entries = [e for e in sets if e["title"].strip("`") == paplog.SET_INDEX_KEY]
+    superseded = {e["n"] for e in index_entries[:-1]}
     for e in sets:
+        if e["n"] in superseded:
+            continue
         f = paplog.set_entry_fields(e)
         s = paplog.set_stats(e["title"].strip("`"), manifest, RAW,
                              first=f["first"], last=f["last"])
