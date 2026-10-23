@@ -134,10 +134,16 @@ def _table(records: list[dict]) -> list[str]:
 
 
 def write_row(
-    row_id: str, records: list[dict], notes: list[str], *, out_dir: Path | None = None
+    row_id: str,
+    records: list[dict],
+    notes: list[str],
+    *,
+    out_dir: Path | None = None,
+    label_text: str | None = None,
 ) -> tuple[Path, Path]:
     """Write `R<nn>.csv` and `R<nn>.md` for a Plan 4 row of the registry. Refuses a record
-    whose keys differ from `ROBUSTNESS_COLUMNS`, an empty record list and an unknown row."""
+    whose keys differ from `ROBUSTNESS_COLUMNS`, an empty record list and an unknown row.
+    `label_text`, if given, replaces the default comma-joined label list of the header."""
     if row_id not in registry.ROWS or registry.ROWS[row_id].owner != "plan4":
         raise ValueError(f"{row_id} is not a Plan 4 row of the PAP §8.2 registry")
     if not records:
@@ -154,7 +160,8 @@ def write_row(
     lines = [
         f"# {row_id}: robustness row (PAP §8.2 {row_id})",
         "",
-        f"Source: PAP §8.2, row {row_id}. Label: {', '.join(labels)}.",
+        f"Source: PAP §8.2, row {row_id}. Label: "
+        f"{', '.join(labels) if label_text is None else label_text}.",
         "",
         f"Every record below is {NOT_A_DECISION}.",
         "",

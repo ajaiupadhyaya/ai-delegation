@@ -30,6 +30,7 @@ NULL = "coefficient = 0"
 R23_DISAGREE = "the two delegation measures named in H1 disagree"
 R23_ALPHA = 0.05
 H2_ESTIMAND = "beta (pp per year)"
+H2_AUTONOMY_ESTIMAND = "beta (ai_autonomy_mean scale points per year)"  # PAP §11 C-79
 H2_UNIT = "pp of the outcome share per year"
 H2_AUTONOMY_UNIT = "ai_autonomy_mean scale points per year"
 H2_NULL = "β = 0"
@@ -39,6 +40,7 @@ R37_NULL = "May minus April = 0"
 
 __all__ = [
     "AUTONOMY_UNIT",
+    "H2_AUTONOMY_ESTIMAND",
     "H2_AUTONOMY_UNIT",
     "H2_ESTIMAND",
     "H2_UNIT",
@@ -262,6 +264,7 @@ def h2_records(row_id: str, part: str, res: HypothesisResult, *, label: str) -> 
     if 6**k != n_draws:
         raise ValueError(f"{n_draws} wild draws for {k} releases; expected 6^{k} = {6**k}")
     n_extreme = round(float(d["p_wild"]) * n_draws)
+    autonomy = res.outcome == "ai_autonomy_mean"
     parts = [
         f"wild-bootstrap p = {report.fmt_p(d['p_wild'])}; weight vectors = 6^{k} = {n_draws}; "
         "would meet the H2 rule (both p <= 0.0125 and beta > 0): "
@@ -283,8 +286,8 @@ def h2_records(row_id: str, part: str, res: HypothesisResult, *, label: str) -> 
         "variant": f"outcome={res.outcome}; releases={','.join(releases)}",
         "applies_to": "H2",
         "label": label,
-        "estimand": H2_ESTIMAND,
-        "unit": H2_AUTONOMY_UNIT if res.outcome == "ai_autonomy_mean" else H2_UNIT,
+        "estimand": H2_AUTONOMY_ESTIMAND if autonomy else H2_ESTIMAND,
+        "unit": H2_AUTONOMY_UNIT if autonomy else H2_UNIT,
         "estimate": c.estimate,
         "scale": c.se,
         "ci_lo": c.ci_low,

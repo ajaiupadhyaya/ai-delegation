@@ -355,3 +355,37 @@ def test_r37_record(stubbed):
     assert "wild" not in (r["note"] or "")
     assert "n_tasks 2" in r["note"]
     assert not any(n == "estimate_h2" for n, _ in stubbed)
+
+
+# --- review fixes (PAP §11 C-79) ----------------------------------------------------------
+
+
+def test_h2_estimand_outcome_aware():
+    (aut,) = RQ.h2_records("R23", "h2", _h2_res(outcome="ai_autonomy_mean"), label="robustness")
+    assert aut["estimand"] == "beta (ai_autonomy_mean scale points per year)"
+    (pp,) = RQ.h2_records("R36", "x", _h2_res(), label="robustness")
+    assert pp["estimand"] == "beta (pp per year)"
+    assert rows.RQ1_LABELS[aut["estimand"]] == rows.RQ1_LABELS[pp["estimand"]] == "trend β"
+
+
+def test_r23_label_line_by_part(stubbed):
+    _, md_path = rows.run_R23()
+    md = md_path.read_text(encoding="utf-8")
+    assert (
+        'Label: part h1 "robustness"; part h2 "robustness; confounded with the r6 '
+        'suppression-regime change".'
+    ) in md
+    assert "| trend β: wild-bootstrap p" in md
+
+
+def test_min_p_from_result_releases(stubbed):
+    _, md = rows.run_R36()
+    text = md.read_text(encoding="utf-8")
+    assert "4 releases, 6/1296 = 0.0046" in text
+    _, md23 = rows.run_R23()
+    assert "3 releases, 6/216 = 0.0278, above 0.0125" in md23.read_text(encoding="utf-8")
+
+
+def test_r37_cites_c79(stubbed):
+    _, md = rows.run_R37()
+    assert "C-79" in md.read_text(encoding="utf-8")
