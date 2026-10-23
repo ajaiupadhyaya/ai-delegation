@@ -322,3 +322,45 @@ def test_persistent_error_body_raises_and_drops_the_record(monkeypatch, tmp_path
         edgar.fts_hits("machine learning", Y0, Y1)
     assert fetch.load_manifest(tmp_path) == {}
     assert not list((tmp_path / "sec").rglob("*.json"))
+
+
+@pytest.mark.parametrize(
+    "partial", [{"timed_out": True}, {"_shards": {"total": 50, "successful": 49, "failed": 1}}]
+)
+def test_partial_response_is_refetched_not_kept(monkeypatch, tmp_path: Path, partial):
+    """An Elasticsearch partial response (timed out, or a failed shard) is an error body."""
+    fake = FakeFts({("2024-01-01", "2024-12-31"): (50, "eq")})
+    calls = []
+    monkeypatch.setattr(edgar, "RAW", tmp_path)
+    monkeypatch.setattr(edgar, "FTS_RETRY_SECONDS", 0.0)
+
+    def download(src, part):
+        body = fake.body(src.url)
+        calls.append(src.key)
+        if len(calls) == 1:
+            body = {**body, **partial}
+        Path(part).write_text(json.dumps(body))
+
+    monkeypatch.setattr(fetch, "_download", download)
+    assert edgar.fts_hits("machine learning", Y0, Y1).height == 50
+    assert len(calls) == 2
+    rec = fetch.load_manifest(tmp_path)["sec_fts/2024-01-01_2024-12-31/machine_learning/00000"]
+    js = json.loads((tmp_path / rec.dest).read_text())
+    assert not js.get("timed_out") and "_shards" not in js
+
+
+def test_hits_from_saved_skips_ranges_outside_the_window(monkeypatch, tmp_path: Path):
+    """A saved range with a missing page does not stop a query whose window misses it."""
+    fake = FakeFts(
+        {("2023-01-01", "2023-12-31"): (250, "eq"), ("2024-01-01", "2024-12-31"): (150, "eq")}
+    )
+    monkeypatch.setattr(edgar, "RAW", tmp_path)
+    monkeypatch.setattr(fetch, "_download", _saving_download(fake))
+    edgar.fts_hits("machine learning", date(2023, 1, 1), date(2023, 12, 31))
+    edgar.fts_hits("machine learning", Y0, Y1)
+    man = fetch.load_manifest(tmp_path)
+    del man["sec_fts/2023-01-01_2023-12-31/machine_learning/00100"]
+    fetch.write_manifest(tmp_path, man)
+    assert edgar.hits_from_saved(start=Y0, end=Y1).height == 150
+    with pytest.raises(FileNotFoundError, match="2023-01-01_2023-12-31/machine_learning/00100"):
+        edgar.hits_from_saved(start=date(2023, 6, 1), end=Y1)

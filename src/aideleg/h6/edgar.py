@@ -312,14 +312,25 @@ class FtsServerError(RuntimeError):
 FTS_ATTEMPTS = 5
 FTS_RETRY_SECONDS = 30.0
 FTS_PAUSE = 0.5  # seconds before each request not yet saved: gentler than the 0.1 s SEC floor
-_ERROR_BODIES: list[str] = []  # keys whose response was an error body at least once (logged)
+
+
+def _usable(js) -> bool:
+    """Search results that are complete: `hits` present, not timed out, no failed shard (an
+    Elasticsearch partial response counts as an error body)."""
+    return (
+        isinstance(js, dict)
+        and "hits" in js
+        and not js.get("timed_out", False)
+        and int((js.get("_shards") or {}).get("failed", 0) or 0) == 0
+    )
 
 
 def _get_json(src) -> dict:
     """Fetch `src` once (MANIFEST record per response, D18) and read the saved file.
 
     The server can answer HTTP 200 with an error JSON (`errorType`, no `hits`; seen
-    2026-10-23, `getaddrinfo EBUSY` from its search backend). Such a body is refetched (backoff
+    2026-10-23, `getaddrinfo EBUSY` from its search backend), or with a partial result
+    (`timed_out`, or `_shards.failed > 0`). Such a body (not `_usable`) is refetched (backoff
     FTS_RETRY_SECONDS x attempt); if it persists its file and MANIFEST record are removed, so
     no error body is ever kept or used, and FtsServerError is raised (a resumed run fetches it
     again). A request not yet saved waits FTS_PAUSE first."""
@@ -332,12 +343,11 @@ def _get_json(src) -> dict:
     js: dict = {}
     for attempt in range(FTS_ATTEMPTS):
         if attempt:
-            _ERROR_BODIES.append(src.key)
             print(f"  error body for {src.key} ({str(js)[:80]}); retry {attempt}", flush=True)
             time.sleep(FTS_RETRY_SECONDS * attempt)
         rec = fetch.fetch(src, RAW, force=bool(attempt))
         js = json.loads((Path(RAW) / rec.dest).read_text())
-        if isinstance(js, dict) and "hits" in js:
+        if _usable(js):
             return js
     manifest = fetch.load_manifest(RAW)
     manifest.pop(src.key, None)
@@ -497,6 +507,8 @@ def hits_from_saved(
     for (s, e, slug), pages in sorted(ranges.items()):
         if 0 not in pages:
             continue  # only deeper pages of a range: never a leaf on its own
+        if (start is not None and e < start) or (end is not None and s > end):
+            continue  # no hit of this range can fall in [start, end]
         phrase = names.get(slug, slug.replace("_", " "))
         first = json.loads((Path(RAW) / pages[0]).read_text())
         if _capped(first):
@@ -507,6 +519,8 @@ def hits_from_saved(
                 raise FileNotFoundError(f"sec_fts/{s}_{e}/{slug}/{off:05d}: page not saved")
         for off in range(0, value, FTS_PAGE):
             js = first if off == 0 else json.loads((Path(RAW) / pages[off]).read_text())
+            if not _usable(js):
+                raise ValueError(f"sec_fts/{s}_{e}/{slug}/{off:05d}: saved body is not usable")
             parts.append(parse_fts(js, phrase))
     if not parts:
         return pl.DataFrame(schema={c: _HITS_SCHEMA[c] for c in _HIT_COLUMNS})
