@@ -41,8 +41,7 @@ def _chars(rows: list[tuple[date, str, float]]) -> pl.DataFrame:
     """`date, me_date, ff49_short, cap` with me_date set as `data.characteristics` sets it."""
     df = pl.DataFrame(rows, schema={"date": pl.Date, "ff49_short": pl.String, "cap": pl.Float64},
                       orient="row")
-    return df.with_columns(
-        me_date=pl.col("date").dt.offset_by(f"-{data.SIZE_ME_OFFSET}mo").dt.month_end())
+    return df.with_columns(me_date=data.me_date_expr("date"))
 
 
 def _synth(seed: int = 3):
@@ -169,6 +168,32 @@ def test_missing_cap_leaves_cap_leg_only():
     ew = terciles.leg_returns(_leg_ret(), chars, legs, [date(2024, 2, 29)], "ew")
     assert cap["high"][0] == pytest.approx(1.0)
     assert ew["high"][0] == pytest.approx(2.0)
+
+
+def test_nan_and_zero_cap_leave_cap_leg_and_are_reported():
+    ret = pl.DataFrame({"date": [date(2024, 2, 29)], "I00": [1.0], "I01": [3.0],
+                        "I02": [5.0], "I03": [0.0]})
+    chars = _chars([(date(2024, 2, 29), "I00", 2.0), (date(2024, 2, 29), "I01", float("nan")),
+                    (date(2024, 2, 29), "I02", 0.0), (date(2024, 2, 29), "I03", 1.0)])
+    legs = {"high": ["I00", "I01", "I02"], "mid": [], "low": ["I03"]}
+    cap = terciles.leg_returns(ret, chars, legs, [date(2024, 2, 29)], "cap")
+    ew = terciles.leg_returns(ret, chars, legs, [date(2024, 2, 29)], "ew")
+    assert cap["high"][0] == pytest.approx(1.0)
+    assert ew["high"][0] == pytest.approx(3.0)
+    gaps = terciles._gap_lines(ret, chars, {"B": legs}, {"B": [date(2024, 2, 29)]})
+    assert gaps[0].endswith("missing return (all legs): none")
+    assert gaps[1].endswith("missing cap (cap legs only): I01 2024-02, I02 2024-02")
+
+
+def test_nan_return_leaves_both_legs_and_is_reported():
+    ret = pl.DataFrame({"date": [date(2024, 2, 29)], "I00": [1.0], "I01": [float("nan")],
+                        "I02": [0.0]})
+    chars = _chars([(date(2024, 2, 29), n, 1.0) for n in ("I00", "I01", "I02")])
+    legs = {"high": ["I00", "I01"], "mid": [], "low": ["I02"]}
+    for w in ("cap", "ew"):
+        assert terciles.leg_returns(ret, chars, legs, [date(2024, 2, 29)], w)["high"][0] == 1.0
+    gaps = terciles._gap_lines(ret, chars, {"B": legs}, {"B": [date(2024, 2, 29)]})
+    assert gaps[0].endswith("missing return (all legs): I01 2024-02")
 
 
 def test_empty_leg_raises():

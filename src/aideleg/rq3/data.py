@@ -84,6 +84,12 @@ def _monthly_file() -> Path:
     return french._single_file("ff49_monthly")
 
 
+def me_date_expr(col: str = "date") -> pl.Expr:
+    """The month end whose ME the size row dated `col` holds: `col` - SIZE_ME_OFFSET months
+    (PAP §11 C-35). Read at call time, so a patched SIZE_ME_OFFSET applies."""
+    return pl.col(col).dt.offset_by(f"-{SIZE_ME_OFFSET}mo").dt.month_end()
+
+
 def characteristics() -> pl.DataFrame:
     """Long `date, me_date, ff49_short, n_firms, avg_size, cap`; select rows by `me_date`."""
     guard.assert_confirmatory_recorded()
@@ -95,7 +101,7 @@ def characteristics() -> pl.DataFrame:
     long_s = size.unpivot(names, index="date", variable_name="ff49_short", value_name="avg_size")
     df = long_f.join(long_s, on=["date", "ff49_short"], how="inner")
     df = df.filter(pl.col("date") <= MARKET_END).with_columns(
-        me_date=pl.col("date").dt.offset_by(f"-{SIZE_ME_OFFSET}mo").dt.month_end(),
+        me_date=me_date_expr("date"),
         cap=pl.col("n_firms") * pl.col("avg_size"))
     return df.select("date", "me_date", "ff49_short", "n_firms", "avg_size", "cap").sort(
         "ff49_short", "date")

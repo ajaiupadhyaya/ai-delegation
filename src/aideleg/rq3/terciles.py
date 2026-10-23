@@ -88,15 +88,31 @@ def members(expo: pl.DataFrame, col: str = "z_delegation") -> dict[str, list[str
     return {"high": names[:k], "mid": names[k:len(names) - k], "low": names[len(names) - k:]}
 
 
+def _bad(x) -> bool:
+    return x is None or (isinstance(x, float) and np.isnan(x))
+
+
+def unusable(ret_row: dict, caps: dict, name: str, weighting: str) -> str | None:
+    """Why member `name` leaves this month's leg ("return" or "cap"), or None if usable.
+
+    A null or NaN return excludes it under both weightings; under "cap" a null, NaN or
+    non-positive cap also excludes it."""
+    if _bad(ret_row.get(name)):
+        return "return"
+    if weighting == "cap":
+        c = caps.get(name)
+        if _bad(c) or c <= 0:
+            return "cap"
+    return None
+
+
 def _leg(ret_row: dict, caps: dict, names: Sequence[str], weighting: str) -> float | None:
     r, w = [], []
     for n in names:
-        x = ret_row.get(n)
-        c = caps.get(n) if weighting == "cap" else 1.0
-        if x is None or c is None or (isinstance(x, float) and np.isnan(x)):
+        if unusable(ret_row, caps, n, weighting) is not None:
             continue
-        r.append(x)
-        w.append(c)
+        r.append(ret_row[n])
+        w.append(caps[n] if weighting == "cap" else 1.0)
     if not r:
         return None
     w = np.asarray(w, dtype=float)
@@ -283,9 +299,9 @@ def _gap_lines(ret: pl.DataFrame, chars: pl.DataFrame, legs_by: dict[str, dict],
             cs = chars.filter(pl.col("me_date") == _prior_month_end(t))
             caps = dict(zip(cs["ff49_short"].to_list(), cs["cap"].to_list(), strict=True))
             for n in legs["high"] + legs["low"]:
-                if rows[t].get(n) is None:
+                if unusable(rows[t], caps, n, "ew") is not None:
                     miss_r.append(f"{n} {t:%Y-%m}")
-                if caps.get(n) is None:
+                elif unusable(rows[t], caps, n, "cap") is not None:
                     miss_c.append(f"{n} {t:%Y-%m}")
         out += [f"- {_label(d)}, missing return (all legs): {', '.join(miss_r) or 'none'}",
                 f"- {_label(d)}, missing cap (cap legs only): {', '.join(miss_c) or 'none'}"]
