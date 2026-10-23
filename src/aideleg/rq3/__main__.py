@@ -17,9 +17,21 @@ def _print_events(df) -> None:
               f"CI=[{r['ci_lo']:8.3f}, {r['ci_hi']:8.3f}] p={r['p']:.4f} n={r['n']}")
 
 
+def _print_terciles(df) -> None:
+    print(f"{df.height} rows -> {(OUT_DIR / 'terciles.md').relative_to(ROOT)}, terciles.csv "
+          "(exploratory; Design B rows secondary)")
+    for r in df.iter_rows(named=True):
+        def f(x):
+            return "      -" if x is None else f"{x:7.3f}"
+        p = "-" if r["p"] is None else f"{r['p']:.4f}"
+        print(f"  {r['design']:<8} {r['weighting']:<3} {r['statistic']:<13} "
+              f"est={f(r['estimate'])} se={f(r['se'])} CI=[{f(r['ci_lo'])}, {f(r['ci_hi'])}] "
+              f"p={p} T={r['T']}")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="python -m aideleg.rq3")
-    p.add_argument("command", choices=["influence", "events"])
+    p.add_argument("command", choices=["influence", "events", "terciles"])
     args = p.parse_args(argv)
     if args.command == "influence":
         from aideleg.rq3 import inference
@@ -33,6 +45,12 @@ def main(argv: list[str] | None = None) -> int:
 
         df = events.run_events(OUT_DIR, fig_dir=FIGURES_DIR)
         _print_events(df)
+    elif args.command == "terciles":
+        from aideleg.figures.save import FIGURES_DIR
+        from aideleg.rq3 import terciles
+
+        df = terciles.run_terciles(OUT_DIR, fig_dir=FIGURES_DIR)
+        _print_terciles(df)
     return 0
 
 
