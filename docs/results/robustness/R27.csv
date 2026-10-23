@@ -1,0 +1,2 @@
+row_id,part,variant,applies_to,label,estimand,unit,estimate,scale,ci_lo,ci_hi,stat,p,null,crit_0025,crit_005,n,n_dropped,dropped,note
+R27,coe,release=r6; source=claude_ai; family=iwa; outcome=validation_pct; indicator=coe,H3,robustness,coe,pp of the outcome share per unit of the regressor,-0.1619428412739975,0.20753901132049532,-0.5700540422699216,0.24616835972192663,-0.7803007263242416,0.435715484835374,coefficient = 0,,,1589,,unmatched_task 0.08%; no_family 1.00%; missing_coe 4.42%,"SE two-way cluster (occupation, task); df 368; G_occ 369, G_task 1096"
