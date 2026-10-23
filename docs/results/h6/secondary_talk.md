@@ -14,7 +14,7 @@ Dictionary occurrences (primary terms and gated acronyms, PAP §6.1 D12) per 10,
 
 ## Documents
 
-- `INDEX.jsonl`: 47946 documents, 138,657,694,780 bytes uncompressed, retrieved (UTC) 2026-10-23T02:20:56Z → 2026-10-23T09:30:11Z.
+- `INDEX.jsonl`: 47946 documents, 138,664,785,161 bytes uncompressed, retrieved (UTC) 2026-10-23T02:20:56Z → 2026-10-23T09:58:41Z.
 
 ## Series by year
 
@@ -37,7 +37,7 @@ Rates are occurrences per 10,000 words. Mean over industries: equal-weight over 
 | 2019 | 6951 | 6951 | 0 | 0 | 0 | 0 | 0 | 51 |
 | 2020 | 6782 | 6782 | 0 | 0 | 0 | 0 | 0 | 49 |
 | 2021 | 7203 | 7203 | 0 | 0 | 0 | 0 | 0 | 44 |
-| 2022 | 7815 | 7815 | 0 | 0 | 0 | 0 | 0 | 67 |
+| 2022 | 7815 | 7815 | 0 | 0 | 0 | 0 | 0 | 65 |
 | 2023 | 7381 | 7381 | 0 | 0 | 0 | 0 | 0 | 51 |
 | 2024 | 6891 | 6891 | 0 | 0 | 0 | 0 | 0 | 36 |
 | 2025 | 6703 | 6703 | 0 | 0 | 0 | 0 | 0 | 55 |
@@ -100,14 +100,14 @@ Spearman(secondary 2024, T_j) = 0.567 over 49 FF49 industries with both defined 
 
 ## Agreement between the FTS talk indicator and the text indicator
 
-Reporting only (a check on the 2023→2024 change in FTS talk). Per filer-year (distinct CIK and year of `filers.parquet`): FTS = the CIK is counted in the talk numerator that year (at least one full-text-search hit in a 10-K, 10-K405 or 10-KT filed that year, any document of the filing, C-50); text = at least one primary-term hit in a primary document of the CIK that year with a rate. Agreement = (both + neither) / the filer-years with a rated document. Gated acronyms need a gate term, itself a primary term, so counting them changes the text indicator in 0 filer-years.
+Reporting only (a check on the 2023→2024 change in FTS talk). Per filer-year (distinct CIK and year of `filers.parquet`): FTS = the CIK is counted in the talk numerator that year (at least one full-text-search hit in a 10-K, 10-K405 or 10-KT filed that year, any document of the filing, C-50); text = at least one primary-term hit in a primary document of the CIK that year with a rate. Agreement = (both + neither) / the filer-years with a rated document. Gated acronyms need a gate term, itself a primary term, so counting them changes the text indicator in 0 filer-years. Both indicators look for the same primary phrases in the same filings, and the text indicator reads the primary document that FTS also searches, so an agreement near 1 is a replication check of the FTS numerator, not two constructs converging. Of the 31 FTS-only filer-years, 30 are CIKs whose every hit that year is in an exhibit (C-39), which the primary document does not contain.
 
 | year | filer-years | both | FTS only | text only | neither | agreement | no rated document (of which FTS talk) |
 |---|---|---|---|---|---|---|---|
 | 2019 | 6793 | 551 | 7 | 0 | 6235 | 0.999 | 0 (0) |
 | 2020 | 6627 | 665 | 3 | 0 | 5959 | 1.000 | 0 (0) |
 | 2021 | 7001 | 925 | 2 | 0 | 6074 | 1.000 | 0 (0) |
-| 2022 | 7667 | 1333 | 5 | 0 | 6329 | 0.999 | 0 (0) |
+| 2022 | 7667 | 1334 | 4 | 0 | 6329 | 0.999 | 0 (0) |
 | 2023 | 7255 | 1434 | 4 | 0 | 5817 | 0.999 | 0 (0) |
 | 2024 | 6774 | 2533 | 5 | 0 | 4236 | 0.999 | 0 (0) |
 | 2025 | 6565 | 3380 | 6 | 1 | 3178 | 0.999 | 0 (0) |
@@ -153,7 +153,7 @@ Industry rate per 10,000 words (— where no CIK has a rate). CIK counts are in 
 | PerSv | 0.040 | 0.065 | 0.068 | 0.119 | 0.279 | 0.892 | 1.448 |
 | BusSv | 0.322 | 0.453 | 0.581 | 0.761 | 1.019 | 2.675 | 3.928 |
 | Hardw | 1.279 | 1.121 | 1.326 | 1.403 | 2.078 | 4.178 | 6.268 |
-| Softw | 0.775 | 0.888 | 1.421 | 1.463 | 1.939 | 5.306 | 7.953 |
+| Softw | 0.775 | 0.888 | 1.421 | 1.469 | 1.939 | 5.306 | 7.953 |
 | Chips | 0.442 | 0.540 | 0.597 | 0.838 | 1.039 | 1.924 | 3.131 |
 | LabEq | 0.107 | 0.116 | 0.167 | 0.232 | 0.410 | 0.885 | 2.436 |
 | Paper | 0.000 | 0.000 | 0.000 | 0.032 | 0.044 | 0.222 | 0.549 |
