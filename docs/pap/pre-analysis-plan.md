@@ -2264,6 +2264,12 @@ primary result (§0.5).
 - Results seen: yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, the D-3 diagnostics and the Task 16 and Task 31 red-team findings
 - Rule: The C-80 rule (a regenerated CSV reproduces the committed one when every non-numeric cell is identical and every numeric cell agrees within relative 1e-9, absolute 1e-12 near zero; a .md must match byte for byte) also applies to docs/results/diagnostics/*.csv. A re-run of the D-3 diagnostics differs only in the last float digit of h2_influence.csv's usage_share_pct (an unordered group_by sum, as in C-80); no printed number moves. No estimate, specification or committed output changes.
 
+### C-83. Clarification: Record corrections: C-81's unit wording; the Plan 4 file amended after the confirmatory runs (2026-10-24)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 34 review (plans committed at a7fb9bd; amended at 358c021)
+- Results seen: yes: all confirmatory, Plan 3 and Plan 4 results and both red teams seen
+- Rule: (1) C-81 says the new RQ1 unit label states the PAP's unit exactly; it corrects it: PAP §4.1's 'per log point' read literally is per 0.01 of the natural log, while the coefficients are per unit of the natural log (a hundred log points), which is what the generated tables now say. No estimate changes. (2) The C-entries cite 'plans committed at a7fb9bd'. The Plan 4 file was amended once more at 358c021 (Plan 3's final fix wave, after both confirmatory runs and before any Plan 4 robustness read); that amendment changed interfaces, test fixtures and guard notes only (hits_from_saved strict/saved_ranges, guard fixture bytes, the R9 placebo name, R4/R8 bootstrap-draw notes, zero_assigned_lines reuse) and no default, specification or row.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
