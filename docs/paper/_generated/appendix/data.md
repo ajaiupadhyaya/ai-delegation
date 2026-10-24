@@ -144,10 +144,11 @@ Each `make` target, what it depends on and what it runs, in the order of the Mak
 
 | target | depends on | runs |
 |----|------|------|
-| `all` | `lint`, `test` | its prerequisites only |
+| `all` | `lint`, `confirmatory-check`, `panel`, `exposure`, `benchmarks`, `audit`, `power-block`, `results-rq1`, `results-rq2`, `rq3`, `h6`, `robustness`, `diagnostics`, `paper-includes`, `paper`, `brief`, `test` | its prerequisites only |
 | `test` | nothing | `uv run pytest -v` |
 | `lint` | nothing | `uv run ruff check` |
 | `data` | nothing | `uv run python -m aideleg.acquire` |
+| `confirmatory-check` | nothing | `uv run python -c "from aideleg.robustness import guards; guards.require_confirmatory_committed(); print('P-RQ1 run commit', guards.require_rq1_run_committed())"` |
 | `panel` | `data/derived/aei_panel.parquet` | its prerequisites only |
 | `data/derived/aei_panel.parquet` | `$(wildcard src/aideleg/aei/*.py)`, `src/aideleg/aei/metric_map.csv`, `src/aideleg/config.py`, `src/aideleg/acquire/sources.py`, `src/aideleg/market/french.py`, `data/raw/MANIFEST.json` | `uv run python -m aideleg.aei` |
 | `exposure` | `data/derived/exposure_ff49.parquet` | its prerequisites only |
@@ -157,6 +158,7 @@ Each `make` target, what it depends on and what it runs, in the order of the Mak
 | `audit` | `data/derived/aei_panel.parquet`, `data/derived/exposure_ff49.parquet`, `data/derived/benchmark_ff49.parquet` | `uv run python -m aideleg.audit` |
 | `power-unfrozen` | nothing | `uv run python -c "import sys; from aideleg.market.seal import pap_frozen; sys.exit('pap-v1 exists: the power analysis is frozen, not rerun' if pap_frozen() else 0)"` |
 | `power` | `power-unfrozen`, `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.power` |
+| `power-block` | `data/derived/exposure_ff49.parquet` | `uv run python scripts/power_block.py` |
 | `freeze` | nothing | `uv run python scripts/pap_freeze.py` |
 | `rq1-dry-run` | nothing | `uv run python -m aideleg.rq1.confirm --dry-run $${TMPDIR:-/tmp}/aideleg-rq1-dry` |
 | `rq1-confirm` | nothing | `uv run python -m aideleg.rq1.confirm` |
@@ -167,6 +169,7 @@ Each `make` target, what it depends on and what it runs, in the order of the Mak
 | `h6-data` | nothing | `uv run python -m aideleg.h6 acquire` |
 | `h6` | `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.h6 all` |
 | `robustness` | `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.robustness --offline`; `uv run python -m aideleg.robustness --summary` |
+| `diagnostics` | `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.robustness --diagnostics` |
 | `figures-check` | nothing | `uv run python -c "from pathlib import Path; d = Path('docs/paper/figures'); pdf = {p.stem for p in d.glob('*.pdf')}; png = {p.stem for p in d.glob('*.png')}; odd = sorted(pdf ^ png); print('figures without a PDF/PNG twin:', odd) if odd else None; raise SystemExit(1 if odd else 0)"` |
 | `paper-includes` | nothing | `uv run python -m aideleg.paper` |
 | `paper` | `paper-includes` | `quarto render docs/paper --to pdf`; `quarto render docs/paper --to html` |

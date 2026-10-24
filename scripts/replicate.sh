@@ -38,7 +38,7 @@ uv run python scripts/compare_outputs.py "$ROOT" "$WORK" > "$OUT" || compare_sta
     echo "## Run"
     echo
     echo "- \`make all\` exit status: $make_status (log: \`make_all.log\` in the work directory)"
-    printf -- '- `make all` runtime: %dm %02ds (%d s)\n' $((runtime / 60)) $((runtime % 60)) "$runtime"
+    printf -- '- Runtime of `make all`: %dm %02ds (%d s)\n' $((runtime / 60)) $((runtime % 60)) "$runtime"
     echo "- Run on $(date -u +%Y-%m-%dT%H:%M:%SZ), $(uname -sm), $(uv run python -c 'import platform; print("Python", platform.python_version())')"
 } >> "$OUT"
 
