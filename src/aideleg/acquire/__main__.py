@@ -3,7 +3,9 @@
 `--from-dir DIR` seeds the raw directory from a frozen archive instead (offline; every file is
 verified against the committed MANIFEST, and the 10-K documents against INDEX.jsonl), and
 `--check-download` downloads every non-bulk MANIFEST file into a temporary directory and writes
-`docs/replication/download_check.md` without touching `data/raw` (`aideleg.acquire.seed`).
+`docs/replication/download_check.md` without touching `data/raw`, and `--build-deposit OUT`
+splits `data/raw` into the public and restricted parts of the archive deposit
+(`aideleg.acquire.seed`).
 """
 
 import argparse
@@ -23,6 +25,8 @@ def main(argv: list[str] | None = None) -> int:
                       help="copy every MANIFEST file from DIR/<dest>, verified (offline)")
     mode.add_argument("--check-download", action="store_true",
                       help="re-download into a temporary directory and report matches")
+    mode.add_argument("--build-deposit", metavar="OUT", type=Path,
+                      help="split data/raw into OUT/public and OUT/restricted for the deposit")
     ap.add_argument("--raw-dir", type=Path, default=RAW, help=argparse.SUPPRESS)  # tests
     args = ap.parse_args(argv)
 
@@ -33,6 +37,9 @@ def main(argv: list[str] | None = None) -> int:
         if refused:
             print(f"\n{len(refused)} refused; nothing was written for them", file=sys.stderr)
             return 1
+        return 0
+    if args.build_deposit is not None:
+        seed.build_deposit(args.build_deposit, raw_dir=args.raw_dir)
         return 0
     if args.check_download:
         rows = seed.check_download(raw_dir=args.raw_dir)

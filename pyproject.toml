@@ -3,6 +3,8 @@ name = "aideleg"
 version = "0.1.0"
 description = "Delegating to the Machine: AEI conversations matched to tasks, joined to BLS and Fama-French data"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "LICENSE-text.md"]
 authors = [
     { name = "ajaiupadhyaya", email = "ajaiupadhyaya@users.noreply.github.com" }
 ]

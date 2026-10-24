@@ -39,6 +39,8 @@ author: "Ajai Upadhyaya"
 ::: {#refs}
 :::
 
+{{< include sections/11-statements.qmd >}}
+
 ```{=latex}
 \appendix
 ```

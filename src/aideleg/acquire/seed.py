@@ -9,11 +9,17 @@
   writes a table of key and match (yes/no) to `docs/replication/download_check.md`. It never
   touches `data/raw`. The bulk SEC sets (the full-text-search responses and the 10-K documents)
   are not re-downloaded; `from_dir` verifies them from the frozen archive.
+- `build_deposit(OUT)` splits `data/raw` into the two parts of the archive deposit:
+  `OUT/public/<dest>` for the sources whose terms allow redistribution and
+  `OUT/restricted/<dest>` for those whose pages state no licence (the French library and AIOE),
+  which are deposited with access on request. Unpacked into one directory, the two parts are
+  the frozen archive `from_dir` reads.
 """
 
 import gzip
 import hashlib
 import json
+import os
 import shutil
 import tempfile
 import zipfile
@@ -27,6 +33,9 @@ DOCS_INDEX_KEY = "sec_docs_index"
 FTS_PREFIX = "sec_fts/"
 BULK_NOTE = "not re-downloaded (bulk; verified from the frozen archive by --from-dir)"
 DOWNLOAD_CHECK = ROOT / "docs/replication/download_check.md"
+# MANIFEST keys whose source page states no licence (README, "Details on each Data Source"):
+# the Kenneth R. French Data Library and AIOE. They are deposited with access on request.
+RESTRICTED_PREFIXES = ("ff", "mom_", "aioe")
 
 
 def _safe(base: Path, rel: str) -> Path:
@@ -236,3 +245,57 @@ def _write_table(out: Path, rows: list[dict], bulk: list[tuple[str, str]]) -> No
     ]
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines))
+
+
+def restricted(key: str) -> bool:
+    """True for a MANIFEST key whose source states no licence (deposited on request)."""
+    return key.startswith(RESTRICTED_PREFIXES)
+
+
+def _place(src: Path, dst: Path) -> None:
+    """Hard-link `src` to `dst` (the archive can be large), copying when linking fails."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copyfile(src, dst)
+
+
+def build_deposit(
+    out: Path, raw_dir: Path = RAW, log: Callable[[str], None] = print
+) -> dict[str, list[str]]:
+    """Split `raw_dir` into `out/public` and `out/restricted` (see the module docstring); return
+    the MANIFEST keys of each part. Every MANIFEST file is checked against its SHA-256 first, and
+    nothing is written if one differs or is missing. The 10-K documents go to `public`."""
+    out, raw_dir = Path(out), Path(raw_dir)
+    if out.exists() and any(out.iterdir()):
+        raise ValueError(f"{out} is not empty")
+    manifest = fetch.load_manifest(raw_dir)
+    if not manifest:
+        raise ValueError(f"no {fetch.MANIFEST_NAME} in {raw_dir}")
+    bad = []
+    for key, rec in sorted(manifest.items()):
+        path = _safe(raw_dir, rec.dest)
+        if not path.is_file():
+            bad.append(f"{key}: missing")
+        elif fetch._sha256(path) != rec.sha256:
+            bad.append(f"{key}: SHA-256 differs from the MANIFEST")
+    if bad:
+        raise ValueError("not deposited: " + "; ".join(bad))
+    parts: dict[str, list[str]] = {"public": [], "restricted": []}
+    for key, rec in sorted(manifest.items()):
+        part = "restricted" if restricted(key) else "public"
+        _place(_safe(raw_dir, rec.dest), _safe(out / part, rec.dest))
+        parts[part].append(key)
+    n_docs = 0
+    if DOCS_INDEX_KEY in manifest:
+        for rec in read_index(_safe(raw_dir, manifest[DOCS_INDEX_KEY].dest)).values():
+            _place(_safe(raw_dir, rec["dest"]), _safe(out / "public", rec["dest"]))
+            n_docs += 1
+    for part, keys in parts.items():
+        (out / part / "KEYS.txt").write_text("".join(k + "\n" for k in keys), encoding="utf-8")
+    log(
+        f"{len(parts['public'])} MANIFEST files and {n_docs} 10-K documents -> {out / 'public'}; "
+        f"{len(parts['restricted'])} MANIFEST files -> {out / 'restricted'}"
+    )
+    return parts

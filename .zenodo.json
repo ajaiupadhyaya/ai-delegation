@@ -1,0 +1,9 @@
+{
+  "title": "Delegating to the Machine: replication package",
+  "upload_type": "software",
+  "creators": [{"name": "Upadhyaya, Ajai"}],
+  "description": "Code, pre-analysis plan, results and paper for Delegating to the Machine. The raw data are not in the git repository; the redistributable raw files are uploaded to this record as data-public, built by `uv run python -m aideleg.acquire --build-deposit OUT`. The French Data Library and AIOE files, whose sources state no licence, are deposited in a separate restricted record, available on request for replication. See README.md.",
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": ["Anthropic Economic Index", "task delegation", "pre-registration", "industry returns", "replication package"]
+}

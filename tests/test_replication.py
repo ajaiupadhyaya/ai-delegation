@@ -131,6 +131,45 @@ def test_from_dir_refuses_its_own_raw_dir(tmp_path):
         seed.from_dir(raw, raw_dir=raw)
 
 
+def test_build_deposit_splits_by_terms_and_round_trips(tmp_path):
+    docs = {"0000000001-24-000001": b"<html>one</html>"}
+    src, raw, lines = _docs_archive(tmp_path, docs)
+    zip_dest = sources.by_key(ZIP_KEY).dest
+    extra = {ZIP_KEY: (zip_dest, _zip_bytes({"a.csv": b"a\n"})),
+             "aioe": ("benchmarks/aioe.xlsx", b"aioe"),
+             TEXT_KEY: (sources.by_key(TEXT_KEY).dest, b"x,y\n")}
+    records = fetch.load_manifest(raw)
+    for key, (dest, body) in extra.items():
+        (src / dest).parent.mkdir(parents=True, exist_ok=True)
+        (src / dest).write_bytes(body)
+        records[key] = _record(key, dest, body)
+    fetch.write_manifest(raw, records)
+    assert seed.from_dir(src, raw_dir=raw) == []
+
+    out = tmp_path / "deposit"
+    parts = seed.build_deposit(out, raw_dir=raw)
+    assert parts == {"public": ["aei_r1_wage", "sec_docs_index"], "restricted": ["aioe", ZIP_KEY]}
+    assert (out / "restricted" / zip_dest).is_file()
+    assert not (out / "public" / zip_dest).exists()
+    assert (out / "public" / lines[0]["dest"]).is_file()
+
+    # the two parts unpacked into one directory are the frozen archive from_dir reads
+    merged = tmp_path / "merged"
+    shutil.copytree(out / "public", merged)
+    shutil.copytree(out / "restricted", merged, dirs_exist_ok=True)
+    raw2 = tmp_path / "raw2"
+    raw2.mkdir()
+    fetch.write_manifest(raw2, records)
+    assert seed.from_dir(merged, raw_dir=raw2) == []
+
+    with pytest.raises(ValueError, match="not empty"):
+        seed.build_deposit(out, raw_dir=raw)
+    (raw / sources.by_key(TEXT_KEY).dest).write_bytes(b"edited\n")
+    with pytest.raises(ValueError, match=TEXT_KEY):
+        seed.build_deposit(tmp_path / "deposit2", raw_dir=raw)
+    assert not (tmp_path / "deposit2").exists()
+
+
 def test_check_download_reports_without_touching_raw(tmp_path, monkeypatch):
     same, revised = b"unchanged\n", b"revised\n"
     _, raw = _archive(

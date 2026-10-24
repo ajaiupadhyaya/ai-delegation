@@ -609,6 +609,10 @@
   },
   "meta": {
     "date": "2026-10-24",
+    "licence": {
+      "code": "MIT License",
+      "text": "CC BY 4.0"
+    },
     "wording": "AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market."
   },
   "pap": {

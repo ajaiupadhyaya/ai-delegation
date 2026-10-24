@@ -33,6 +33,13 @@ single logged run of H1–H4 (`docs/results/rq1/confirmatory_rq1.*`) and the sin
 run of H5/H5b (`docs/results/confirmatory_h5.md` and `.attempt`). Both were committed once and
 are never re-executed (see Instructions to Replicators).
 
+The paper's Statements section records the use of AI tools and the author's declaration of
+interests. In short: the code, analysis and drafts were produced with Claude (Anthropic)
+running in Claude Code under the author's direction; the author set the research questions and
+hypotheses, signed the pre-analysis plan and approved every deviation. The author has no
+employment, funding, consulting or equity relationship with Anthropic, OpenAI or any other AI
+developer, and holds no position in the industry portfolios studied beyond broad index funds.
+
 ## Data Availability and Provenance Statements
 
 ### Statement about Rights
@@ -46,6 +53,33 @@ The second box is not checked because this repository redistributes no raw data:
 is downloaded from its original source by `make data`, and only `data/raw/MANIFEST.json` (URL,
 retrieval time, size and SHA-256 of each file) is committed. Each source's own terms are quoted
 below.
+
+### License for Code
+
+The code (`src/`, `scripts/`, `tests/`, the `Makefile` and the Quarto configuration) is
+licensed under the MIT License (`LICENSE`).
+
+### License for Data
+
+The paper, the brief, the pre-analysis plan, the results and the other documentation are
+licensed under CC BY 4.0 (`LICENSE-text.md`). The raw data are not covered by either licence:
+each source keeps its own terms, quoted below, and every figure or table built from a source
+carries that source's attribution.
+
+### Archive deposit
+
+The frozen raw archive is deposited at Zenodo in two records, built from `data/raw` by
+`uv run python -m aideleg.acquire --build-deposit OUT` (`OUT/public`, `OUT/restricted`):
+
+- **Public record:** this repository at its release tag together with every raw file whose
+  source allows redistribution: the AEI, O\*NET, BLS, Census, SEC EDGAR (including the 10-K
+  documents of `INDEX.jsonl`), Natural Earth and Eloundou et al. files.
+- **Restricted record (access on request):** the Kenneth R. French Data Library files and AIOE,
+  whose pages state no licence (below). They are shared on request for replication only.
+
+To restore the archive, unpack both records' raw parts into one directory `DIR` and run
+`uv run python -m aideleg.acquire --from-dir DIR`. The DOIs are added here when the records are
+published.
 
 ### Summary of Availability
 
@@ -334,7 +368,8 @@ All code is in the Python package `src/aideleg/`; `make` targets drive it.
    protocol guards read git. They check that each confirmatory file is tracked and unmodified at
    HEAD, that it matches its pinned blob, and which commit recorded it.
 2. **Get the raw data.** Either run `make data`, which downloads every file and reports any
-   whose SHA-256 differs from the MANIFEST, or restore the frozen raw archive with
+   whose SHA-256 differs from the MANIFEST, or restore the frozen raw archive (see Archive
+   deposit) with
    `uv run python -m aideleg.acquire --from-dir DIR`, which copies each file from `DIR/<dest>`,
    checks its SHA-256 (and each 10-K document against `INDEX.jsonl`) and refuses, naming it, any
    file that differs. The French files are revised retroactively, so exact replication needs

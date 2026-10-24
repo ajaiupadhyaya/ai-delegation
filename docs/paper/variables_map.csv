@@ -3042,3 +3042,5 @@ rq3.eisfeldt.step1.ci_lo,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z
 rq3.eisfeldt.step1.ci_hi,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[-?\d+\.\d+, (-?\d+\.\d+)\]",pp2
 rq3.eisfeldt.step1.p,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = .*?, p = (\d\.\d+), n =",p3
 meta.wording,docs/results/rq1/README.md,regex=^(AEI data are conversations matched to O\*NET tasks\. Nothing here says .*)$,text
+meta.licence.code,LICENSE-text.md,"regex=^licensed under the (MIT License) in `LICENSE`\.$",text
+meta.licence.text,LICENSE-text.md,regex=International License \((CC BY 4\.0)\),text
