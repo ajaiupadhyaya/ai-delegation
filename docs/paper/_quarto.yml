@@ -27,9 +27,27 @@ format:
     mathfont: texgyrepagella-math.otf
     number-sections: true
     toc: true
+    # the appendices quote PAP §11 verbatim, one level-3 heading per entry: keep them out of the TOC
+    toc-depth: 2
     colorlinks: true
+    # Task 21: the wide robustness and data tables are set landscape; long identifiers may break
+    # after an underscore; subscript and superscript digits missing from Pagella are typeset
+    include-in-header:
+      text: |
+        \usepackage{pdflscape}
+        \renewcommand{\_}{\textunderscore\allowbreak}
+        \usepackage{newunicodechar}
+        \newunicodechar{₀}{\textsubscript{0}}
+        \newunicodechar{₁}{\textsubscript{1}}
+        \newunicodechar{₂}{\textsubscript{2}}
+        \newunicodechar{₃}{\textsubscript{3}}
+        \newunicodechar{₄}{\textsubscript{4}}
+        \newunicodechar{₉}{\textsubscript{9}}
+        \newunicodechar{⁴}{\textsuperscript{4}}
+        \newunicodechar{⁻}{\textsuperscript{\textendash}}
     keep-tex: false
   html:
     toc: true
+    toc-depth: 2
     number-sections: true
     embed-resources: true
