@@ -125,7 +125,6 @@ def test_challenges_columns_and_values():
         assert r["resolution"] in hl.RESOLUTIONS or _FIX.match(r["resolution"]), r
 
 
-@pytest.mark.xfail(strict=True, reason="filled by the Task 16 review")
 def test_every_headline_challenged():
     keys = [r["key"] for r in _rows(HEADLINES)]
     rows = _rows(CHALLENGES_CSV)
