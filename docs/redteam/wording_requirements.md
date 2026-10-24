@@ -142,4 +142,73 @@ block, which `power._write` writes before the hand-written interpretation) and
 rerun (PAP §11 C-81).
 Rows: `d11.primary_mde C1`, `d3.zero_assigned_pct C1` (label fixed, C-81).
 
+## Task 31: the variables of the abstract, the brief, §1 and §10
+
+These items come from the Task 31 challenge of the 63 headline keys that
+`headlines.scan_headlines()` added (status "declared (Task 31)" in `headlines.csv`). They bind
+the prose fixes that follow the Task 31 claims review. The page budget (References on p.45)
+and the abstract's 200 words are constraints on how, not on whether, each item is met; where
+they conflict the controller decides and records the ruling.
+
+**W-18. Market non-rejections in the abstract and the brief.** "H5 is not rejected" and "H5b is
+not rejected" are never written without their H0, for the reason of W-1. The Global Constraints
+(plan, "Nulls get the same prominence") require the P14 wording verbatim
+(`{{< var rq3.h5.wording >}}`, `{{< var rq3.h5b.wording >}}`), which also puts each MDE beside
+its null. Where the abstract cannot hold both sentences, it says at least that the null of no
+departure from the 1990–2022 pattern (b = b̄) is not rejected for either, and prints H5b's MDE
+(`rq3.h5b.mde`) beside H5b as it prints H5's.
+Rows: `rq3.h5.decision_text C10`, `rq3.h5b.decision_text C10`, `rq3.h5b.decision_text C11`.
+
+**W-19. The S1 timing caveat beside the market results of the abstract and the brief.** W-9
+applies to the decisions and slopes printed there. The abstract names R32 as the strict
+real-time row (or says "not strictly real-time"). The brief's RQ3 paragraph says, beside H5 and
+H5b, that the OEWS May 2024 weights were released after formation and inside the return window
+and that the O*NET 29.3 links postdate formation; the RQ2 paragraph's sentence does not reach
+the RQ3 numbers.
+Rows: `C3` of `rq3.h5.decision_text`, `rq3.h5b.decision_text` and the six `rq3.h5*_pp2` keys.
+
+**W-20. Labels on diagnostic and robustness numbers.** The conclusion labels the leave-out-r2 β
+"post-result diagnostic (PAP §11 D-3); exploratory; not a decision", as the introduction does
+(W-5). The brief labels the balanced-panel drops descriptive (W-4) and names R3 as the
+pre-registered robustness row that drops the unpublished occupations.
+Rows: `diag.h2.leave_out_release_r2.beta C5`, `diag.h2.balancing_removed.n_tasks C5`,
+`diag.h2.balancing_removed.usage_share_pct C5`, `rob.r03.spearman_z_eloundou_vs_z_delegation.estimate C5`.
+
+**W-21. Uncertainty beside robustness and diagnostic estimates.** Where prose quotes a
+robustness or diagnostic estimate it gives its interval or p from the generated file, or points
+to the table that does. R3's ρ has an industry-bootstrap interval (`R03.csv`), R32's slopes have
+intervals and p (`R32.csv`; both non-rejections), and the leave-out-r2 β has a release-level wild
+p (`h2_influence.md`) that is far from any level: a sign reversal without it overstates the
+diagnostic.
+Rows: `rob.r03.spearman_z_eloundou_vs_z_delegation.estimate C11`, `rob.r32.h5.estimate C11`,
+`rob.r32.h5b.estimate C11`, `diag.h2.leave_out_release_r2.beta C11`.
+
+**W-22. The seal date is not the test window.** The introduction's third contribution says the
+paper tests whether repricing "since the launch of ChatGPT" on the seal date lines up with
+delegation. The test reads returns only in the 2025-04-01 to 2026-08-31 window, after Design B's
+formation (PAP §3.1; `confirmatory_h5.md`). The seal date bounds the pre-seal history from which
+b̄ and s come. The sentence says so, or names the window.
+Row: `design.seal_date C2`.
+
+**W-23. The log-unit gloss.** W-17's "(= 100 log points)" is not printed beside the
+log-regressor coefficients and intervals in §1, §10 or the brief (the integration pass dropped
+it under the no-digit rule). It is restored in words ("a hundred log points") or by a variable.
+Rows: `C6` of `rq1.h1.log_wage.ci_low`, `rq1.h1.log_wage.ci_high`, `rq1.h4.log_aui.ci_low`,
+`rq1.h4.log_aui.ci_high`, `rq1.h4.log_income.ci_low`, `rq1.h4.log_income.ci_high`.
+
+**T-2. Task 33 rebuilds what it compares.** `make all` regenerates none of
+`docs/results/diagnostics/` (`python -m aideleg.robustness --diagnostics`, D-3),
+`docs/pap/power.md`'s generated block or `docs/audit/tables/` (`make audit`), so comparing them
+in a fresh clone (T-1) would compare the committed bytes with themselves. Task 33 adds those
+steps to `make all`. A scratch rerun of the diagnostics on 2026-10-24 reproduced every `.md`
+and two of the three `.csv` byte for byte; `h2_influence.csv` differed only in the last digit
+of `balancing_removed.usage_share_pct` (5.388848255183692 against the committed
+…691), summation-order noise of the kind C-80 covers for robustness CSVs. C-80 does not name the
+diagnostics, so Task 33 records the tolerance for them in PAP §11 (a clarification) or makes
+the sum order-stable.
+Rows: `C1` of `diag.h2.balancing_removed.n_tasks`, `diag.h2.balancing_removed.usage_share_pct`,
+`diag.h2.leave_out_release_r2.beta`, and of the power.md and audit-table keys
+(`power.mde_over_s`, `design.window.months`, `design.alpha.h5_first`, `design.alpha.h5_second`,
+`vintage.oews.primary`, `vintage.onet.primary`).
+
 AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market.
