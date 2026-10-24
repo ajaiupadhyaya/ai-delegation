@@ -15,6 +15,7 @@ import polars as pl
 from aideleg.config import ROOT
 from aideleg.results.common import check_text, write_csv
 from aideleg.robustness import registry, upstream
+from aideleg.robustness.reproduce import csv_equivalent
 
 ROBUSTNESS_COLUMNS = [
     "row_id",
@@ -133,6 +134,22 @@ def _table(records: list[dict]) -> list[str]:
     return lines
 
 
+def write_csv_reproducing(
+    df: pl.DataFrame, csv_path: Path, *, previous: bytes | None, md_unchanged: bool
+) -> None:
+    """Write `df` to `csv_path`, unless the row's `.md` is unchanged and `df` reproduces the
+    `previous` CSV bytes within the PAP §11 C-80 tolerance: then `previous` is kept."""
+    if (
+        previous is not None
+        and md_unchanged
+        and csv_equivalent(previous, df.write_csv(float_precision=None))
+    ):
+        if not csv_path.exists() or csv_path.read_bytes() != previous:
+            csv_path.write_bytes(previous)
+        return
+    write_csv(df, csv_path)
+
+
 def write_row(
     row_id: str,
     records: list[dict],
@@ -143,7 +160,10 @@ def write_row(
 ) -> tuple[Path, Path]:
     """Write `R<nn>.csv` and `R<nn>.md` for a Plan 4 row of the registry. Refuses a record
     whose keys differ from `ROBUSTNESS_COLUMNS`, an empty record list and an unknown row.
-    `label_text`, if given, replaces the default comma-joined label list of the header."""
+    `label_text`, if given, replaces the default comma-joined label list of the header.
+    If both files exist, the `.md` is byte-identical and the CSV reproduces the existing one
+    within the PAP §11 C-80 tolerance (`reproduce.csv_equivalent`), the existing CSV bytes are
+    kept, so a re-run leaves the tree clean; otherwise both are written."""
     if row_id not in registry.ROWS or registry.ROWS[row_id].owner != "plan4":
         raise ValueError(f"{row_id} is not a Plan 4 row of the PAP §8.2 registry")
     if not records:
@@ -177,6 +197,10 @@ def write_row(
     df = pl.DataFrame(
         [{k: r[k] for k in ROBUSTNESS_COLUMNS} for r in records], infer_schema_length=None
     )
-    write_csv(df.select(ROBUSTNESS_COLUMNS), csv_path)
+    previous = csv_path.read_bytes() if csv_path.exists() else None
+    md_unchanged = md_path.exists() and md_path.read_text(encoding="utf-8") == text
+    write_csv_reproducing(
+        df.select(ROBUSTNESS_COLUMNS), csv_path, previous=previous, md_unchanged=md_unchanged
+    )
     md_path.write_text(text, encoding="utf-8")
     return csv_path, md_path

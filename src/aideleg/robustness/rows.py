@@ -1436,9 +1436,14 @@ def _write(
     by_part: bool = False,
 ):
     """`write_row` with the RQ1 coefficients labelled in the `.md` table only; the CSV is then
-    rewritten from the unlabelled records, so it keeps `estimand` and the plain notes (C-78).
+    rewritten from the unlabelled records, so it keeps `estimand` and the plain notes (C-78),
+    keeping the previous CSV bytes under the C-80 rule (`report.write_csv_reproducing`).
     `by_part` writes the header's label line by part (R23, PAP §11 C-79)."""
     out = OUT_DIR if out_dir is None else out_dir
+    stem = Path(out) / registry.output_stem(row_id)
+    old_csv, old_md = stem.with_suffix(".csv"), stem.with_suffix(".md")
+    previous = old_csv.read_bytes() if old_csv.exists() else None
+    previous_md = old_md.read_text(encoding="utf-8") if old_md.exists() else None
     labelled = [_md_label(r) for r in records]
     csv_path, md_path = report.write_row(
         row_id,
@@ -1450,7 +1455,12 @@ def _write(
     df = pl.DataFrame(
         [{k: r[k] for k in report.ROBUSTNESS_COLUMNS} for r in records], infer_schema_length=None
     )
-    report.write_csv(df.select(report.ROBUSTNESS_COLUMNS), csv_path)
+    report.write_csv_reproducing(  # PAP §11 C-80
+        df.select(report.ROBUSTNESS_COLUMNS),
+        csv_path,
+        previous=previous,
+        md_unchanged=previous_md == md_path.read_text(encoding="utf-8"),
+    )
     return csv_path, md_path
 
 
