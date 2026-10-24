@@ -1,0 +1,57 @@
+---
+title: "Delegating to the Machine: How People Hand Work to AI, and Whether Equity Markets Priced It"
+author: "Ajai Upadhyaya"
+date: "{{< var meta.date >}}"
+---
+
+
+# Abstract {.unnumbered}
+
+{{< include sections/00-abstract.qmd >}}
+
+# Executive brief {.unnumbered}
+
+{{< include brief_body.qmd >}}
+
+{{< include sections/01-introduction.qmd >}}
+
+{{< include sections/02-related-literature.qmd >}}
+
+{{< include sections/03-data-and-measurement.qmd >}}
+
+{{< include sections/04-preregistration-and-methods.qmd >}}
+
+{{< include sections/05-behaviour.qmd >}}
+
+{{< include sections/06-bridge.qmd >}}
+
+{{< include sections/07-market-evidence.qmd >}}
+
+{{< include sections/08-robustness.qmd >}}
+
+{{< include sections/09-limitations.qmd >}}
+
+{{< include sections/10-conclusion.qmd >}}
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+```{=latex}
+\appendix
+```
+
+::: {.appendix}
+
+{{< include appendix/a-preregistration.qmd >}}
+
+{{< include appendix/b-deviations.qmd >}}
+
+{{< include appendix/c-disclosures.qmd >}}
+
+{{< include appendix/d-robustness.qmd >}}
+
+{{< include appendix/e-data-replication.qmd >}}
+
+:::

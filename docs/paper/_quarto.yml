@@ -1,0 +1,32 @@
+project:
+  type: default
+  output-dir: _output
+
+bibliography: references.bib
+
+execute:
+  enabled: false
+
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    fontsize: 11pt
+    geometry: margin=1in
+    linestretch: 1.15
+    # TeX Gyre Pagella, loaded by file name: it sits in the TeX Live tree but is
+    # not registered with fontconfig, so the family name does not resolve.
+    mainfont: texgyrepagella-regular.otf
+    mainfontoptions:
+      - BoldFont=texgyrepagella-bold.otf
+      - ItalicFont=texgyrepagella-italic.otf
+      - BoldItalicFont=texgyrepagella-bolditalic.otf
+    mathfont: texgyrepagella-math.otf
+    number-sections: true
+    toc: true
+    colorlinks: true
+    keep-tex: false
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true

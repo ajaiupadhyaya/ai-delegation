@@ -1,0 +1,13 @@
+file,min_words,max_words
+sections/00-abstract.qmd,150,200
+sections/01-introduction.qmd,1600,2000
+sections/02-related-literature.qmd,1400,1800
+sections/03-data-and-measurement.qmd,2000,2500
+sections/04-preregistration-and-methods.qmd,2000,2500
+sections/05-behaviour.qmd,2000,2600
+sections/06-bridge.qmd,1200,1600
+sections/07-market-evidence.qmd,1800,2300
+sections/08-robustness.qmd,800,1200
+sections/09-limitations.qmd,900,1200
+sections/10-conclusion.qmd,500,700
+brief_body.qmd,700,900

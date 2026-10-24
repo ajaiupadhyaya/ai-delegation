@@ -28,10 +28,14 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pypdf>=6.21.2",
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["data: needs built data under data/ (e.g. `make panel`)"]
+markers = [
+    "data: needs built data under data/ (e.g. `make panel`)",
+    "slow: renders the full paper (Quarto + XeLaTeX)",
+]

@@ -119,3 +119,12 @@ figures-check:
 		pdf = {p.stem for p in d.glob('*.pdf')}; png = {p.stem for p in d.glob('*.png')}; \
 		odd = sorted(pdf ^ png); print('figures without a PDF/PNG twin:', odd) if odd else None; \
 		raise SystemExit(1 if odd else 0)"
+
+# the paper and the executive brief (Quarto; XeLaTeX for PDF). No code runs at render.
+.PHONY: paper brief
+paper:
+	quarto render docs/paper --to pdf
+	quarto render docs/paper --to html
+
+brief:
+	quarto render docs/paper/brief.qmd --to pdf
