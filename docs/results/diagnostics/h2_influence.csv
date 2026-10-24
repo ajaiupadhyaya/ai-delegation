@@ -1,0 +1,7 @@
+part,dropped,releases,n_tasks,n_rows,usage_share_pct,beta,se,p_cluster,p_wild,n_wild_draws,note
+primary,none,r2 r3 r4 r5,1315,5260,,4.979177595216438,1.1585652925995158,0.00001852981565286751,0.9274691358024691,1296,smallest attainable wild bootstrap p = 6/1296
+leave_out_release,r2,r3 r4 r5,1315,3945,,-6.548268466812859,1.4493984767282413,6.80599374408604e-6,0.2037037037037037,216,smallest attainable wild bootstrap p = 6/216
+leave_out_release,r3,r2 r4 r5,1315,3945,,5.953999126695587,1.2297523860894917,1.4404714951738269e-6,0.12962962962962962,216,smallest attainable wild bootstrap p = 6/216
+leave_out_release,r4,r2 r3 r5,1315,3945,,5.215526106258999,1.146615181312582,5.898006667085494e-6,0.8055555555555556,216,smallest attainable wild bootstrap p = 6/216
+leave_out_release,r5,r2 r3 r4,1315,3945,,8.440457430357396,1.5336563138366295,4.471921670578168e-8,0.6481481481481481,216,smallest attainable wild bootstrap p = 6/216
+balancing_removed,tasks with a value in some but not all of the releases,r2 r3 r4 r5,890,2285,5.388848255183691,,,,,,of 2205 tasks and 7545 rows in build_h2_panel(balanced=False); usage share = their fixed task weight in percent of that panel's task weight

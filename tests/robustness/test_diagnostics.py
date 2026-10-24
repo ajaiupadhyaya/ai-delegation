@@ -210,3 +210,30 @@ def test_cli_diagnostics_flag(monkeypatch, capsys, tmp_path):
     monkeypatch.setattr(dg, "write_all", lambda: [p])
     cli.main(["--diagnostics"])
     assert capsys.readouterr().out.strip() == str(p)
+
+
+# --- the committed outputs -----------------------------------------------------------------
+
+
+@pytest.mark.parametrize("stem", ["h1_influence", "h2_influence", "h6_influence"])
+def test_committed_diagnostics_are_labelled(stem):
+    md = (dg.OUT_DIR / f"{stem}.md").read_text(encoding="utf-8")
+    assert dg.TAG in md.splitlines()[0] and dg.LABEL in md
+    assert md.rstrip("\n").splitlines()[-1] == upstream.WORDING
+    check_text(md)
+    df = pl.read_csv(dg.OUT_DIR / f"{stem}.csv")
+    assert df["part"][0] == "primary" and df["dropped"][0] == "none"
+
+
+def test_committed_diagnostics_primaries_are_the_committed_estimates():
+    rec = upstream.committed_rq1()["results"]
+    h1 = pl.read_csv(dg.OUT_DIR / "h1_influence.csv").row(0, named=True)
+    assert math.isclose(h1["beta_w"], rec["H1"]["coefs"]["log_wage"]["estimate"], rel_tol=1e-9)
+    assert math.isclose(h1["p_H1"], rec["H1"]["p_family"], rel_tol=1e-9)
+    h2 = pl.read_csv(dg.OUT_DIR / "h2_influence.csv").row(0, named=True)
+    assert math.isclose(h2["beta"], rec["H2"]["coefs"]["trend"]["estimate"], rel_tol=1e-9)
+    assert math.isclose(h2["p_wild"], rec["H2"]["diagnostics"]["p_wild"], rel_tol=1e-9)
+    h6 = pl.read_csv(dg.OUT_DIR / "h6_influence.csv").row(0, named=True)
+    assert f"| {h6['rho']:.3f} | [{h6['ci_lo']:.3f}, {h6['ci_hi']:.3f}] |" in (
+        upstream.H6_DIR / "gap.md"
+    ).read_text(encoding="utf-8")
