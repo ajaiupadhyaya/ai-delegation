@@ -2246,6 +2246,12 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, the Task 11 rows, and the Task 12 rows R22, R23, R36, R37 (f8ea9d1) seen
 - Rule: (1) R37 leaves out r6 tasks whose mean pct over April and May is 0 (r6 task pct is published rounded to 0.01 and shows 0.00 in both months), as D13 and C-30 (b) do for H1/H3 and as Plan 2's H2 builder does (a zero-usage task-release has no D13 value). Such tasks carry no weight in the WLS fit; n_tasks, G_task and the df (G_task − 1) count tasks with positive weight. With these data 1,141 tasks are left out and 1,133 kept. A task-month whose metric is published but whose pct is null counts as pct 0 in the fixed task weight. (2) Presentation only: R23's H2 record names its estimand in ai_autonomy_mean scale points per year (it said pp), and R23.md's label line separates the H1 and H2 labels by part; every numeric column of R23.csv stays byte-identical to f8ea9d1.
 
+### C-80. Clarification: Reproduction tolerance for robustness CSVs (2026-10-24)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 15 (plans committed at a7fb9bd)
+- Results seen: RQ1 and H5 confirmatory results, all Plan 3 results, and every Plan 4 row R1–R38 seen
+- Rule: A re-run of the Plan 4 rows reproduces every .md byte for byte, but three CSVs differ in the last float digits from run to run: R28 (relative ~9e-12; Plan 2's bound rq1/h4._mix sums after an unordered group_by, C-32), R15 (~1e-15; the crosswalk's hq_shares unordered group_by sum) and R29 float_weighted (~2e-15; an unordered group_by sum). These are summation-order noise, not a code or input change, and no printed number moves. Rule: a regenerated robustness CSV counts as reproducing the committed one when every non-numeric cell is identical and every numeric cell agrees within relative 1e-9 (absolute 1e-12 near zero); in that case the committed bytes are kept, so a re-run leaves the tree clean. A .md must still match byte for byte. The same rule applies to these CSVs in the fresh-clone check (Task 33). No estimate, specification or committed output changes; the bound Plan 2 code is not edited.
+
 ### Deviations after the freeze
 
 ### D-1. Deviation: H6 secondary: two truncated 10-K primary documents fetched again (data-integrity correction) (2026-10-23)
