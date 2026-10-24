@@ -105,6 +105,14 @@ h6-data:
 h6: data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.h6 all
 
+# Plan 4 robustness rows (PAP §8.2), offline: every Plan 4 row, then the appendix summary,
+# implementation choices and forest figures. Never runs a confirmatory script or a network fetch;
+# a reproduced CSV keeps its committed bytes (PAP §11 C-80).
+.PHONY: robustness
+robustness: data/derived/exposure_ff49.parquet
+	uv run python -m aideleg.robustness --offline
+	uv run python -m aideleg.robustness --summary
+
 # fails if a figure has a PDF without a PNG, or the reverse
 figures-check:
 	@uv run python -c "from pathlib import Path; d = Path('docs/paper/figures'); \

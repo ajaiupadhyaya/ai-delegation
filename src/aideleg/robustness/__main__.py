@@ -1,7 +1,8 @@
 """`python -m aideleg.robustness [--only R01 R17 ...] [--offline]`: run the listed PAP §8.2 rows,
 or every Plan 4 row that has a runner, in registry order. Row names are accepted as `R1` or `R01`.
-`--offline` sets `rows.OFFLINE`: the H6 rows never fetch, and saved full-text-search responses
-that do not cover a request raise instead."""
+`--summary` writes only the appendix (`summary.md`, `implementation_choices.md`) and the two
+forest figures from the committed row files. `--offline` sets `rows.OFFLINE`: the H6 rows
+never fetch, and saved full-text-search responses that do not cover a request raise instead."""
 
 import argparse
 import sys
@@ -27,7 +28,16 @@ def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="python -m aideleg.robustness")
     ap.add_argument("--only", nargs="+", metavar="ROW", help="rows to run, e.g. R01 R17")
     ap.add_argument("--offline", action="store_true", help="never fetch; use saved responses only")
+    ap.add_argument(
+        "--summary", action="store_true", help="write the appendix and figures; run no row"
+    )
     args = ap.parse_args(argv)
+    if args.summary:
+        from aideleg.robustness import appendix, figures
+
+        for path in (*appendix.write_appendix(), *figures.write_figures()):
+            print(path, flush=True)
+        return
     rows.OFFLINE = args.offline
     ids = _resolve(args.only) if args.only else [r for r in registry.ROWS if r in rows.RUNNERS]
     for rid in ids:
