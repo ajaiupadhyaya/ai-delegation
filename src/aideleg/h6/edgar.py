@@ -573,7 +573,7 @@ def hits_from_saved(
     from aideleg.h6.dictionary import fts_phrases
 
     names = _phrase_names(phrases)
-    wanted = {_slug(p) for p in phrases} if phrases is not None else None
+    wanted = {_slug(p) for p in (phrases if phrases is not None else fts_phrases())}
     ranges = {k: v for k, v in _saved_pages().items() if wanted is None or k[2] in wanted}
     if strict:
         req = list(phrases) if phrases is not None else fts_phrases()

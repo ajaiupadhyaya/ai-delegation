@@ -403,6 +403,20 @@ def test_hits_from_saved_default_window_is_every_year_and_phrase(monkeypatch, tm
     assert edgar.hits_from_saved(strict=False).height == 9000
 
 
+def test_hits_from_saved_default_excludes_extra_saved_phrases(monkeypatch, tmp_path: Path):
+    """PAP §11 D-2: phrases=None means fts_phrases(); a saved phrase outside it (R30's
+    "robotics") never enters the default frame, but is read when asked for by name."""
+    _save_split(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        fetch, "_download", _saving_download(FakeFts({("2024-01-01", "2024-12-31"): (150, "eq")}))
+    )
+    edgar.fts_hits("robotics", Y0, Y1)
+    default = edgar.hits_from_saved(strict=False)
+    assert set(default["phrase"].to_list()) == {"artificial intelligence"}
+    assert default.height == 9000
+    assert edgar.hits_from_saved(["robotics"], Y0, Y1).height == 150
+
+
 def test_hits_from_saved_strict_passes_when_covered(monkeypatch, tmp_path: Path):
     _save_split(monkeypatch, tmp_path)
     got = edgar.hits_from_saved(["artificial intelligence"], date(2024, 6, 1), date(2024, 8, 1))
@@ -419,6 +433,7 @@ def test_hits_from_saved_strict_default_equals_the_derived_parquet(monkeypatch):
     monkeypatch.setattr(edgar, "_get_json", no_network)
     assert edgar.hits_from_saved().equals(pl.read_parquet(edgar.FTS_HITS))
     r = edgar.saved_ranges()
-    assert set(r["phrase"].to_list()) == set(
-        __import__("aideleg.h6.dictionary", fromlist=["fts_phrases"]).fts_phrases()
+    # PAP §11 D-2: the MANIFEST may also hold other phrases (A-47: R30's automation, robotics)
+    assert set(__import__("aideleg.h6.dictionary", fromlist=["fts_phrases"]).fts_phrases()) <= set(
+        r["phrase"].to_list()
     )
