@@ -178,5 +178,7 @@ def test_fixes_have_deviation_entries():
 
         assert field("Before"), f"{ident}: empty Before"
         assert field("After"), f"{ident}: empty After"
-        assert field("Results seen") == "yes", f"{ident}: Results seen is not yes"
+        # "yes" alone, or "yes: <what was seen>" (D-3)
+        seen = field("Results seen")
+        assert re.match(r"yes(?::|$)", seen), f"{ident}: Results seen is not yes"
         assert field("Approved by Ajai"), f"{ident}: not approved by Ajai"

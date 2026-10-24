@@ -1,8 +1,10 @@
 """`python -m aideleg.robustness [--only R01 R17 ...] [--offline]`: run the listed PAP §8.2 rows,
 or every Plan 4 row that has a runner, in registry order. Row names are accepted as `R1` or `R01`.
 `--summary` writes only the appendix (`summary.md`, `implementation_choices.md`) and the two
-forest figures from the committed row files. `--offline` sets `rows.OFFLINE`: the H6 rows
-never fetch, and saved full-text-search responses that do not cover a request raise instead."""
+forest figures from the committed row files. `--diagnostics` writes only the post-result
+influence diagnostics of PAP §11 D-3 (`docs/results/diagnostics/`). `--offline` sets
+`rows.OFFLINE`: the H6 rows never fetch, and saved full-text-search responses that do not cover
+a request raise instead."""
 
 import argparse
 import sys
@@ -31,7 +33,18 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument(
         "--summary", action="store_true", help="write the appendix and figures; run no row"
     )
+    ap.add_argument(
+        "--diagnostics",
+        action="store_true",
+        help="write the PAP §11 D-3 influence diagnostics; run no row",
+    )
     args = ap.parse_args(argv)
+    if args.diagnostics:
+        from aideleg.robustness import diagnostics
+
+        for path in diagnostics.write_all():
+            print(path, flush=True)
+        return
     if args.summary:
         from aideleg.robustness import appendix, figures
 

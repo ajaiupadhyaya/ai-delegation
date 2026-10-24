@@ -24,18 +24,19 @@ from aideleg.h6.dictionary import PRIMARY_TERMS, fts_phrases
 from aideleg.h6.edgar import (
     FILERS,
     FORMS,
+    FTS_HITS,
     denominator,
     fts_hits,
     hits_from_saved,
     numerator,
     saved_ranges,
 )
-from aideleg.h6.talk import T_YEAR, gap, gap_returns, spearman_ci, talk_table
+from aideleg.h6.talk import T_YEAR, gap, gap_returns, spearman_ci, t_index, talk_table
 from aideleg.results.common import FORBIDDEN_PHRASES, WORDING
 from aideleg.rq1.confirm import Inputs, load_inputs
 from aideleg.rq1.family import holm
 from aideleg.rq1.h1h3 import estimate_h1, estimate_h3
-from aideleg.rq1.h2 import build_h2_panel, estimate_h2
+from aideleg.rq1.h2 import H2_RELEASES, build_h2_panel, estimate_h2
 from aideleg.rq1.h4 import GeoSample, build_geo_sample, estimate_h4
 from aideleg.rq1.inputs import task_families, two_month_mean
 from aideleg.rq1.result import Coef, HypothesisResult
@@ -138,6 +139,8 @@ __all__ = [
     "EVENTS",
     "FORBIDDEN_PHRASES",
     "FORMS",
+    "FTS_HITS",
+    "H2_RELEASES",
     "H6_DIR",
     "PRIMARY_TERMS",
     "RQ1_DIR",
@@ -185,6 +188,7 @@ __all__ = [
     "saved_ranges",
     "spearman_bootstrap",
     "spearman_ci",
+    "t_index",
     "talk_table",
     "task_families",
     "task_rows",
