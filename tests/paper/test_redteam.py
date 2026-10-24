@@ -14,6 +14,8 @@ REDTEAM = ROOT / "docs/redteam"
 HEADLINES = REDTEAM / "headlines.csv"
 CHALLENGES_CSV = REDTEAM / "challenges.csv"
 _FIX = re.compile(r"^fix logged as (D-\d+)$")
+CLAIM_PREFIX = "claim:"
+_CLAIM = re.compile(r"^claim:[0-9a-z_-]+:(\d+|all)$")
 
 
 def _rows(path) -> list[dict]:
@@ -157,7 +159,8 @@ def test_challenges_columns_and_values():
 
 def test_every_headline_challenged():
     keys = [r["key"] for r in _rows(HEADLINES)]
-    rows = _rows(CHALLENGES_CSV)
+    # the claims review's pseudo-keys (Task 31) are checked in test_claim_rows
+    rows = [r for r in _rows(CHALLENGES_CSV) if not r["key"].startswith(CLAIM_PREFIX)]
     seen: dict[tuple[str, str], int] = {}
     for r in rows:
         seen[(r["key"], r["challenge"])] = seen.get((r["key"], r["challenge"]), 0) + 1
@@ -171,6 +174,21 @@ def test_every_headline_challenged():
         f"(first: {missing[:3]}); {len(twice)} duplicated; {len(extra)} unknown; "
         f"{len(empty)} with an empty check or evidence"
     )
+
+
+def test_claim_rows():
+    """Task 31's claims review: one row per finding under `claim:<section stem>:<line>` (or
+    `claim:<stem>:all` for a section read in full), challenge C5 or C10, check and evidence
+    filled; a failing claim names the commit that fixed it."""
+    rows = [r for r in _rows(CHALLENGES_CSV) if r["key"].startswith(CLAIM_PREFIX)]
+    assert rows, "no claims-review rows"
+    for r in rows:
+        assert _CLAIM.match(r["key"]), r["key"]
+        assert r["challenge"] in ("C5", "C10"), r
+        assert r["check"] and r["evidence"], r
+        if r["outcome"] == "fails":
+            assert r["resolution"] in ("wording fixed", "label fixed"), r
+            assert re.fullmatch(r"[0-9a-f]{7,40}", r["commit"]), r
 
 
 def test_no_open_failures():
