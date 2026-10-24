@@ -24,7 +24,9 @@ number, in this order (every removal keeps the line breaks it spans, so line num
 8. PAP section references `§\d+(\.\d+)*`;
 9. identifier tokens `\b[A-Za-z]+(\*[A-Za-z]+)*\d+[A-Za-z]*\b` (H1, RQ2, FF49, r6, R13, D21,
    H5b, t21); `*` passes only between letters, as in O*NET. Known limit: a letter-prefixed
-   number such as `pp5` or `t2025` looks like an identifier and is stripped.
+   number such as `pp5` or `t2025` looks like an identifier and is stripped. Also stripped as
+   names, not numbers (`NAMES`): the PAP §10/§11 entry ids `[ACD]-\d+` (A-47, C-80, D-3) and
+   the fixed names `10-K` and `GPT-4`.
 
 A numeral is any character with a Unicode numeric value (`unicodedata.numeric`): ASCII digits,
 ½, ①, ⅓, Ⅳ, …. Allowed: superscript digits ⁰-⁹ as exponents and subscript digits ₀-₉ as
@@ -103,6 +105,8 @@ _CITE = re.compile(r"@[A-Za-z_][\w:.-]*")
 _TARGET = re.compile(r"\]\([^)]*\)")
 _PAP_REF = re.compile(r"§\d+(\.\d+)*")
 _IDENT = re.compile(r"\b[A-Za-z]+(?:\*[A-Za-z]+)*\d+[A-Za-z]*\b")
+# Names that hold a digit but are not reported numbers: PAP §10/§11 entry ids, 10-K, GPT-4.
+NAMES = re.compile(r"\b[ACD]-\d+\b|\b10-K\b|\bGPT-4\b")
 _KEY = re.compile(r"(?<![\w.@])@([A-Za-z_][\w:.-]*)")
 
 
@@ -197,6 +201,7 @@ def strip_allowed(text: str) -> str:
     text = _CITE.sub("", text)
     text = _TARGET.sub("]", text)
     text = _PAP_REF.sub("", text)
+    text = NAMES.sub("", text)
     return _IDENT.sub("", text)
 
 

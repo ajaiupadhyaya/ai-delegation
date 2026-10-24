@@ -100,6 +100,35 @@ def test_attribute_blocks_stripped_generally():
     assert hygiene.numerals_in_text("Text {5} here") == [(1, "Text {5} here")]
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "logged as D-3 in PAP §11",
+        "the clarifications C-55, C-77 and C-80, and the addition A-47",
+        "the GPT-4 β beside the human β",
+        "annual 10-K filings",
+    ],
+)
+def test_names_with_digits_pass(text):
+    """PAP §10/§11 entry ids, `10-K` and `GPT-4` are names, not reported numbers."""
+    assert hygiene.numerals_in_text(text) == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "D-3 moves β to 0.34",
+        "the GPT-4 β is 0.71",
+        "C-80 sets a tolerance of 1e-9",
+        "in 10-K filings of 2024",
+        "GPT-4o and E-3 and D-3a",
+    ],
+)
+def test_numbers_beside_names_still_flagged(text):
+    hits = hygiene.numerals_in_text(text)
+    assert [ln for ln, _ in hits] == [1], hits
+
+
 def test_numeral_fixture_ok_passes():
     assert hygiene.numerals(FIX / "ok.qmd") == []
 
