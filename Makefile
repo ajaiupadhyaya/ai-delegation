@@ -1,6 +1,13 @@
-.PHONY: all test lint data
+.PHONY: all test lint data confirmatory-check power-block diagnostics
 
-all: lint test
+# `make all` (Task 33): every offline build step from the committed MANIFEST and raw files, then
+# the tests. Never a network target (`data`, `h6-data`, `rq1-confirm`) and never
+# `aideleg.confirm_h5`: the committed confirmatory records are inputs, checked by
+# `confirmatory-check`, never rebuilt. `test` runs last so it checks the rebuilt outputs.
+# Prerequisites run left to right; serial on purpose.
+.NOTPARALLEL:
+all: lint confirmatory-check panel exposure benchmarks audit power-block results-rq1 \
+		results-rq2 rq3 h6 robustness diagnostics paper-includes paper brief test
 
 test:
 	uv run pytest -v
@@ -10,6 +17,12 @@ lint:
 
 data:
 	uv run python -m aideleg.acquire
+
+# refuses unless Plan 3's H5 record and Plan 2's single P-RQ1 run are committed unedited
+confirmatory-check:
+	uv run python -c "from aideleg.robustness import guards; \
+		guards.require_confirmatory_committed(); \
+		print('P-RQ1 run commit', guards.require_rq1_run_committed())"
 
 .DELETE_ON_ERROR:
 .PHONY: panel
@@ -58,6 +71,11 @@ power-unfrozen:
 
 power: power-unfrozen data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.power
+
+# Task 33 (T-2): rebuild power.md's generated block after the freeze, so the fresh-clone check
+# compares a rebuilt block with the committed one (pre-seal returns only; aideleg.power unedited)
+power-block: data/derived/exposure_ff49.parquet
+	uv run python scripts/power_block.py
 
 # regenerate the GENERATED blocks of PAP section 9 from the files (MANIFEST, code binding,
 # frozen values)
@@ -112,6 +130,10 @@ h6: data/derived/exposure_ff49.parquet
 robustness: data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.robustness --offline
 	uv run python -m aideleg.robustness --summary
+
+# the post-result influence diagnostics of PAP §11 D-3 (docs/results/diagnostics/), offline
+diagnostics: data/derived/exposure_ff49.parquet
+	uv run python -m aideleg.robustness --diagnostics
 
 # fails if a figure has a PDF without a PNG, or the reverse
 figures-check:
