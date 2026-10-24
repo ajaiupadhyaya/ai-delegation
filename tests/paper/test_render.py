@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -39,9 +40,7 @@ def test_section_titles_fixed():
 
 
 def _meta_date() -> str:
-    m = re.search(r'date:\s*"([^"]+)"', (PAPER / "_variables.yml").read_text(encoding="utf-8"))
-    assert m
-    return m.group(1)
+    return json.loads((PAPER / "_variables.yml").read_text(encoding="utf-8"))["meta"]["date"]
 
 
 def _pdf_text(path: Path) -> str:
@@ -79,3 +78,35 @@ def test_brief_renders(tmp_path):
     assert (out / "brief.pdf").stat().st_size > 0
     text = _pdf_text(out / "brief.pdf")
     assert _meta_date() in text and "Invalid Date" not in text
+
+
+@pytest.mark.slow
+def test_generated_includes_render(tmp_path):
+    """Task 18: every generated table and figure include renders in PDF and HTML, its labels
+    resolve as cross-references and the variables expand (a copy of the project with one extra
+    document that includes them all)."""
+    work = tmp_path / "paper"
+    shutil.copytree(PAPER, work, ignore=shutil.ignore_patterns("_output", ".quarto"))
+    quarto = work / "_quarto.yml"
+    text = quarto.read_text(encoding="utf-8")
+    assert "    - brief.qmd\n" in text
+    quarto.write_text(text.replace("    - brief.qmd\n", "    - brief.qmd\n    - check.qmd\n", 1))
+    incs = sorted((work / "_generated").glob("*/*.md"))
+    assert incs
+    body = ["---", 'title: "Includes check"', "---", "", "MDE {{< var power.mde.h5 >}}.", ""]
+    body += [f"{{{{< include {p.relative_to(work).as_posix()} >}}}}\n" for p in incs]
+    body += ["See @tbl-rob-r07 and @fig-rq2-could-vs-does."]
+    (work / "check.qmd").write_text("\n".join(body) + "\n", encoding="utf-8")
+    for to in ("html", "pdf"):
+        r = subprocess.run(
+            ["quarto", "render", str(work / "check.qmd"), "--to", to],
+            capture_output=True,
+            text=True,
+            timeout=900,
+        )
+        assert r.returncode == 0, r.stderr[-3000:]
+        assert "Unknown var" not in r.stderr and "WARNING" not in r.stderr, r.stderr[-3000:]
+    html = (work / "_output/check.html").read_text(encoding="utf-8")
+    assert 'href="#tbl-rob-r07"' in html and 'href="#fig-rq2-could-vs-does"' in html
+    pdf = _pdf_text(work / "_output/check.pdf")
+    assert "See Table" in pdf and "?? " not in pdf and "7.43" in pdf

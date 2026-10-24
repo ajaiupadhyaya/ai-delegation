@@ -121,10 +121,15 @@ figures-check:
 		raise SystemExit(1 if odd else 0)"
 
 # the paper and the executive brief (Quarto; XeLaTeX for PDF). No code runs at render.
-.PHONY: paper brief
-paper:
+# paper-includes regenerates docs/paper/_variables.yml and docs/paper/_generated/ from the
+# committed results first (offline), so a render never uses stale numbers.
+.PHONY: paper brief paper-includes
+paper-includes:
+	uv run python -m aideleg.paper
+
+paper: paper-includes
 	quarto render docs/paper --to pdf
 	quarto render docs/paper --to html
 
-brief:
+brief: paper-includes
 	quarto render docs/paper/brief.qmd --to pdf

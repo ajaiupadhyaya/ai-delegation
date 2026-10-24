@@ -80,3 +80,24 @@ def test_parse_refuses_attempt_record(tmp_path):
     )
     with pytest.raises(ValueError, match="attempt"):
         confirmatory_md.parse(p)
+
+
+def test_parse_fixture_decision_block_and_secondaries(tmp_path):
+    """Task 18 extension: the interval ends, the R13 MDE and the HC3 / RI secondaries of a
+    `_report` fixture parse back to the strings `_report` printed."""
+    fz = ch.FROZEN
+    b = {v: 2.0 * fz[f"s_{v}"] + fz[f"bbar_{v}"] for v in ch.VARIANTS}
+    res = _res(b)
+    path = tmp_path / "confirmatory_h5.md"
+    path.write_text(ch._report(res), encoding="utf-8")
+    got = confirmatory_md.parse(path)
+    pp = 100
+    for hyp, v in (("H5", "h5"), ("H5b", "h5b")):
+        dec = got["decision"][hyp]
+        lo = b[v] - fz[f"crit_{v}_0.05"] * fz[f"s_{v}"]
+        assert dec["ci_005"][0] == f"{lo * pp:.3f}"
+        assert dec["mde_r13"] == f"{res['decision']['mde_r13'][hyp] * pp:.2f}"
+        assert got[ch.LABEL[v]]["s"] == f"{fz[f's_{v}'] * pp:.3f}"
+    assert got["secondary"]["hc3_h5_b"] == f"{0.0123 * pp:.3f}"
+    assert got["secondary"]["fl_coef_h5b"] == "0.3567"
+    assert got["provenance"]["n_days"] == "356"
