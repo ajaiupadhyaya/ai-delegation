@@ -181,13 +181,14 @@ def test_every_result_table_and_figure_is_mapped():
 
 
 def test_tables_keep_source_bytes():
-    """A table include holds the source table lines unchanged, then the caption and notes."""
+    """A table include holds the source table lines unchanged (an intraword asterisk escaped, so
+    it renders as written: `includes.escape_md`), then the caption and notes."""
     for row in _rows(includes.TABLES):
         path, _, n = row["source"].partition("#")
         table = includes.extract_table((ROOT / path).read_text("utf-8"), int(n) if n else None)
         text = (includes.GENERATED / "tables" / f"{row['id']}.md").read_text("utf-8")
-        assert "\n".join(table) + "\n" in text, row["id"]
-        assert f": {row['caption']} {{#tbl-{row['id']}}}" in text, row["id"]
+        assert includes.escape_md("\n".join(table) + "\n") in text, row["id"]
+        assert includes.escape_md(f": {row['caption']} {{#tbl-{row['id']}}}") in text, row["id"]
 
 
 def test_extract_table_refuses_ambiguity():

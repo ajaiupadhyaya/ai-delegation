@@ -3,8 +3,9 @@
 
 `summary.md` is one table: each row's records beside the primary's estimate, read from the
 committed confirmatory and generated result files (nothing is re-estimated). It states no verdict
-and counts nothing (PAP §8.1). `implementation_choices.md` collects every **[default]** note of
-the row files with its §11 C-entry.
+and counts nothing (PAP §8.1). `implementation_choices.md` collects every implementation choice of
+the row files (each **[default]** note and each note citing a Plan 4 §11 clarification,
+C-56..C-82), grouped by its §11 C-entry with the rows that cite it.
 
 AEI data are conversations matched to O*NET tasks.
 """
@@ -454,39 +455,95 @@ def default_notes(out_dir: Path = report.OUT_DIR) -> list[tuple[str, str]]:
     return out
 
 
+# Plan 4's own PAP §11 clarifications (Task 1 onward); a row note citing one of them records an
+# implementation choice, whether or not it is tagged [default]
+PLAN4_CLARIFICATIONS = range(56, 83)
+
+
+def _c_numbers(note: str) -> list[int]:
+    return list(dict.fromkeys(int(c) for c in re.findall(r"\bC-(\d+)\b", note)))
+
+
+def _plan4_notes_of(text: str) -> list[str]:
+    """The `## Notes` bullets that cite a Plan 4 clarification (`PLAN4_CLARIFICATIONS`)."""
+    out: list[str] = []
+    in_notes = False
+    for ln in text.splitlines():
+        if ln.startswith("## "):
+            in_notes = ln == "## Notes"
+            continue
+        if in_notes and ln.startswith("- "):
+            if any(c in PLAN4_CLARIFICATIONS for c in _c_numbers(ln)):
+                out.append(ln[2:])
+    return out
+
+
+def choice_notes(out_dir: Path = report.OUT_DIR) -> list[tuple[str, str]]:
+    """(row ID, note) for every implementation choice of the Plan 4 row files, in registry
+    order: each **[default]** note and each note citing a Plan 4 clarification (C-56..C-82)."""
+    out = []
+    for rid, row in registry.ROWS.items():
+        if row.owner == "plan4":
+            text = (Path(out_dir) / Path(row.outputs[1]).name).read_text(encoding="utf-8")
+            notes = [*_default_notes_of(text), *_plan4_notes_of(text)]
+            out += [(rid, n) for n in dict.fromkeys(notes)]
+    return out
+
+
 def _entry_titles(kinds: Iterable[str] = ("C", "D")) -> dict[tuple[str, int], str]:
     return {(e["kind"], e["n"]): e["title"] for e in paplog.entries() if e["kind"] in kinds}
 
 
+def _results_seen() -> dict[int, str]:
+    out = {}
+    for e in paplog.entries():
+        if e["kind"] == "C":
+            m = re.search(r"^- Results seen: (.*)$", e["body"], re.M)
+            out[e["n"]] = m[1].strip() if m else "not stated"
+    return out
+
+
 def choices_text(notes: list[tuple[str, str]]) -> str:
     titles = _entry_titles()
+    seen = _results_seen()
     lines = [
         "# Implementation choices where the PAP is silent",
         "",
         generated_line(GENERATOR),
         "",
-        "Every **[default]** note of the robustness row files, as the row file prints it, with "
-        "the PAP §11 clarification(s) it names. Each was fixed and logged before the row's "
-        "first robustness read unless its §11 entry says otherwise.",
+        "Every implementation choice that a robustness row file attributes to one of Plan 4's "
+        f"PAP §11 clarifications (C-{PLAN4_CLARIFICATIONS[0]} to C-{PLAN4_CLARIFICATIONS[-1]}), "
+        "grouped by clarification: under each, the rows that cite it, each with its note as the "
+        "row file prints it and every §11 entry the note names. Notes marked **[default]** are "
+        "the defaults the plan fixed where the PAP is silent; a note citing several "
+        "clarifications appears under each. All of these clarifications were filed after the "
+        'confirmatory results; the "Results seen" line under each, quoted from its §11 entry, '
+        "says which results had been seen, including any robustness row already run.",
         "",
         INTERVAL_STATEMENT,
         "",
         P14_STATEMENT,
     ]
-    current = None
+    groups: dict[int, list[tuple[str, str]]] = {}
     for rid, note in notes:
-        if rid != current:
-            lines += [
-                "",
-                f"## {rid} ([{registry.output_stem(rid)}.md]({registry.output_stem(rid)}.md))",
-                "",
-            ]
-            current = rid
-        cs = list(dict.fromkeys(int(c) for c in re.findall(r"\bC-(\d+)\b", note)))
+        cs = _c_numbers(note)
         if not cs:
-            raise ValueError(f"{rid}: a [default] note names no §11 C- number: {note!r}")
-        refs = "; ".join(f"C-{c} ({titles[('C', c)]})" for c in cs)
-        lines.append(f"- {note} — §11 {refs}.")
+            raise ValueError(f"{rid}: a choice note names no §11 C- number: {note!r}")
+        keys = [c for c in cs if c in PLAN4_CLARIFICATIONS] or cs
+        for c in keys:
+            groups.setdefault(c, []).append((rid, note))
+    for c in sorted(groups):
+        lines += [
+            "",
+            f"## C-{c} ({titles[('C', c)]})",
+            "",
+            f"Results seen when filed (PAP §11 C-{c}): {seen[c]}",
+            "",
+        ]
+        for rid, note in groups[c]:
+            stem = registry.output_stem(rid)
+            refs = "; ".join(f"C-{n} ({titles[('C', n)]})" for n in _c_numbers(note))
+            lines.append(f"- {rid} ([{stem}.md]({stem}.md)): {note} — §11 {refs}.")
     lines += [
         "",
         "## Reproduction of the row files",
@@ -518,5 +575,5 @@ def write_appendix(out_dir: Path = report.OUT_DIR) -> tuple[Path, Path]:
     out_dir = Path(out_dir)
     s, c = out_dir / SUMMARY, out_dir / CHOICES
     s.write_text(summary_text(load_records(out_dir)), encoding="utf-8")
-    c.write_text(choices_text(default_notes(out_dir)), encoding="utf-8")
+    c.write_text(choices_text(choice_notes(out_dir)), encoding="utf-8")
     return s, c

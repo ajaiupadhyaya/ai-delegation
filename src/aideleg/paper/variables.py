@@ -32,7 +32,8 @@ decimals with p < 0.001 shown as "< 0.001"; `pct` 2 decimals (percent 0-100, no 
 `text` verbatim; `date` ISO. A value read from a printed markdown file (`confirmatory_md` or a
 `.md` regex) keeps the precision it was printed with: the format only checks that it is a
 number of the right kind. Negative numbers keep the ASCII hyphen the tables print.
-Two prose forms: `pp2` is 2 decimals even for a printed value (so prose never mixes precisions);
+Three prose forms: `pp2` is 2 decimals even for a printed value (so prose never mixes precisions);
+`p3` is a p to 3 decimals ("< 0.001" below 0.001) even for a printed value;
 `verdict` turns a decision into words (`True`/`False` -> "rejected"/"not rejected";
 the RQ1 status `supported`/`not_rejected` -> "supported"/"not supported"; any other value is
 refused).
@@ -58,7 +59,7 @@ from aideleg.paper import confirmatory_md, headlines
 MAP = ROOT / "docs/paper/variables_map.csv"
 OUT = ROOT / "docs/paper/_variables.yml"
 COLUMNS = ["key", "source", "locator", "fmt"]
-FMTS = ("pp", "coef", "rho", "p", "int", "pct", "text", "date", "pp2", "verdict")
+FMTS = ("pp", "coef", "rho", "p", "int", "pct", "text", "date", "pp2", "p3", "verdict")
 VERDICTS = {
     "True": "rejected",
     "False": "not rejected",
@@ -100,6 +101,9 @@ def fmt(value, kind: str, *, printed: bool = False) -> str:
         return VERDICTS[str(value)]
     if kind == "pp2":
         return f"{_float(value, kind):.2f}"
+    if kind == "p3":
+        x = _float(value, kind)
+        return "< 0.001" if x < 0.001 else f"{x:.3f}"
     if kind == "date":
         s = value.isoformat() if isinstance(value, date) else str(value)
         if not _DATE.match(s):

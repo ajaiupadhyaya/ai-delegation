@@ -108,12 +108,27 @@ def test_preregistration_verbatim(out):
 def test_deviations_verbatim(out):
     text = includes.deviations_appendix(PAP, out_dir=out).read_text(encoding="utf-8")
     pap = PAP.read_text(encoding="utf-8")
-    body = "\n".join(paplog.section_11_lines(pap)[1:]).strip("\n")
+    body = includes.escape_md("\n".join(paplog.section_11_lines(pap)[1:]).strip("\n"))
     assert body in text
-    assert _body(pap, "## 10. Corrections to the design spec") in text
+    assert includes.escape_md(_body(pap, "## 10. Corrections to the design spec")) in text
     rows = _table_rows(text.split(body)[0])
     ids = [f"{e['kind']}-{e['n']}" for e in paplog.entries(PAP)]
     assert [r[0] for r in rows[1:]] == ids
+
+
+def test_escape_md_intraword_asterisks_only():
+    """`O*NET` is escaped (Pandoc would read two of them in a paragraph as emphasis); emphasis,
+    bullets, an escaped asterisk, inline code and fenced blocks are left alone; idempotent."""
+    src = (
+        "O*NET 29.2 and O*NET-SOC; **[default]** and *it*; O\\*NET kept; `oesm24*` and "
+        "`a*b`\n- bullet\n```{=latex}\nx*y\n```\nz*w"
+    )
+    got = includes.escape_md(src)
+    assert got == (
+        "O\\*NET 29.2 and O\\*NET-SOC; **[default]** and *it*; O\\*NET kept; `oesm24*` and "
+        "`a*b`\n- bullet\n```{=latex}\nx*y\n```\nz\\*w"
+    )
+    assert includes.escape_md(got) == got
 
 
 def test_deviation_summary_rows(tmp_path):
@@ -159,12 +174,26 @@ def test_deviations_subsections_only(tmp_path):
 def test_disclosures_verbatim(out):
     text = includes.disclosures_appendix(PAP, POST, out_dir=out).read_text(encoding="utf-8")
     pap = PAP.read_text(encoding="utf-8")
-    disclosures = _body(pap, "### 0.4 Disclosures")
+    disclosures = includes.escape_md(_body(pap, "### 0.4 Disclosures"))
     assert disclosures.startswith("What was seen before this plan was frozen:")
     assert disclosures in text
-    post = POST.read_text(encoding="utf-8").strip("\n")
+    post = includes.escape_md(POST.read_text(encoding="utf-8").strip("\n"))
     assert post in text
     assert text.index(disclosures) < text.index(post)
+
+
+def test_post_freeze_ledgers_committed_and_lines_exist():
+    """Every ledger post-freeze.md names is a committed file under docs/superpowers/ledgers, and
+    every "Plan <n> ledger, line(s) ..." citation points inside it."""
+    text = POST.read_text(encoding="utf-8")
+    paths = dict(re.findall(r"^Plan (\d): `([^`]+)`", text, re.M))
+    assert set(paths) == {"2", "3", "4"}
+    for n, rel in paths.items():
+        assert rel.startswith("docs/superpowers/ledgers/"), rel
+        n_lines = len((ROOT / rel).read_text(encoding="utf-8").splitlines())
+        for cite in re.findall(rf"Plan {n} ledger, lines? ([0-9][0-9, –-]*)", text):
+            for num in re.findall(r"\d+", cite):
+                assert 1 <= int(num) <= n_lines, (n, cite)
 
 
 def test_post_freeze_bullets_cite_sources():
@@ -191,7 +220,7 @@ def test_robustness_appendix_row_order(out):
         for table in includes.tables_in(src):
             for line in table:
                 if "](" not in line:
-                    assert line in text, (name, line)
+                    assert includes.escape_md(line) in text, (name, line)
         title = src.splitlines()[0]
         assert title.startswith("# ")
         pos.append(text.index("#" + title.split(" {")[0]))

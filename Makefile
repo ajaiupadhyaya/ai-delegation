@@ -6,7 +6,7 @@
 # `confirmatory-check`, never rebuilt. `test` runs last so it checks the rebuilt outputs.
 # Prerequisites run left to right; serial on purpose.
 .NOTPARALLEL:
-all: lint confirmatory-check panel exposure benchmarks audit power-block results-rq1 \
+all: lint confirmatory-check panel exposure benchmarks audit-check power-block results-rq1 \
 		results-rq2 rq3 h6 robustness diagnostics paper-includes paper brief test
 
 test:
@@ -59,6 +59,14 @@ audit: data/derived/aei_panel.parquet data/derived/exposure_ff49.parquet \
 		data/derived/benchmark_ff49.parquet
 	uv run python -m aideleg.audit
 
+# `make all` (T-2): the audit tables are frozen inputs of the PAP, so they are rebuilt into a
+# temporary directory and compared with the committed ones (exit 1 on a difference), never
+# rewritten in place
+.PHONY: audit-check
+audit-check: data/derived/aei_panel.parquet data/derived/exposure_ff49.parquet \
+		data/derived/benchmark_ff49.parquet
+	uv run python scripts/audit_check.py
+
 # pre-seal power analysis for H5/H5b (returns end 2022-11-29); rewrites the generated block.
 # Pre-seal only: once the tag pap-v1 exists the frozen values are fixed, and both this guard
 # and `aideleg.power.main` refuse. (The benchmarks are computed in-process, not read from
@@ -72,8 +80,9 @@ power-unfrozen:
 power: power-unfrozen data/derived/exposure_ff49.parquet
 	uv run python -m aideleg.power
 
-# Task 33 (T-2): rebuild power.md's generated block after the freeze, so the fresh-clone check
-# compares a rebuilt block with the committed one (pre-seal returns only; aideleg.power unedited)
+# Task 33 (T-2): rebuild power.md's generated block after the freeze in a temporary copy and
+# compare it with the committed one, exit 1 on a difference (pre-seal returns only;
+# aideleg.power unedited; the frozen docs/pap/power.md is never written)
 power-block: data/derived/exposure_ff49.parquet
 	uv run python scripts/power_block.py
 

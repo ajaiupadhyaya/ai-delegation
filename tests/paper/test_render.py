@@ -110,3 +110,47 @@ def test_generated_includes_render(tmp_path):
     assert 'href="#tbl-rob-r07"' in html and 'href="#fig-rq2-could-vs-does"' in html
     pdf = _pdf_text(work / "_output/check.pdf")
     assert "See Table" in pdf and "?? " not in pdf and "7.43" in pdf
+
+
+@pytest.mark.slow
+def test_deviations_render_onet_literally(tmp_path):
+    """Appendix B quotes PAP §11 verbatim: its rendered text (HTML and PDF) holds "O*NET" as
+    often as the source §11 does, with no emphasis opened between two of them (Minor 1 of the
+    Task 34 review)."""
+    from html import unescape
+
+    from aideleg import paplog
+    from aideleg.config import ROOT
+
+    pap = (ROOT / "docs/pap/pre-analysis-plan.md").read_text(encoding="utf-8")
+    body = "\n".join(paplog.section_11_lines(pap)[1:]).replace("O\\*NET", "O*NET")
+    want = body.count("O*NET")
+    assert want >= 2
+    work = tmp_path / "paper"
+    shutil.copytree(PAPER, work, ignore=shutil.ignore_patterns("_output", ".quarto"))
+    quarto = work / "_quarto.yml"
+    quarto.write_text(
+        quarto.read_text(encoding="utf-8").replace(
+            "    - brief.qmd\n", "    - brief.qmd\n    - onet.qmd\n", 1
+        )
+    )
+    doc = ["---", 'title: "O*NET check"', "---", "", "START-OF-SECTION-11", ""]
+    doc += ["{{< include _generated/appendix/deviations.md >}}", ""]
+    (work / "onet.qmd").write_text("\n".join(doc) + "\n", encoding="utf-8")
+    for to in ("html", "pdf"):
+        r = subprocess.run(
+            ["quarto", "render", str(work / "onet.qmd"), "--to", to],
+            capture_output=True,
+            text=True,
+            timeout=900,
+        )
+        assert r.returncode == 0, r.stderr[-3000:]
+    html = (work / "_output/onet.html").read_text(encoding="utf-8")
+    # the last occurrence of each heading: the table of contents names them first
+    section = html.rpartition("PAP §11, verbatim")[2].rpartition("PAP §10: corrections")[0]
+    assert "O<em>NET" not in section and "O\\*NET" not in section
+    text = unescape(re.sub(r"<[^>]+>", "", section))
+    assert text.count("O*NET") == want, (text.count("O*NET"), want)
+    pdf = _pdf_text(work / "_output/onet.pdf")
+    pdf_section = pdf.rpartition("PAP §11, verbatim")[2].rpartition("PAP §10: corrections")[0]
+    assert pdf_section.replace("\n", "").count("O*NET") == want

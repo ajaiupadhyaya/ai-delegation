@@ -247,8 +247,8 @@ def with_coe(tr: TaskRows, coe: pl.DataFrame) -> TaskRows:
 
 
 def _at_most(p: float, alpha: float = H2_ALPHA) -> bool:
-    """p ≤ α compared exactly on the printed decimals (PAP §11 C-24); False if p is not
-    finite."""
+    """p ≤ α by exact comparison on each float's decimal repr (PAP §11 C-24); False if p is
+    not finite."""
     p = float(p)
     return math.isfinite(p) and Fraction(repr(p)) <= Fraction(repr(alpha))
 

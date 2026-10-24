@@ -14,6 +14,10 @@ MD, ATTEMPT = guards.H5_FILES
 RQ1_JSON, RQ1_MD, RQ1_LOG, RQ1_ATTEMPT = guards.RQ1_FILES
 # Plan 3's guard module, reached through the adapter's re-export, for its PINNED blob IDs.
 _rq3_guard = importlib.import_module(upstream.assert_confirmatory_recorded.__module__)
+# the commits of Plan 2's P-RQ1 run and Plan 3's P-H5 run, pinned (not read from `git log`, which
+# would follow any later commit to these files and make the check below tautological)
+P_RQ1_COMMIT = "75e8956eea6beedbd2499f03c0dabff2041355ec"
+P_H5_COMMIT = "ebe59beeb21577f8263d915688258ebdf83a6a09"
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -160,23 +164,23 @@ def test_confirmatory_files_untouched():
     assert protected
     for rel in protected:
         assert _git(ROOT, "hash-object", rel) == blobs[rel], rel
-    rq1_commit = guards.require_rq1_run_committed()
     for rel in guards.RQ1_FILES:
         assert (
             subprocess.run(
-                ["git", "-C", str(ROOT), "diff", "--quiet", rq1_commit, "HEAD", "--", rel]
+                ["git", "-C", str(ROOT), "diff", "--quiet", P_RQ1_COMMIT, "HEAD", "--", rel]
             ).returncode
             == 0
         ), rel
-    h5_commit = _git(ROOT, "log", "-1", "--format=%H", "--", MD)
-    assert h5_commit
     for rel in guards.H5_FILES:
         assert (
             subprocess.run(
-                ["git", "-C", str(ROOT), "diff", "--quiet", h5_commit, "HEAD", "--", rel]
+                ["git", "-C", str(ROOT), "diff", "--quiet", P_H5_COMMIT, "HEAD", "--", rel]
             ).returncode
             == 0
         ), rel
+    # the pinned commits are the ones that last touched the records: nothing has edited them since
+    assert guards.require_rq1_run_committed() == P_RQ1_COMMIT
+    assert _git(ROOT, "log", "-1", "--format=%H", "--", MD) == P_H5_COMMIT
     assert (
         subprocess.run(
             [

@@ -3,7 +3,8 @@
 `docs/paper/tables.csv` (`id, source, caption, notes`) names a committed results table: `source`
 is a repo-relative markdown file, with `#<n>` for its n-th pipe table (1-based) when it holds more
 than one. `build_tables` writes `docs/paper/_generated/tables/<id>.md`: the source table lines
-unchanged (no number is reformatted), then the caption line `: <caption> {#tbl-<id>}`, then the
+unchanged (no number is reformatted; an intraword asterisk such as `O*NET`'s is escaped so it
+renders as written), then the caption line `: <caption> {#tbl-<id>}`, then the
 notes. `docs/paper/figures.csv` (`id, stem, caption, alt`) names a figure in
 `docs/paper/figures/`; `build_figures` writes `docs/paper/_generated/figures/<id>.md` with the
 PDF for the PDF format and the PNG for HTML, each block labelled `{#fig-<id>}` once.
@@ -73,6 +74,35 @@ def _rows(path: Path, columns: list[str]) -> list[dict]:
     return rows
 
 
+# an asterisk between two word characters (`O*NET`) opens or closes intraword emphasis in Pandoc
+# Markdown, so two such names in one paragraph render as emphasis; escaped, it renders as itself
+_INTRAWORD_STAR = re.compile(r"(?<=[A-Za-z0-9])(?<!\\)\*(?=[A-Za-z0-9])")
+_CODE_SPAN = re.compile(r"(`+)(.+?)\1")
+
+
+def escape_md(text: str) -> str:
+    """`text` with every unescaped intraword asterisk escaped (`O*NET` -> `O\\*NET`), outside
+    fenced blocks and inline code, so that the rendered text equals the source text. Idempotent:
+    an escaped asterisk is left alone."""
+    out, fenced = [], False
+    for line in text.split("\n"):
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            out.append(line)
+            continue
+        if fenced:
+            out.append(line)
+            continue
+        parts, last = [], 0
+        for m in _CODE_SPAN.finditer(line):
+            parts.append(_INTRAWORD_STAR.sub(r"\\*", line[last : m.start()]))
+            parts.append(m[0])
+            last = m.end()
+        parts.append(_INTRAWORD_STAR.sub(r"\\*", line[last:]))
+        out.append("".join(parts))
+    return "\n".join(out)
+
+
 def _write_all(out_dir: Path, texts: dict[str, str]) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     for stale in out_dir.glob("*.md"):
@@ -105,7 +135,7 @@ def build_tables(tables_csv: Path = TABLES, out_dir: Path = GENERATED / "tables"
         ]
         if row["notes"].strip():
             parts += ["", row["notes"].strip()]
-        texts[row["id"]] = "\n".join(parts) + "\n"
+        texts[row["id"]] = escape_md("\n".join(parts) + "\n")
     return _write_all(out_dir, texts)
 
 
@@ -136,9 +166,11 @@ def build_figures(figures_csv: Path = FIGURES, out_dir: Path = GENERATED / "figu
 #
 # Each builder writes `docs/paper/_generated/appendix/<name>.md`, which `docs/paper/appendix/*.qmd`
 # includes. Text quoted from the PAP, the robustness files and `post-freeze.md` is copied
-# unchanged; the robustness files only have their headings demoted one level (they sit under the
-# appendix heading) and their links to sibling row files pointed at the row's heading here. Wide
-# tables are set landscape and small for the PDF (raw LaTeX, which HTML ignores).
+# unchanged, except that an intraword asterisk (`O*NET`) is escaped so the rendered text equals
+# the source (`escape_md`); the robustness files only have their headings demoted one level (they
+# sit under the appendix heading) and their links to sibling row files pointed at the row's
+# heading here. Wide tables are set landscape and small for the PDF (raw LaTeX, which HTML
+# ignores).
 
 PAP_MD = ROOT / "docs/pap/pre-analysis-plan.md"
 POST_FREEZE = ROOT / "docs/disclosures/post-freeze.md"
@@ -180,6 +212,9 @@ def _appendix_header(*sources: Path | str) -> str:
 
 
 def _write_one(out_dir: Path, name: str, text: str) -> Path:
+    """Write an appendix include; quoted Markdown is escaped (`escape_md`) so that it renders
+    exactly as its source reads."""
+    text = escape_md(text)
     out_dir.mkdir(parents=True, exist_ok=True)
     p = out_dir / f"{name}.md"
     if not p.exists() or p.read_text(encoding="utf-8") != text:

@@ -323,8 +323,17 @@ def test_r23_h1_rows_carried_byte_identical(stubbed):
     assert h2["label"] == rows.R23_H2_LABEL and h2["applies_to"] == "H2"
     md = md_path.read_text(encoding="utf-8")
     old = _committed("R23.md")
+    # Task 11's units note is carried with "per unit of log wage" for "per log point of wage"
+    # (presentation only, W-17); every other Task 11 note is carried verbatim
+    units_old, units_new = (
+        rows._rq1_note(rows._R23_H1_UNITS_TASK11),
+        rows._rq1_note(rows._R23_H1_UNITS),
+    )
+    assert f"- {units_old}" in old.splitlines()
     for ln in (x for x in old.splitlines() if x.startswith("- ")):
+        ln = f"- {units_new}" if ln == f"- {units_old}" else ln
         assert md.count(ln) == 1, ln
+    assert "per log point" not in md
     old_table = [x for x in old.splitlines() if x.startswith("| h1 |")]
     assert len(old_table) == 3 and all(md.count(x) == 1 for x in old_table)
     assert "scale points per year" in md

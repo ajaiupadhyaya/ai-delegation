@@ -154,7 +154,8 @@ EXPOSURE_ROWS: dict[str, ExposureRow] = {
                 "The wage bill replaces employment in both industry weights (the occupation "
                 "shares within each OEWS NAICS code and the code weights that combine codes "
                 "into an FF49 industry), so w_oj is o's share of industry j's wage bill; "
-                "emp_covered_share is wage-bill weighted (PAP §11 C-72).",
+                "emp_covered_share is wage-bill weighted (PAP §11 C-72), while the zero-assigned "
+                "share (D3) below is employment-based, as in every row.",
                 _BENCH_REAGG,
             ),
         ),
@@ -177,7 +178,8 @@ EXPOSURE_ROWS: dict[str, ExposureRow] = {
             (
                 "Employment-weighted task allocation in place of the equal split (PAP D4 "
                 "alternative, §8.2 R11): a task's usage goes to its candidate occupations in "
-                "proportion to their national OEWS employment.",
+                "proportion to their national OEWS employment. It applies to the task-basis "
+                "tables only; r6's published SOC rows stay as published.",
                 "PAP D4: this makes U equal across occupations sharing a task by construction, "
                 "so it removes rather than tests the within-group dispersion.",
                 _BENCH_PRIMARY,
@@ -310,6 +312,10 @@ def _rq2_records(row: ExposureRow, expo: pl.DataFrame, desc: str) -> list[dict]:
     tab = rq2_correlations(ex, bench)
     present = set(expo["industry"].to_list())
     missing = [n for i, n in R20_ABSENT.items() if i not in present]
+    # `dropped`/`n_dropped` are computed against R20's absent industries only: every other row
+    # must have all 49 FF49 industries (guard; no output depends on it)
+    if row.row_id != "R20" and (missing or expo.height != 49):
+        raise ValueError(f"{row.row_id}: RQ2 needs the 49 FF49 industries, got {expo.height}")
     order = {b: k for k, b in enumerate(_BENCH_ORDER[row.headline])}
     aei_order = {a: k for k, a in enumerate(AEI_COLS)}
     recs = sorted(
@@ -1434,11 +1440,13 @@ def _write(
     out_dir: Path | None,
     *,
     by_part: bool = False,
+    label_text: str | None = None,
 ):
     """`write_row` with the RQ1 coefficients labelled in the `.md` table only; the CSV is then
     rewritten from the unlabelled records, so it keeps `estimand` and the plain notes (C-78),
     keeping the previous CSV bytes under the C-80 rule (`report.write_csv_reproducing`).
-    `by_part` writes the header's label line by part (R23, PAP §11 C-79)."""
+    `by_part` writes the header's label line by part (R23, PAP §11 C-79); `label_text`, if
+    given, replaces it (R22)."""
     out = OUT_DIR if out_dir is None else out_dir
     stem = Path(out) / registry.output_stem(row_id)
     old_csv, old_md = stem.with_suffix(".csv"), stem.with_suffix(".md")
@@ -1450,7 +1458,7 @@ def _write(
         labelled,
         notes,
         out_dir=out,
-        label_text=_labels_by_part(records) if by_part else None,
+        label_text=label_text or (_labels_by_part(records) if by_part else None),
     )
     df = pl.DataFrame(
         [{k: r[k] for k in report.ROBUSTNESS_COLUMNS} for r in records], infer_schema_length=None
@@ -1548,6 +1556,12 @@ _R23_H1_NOTE = (
     "inference. R23's H2 part is a separate Plan 4 task."
 )
 _R23_H1_UNITS = (
+    "ai_autonomy_mean scale points per unit of the regressor (per year of education, "
+    "per unit of log wage)"
+)
+# Task 11's committed wording of the same units, read back by `r23_h1_carry` and replaced by
+# `_R23_H1_UNITS` (presentation only: W-17 writes a log coefficient per unit of the log)
+_R23_H1_UNITS_TASK11 = (
     "ai_autonomy_mean scale points per unit of the regressor (per year of education, "
     "per log point of wage)"
 )
@@ -1799,7 +1813,11 @@ def run_R22(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "`build_h2_panel(balanced=False)`); there is no other unbalanced rule (PAP §11 C-56).",
         _h2_note(ks),
     ]
-    return _write("R22", records, notes, out_dir)
+    label = (
+        "robustness; part all_r2_r6 is also labelled confounded with the r6 "
+        "suppression-regime change"
+    )
+    return _write("R22", records, notes, out_dir, label_text=label)
 
 
 def r23_h1_carry(out_dir: Path) -> tuple[list[dict], list[str]]:
@@ -1826,12 +1844,20 @@ def r23_h1_carry(out_dir: Path) -> tuple[list[dict], list[str]]:
 
     def task11(n: str) -> bool:
         return (
-            n in (_R23_H1_NOTE, _R23_ALWAYS, _rq1_note(_R23_H1_UNITS))
+            n
+            in (
+                _R23_H1_NOTE,
+                _R23_ALWAYS,
+                _rq1_note(_R23_H1_UNITS),
+                _rq1_note(_R23_H1_UNITS_TASK11),
+            )
             or n.startswith(sign)
             or n.startswith(_R23_DISAGREE_PREFIX)
         )
 
     notes = [ln[2:] for ln in lines[i + 1 : j] if ln.startswith("- ") and task11(ln[2:])]
+    old_units = _rq1_note(_R23_H1_UNITS_TASK11)
+    notes = [_rq1_note(_R23_H1_UNITS) if n == old_units else n for n in notes]
     fixed = [n for n in notes if not (n.startswith(sign) or n.startswith(_R23_DISAGREE_PREFIX))]
     if fixed != [_R23_H1_NOTE, _R23_ALWAYS, _rq1_note(_R23_H1_UNITS)] or not any(
         n.startswith(sign) for n in notes
@@ -1954,6 +1980,9 @@ _R28_NOTES = (
     "Task IDs (its panel Task ID and every Task ID carrying its statement), as Plan 2's H1/H3 "
     "task rows apply D14 (PAP §11 C-9, C-59); unmatched task nodes and tasks with no DWA link "
     "carry no GWA.",
+    "In r4_countries and r5_countries the excluded geographies listed below include AEI's "
+    "non-country buckets (`unmatched:*`), which are counted in `n_dropped` and `dropped` with "
+    "the countries.",
     "usage_weighted: the D16 r6 country frame, estimated by WLS with weights = the country's "
     "two-month mean overall `usage_pct` (PAP §4.4 'weights = country usage_pct'); the sample is "
     "the primary one.",
@@ -2016,10 +2045,10 @@ _R25_NOTES = (
     "giving the five-member Holm family {H1a: education, H1b: log wage, H3: error cost, H4a: "
     "log AUI, H4b: log income}, tested by Plan 2's `holm` at family-wise 0.0375 (D22): the "
     "k-th smallest p of the five (ties by name) is compared with 0.0375/(5 − k + 1), step-down, "
-    "exactly on the printed decimals. Each p is the committed P-RQ1 fit's two-sided coefficient "
-    "p (`confirmatory_rq1.json`): H1's two-way cluster t p-values, H3's indicator p, and H4's "
-    "normal-reference HC3 p-values of log AUI and log income. Nothing is re-estimated; the "
-    "estimates, SEs and intervals are the committed ones.",
+    "by exact comparison on each float's decimal repr. Each p is the committed P-RQ1 fit's "
+    "two-sided coefficient p (`confirmatory_rq1.json`): H1's two-way cluster t p-values, H3's "
+    "indicator p, and H4's normal-reference HC3 p-values of log AUI and log income. Nothing is "
+    "re-estimated; the estimates, SEs and intervals are the committed ones.",
     "H2 is outside this family and is tested on its own at 0.0125 (D22). 'rejected under R25' "
     "is the Holm step alone, with no sign condition; it is reported only and is not a "
     "decision: the RQ1 decisions are P-RQ1's (D17).",

@@ -187,16 +187,32 @@ def test_make_all_never_runs_rq1_confirm():
 
 def test_make_all_rebuilds_what_it_compares():
     """T-2: the D-3 diagnostics, the audit tables and power.md's generated block are rebuilt,
-    and the committed confirmatory records are checked, not rebuilt."""
+    and the committed confirmatory records are checked, not rebuilt. The audit tables and
+    power.md are frozen PAP inputs: `make all` rebuilds them into temporary files and compares,
+    never rewriting them in place."""
     out = _make_n_all()
     for needed in (
         "aideleg.robustness --diagnostics",
-        "python -m aideleg.audit",
+        "scripts/audit_check.py",
         "require_confirmatory_committed",
         "require_rq1_run_committed",
         "scripts/power_block.py",
     ):
         assert needed in out, needed
+    assert "python -m aideleg.audit" not in out
+
+
+def test_frozen_inputs_compared_not_rewritten():
+    """power_block.py and audit_check.py pass a temporary `out` to the unedited builders and
+    exit 1 on a difference; neither writes docs/pap/power.md or docs/audit/tables/."""
+    for script, call in (
+        ("scripts/power_block.py", "power.run_power(out=rebuilt_path)"),
+        ("scripts/audit_check.py", "audit.build(out=Path(tmp))"),
+    ):
+        text = (ROOT / script).read_text(encoding="utf-8")
+        assert call in text, script
+        assert "return 1" in text, script
+        assert "write_text" not in text and "write_bytes" not in text, script
 
 
 def _git_tree(root: Path, files: dict[str, bytes]) -> Path:

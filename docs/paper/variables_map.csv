@@ -845,16 +845,16 @@ rq3.event.gemini_2_5.k20.a_pooled.z_delegation.z_delegation.b,docs/results/rq3/e
 rq3.event.gemini_2_5.k20.a_pooled.z_delegation.z_delegation.ci_lo,docs/results/rq3/event_study.csv,"column=ci_lo;filter=event:Gemini 2.5,horizon:20,design:A_pooled,regressors:z_delegation,regressor:z_delegation",pp
 rq3.event.gemini_2_5.k20.a_pooled.z_delegation.z_delegation.ci_hi,docs/results/rq3/event_study.csv,"column=ci_hi;filter=event:Gemini 2.5,horizon:20,design:A_pooled,regressors:z_delegation,regressor:z_delegation",pp
 rq3.event.gemini_2_5.k20.a_pooled.z_delegation.z_delegation.p,docs/results/rq3/event_study.csv,"column=p;filter=event:Gemini 2.5,horizon:20,design:A_pooled,regressors:z_delegation,regressor:z_delegation",p
-h6.gap_returns.b,docs/results/h6/gap_returns.md,regex=^\| b \(pp of annualised alpha per 1 SD of gap\) \| (-?\d+\.\d+) \|$,pp
-h6.gap_returns.s,docs/results/h6/gap_returns.md,regex=^\| s \(pp\) \| (-?\d+\.\d+) \|$,pp
-h6.gap_returns.bbar,docs/results/h6/gap_returns.md,regex=^\| b̄ \(pp\) \| (-?\d+\.\d+) \|$,pp
-h6.gap_returns.crit,docs/results/h6/gap_returns.md,"regex=^\| critical, max\(t_21, q\) \| (-?\d+\.\d+) \|$",coef
-h6.gap_returns.t_bbar,docs/results/h6/gap_returns.md,"regex=^\| T, H0: b = b̄ \(D21, primary null\) \| (-?\d+\.\d+) \|$",coef
-h6.gap_returns.p_bbar,docs/results/h6/gap_returns.md,"regex=^\| p, H0: b = b̄ \(nominal\) \| (-?\d+\.\d+) \|$",p
-h6.gap_returns.t_zero,docs/results/h6/gap_returns.md,"regex=^\| T, H0: b = 0 \(secondary null\) \| (-?\d+\.\d+) \|$",coef
-h6.gap_returns.p_zero,docs/results/h6/gap_returns.md,"regex=^\| p, H0: b = 0 \(nominal\) \| (-?\d+\.\d+) \|$",p
-h6.gap_returns.ci.lo,docs/results/h6/gap_returns.md,"regex=^\| 95% CI for b, b ± critical × s \(pp\) \| \[(-?\d+\.\d+), -?\d+\.\d+\] \|$",pp
-h6.gap_returns.ci.hi,docs/results/h6/gap_returns.md,"regex=^\| 95% CI for b, b ± critical × s \(pp\) \| \[-?\d+\.\d+, (-?\d+\.\d+)\] \|$",pp
+h6.gap_returns.b,docs/results/h6/gap_returns.md,regex=^\| b \(pp of annualised alpha per 1 SD of gap\) \| (-?\d+\.\d+) \|$,pp2
+h6.gap_returns.s,docs/results/h6/gap_returns.md,regex=^\| s \(pp\) \| (-?\d+\.\d+) \|$,pp2
+h6.gap_returns.bbar,docs/results/h6/gap_returns.md,regex=^\| b̄ \(pp\) \| (-?\d+\.\d+) \|$,pp2
+h6.gap_returns.crit,docs/results/h6/gap_returns.md,"regex=^\| critical, max\(t_21, q\) \| (-?\d+\.\d+) \|$",pp2
+h6.gap_returns.t_bbar,docs/results/h6/gap_returns.md,"regex=^\| T, H0: b = b̄ \(D21, primary null\) \| (-?\d+\.\d+) \|$",pp2
+h6.gap_returns.p_bbar,docs/results/h6/gap_returns.md,"regex=^\| p, H0: b = b̄ \(nominal\) \| (-?\d+\.\d+) \|$",p3
+h6.gap_returns.t_zero,docs/results/h6/gap_returns.md,"regex=^\| T, H0: b = 0 \(secondary null\) \| (-?\d+\.\d+) \|$",pp2
+h6.gap_returns.p_zero,docs/results/h6/gap_returns.md,"regex=^\| p, H0: b = 0 \(nominal\) \| (-?\d+\.\d+) \|$",p3
+h6.gap_returns.ci.lo,docs/results/h6/gap_returns.md,"regex=^\| 95% CI for b, b ± critical × s \(pp\) \| \[(-?\d+\.\d+), -?\d+\.\d+\] \|$",pp2
+h6.gap_returns.ci.hi,docs/results/h6/gap_returns.md,"regex=^\| 95% CI for b, b ± critical × s \(pp\) \| \[-?\d+\.\d+, (-?\d+\.\d+)\] \|$",pp2
 h6.gap_returns.n,docs/results/h6/gap_returns.md,regex=^\| industries \| (\d+) \|$,int
 diag.h1.primary.dropped_weight_pct,docs/results/diagnostics/h1_influence.csv,column=dropped_weight_pct;filter=part:primary,pct
 diag.h1.primary.beta_e,docs/results/diagnostics/h1_influence.csv,column=beta_e;filter=part:primary,coef
@@ -3037,8 +3037,8 @@ h6.talk.pooled_all.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \| \d+ \| 
 h6.talk.pooled_mapped.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \| \d+ \| \d+ \| \d\.\d+ \| (\d\.\d+) \|,rho
 h6.talk.unmapped_share_pct.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \|(?: [^|]+ \|){5} (\d+\.\d+)% \|,pct
 h6.vintage.submissions_retrieved_utc,data/raw/MANIFEST.json,sec_submissions_bulk.retrieved_utc,text
-rq3.eisfeldt.step1.b,docs/results/rq3/eisfeldt_replication.md,regex=^The `z_aioe` slope is negative: b = (-?\d+\.\d+) pp per 1 SD,coef
-rq3.eisfeldt.step1.ci_lo,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[(-?\d+\.\d+),",coef
-rq3.eisfeldt.step1.ci_hi,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[-?\d+\.\d+, (-?\d+\.\d+)\]",coef
-rq3.eisfeldt.step1.p,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = .*?, p = (\d\.\d+), n =",p
+rq3.eisfeldt.step1.b,docs/results/rq3/eisfeldt_replication.md,regex=^The `z_aioe` slope is negative: b = (-?\d+\.\d+) pp per 1 SD,pp2
+rq3.eisfeldt.step1.ci_lo,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[(-?\d+\.\d+),",pp2
+rq3.eisfeldt.step1.ci_hi,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[-?\d+\.\d+, (-?\d+\.\d+)\]",pp2
+rq3.eisfeldt.step1.p,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = .*?, p = (\d\.\d+), n =",p3
 meta.wording,docs/results/rq1/README.md,regex=^(AEI data are conversations matched to O\*NET tasks\. Nothing here says .*)$,text
