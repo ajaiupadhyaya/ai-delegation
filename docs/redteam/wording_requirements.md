@@ -196,6 +196,18 @@ it under the no-digit rule). It is restored in words ("a hundred log points") or
 Rows: `C6` of `rq1.h1.log_wage.ci_low`, `rq1.h1.log_wage.ci_high`, `rq1.h4.log_aui.ci_low`,
 `rq1.h4.log_aui.ci_high`, `rq1.h4.log_income.ci_low`, `rq1.h4.log_income.ci_high`.
 
+**W-24. The abstract's market sentence (documented exception to W-18; controller ruling).** The
+abstract's word cap (150–200 words) cannot hold the two P14 sentences verbatim. It states both
+non-rejections in one compressed sentence that keeps every P14 element through variables: each
+decision (`rq3.h5.decision_text`, `rq3.h5b.decision_text`), the null H0: b = b̄, each interval
+(`rq3.h5.ci_005.*_pp2`, `rq3.h5b.ci_005.*_pp2`), and "80% power only against a departure of at
+least" each MDE (`power.power_pct`, `rq3.h5.mde`, `rq3.h5b.mde`) "pp per SD". It points to the
+market section for the verbatim wording. The exception is the abstract word cap only: P14
+elements are kept, and the P14 sentences appear verbatim (`rq3.h5.wording`, `rq3.h5b.wording`)
+in §7, the brief and the body (§1, §10).
+Rows: `claim:00-abstract:1 C10`, `rq3.h5.decision_text C10`, `rq3.h5b.decision_text C10`,
+`rq3.h5b.decision_text C11`.
+
 **T-2. Task 33 rebuilds what it compares.** `make all` regenerates none of
 `docs/results/diagnostics/` (`python -m aideleg.robustness --diagnostics`, D-3),
 `docs/pap/power.md`'s generated block or `docs/audit/tables/` (`make audit`), so comparing them
