@@ -1,10 +1,15 @@
 ---
 title: "Delegating to the Machine: Executive Brief"
 author: "Ajai Upadhyaya"
+# brief_body.qmd shows its figure only here; in the paper it points to the figure in the RQ2 section
+brief: true
 format:
   pdf:
     toc: false
     number-sections: false
+    # two pages (Task 31): tighter margins and spacing than the paper
+    geometry: margin=0.9in
+    linestretch: 1.0
 ---
 
 {{< var meta.date >}}
