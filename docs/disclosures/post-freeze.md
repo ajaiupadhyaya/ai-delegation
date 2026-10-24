@@ -4,7 +4,7 @@ Each fact below happened after the tag `pap-v1` (2026-10-21) and is recorded in 
 
 Plan 2: `docs/superpowers/ledgers/2026-10-21-plan-2-behaviour-ledger.md`\
 Plan 3: `docs/superpowers/ledgers/2026-10-21-plan-3-markets-ledger.md`\
-Plan 4: `.superpowers/sdd/2026-10-21-plan-4-paper/progress.md`
+Plan 4: `docs/superpowers/ledgers/2026-10-21-plan-4-paper-ledger.md`
 
 Dates are §11 entry dates (UTC) or the dates of the commits named. "The controller" is the agent session that ran each plan; "an implementer" or "a referee" is a subagent it dispatched. No fact here is interpreted.
 
