@@ -20,13 +20,22 @@ Sources and locators:
   date, SEED, the FF49 industry count, the D11 plausibility threshold, the results date).
 - `power_frozen`: a dotted path into `power_values()`, computed from `confirm_h5.FROZEN`
   (MDE = (c_0.025 + t_21,0.80) * s, in pp).
-- `pap`: a dotted path into `pap_values()` (the `pap-v1` tag, its commit and date).
+- `pap`: a dotted path into `pap_values()` (the `pap-v1` tag, its commit and date). The PAP is
+  frozen, so commit and date are pinned here (`PAP_COMMIT`, `PAP_DATE`) and checked against git
+  when the tag is available.
+
+Without git history (an archive with no `.git`, or a shallow clone), `meta.date` is read from the
+committed `_variables.yml`, so the build is the same as from a full clone.
 
 Formats (`fmt`; Global Constraints): `pp` and `coef` 2 decimals; `rho` 3 decimals; `p` 3
 decimals with p < 0.001 shown as "< 0.001"; `pct` 2 decimals (percent 0-100, no sign); `int`;
 `text` verbatim; `date` ISO. A value read from a printed markdown file (`confirmatory_md` or a
 `.md` regex) keeps the precision it was printed with: the format only checks that it is a
 number of the right kind. Negative numbers keep the ASCII hyphen the tables print.
+Two prose forms: `pp2` is 2 decimals even for a printed value (so prose never mixes precisions);
+`verdict` turns a decision into words (`True`/`False` -> "rejected"/"not rejected";
+the RQ1 status `supported`/`not_rejected` -> "supported"/"not supported"; any other value is
+refused).
 
 Default (Task 18): a red-team headline key of `docs/redteam/headlines.csv` is the variable of the
 same name lower-cased (`rq1.H1.beta_e` -> `rq1.h1.beta_e`), with the same value as formatted.
@@ -49,7 +58,16 @@ from aideleg.paper import confirmatory_md, headlines
 MAP = ROOT / "docs/paper/variables_map.csv"
 OUT = ROOT / "docs/paper/_variables.yml"
 COLUMNS = ["key", "source", "locator", "fmt"]
-FMTS = ("pp", "coef", "rho", "p", "int", "pct", "text", "date")
+FMTS = ("pp", "coef", "rho", "p", "int", "pct", "text", "date", "pp2", "verdict")
+VERDICTS = {
+    "True": "rejected",
+    "False": "not rejected",
+    "supported": "supported",
+    "not_rejected": "not supported",
+}
+# pap-v1 (frozen): checked against git when the tag is present
+PAP_COMMIT = "6a16b1ad052977650b90c8062ceeeab9ac6572e1"
+PAP_DATE = "2026-10-21"
 BUILTINS = ("confirmatory_md", "config", "power_frozen", "pap")
 NUMERIC = ("pp", "coef", "rho", "p", "int", "pct")
 KEY_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$")
@@ -76,6 +94,12 @@ def fmt(value, kind: str, *, printed: bool = False) -> str:
         raise ValueError(f"unknown format {kind!r}; expected one of {FMTS}")
     if kind == "text":
         return str(value)
+    if kind == "verdict":
+        if str(value) not in VERDICTS:
+            raise ValueError(f"{value!r} is not a known decision {sorted(VERDICTS)}")
+        return VERDICTS[str(value)]
+    if kind == "pp2":
+        return f"{_float(value, kind):.2f}"
     if kind == "date":
         s = value.isoformat() if isinstance(value, date) else str(value)
         if not _DATE.match(s):
@@ -101,11 +125,34 @@ def fmt(value, kind: str, *, printed: bool = False) -> str:
     return str(int(x))
 
 
-def _git(*args: str) -> str:
-    r = subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True)
-    if r.returncode != 0 or not r.stdout.strip():
-        raise ValueError(f"git {' '.join(args)} failed: {r.stderr.strip()}")
-    return r.stdout.strip()
+def _git(repo: Path, *args: str) -> str | None:
+    """git's output in `repo`, or None when git, the repository or the object is unavailable."""
+    try:
+        r = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
+    except OSError:
+        return None
+    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
+
+
+def _has_history(repo: Path) -> bool:
+    top = _git(repo, "rev-parse", "--show-toplevel")
+    if top is None or Path(top).resolve() != Path(repo).resolve():
+        return False
+    return _git(repo, "rev-parse", "--is-shallow-repository") == "false"
+
+
+def results_date(repo: Path = ROOT) -> str:
+    """The last commit date of the generated inputs (`DATED`): fixed until a result changes.
+    Without full git history, the `meta.date` of the committed `_variables.yml`."""
+    if _has_history(repo):
+        d = _git(repo, "log", "-1", "--format=%cs", "--", *DATED)
+        if d:
+            return d
+    committed = Path(repo) / OUT.relative_to(ROOT)
+    try:
+        return json.loads(committed.read_text(encoding="utf-8"))["meta"]["date"]
+    except (OSError, ValueError, KeyError) as e:
+        raise ValueError(f"no git history and no committed meta.date in {committed}: {e}") from None
 
 
 @cache
@@ -122,7 +169,7 @@ def config_values() -> dict:
         "n_industries": len(FF49_INDUSTRIES),
         "plausibility_pp": power.PLAUSIBILITY_PP,
         # the last commit date of the generated inputs: fixed until a result changes
-        "results_date": _git("log", "-1", "--format=%cs", "--", *DATED),
+        "results_date": results_date(ROOT),
     }
 
 
@@ -147,13 +194,18 @@ def power_values() -> dict:
     }
 
 
-@cache
-def pap_values() -> dict:
-    return {
-        "tag": PAP_TAG,
-        "commit": _git("rev-list", "-n", "1", PAP_TAG),
-        "date": _git("log", "-1", "--format=%cs", PAP_TAG),
-    }
+def pap_values(repo: Path = ROOT) -> dict:
+    """The pinned `pap-v1` commit and date; where git has the tag, they must agree with it."""
+    if _has_history(repo):
+        got = {
+            "commit": _git(repo, "rev-list", "-n", "1", PAP_TAG),
+            "date": _git(repo, "log", "-1", "--format=%cs", PAP_TAG),
+        }
+        want = {"commit": PAP_COMMIT, "date": PAP_DATE}
+        for k, v in got.items():
+            if v is not None and v != want[k]:
+                raise ValueError(f"{PAP_TAG} {k} is {v} in git, pinned {want[k]}")
+    return {"tag": PAP_TAG, "commit": PAP_COMMIT, "date": PAP_DATE}
 
 
 def _builtin(source: str, locator: str):

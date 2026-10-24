@@ -216,3 +216,77 @@ def test_captions_have_no_typed_numerals():
                 t = re.sub(r"§\d+(\.\d+)*", "", t)
                 t = _IDENT.sub("", t)
                 assert not re.search(r"\d", t), (path.name, row["id"], c, row[c])
+
+
+def test_prose_formats():
+    assert variables.fmt("False", "verdict") == "not rejected"
+    assert variables.fmt("True", "verdict") == "rejected"
+    assert variables.fmt("supported", "verdict") == "supported"
+    assert variables.fmt("not_rejected", "verdict") == "not supported"
+    with pytest.raises(ValueError):
+        variables.fmt("contradicts", "verdict")
+    assert variables.fmt("-2.764", "pp2", printed=True) == "-2.76"
+
+
+def test_prose_forms_beside_raw(flat):
+    """Prose never prints `False` or mixes precisions: verdicts and 2-dp interval ends sit beside
+    the raw and printed-precision values, and the 2-dp ends equal the P14 wording's interval."""
+    rec = confirmatory_md.parse()
+    for hyp in ("H5", "H5b"):
+        k = f"rq3.{hyp.lower()}"
+        assert flat[f"{k}.decision"] == rec["decision"][hyp]["rejected"]
+        assert flat[f"{k}.decision_text"] == (
+            "rejected" if rec["decision"][hyp]["rejected"] == "True" else "not rejected"
+        )
+        lo, hi = flat[f"{k}.ci_005.lo_pp2"], flat[f"{k}.ci_005.hi_pp2"]
+        assert f"Interval [{lo}, {hi}] pp per 1 SD" in flat[f"{k}.wording"]
+        assert flat[f"{k}.ci_0025.lo_pp2"] == f"{float(flat[f'{k}.ci_0025.lo']):.2f}"
+        assert flat[f"{k}.b_pp2"] == f"{float(flat[f'{k}.b']):.2f}"
+    for h in ("h1", "h2", "h3", "h4"):
+        raw = flat[f"rq1.{h}.decision"]
+        assert flat[f"rq1.{h}.decision_text"] == variables.VERDICTS[raw]
+
+
+def _git(*args, cwd=None):
+    import subprocess
+
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
+
+
+def _committed_date() -> str:
+    return json.loads(variables.OUT.read_text(encoding="utf-8"))["meta"]["date"]
+
+
+def test_no_git_falls_back_to_committed(tmp_path):
+    """An archive with no `.git`: meta.date from the committed `_variables.yml`, the PAP from
+    the pinned constants."""
+    repo = tmp_path / "archive"
+    (repo / "docs/paper").mkdir(parents=True)
+    (repo / "docs/paper/_variables.yml").write_text(variables.OUT.read_text("utf-8"), "utf-8")
+    assert variables.results_date(repo) == _committed_date()
+    assert variables.pap_values(repo) == variables.pap_values(ROOT)
+    with pytest.raises(ValueError, match="no git history"):
+        variables.results_date(tmp_path / "empty")
+
+
+@pytest.mark.parametrize("depth", [["--depth", "1"], []])
+def test_shallow_and_full_clone_agree(tmp_path, depth):
+    """A `--depth 1` clone falls back to the committed date; a full clone reads git. Both give
+    the committed values, and the PAP pins agree with the tag where git has it."""
+    clone = tmp_path / "clone"
+    _git("clone", "-q", "--no-local", *depth, f"file://{ROOT}", str(clone))
+    shallow = bool(depth)
+    assert variables._has_history(clone) is (not shallow)
+    committed = json.loads((clone / "docs/paper/_variables.yml").read_text("utf-8"))
+    assert variables.results_date(clone) == committed["meta"]["date"]
+    assert variables.pap_values(clone) == {
+        "tag": "pap-v1",
+        "commit": variables.PAP_COMMIT,
+        "date": variables.PAP_DATE,
+    }
+
+
+def test_pap_pins_match_git():
+    assert variables._has_history(ROOT)
+    assert variables._git(ROOT, "rev-list", "-n", "1", "pap-v1") == variables.PAP_COMMIT
+    assert variables.results_date(ROOT) == _committed_date()
