@@ -596,3 +596,205 @@ def build_appendices(out_dir: Path = APPENDIX) -> list[Path]:
         robustness_appendix(out_dir=out_dir),
         data_appendix(out_dir=out_dir),
     ]
+
+
+# --- the replication README (Plan 4 Task 32) ----------------------------------------------------
+#
+# `README.md` follows the AEA Data Editor template. Its generated blocks sit between
+# `<!-- BEGIN GENERATED: <name> -->` and `<!-- END GENERATED: <name> -->`; `readme_blocks`
+# builds them (the dataset list and the environment from the data appendix's own builders) and
+# `write_readme` replaces each block in place, leaving the hand-written text untouched.
+
+README_MD = ROOT / "README.md"
+CHECK_MD = ROOT / "docs/replication/check.md"
+README_BLOCKS = (
+    "wording",
+    "preregistration",
+    "datasets",
+    "environment",
+    "seed",
+    "storage",
+    "tables",
+)
+RUNTIME_PENDING = "runtime: pending the fresh-clone check (Task 33)"
+_RUNTIME = re.compile(r"^\W*(.*\b(runtime|wall[- ]clock|elapsed)\b.*)$", re.I | re.M)
+# Which program writes a results file (by path prefix, first match) and a figure (by stem prefix).
+# The two confirmatory records are inputs: committed once, never rebuilt.
+TABLE_PROGRAMS = (
+    (
+        "docs/results/confirmatory_h5.",
+        "`aideleg.confirm_h5` (single run, never re-executed; the committed record is an input)",
+    ),
+    (
+        "docs/results/rq1/confirmatory_rq1.",
+        "`make rq1-confirm` (`aideleg.rq1.confirm`, write-once; the committed record is an input)",
+    ),
+    ("docs/results/rq1/", "`make results-rq1` (`aideleg.results.rq1`)"),
+    ("docs/results/rq2/", "`make results-rq2` (`aideleg.results.rq2`)"),
+    ("docs/results/rq3/", "`make rq3` (`aideleg.rq3 all`)"),
+    ("docs/results/h6/", "`make h6` (`aideleg.h6 all`)"),
+    ("docs/results/robustness/", "`make robustness` (`aideleg.robustness`)"),
+    ("docs/results/diagnostics/", "`python -m aideleg.robustness --diagnostics`"),
+    ("docs/audit/tables/", "`make audit` (`aideleg.audit`)"),
+)
+FIGURE_PROGRAMS = (
+    ("fig_rq1_", "`make results-rq1` (`aideleg.results.rq1`)"),
+    ("fig_rq2_", "`make results-rq2` (`aideleg.results.rq2`)"),
+    ("fig_rq3_", "`make rq3` (`aideleg.rq3 all`)"),
+    ("fig_h6_", "`make h6` (`aideleg.h6 all`)"),
+    ("fig_robustness_", "`make robustness` (`aideleg.robustness --summary`)"),
+)
+
+
+def readme_markers(name: str) -> tuple[str, str]:
+    return f"<!-- BEGIN GENERATED: {name} -->", f"<!-- END GENERATED: {name} -->"
+
+
+def table_program(source: str) -> str:
+    path = source.partition("#")[0]
+    for prefix, program in TABLE_PROGRAMS:
+        if path.startswith(prefix):
+            return program
+    raise ValueError(f"{source}: no program is known to write it")
+
+
+def figure_program(stem: str) -> str:
+    for prefix, program in FIGURE_PROGRAMS:
+        if stem.startswith(prefix):
+            return program
+    raise ValueError(f"{stem}: no program is known to write it")
+
+
+def runtime_line(check: Path = CHECK_MD) -> str:
+    """The measured runtime, quoted from Task 33's `docs/replication/check.md`, or the pending
+    text when that file (or a runtime line in it) is absent."""
+    check = Path(check)
+    if not check.is_file():
+        return RUNTIME_PENDING
+    m = _RUNTIME.search(check.read_text(encoding="utf-8"))
+    if m is None:
+        return f"runtime: see `{_rel(check)}` (no runtime line found in it)"
+    return f"{m[1].strip()} (quoted from `{_rel(check)}`)"
+
+
+def _gb(n: int) -> str:
+    return f"{n} bytes ({n / 1e9:.2f} GB)"
+
+
+def _storage(manifest: dict, raw: Path, check: Path) -> list[str]:
+    total = sum(rec["bytes"] for rec in manifest.values())
+    largest = max(manifest, key=lambda k: manifest[k]["bytes"])
+    lines = [
+        f"- `data/raw`, as listed in the MANIFEST: {_gb(total)} in {len(manifest)} records "
+        "(zip archives are also extracted next to themselves, which adds to this).",
+        f"- Largest single raw file: `{largest}`, {_gb(manifest[largest]['bytes'])}.",
+    ]
+    if paplog.SET_INDEX_KEY in manifest:
+        index = raw / manifest[paplog.SET_INDEX_KEY].get("dest", paplog.SET_INDEX_FILE)
+        docs = []
+        if index.is_file():
+            docs = [
+                json.loads(line)["dest"]
+                for line in index.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        if docs and all((raw / d).is_file() for d in docs):
+            size = sum((raw / d).stat().st_size for d in docs)
+            lines.append(
+                f"- The {len(docs)} 10-K documents listed in `{_rel(index)}` (gzip, on disk): "
+                f"{_gb(size)}, in addition to the MANIFEST total."
+            )
+        else:
+            lines.append(
+                f"- The 10-K documents listed in `{_rel(index)}` are not all on disk here; "
+                "their compressed size is not counted."
+            )
+    lines.append(f"- {runtime_line(check)}")
+    return lines
+
+
+def _exhibit_rows() -> list[str]:
+    rows = [
+        "| exhibit | id | program | output file | paper include |",
+        "|----|----|----|----|----|",
+    ]
+    for row in _rows(TABLES, TABLE_COLUMNS):
+        rows.append(
+            f"| table | `{row['id']}` | {_cell(table_program(row['source']))} | "
+            f"`{row['source']}` | `docs/paper/_generated/tables/{row['id']}.md` |"
+        )
+    for row in _rows(FIGURES, FIGURE_COLUMNS):
+        stem = row["stem"]
+        rows.append(
+            f"| figure | `{row['id']}` | {_cell(figure_program(stem))} | "
+            f"`docs/paper/figures/{stem}.pdf`, `.png` | "
+            f"`docs/paper/_generated/figures/{row['id']}.md` |"
+        )
+    return rows
+
+
+def readme_blocks(
+    *,
+    manifest_path: Path = MANIFEST_JSON,
+    pap: Path = PAP_MD,
+    raw: Path | None = None,
+    check: Path = CHECK_MD,
+) -> dict[str, str]:
+    """The README's generated blocks, by name (`README_BLOCKS`), each ending in a newline."""
+    from aideleg.config import SEED
+    from aideleg.paper.variables import pap_values
+    from aideleg.robustness.upstream import WORDING
+
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    raw = Path(raw) if raw is not None else Path(manifest_path).parent
+    table, notes = _manifest_table(manifest, pap, raw)
+    pv = pap_values()
+    blocks = {
+        "wording": [WORDING],
+        "preregistration": [
+            f"The pre-analysis plan (`docs/pap/pre-analysis-plan.md`) was signed and frozen as "
+            f"the annotated git tag `{pv['tag']}` on commit `{pv['commit']}` ({pv['date']}). "
+            "Every later change to it is an entry of its §11."
+        ],
+        "datasets": [
+            "Generated from `data/raw/MANIFEST.json`, as in the data appendix: one row per raw "
+            "file, with the two bulk sets collapsed to one row each. No raw file is provided in "
+            "the repository; every one is downloaded by `make data` or restored from the frozen "
+            "archive, and checked against its SHA-256.",
+            "",
+            *table,
+            "",
+            *notes,
+        ],
+        "environment": _environment(),
+        "seed": [
+            f"`aideleg.config.SEED` = {SEED}. Every random draw comes from "
+            "`numpy.random.default_rng(SEED)`."
+        ],
+        "storage": _storage(manifest, raw, Path(check)),
+        "tables": _exhibit_rows(),
+    }
+    return {k: "\n".join(v) + "\n" for k, v in blocks.items()}
+
+
+def render_readme(text: str, blocks: dict[str, str] | None = None) -> str:
+    """`text` with each generated block replaced by its fresh body; every block must be there
+    exactly once."""
+    blocks = readme_blocks() if blocks is None else blocks
+    for name, body in blocks.items():
+        begin, end = readme_markers(name)
+        if text.count(begin) != 1 or text.count(end) != 1:
+            raise ValueError(f"README: the {name!r} block markers must appear exactly once")
+        head, rest = text.split(begin + "\n", 1)
+        _, tail = rest.split(end, 1)
+        text = head + begin + "\n" + body + end + tail
+    return text
+
+
+def write_readme(path: Path = README_MD) -> Path:
+    path = Path(path)
+    text = path.read_text(encoding="utf-8")
+    new = render_readme(text)
+    if new != text:
+        path.write_text(new, encoding="utf-8")
+    return path

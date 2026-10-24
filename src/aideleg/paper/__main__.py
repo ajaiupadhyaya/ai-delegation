@@ -1,6 +1,7 @@
 """`uv run python -m aideleg.paper`: regenerate `docs/paper/_variables.yml` and the table and
 figure includes under `docs/paper/_generated/` from the committed results (Plan 4 Task 18), and the
-five appendix includes under `docs/paper/_generated/appendix/` (Task 21).
+five appendix includes under `docs/paper/_generated/appendix/` (Task 21), and the generated
+blocks of `README.md` (Task 32).
 Offline; reads committed files, git metadata and, where present, the raw `INDEX.jsonl` (whose
 line count the data appendix checks against PAP §11)."""
 
@@ -19,10 +20,11 @@ def main() -> int:
     tables = includes.build_tables()
     figures = includes.build_figures()
     appendices = includes.build_appendices()
+    includes.write_readme()
     print(
         f"{variables.OUT.relative_to(variables.ROOT)}: {_count(vars_)} variables; "
         f"{len(tables)} table includes; {len(figures)} figure includes; "
-        f"{len(appendices)} appendix includes"
+        f"{len(appendices)} appendix includes; README.md blocks"
     )
     return 0
 
