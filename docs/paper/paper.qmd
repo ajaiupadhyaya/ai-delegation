@@ -1,9 +1,10 @@
 ---
 title: "Delegating to the Machine: How People Hand Work to AI, and Whether Equity Markets Priced It"
 author: "Ajai Upadhyaya"
-date: "{{< var meta.date >}}"
 ---
 
+
+{{< var meta.date >}}
 
 # Abstract {.unnumbered}
 

@@ -1,11 +1,12 @@
 ---
 title: "Delegating to the Machine: Executive Brief"
 author: "Ajai Upadhyaya"
-date: "{{< var meta.date >}}"
 format:
   pdf:
     toc: false
     number-sections: false
 ---
+
+{{< var meta.date >}}
 
 {{< include brief_body.qmd >}}
