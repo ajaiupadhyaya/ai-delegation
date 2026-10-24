@@ -103,21 +103,15 @@ def _names(text: str, rid: str) -> bool:
     return re.search(rf"\bR0?{n}\b", text) is not None
 
 
-def _reports(path: Path, header: str, rid: str) -> bool:
-    """A header reports a §8.2 row when a CSV header has a column named by the row ID, or a
-    Markdown title names the row ID together with "robustness" or "§8.2". (The RQ2 title
-    "widths of the R7 bounds" names the D1 suppression bounds, not row R7.)"""
-    if path.suffix == ".csv":
-        return any(
-            _names(c, rid) and c.strip().upper().lstrip("R").isdigit() for c in header.split(",")
-        )
-    return _names(header, rid) and ("robustness" in header.lower() or "§8.2" in header)
+# Result files whose header names an R-ID that is not a §8.2 row: the RQ2 title "widths of
+# the R7 bounds" names the D1 suppression bounds (PAP §8.2 R10's "R7 bounds"), not row R7.
+COVERAGE_EXEMPT = {"docs/results/rq2/bounds.md": "R7 here is the D1 suppression bounds"}
 
 
 def coverage(root: Path = ROOT) -> dict[str, list[str]]:
     """For each §8.2 row, the files that report it: the owner's outputs (Plan 4's `R<nn>.csv`
     and `.md` both present, or the confirmatory record naming the row), plus any other result
-    file under `docs/results` whose header reports the row (`_reports`).
+    file under `docs/results` whose header names the row ID (except `COVERAGE_EXEMPT`).
     Exactly one entry is the gate."""
     root = Path(root)
     results = root / "docs/results"
@@ -125,7 +119,10 @@ def coverage(root: Path = ROOT) -> dict[str, list[str]]:
     others = [
         p
         for p in sorted(results.rglob("*"))
-        if p.suffix in (".md", ".csv") and p.is_file() and p not in own
+        if p.suffix in (".md", ".csv")
+        and p.is_file()
+        and p not in own
+        and str(p.relative_to(root)) not in COVERAGE_EXEMPT
     ]
     headers = {p: _header(p) for p in others}
     out: dict[str, list[str]] = {}
@@ -138,7 +135,7 @@ def coverage(root: Path = ROOT) -> dict[str, list[str]]:
             h5 = root / registry.H5_RECORD
             if h5.exists() and _names(h5.read_text(encoding="utf-8"), rid):
                 found.append(registry.H5_RECORD)
-        found += [str(p.relative_to(root)) for p, h in headers.items() if _reports(p, h, rid)]
+        found += [str(p.relative_to(root)) for p, h in headers.items() if _names(h, rid)]
         out[rid] = found
     return out
 
@@ -262,15 +259,22 @@ def _h6() -> dict[str, Primary]:
     }
 
 
+def record_outcome(rec: dict) -> str:
+    """An RQ1 record's outcome: the `outcome=` field of its variant, or, for a row that states
+    none (R25 re-tests the committed fits, R28 varies the H4 sample), the primary's."""
+    m = re.search(r"(?:^|; )outcome=([^;]+)", rec["variant"] or "")
+    return m[1].strip() if m else _rq1()[rec["applies_to"]]["outcome"]
+
+
 def primary_for(rec: dict) -> Primary | None:
     """The primary estimate a record stands beside, from the committed result files, or None
     when the record has no primary counterpart (placebo dates, the A_pooled index comparison,
-    a coefficient the primary does not estimate, an outcome in other units)."""
+    a coefficient the primary does not estimate, another outcome or outcome units)."""
     unit, applies, est, part = rec["unit"], rec["applies_to"], rec["estimand"], rec["part"]
     if unit == report.MARKET_UNIT and applies in ("H5", "H5b"):
         return _quoted(*h5_record()[applies])
     if applies in _RQ1_UNITS:
-        if unit != _RQ1_UNITS[applies]:
+        if unit != _RQ1_UNITS[applies] or record_outcome(rec) != _rq1()[applies]["outcome"]:
             return None
         name = _RQ1_ALIAS.get((applies, est), est)
         c = _rq1()[applies]["coefs"].get(name)
@@ -293,6 +297,16 @@ def primary_for(rec: dict) -> Primary | None:
 
 
 # --- summary.md -------------------------------------------------------------------------------
+
+
+def _display(unit: str | None, prim: Primary) -> str:
+    """The primary at the row files' precision (pp 2 decimals, correlations 3). A value quoted
+    at 3 decimals is rounded once more only when that rounding is not a tie."""
+    if prim.quoted and unit != report.RHO_UNIT:
+        digits = prim.text.lstrip("-").split(".")[1]
+        if len(digits) > 2 and digits[2:] == "5" + "0" * (len(digits) - 3):
+            raise ValueError(f"ambiguous rounding of the quoted primary {prim.text}")
+    return _fmt(unit, prim.est)
 
 
 def _link(rid: str) -> str:
@@ -352,7 +366,7 @@ def summary_lines(records: pl.DataFrame) -> list[str]:
                         part,
                         r["estimand"],
                         _fmt(r["unit"], r["estimate"]),
-                        prim.text,
+                        _display(r["unit"], prim),
                         _link(rid),
                     )
                 )
@@ -386,11 +400,13 @@ def summary_text(records: pl.DataFrame) -> str:
         "",
         P14_STATEMENT,
         "",
-        "Each line puts a row's estimate beside the primary's, formatted as in the row files "
-        "(pp and RQ1 coefficients to 2 decimals, correlations to 3). Primaries are read from "
-        "the committed files: H5 and H5b from `confirmatory_h5.md` and the H6 rows from "
-        "`h6/gap.md` and `h6/gap_returns.md` at their printed precision; RQ1 from "
-        "`rq1/confirmatory_rq1.json`; RQ2 from `rq2/could_vs_does.csv` (Design B, or A_pooled "
+        "Each line puts a row's estimate beside the primary's, both formatted as in the row files "
+        "(pp and RQ1 coefficients to 2 decimals, correlations to 3); the R12 and R13 lines quote "
+        "`confirmatory_h5.md` at its printed precision. Primaries are read from the committed "
+        "files: H5 and H5b from `confirmatory_h5.md` and the H6 rows from `h6/gap.md` and "
+        "`h6/gap_returns.md` (as printed, then formatted); RQ1 from "
+        "`rq1/confirmatory_rq1.json`, only for records with the primary's outcome and units; "
+        "RQ2 from `rq2/could_vs_does.csv` (Design B, or A_pooled "
         "for the A_pooled rows); Design A from `rq3/terciles.csv`, `rq3/fama_macbeth.csv` and "
         "`rq3/event_study.csv`; the r6 descriptives from `rq1/anatomy_wage_decile.csv`. "
         "Intervals, statistics, p-values and notes are in the row files. Implementation choices "

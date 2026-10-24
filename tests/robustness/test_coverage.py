@@ -47,9 +47,7 @@ def test_every_row_covered_exactly_once():
 def test_coverage_fails_on_a_row_reported_twice(tmp_path):
     root = _fixture_root(tmp_path)
     assert all(len(v) == 1 for v in appendix.coverage(root).values())
-    _write(
-        root / "docs/results/rq3/extra.md", "# R5: robustness row, equal-weighted returns\n\nx\n"
-    )
+    _write(root / "docs/results/rq3/extra.md", "# R5: equal-weighted returns\n\nx\n")
     assert len(appendix.coverage(root)["R5"]) == 2
     _write(root / "docs/results/rq2/bounds.md", "# RQ2: widths of the R7 bounds\n")
     assert len(appendix.coverage(root)["R7"]) == 1
@@ -167,6 +165,43 @@ def test_primary_mapping_by_kind():
     assert all(appendix.primary_for(r) is None for r in r9.iter_rows(named=True))
 
 
+def test_matched_rq1_records_have_the_primary_outcome():
+    recs = appendix.load_records().filter(
+        pl.col("applies_to").is_in(["H1", "H2", "H3", "H4"]), pl.col("estimate").is_not_null()
+    )
+    rq1 = appendix._rq1()
+    matched = 0
+    for r in recs.iter_rows(named=True):
+        out = appendix.record_outcome(r)
+        if appendix.primary_for(r) is not None:
+            matched += 1
+            assert out == rq1[r["applies_to"]]["outcome"], (r["row_id"], r["part"], out)
+        elif out != rq1[r["applies_to"]]["outcome"]:
+            assert appendix.primary_for(r) is None
+    assert matched
+    r22 = recs.filter(pl.col("row_id") == "R22")
+    unmatched = {r["part"] for r in r22.iter_rows(named=True) if appendix.primary_for(r) is None}
+    assert unmatched == {
+        "augmentation_pct",
+        "directive_pct",
+        "feedback_loop_pct",
+        "task_iteration_pct",
+        "validation_pct",
+        "learning_pct",
+    }
+
+
+def test_summary_primary_at_row_file_precision(summary_text):
+    for ln in summary_text.splitlines():
+        cells = [c.strip() for c in ln.split("|")[1:-1]]
+        if len(cells) != 9 or cells[0] in ("row", "---") or cells[4] == "confirmatory script":
+            continue
+        var, prim = cells[6], cells[7]
+        if prim == "—" or var == "see file":
+            continue
+        assert len(var.split(".")[-1]) == len(prim.split(".")[-1]), ln
+
+
 def test_market_intervals_are_the_c005_interval():
     recs = appendix.load_records().filter(pl.col("unit") == report.MARKET_UNIT)
     assert recs.height
@@ -236,14 +271,44 @@ def _fixture_records():
     )
 
 
+def _texts(fig):
+    return [t.get_text() for t in fig.findobj(matplotlib.text.Text)]
+
+
+def _no_stars_or_counts(texts):
+    assert not [t for t in texts if "*" in t]
+    assert not [t for t in texts if re.search(r"\b\d+\s+(of|out of)\b", t)]
+
+
 def test_forest_no_stars():
     fig = figures.forest(
         _fixture_records(), {"H5": (1.5, -3.0, 6.0), "H5b": (3.0, -2.0, 8.0)}, "Market rows"
     )
-    texts = [t.get_text() for t in fig.findobj(matplotlib.text.Text)]
+    texts = _texts(fig)
     assert any("R05 market" in t for t in texts)
-    assert not [t for t in texts if "*" in t]
-    assert not [t for t in texts if re.search(r"\b\d+\s+(of|out of)\b", t)]
+    _no_stars_or_counts(texts)
+
+
+@pytest.mark.parametrize("inputs", ["market_inputs", "rq1_inputs"])
+def test_forest_no_stars_real_figures(inputs):
+    import matplotlib.pyplot as plt
+
+    recs, prim = getattr(figures, inputs)()
+    fig = figures.forest(recs, prim, inputs)
+    texts = _texts(fig)
+    plt.close(fig)
+    assert any(t.startswith("R") for t in texts)
+    _no_stars_or_counts(texts)
+
+
+def test_rq1_figure_leaves_other_outcomes_out():
+    recs, prim = figures.rq1_inputs()
+    h2 = recs.filter(pl.col("panel") == "H2: trend")
+    assert "learning_pct" not in set(h2["part"].to_list())
+    assert all(
+        appendix.record_outcome(r) == appendix._rq1()[r["applies_to"]]["outcome"]
+        for r in recs.iter_rows(named=True)
+    )
 
 
 def test_forest_one_point_per_row_and_part():

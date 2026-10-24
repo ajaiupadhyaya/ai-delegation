@@ -33,6 +33,16 @@ def test_csv_equivalent_last_digits():
     assert csv_equivalent(HEAD, "a,b,c\nx,1.9584125416694946,\ny,1e-13,-3\n")  # near zero
 
 
+def test_csv_equivalent_nan_and_inf():
+    base = "a,b\nx,NaN\ny,inf\nz,-inf\n"
+    assert csv_equivalent(base, base)
+    assert not csv_equivalent(base, "a,b\nx,1.0\ny,inf\nz,-inf\n")
+    assert not csv_equivalent(base, "a,b\nx,NaN\ny,1e308\nz,-inf\n")
+    assert not csv_equivalent(base, "a,b\nx,NaN\ny,-inf\nz,-inf\n")
+    assert not csv_equivalent(base, "a,b\nx,,\ny,inf\nz,-inf\n")
+    assert not csv_equivalent("a\n1.0\n", "a\nNaN\n")
+
+
 def test_csv_equivalent_real_differences():
     assert not csv_equivalent(HEAD, "a,b,c\nx,1.9584125,\ny,0.0,-3\n")
     assert not csv_equivalent(HEAD, "a,b,c\nz,1.9584125416694946,\ny,0.0,-3\n")

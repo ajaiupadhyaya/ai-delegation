@@ -8,12 +8,12 @@ Every market interval of the robustness rows (H5, H5b and the H6 gap–return sl
 
 Any prose that calls a market robustness result a non-rejection uses the fixed P14 wording of `docs/results/confirmatory_h5.md` verbatim (PAP §3.3 P14).
 
-Each line puts a row's estimate beside the primary's, formatted as in the row files (pp and RQ1 coefficients to 2 decimals, correlations to 3). Primaries are read from the committed files: H5 and H5b from `confirmatory_h5.md` and the H6 rows from `h6/gap.md` and `h6/gap_returns.md` at their printed precision; RQ1 from `rq1/confirmatory_rq1.json`; RQ2 from `rq2/could_vs_does.csv` (Design B, or A_pooled for the A_pooled rows); Design A from `rq3/terciles.csv`, `rq3/fama_macbeth.csv` and `rq3/event_study.csv`; the r6 descriptives from `rq1/anatomy_wage_decile.csv`. Intervals, statistics, p-values and notes are in the row files. Implementation choices where the PAP is silent are listed in [implementation_choices.md](implementation_choices.md).
+Each line puts a row's estimate beside the primary's, both formatted as in the row files (pp and RQ1 coefficients to 2 decimals, correlations to 3); the R12 and R13 lines quote `confirmatory_h5.md` at its printed precision. Primaries are read from the committed files: H5 and H5b from `confirmatory_h5.md` and the H6 rows from `h6/gap.md` and `h6/gap_returns.md` (as printed, then formatted); RQ1 from `rq1/confirmatory_rq1.json`, only for records with the primary's outcome and units; RQ2 from `rq2/could_vs_does.csv` (Design B, or A_pooled for the A_pooled rows); Design A from `rq3/terciles.csv`, `rq3/fama_macbeth.csv` and `rq3/event_study.csv`; the r6 descriptives from `rq1/anatomy_wage_decile.csv`. Intervals, statistics, p-values and notes are in the row files. Implementation choices where the PAP is silent are listed in [implementation_choices.md](implementation_choices.md).
 
 | row | applies to | label | PAP source | part | estimand | variant | primary | file |
 |---|---|---|---|---|---|---|---|---|
-| R1 | H5 | robustness; look-ahead | spec §5.6; P16 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R01.md](R01.md) |
-| R1 | H5b | robustness; look-ahead | spec §5.6; P16 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.51 | 3.461 | [R01.md](R01.md) |
+| R1 | H5 | robustness; look-ahead | spec §5.6; P16 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R01.md](R01.md) |
+| R1 | H5b | robustness; look-ahead | spec §5.6; P16 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.51 | 3.46 | [R01.md](R01.md) |
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_eloundou vs z_usage | 0.779 | 0.768 | [R01.md](R01.md) |
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_eloundou vs z_delegation | 0.724 | 0.716 | [R01.md](R01.md) |
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_eloundou vs z_augmentation | 0.783 | 0.783 | [R01.md](R01.md) |
@@ -23,8 +23,8 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_aioe vs z_usage | 0.813 | 0.809 | [R01.md](R01.md) |
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_aioe vs z_delegation | 0.768 | 0.763 | [R01.md](R01.md) |
 | R1 | RQ2 | robustness; look-ahead | spec §5.6; P16 | rq2 | spearman z_aioe vs z_augmentation | 0.824 | 0.825 | [R01.md](R01.md) |
-| R2 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.75 | 1.958 | [R02.md](R02.md) |
-| R2 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.36 | 3.461 | [R02.md](R02.md) |
+| R2 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.75 | 1.96 | [R02.md](R02.md) |
+| R2 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.36 | 3.46 | [R02.md](R02.md) |
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_eloundou vs z_usage | 0.814 | 0.768 | [R02.md](R02.md) |
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_eloundou vs z_delegation | 0.786 | 0.716 | [R02.md](R02.md) |
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_eloundou vs z_augmentation | 0.822 | 0.783 | [R02.md](R02.md) |
@@ -34,8 +34,8 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_aioe vs z_usage | 0.847 | 0.809 | [R02.md](R02.md) |
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_aioe vs z_delegation | 0.817 | 0.763 | [R02.md](R02.md) |
 | R2 | RQ2 | robustness | spec §5.6 | rq2 | spearman z_aioe vs z_augmentation | 0.855 | 0.825 | [R02.md](R02.md) |
-| R3 | H5 | robustness | D3 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.55 | 1.958 | [R03.md](R03.md) |
-| R3 | H5b | robustness | D3 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 2.44 | 3.461 | [R03.md](R03.md) |
+| R3 | H5 | robustness | D3 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.55 | 1.96 | [R03.md](R03.md) |
+| R3 | H5b | robustness | D3 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 2.44 | 3.46 | [R03.md](R03.md) |
 | R3 | RQ2 | robustness | D3 | rq2 | spearman z_eloundou vs z_usage | 0.667 | 0.768 | [R03.md](R03.md) |
 | R3 | RQ2 | robustness | D3 | rq2 | spearman z_eloundou vs z_delegation | 0.568 | 0.716 | [R03.md](R03.md) |
 | R3 | RQ2 | robustness | D3 | rq2 | spearman z_eloundou vs z_augmentation | 0.648 | 0.783 | [R03.md](R03.md) |
@@ -104,14 +104,14 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R4 | event studies | robustness; exploratory | spec §5.6 | events | CAR slope GPT-4.5 h20 A_pooled | -0.56 | -0.63 | [R04.md](R04.md) |
 | R4 | event studies | robustness; exploratory | spec §5.6 | events | CAR slope Gemini 2.5 h5 A_pooled | -0.51 | -0.46 | [R04.md](R04.md) |
 | R4 | event studies | robustness; exploratory | spec §5.6 | events | CAR slope Gemini 2.5 h20 A_pooled | -1.20 | -1.12 | [R04.md](R04.md) |
-| R5 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | 4.88 | 1.958 | [R05.md](R05.md) |
-| R5 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 4.82 | 3.461 | [R05.md](R05.md) |
-| R6 | H5 | robustness | spec §5.6; P10 | ff30 | slope of annualised FF5+UMD alpha on z_delegation | 1.55 | 1.958 | [R06.md](R06.md) |
-| R6 | H5b | robustness | spec §5.6; P10 | ff30 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 0.72 | 3.461 | [R06.md](R06.md) |
-| R6 | H5 | robustness | spec §5.6; P10 | ff48 | slope of annualised FF5+UMD alpha on z_delegation | 2.17 | 1.958 | [R06.md](R06.md) |
-| R6 | H5b | robustness | spec §5.6; P10 | ff48 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.81 | 3.461 | [R06.md](R06.md) |
-| R7 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | -1.72 | 1.958 | [R07.md](R07.md) |
-| R7 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | -0.24 | 3.461 | [R07.md](R07.md) |
+| R5 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | 4.88 | 1.96 | [R05.md](R05.md) |
+| R5 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 4.82 | 3.46 | [R05.md](R05.md) |
+| R6 | H5 | robustness | spec §5.6; P10 | ff30 | slope of annualised FF5+UMD alpha on z_delegation | 1.55 | 1.96 | [R06.md](R06.md) |
+| R6 | H5b | robustness | spec §5.6; P10 | ff30 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 0.72 | 3.46 | [R06.md](R06.md) |
+| R6 | H5 | robustness | spec §5.6; P10 | ff48 | slope of annualised FF5+UMD alpha on z_delegation | 2.17 | 1.96 | [R06.md](R06.md) |
+| R6 | H5b | robustness | spec §5.6; P10 | ff48 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.81 | 3.46 | [R06.md](R06.md) |
+| R7 | H5 | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation | -1.72 | 1.96 | [R07.md](R07.md) |
+| R7 | H5b | robustness | spec §5.6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | -0.24 | 3.46 | [R07.md](R07.md) |
 | R8 | terciles | robustness; exploratory | spec §5.6 | terciles | alpha_CAPM A_r2 cap | 3.83 | 4.64 | [R08.md](R08.md) |
 | R8 | terciles | robustness; exploratory | spec §5.6 | terciles | alpha_FF3 A_r2 cap | 6.99 | 5.12 | [R08.md](R08.md) |
 | R8 | terciles | robustness; exploratory | spec §5.6 | terciles | alpha_FF5+UMD A_r2 cap | 5.50 | 3.71 | [R08.md](R08.md) |
@@ -150,18 +150,16 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R8 | Fama-MacBeth | robustness; exploratory | spec §5.6 | fm | FM mom A_pooled | -0.07 | 0.24 | [R08.md](R08.md) |
 | R9 | event studies | robustness; exploratory | spec §5.6 | placebo | records without a primary counterpart (in the row file) | see file | — | [R09.md](R09.md) |
 | R9 | event studies | robustness; exploratory | spec §5.6 | summary | records without a primary counterpart (in the row file) | see file | — | [R09.md](R09.md) |
-| R10 | H5 | robustness | D1 | market_lb | slope of annualised FF5+UMD alpha on z_delegation_lb | 1.98 | 1.958 | [R10.md](R10.md) |
-| R10 | H5b | robustness | D1 | market_lb | slope of annualised FF5+UMD alpha on z_delegation_lb, controlling for z_aioe | 3.46 | 3.461 | [R10.md](R10.md) |
-| R10 | H5 | robustness | D1 | market_ub | slope of annualised FF5+UMD alpha on z_delegation_ub | 2.01 | 1.958 | [R10.md](R10.md) |
-| R10 | H5b | robustness | D1 | market_ub | slope of annualised FF5+UMD alpha on z_delegation_ub, controlling for z_aioe | 3.61 | 3.461 | [R10.md](R10.md) |
-| R10 | H1 | robustness | D1 | h1_lb | human_education_years_mean | -0.06 | -0.53 | [R10.md](R10.md) |
-| R10 | H1 | robustness | D1 | h1_lb | log_wage | 4.61 | 4.40 | [R10.md](R10.md) |
-| R10 | H1 | robustness | D1 | h1_ub | human_education_years_mean | -0.86 | -0.53 | [R10.md](R10.md) |
-| R10 | H1 | robustness | D1 | h1_ub | log_wage | 3.98 | 4.40 | [R10.md](R10.md) |
-| R10 | H3 | robustness | D1 | h3_lb | error_cost | -0.16 | -0.18 | [R10.md](R10.md) |
-| R10 | H3 | robustness | D1 | h3_ub | error_cost | -2.52 | -0.18 | [R10.md](R10.md) |
-| R11 | H5 | robustness | D4 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.94 | 1.958 | [R11.md](R11.md) |
-| R11 | H5b | robustness | D4 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.42 | 3.461 | [R11.md](R11.md) |
+| R10 | H5 | robustness | D1 | market_lb | slope of annualised FF5+UMD alpha on z_delegation_lb | 1.98 | 1.96 | [R10.md](R10.md) |
+| R10 | H5b | robustness | D1 | market_lb | slope of annualised FF5+UMD alpha on z_delegation_lb, controlling for z_aioe | 3.46 | 3.46 | [R10.md](R10.md) |
+| R10 | H5 | robustness | D1 | market_ub | slope of annualised FF5+UMD alpha on z_delegation_ub | 2.01 | 1.96 | [R10.md](R10.md) |
+| R10 | H5b | robustness | D1 | market_ub | slope of annualised FF5+UMD alpha on z_delegation_ub, controlling for z_aioe | 3.61 | 3.46 | [R10.md](R10.md) |
+| R10 | H1 | robustness | D1 | h1_lb | records without a primary counterpart (in the row file) | see file | — | [R10.md](R10.md) |
+| R10 | H1 | robustness | D1 | h1_ub | records without a primary counterpart (in the row file) | see file | — | [R10.md](R10.md) |
+| R10 | H3 | robustness | D1 | h3_lb | records without a primary counterpart (in the row file) | see file | — | [R10.md](R10.md) |
+| R10 | H3 | robustness | D1 | h3_ub | records without a primary counterpart (in the row file) | see file | — | [R10.md](R10.md) |
+| R11 | H5 | robustness | D4 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.94 | 1.96 | [R11.md](R11.md) |
+| R11 | H5b | robustness | D4 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.42 | 3.46 | [R11.md](R11.md) |
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_eloundou vs z_usage | 0.773 | 0.768 | [R11.md](R11.md) |
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_eloundou vs z_delegation | 0.721 | 0.716 | [R11.md](R11.md) |
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_eloundou vs z_augmentation | 0.773 | 0.783 | [R11.md](R11.md) |
@@ -175,7 +173,7 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R12 | H5b | co-primary reporting | D5 | confirmatory script | H5b b, R12 (ranks) | -2.386 | 3.461 | [confirmatory_h5.md](../confirmatory_h5.md) |
 | R13 | H5 | co-primary reporting; co-condition | D5 | confirmatory script | H5 b, R13 (drop Softw) | 1.655 | 1.958 | [confirmatory_h5.md](../confirmatory_h5.md) |
 | R13 | H5b | co-primary reporting; co-condition | D5 | confirmatory script | H5b b, R13 (drop Softw) | 3.634 | 3.461 | [confirmatory_h5.md](../confirmatory_h5.md) |
-| R14 | H5b | robustness | D6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R14.md](R14.md) |
+| R14 | H5b | robustness | D6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R14.md](R14.md) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_eloundou vs z_usage | 0.768 | 0.768 | [R14.md](R14.md) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_eloundou vs z_delegation | 0.716 | 0.716 | [R14.md](R14.md) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_eloundou vs z_augmentation | 0.783 | 0.783 | [R14.md](R14.md) |
@@ -185,8 +183,8 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_aioe vs z_usage | 0.811 | 0.809 | [R14.md](R14.md) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_aioe vs z_delegation | 0.766 | 0.763 | [R14.md](R14.md) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_aioe vs z_augmentation | 0.826 | 0.825 | [R14.md](R14.md) |
-| R15 | H5 | robustness | D7 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R15.md](R15.md) |
-| R15 | H5b | robustness | D7 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R15.md](R15.md) |
+| R15 | H5 | robustness | D7 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R15.md](R15.md) |
+| R15 | H5b | robustness | D7 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R15.md](R15.md) |
 | R15 | RQ2 | robustness | D7 | rq2 | spearman z_eloundou vs z_usage | 0.768 | 0.768 | [R15.md](R15.md) |
 | R15 | RQ2 | robustness | D7 | rq2 | spearman z_eloundou vs z_delegation | 0.716 | 0.716 | [R15.md](R15.md) |
 | R15 | RQ2 | robustness | D7 | rq2 | spearman z_eloundou vs z_augmentation | 0.783 | 0.783 | [R15.md](R15.md) |
@@ -341,12 +339,12 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R17 | RQ2 | robustness; descriptive | D8 | rq2 | spearman z_aioe vs z_usage | 0.809 | 0.809 | [R17.md](R17.md) |
 | R17 | RQ2 | robustness; descriptive | D8 | rq2 | spearman z_aioe vs z_delegation | 0.763 | 0.763 | [R17.md](R17.md) |
 | R17 | RQ2 | robustness; descriptive | D8 | rq2 | spearman z_aioe vs z_augmentation | 0.825 | 0.825 | [R17.md](R17.md) |
-| R18 | H5 | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R18.md](R18.md) |
-| R18 | H5b | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R18.md](R18.md) |
-| R19 | H5 | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R19.md](R19.md) |
-| R19 | H5b | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R19.md](R19.md) |
-| R20 | H5 | robustness | Task 10 ruling | market | slope of annualised FF5+UMD alpha on z_delegation | 2.43 | 1.958 | [R20.md](R20.md) |
-| R20 | H5b | robustness | Task 10 ruling | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.74 | 3.461 | [R20.md](R20.md) |
+| R18 | H5 | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R18.md](R18.md) |
+| R18 | H5b | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R18.md](R18.md) |
+| R19 | H5 | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R19.md](R19.md) |
+| R19 | H5b | robustness | D10 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R19.md](R19.md) |
+| R20 | H5 | robustness | Task 10 ruling | market | slope of annualised FF5+UMD alpha on z_delegation | 2.43 | 1.96 | [R20.md](R20.md) |
+| R20 | H5b | robustness | Task 10 ruling | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.74 | 3.46 | [R20.md](R20.md) |
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_eloundou vs z_usage | 0.751 | 0.768 | [R20.md](R20.md) |
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_eloundou vs z_delegation | 0.714 | 0.716 | [R20.md](R20.md) |
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_eloundou vs z_augmentation | 0.761 | 0.783 | [R20.md](R20.md) |
@@ -356,19 +354,19 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_aioe vs z_usage | 0.797 | 0.809 | [R20.md](R20.md) |
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_aioe vs z_delegation | 0.760 | 0.763 | [R20.md](R20.md) |
 | R20 | RQ2 | robustness | Task 10 ruling | rq2 | spearman z_aioe vs z_augmentation | 0.811 | 0.825 | [R20.md](R20.md) |
-| R21 | H5 | robustness; no error control | spec §5.4.1 | usage | slope of annualised FF5+UMD alpha on z_usage | 2.12 | 1.958 | [R21.md](R21.md) |
-| R21 | H5b | robustness; no error control | spec §5.4.1 | usage | slope of annualised FF5+UMD alpha on z_usage, controlling for z_aioe | 4.16 | 3.461 | [R21.md](R21.md) |
-| R21 | H5 | robustness; no error control | spec §5.4.1 | augmentation | slope of annualised FF5+UMD alpha on z_augmentation | 2.44 | 1.958 | [R21.md](R21.md) |
-| R21 | H5b | robustness; no error control | spec §5.4.1 | augmentation | slope of annualised FF5+UMD alpha on z_augmentation, controlling for z_aioe | 4.87 | 3.461 | [R21.md](R21.md) |
+| R21 | H5 | robustness; no error control | spec §5.4.1 | usage | slope of annualised FF5+UMD alpha on z_usage | 2.12 | 1.96 | [R21.md](R21.md) |
+| R21 | H5b | robustness; no error control | spec §5.4.1 | usage | slope of annualised FF5+UMD alpha on z_usage, controlling for z_aioe | 4.16 | 3.46 | [R21.md](R21.md) |
+| R21 | H5 | robustness; no error control | spec §5.4.1 | augmentation | slope of annualised FF5+UMD alpha on z_augmentation | 2.44 | 1.96 | [R21.md](R21.md) |
+| R21 | H5b | robustness; no error control | spec §5.4.1 | augmentation | slope of annualised FF5+UMD alpha on z_augmentation, controlling for z_aioe | 4.87 | 3.46 | [R21.md](R21.md) |
 | R22 | H2 | robustness; confounded with the r6 suppression-regime change | D2 | all_r2_r6 | beta (pp per year) | 7.31 | 4.98 | [R22.md](R22.md) |
 | R22 | H2 | robustness | D2 | all_r2_r6_r6dummy | beta (pp per year) | 5.47 | 4.98 | [R22.md](R22.md) |
 | R22 | H2 | robustness | D2 | unbalanced | beta (pp per year) | 5.00 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | augmentation_pct | beta (pp per year) | -4.98 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | directive_pct | beta (pp per year) | 1.42 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | feedback_loop_pct | beta (pp per year) | 5.62 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | task_iteration_pct | beta (pp per year) | 2.26 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | validation_pct | beta (pp per year) | 1.48 | 4.98 | [R22.md](R22.md) |
-| R22 | H2 | robustness | D2 | learning_pct | beta (pp per year) | -8.47 | 4.98 | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | augmentation_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | directive_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | feedback_loop_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | task_iteration_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | validation_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
+| R22 | H2 | robustness | D2 | learning_pct | records without a primary counterpart (in the row file) | see file | — | [R22.md](R22.md) |
 | R22 | H2 | robustness | D2 | api_r3_r5 | beta (pp per year) | -9.51 | 4.98 | [R22.md](R22.md) |
 | R23 | H1 | robustness | spec §5.4.1 | h1 | records without a primary counterpart (in the row file) | see file | — | [R23.md](R23.md) |
 | R23 | H2 | robustness; confounded with the r6 suppression-regime change | spec §5.4.1 | h2 | records without a primary counterpart (in the row file) | see file | — | [R23.md](R23.md) |
@@ -404,21 +402,21 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R28 | H4 | robustness | D16 | iwa_mix | log_aui | -1.22 | -1.19 | [R28.md](R28.md) |
 | R28 | H4 | robustness | D16 | iwa_mix | log_income | -0.84 | -0.92 | [R28.md](R28.md) |
 | R29 | H6 divergence | robustness; exploratory | D18 | pre_formation_2025 | Spearman(T_j, Design B z_usage) across FF49 industries | 0.267 | 0.361 | [R29.md](R29.md) |
-| R29 | H6 gap-return | robustness; exploratory | D18 | pre_formation_2025 | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -2.15 | -2.398 | [R29.md](R29.md) |
+| R29 | H6 gap-return | robustness; exploratory | D18 | pre_formation_2025 | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -2.15 | -2.40 | [R29.md](R29.md) |
 | R29 | H6 divergence | robustness; exploratory | D18 | change_2019_2024 | Spearman(T_j, Design B z_usage) across FF49 industries | 0.081 | 0.361 | [R29.md](R29.md) |
-| R29 | H6 gap-return | robustness; exploratory | D18 | change_2019_2024 | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -3.37 | -2.398 | [R29.md](R29.md) |
+| R29 | H6 gap-return | robustness; exploratory | D18 | change_2019_2024 | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -3.37 | -2.40 | [R29.md](R29.md) |
 | R29 | H6 divergence | robustness; exploratory | D18 | float_weighted | Spearman(T_j, Design B z_usage) across FF49 industries | 0.190 | 0.361 | [R29.md](R29.md) |
-| R29 | H6 gap-return | robustness; exploratory | D18 | float_weighted | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -0.21 | -2.398 | [R29.md](R29.md) |
+| R29 | H6 gap-return | robustness; exploratory | D18 | float_weighted | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -0.21 | -2.40 | [R29.md](R29.md) |
 | R30 | H6 divergence | robustness; exploratory | D12 | narrow | Spearman(T_j, Design B z_usage) across FF49 industries | 0.361 | 0.361 | [R30.md](R30.md) |
-| R30 | H6 gap-return | robustness; exploratory | D12 | narrow | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -2.40 | -2.398 | [R30.md](R30.md) |
+| R30 | H6 gap-return | robustness; exploratory | D12 | narrow | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -2.40 | -2.40 | [R30.md](R30.md) |
 | R30 | H6 divergence | robustness; exploratory | D12 | broad | Spearman(T_j, Design B z_usage) across FF49 industries | 0.364 | 0.361 | [R30.md](R30.md) |
-| R30 | H6 gap-return | robustness; exploratory | D12 | broad | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -1.98 | -2.398 | [R30.md](R30.md) |
+| R30 | H6 gap-return | robustness; exploratory | D12 | broad | slope of annualised FF5+UMD alpha on gap_j (Design B window, no control) | -1.98 | -2.40 | [R30.md](R30.md) |
 | R31 | H3 | robustness | P13 | covariates | error_cost | -0.20 | -0.18 | [R31.md](R31.md) |
 | R31 | H3 | robustness | P13 | covariates | records without a primary counterpart (in the row file) | see file | — | [R31.md](R31.md) |
-| R32 | H5 | robustness | P15 | market | slope of annualised FF5+UMD alpha on z_delegation | 2.20 | 1.958 | [R32.md](R32.md) |
-| R32 | H5b | robustness | P15 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.72 | 3.461 | [R32.md](R32.md) |
-| R33 | H5 | robustness | D23; P17 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.92 | 1.958 | [R33.md](R33.md) |
-| R33 | H5b | robustness | D23; P17 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.67 | 3.461 | [R33.md](R33.md) |
+| R32 | H5 | robustness | P15 | market | slope of annualised FF5+UMD alpha on z_delegation | 2.20 | 1.96 | [R32.md](R32.md) |
+| R32 | H5b | robustness | P15 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.72 | 3.46 | [R32.md](R32.md) |
+| R33 | H5 | robustness | D23; P17 | market | slope of annualised FF5+UMD alpha on z_delegation | 1.92 | 1.96 | [R33.md](R33.md) |
+| R33 | H5b | robustness | D23; P17 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.67 | 3.46 | [R33.md](R33.md) |
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_eloundou vs z_usage | 0.758 | 0.768 | [R33.md](R33.md) |
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_eloundou vs z_delegation | 0.708 | 0.716 | [R33.md](R33.md) |
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_eloundou vs z_augmentation | 0.769 | 0.783 | [R33.md](R33.md) |
@@ -428,12 +426,12 @@ Each line puts a row's estimate beside the primary's, formatted as in the row fi
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_aioe vs z_usage | 0.786 | 0.809 | [R33.md](R33.md) |
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_aioe vs z_delegation | 0.746 | 0.763 | [R33.md](R33.md) |
 | R33 | RQ2 | robustness | D23; P17 | rq2 | spearman z_aioe vs z_augmentation | 0.804 | 0.825 | [R33.md](R33.md) |
-| R34 | H5 | robustness | P6 | from_1969 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R34.md](R34.md) |
-| R34 | H5b | robustness | P6 | from_1969 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R34.md](R34.md) |
-| R34 | H5 | robustness | P6 | from_1963 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R34.md](R34.md) |
-| R34 | H5b | robustness | P6 | from_1963 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R34.md](R34.md) |
-| R35 | H5 | robustness | P10 | h5 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.958 | [R35.md](R35.md) |
-| R35 | H5b | robustness | P10 | h5b | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.461 | [R35.md](R35.md) |
+| R34 | H5 | robustness | P6 | from_1969 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R34.md](R34.md) |
+| R34 | H5b | robustness | P6 | from_1969 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R34.md](R34.md) |
+| R34 | H5 | robustness | P6 | from_1963 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R34.md](R34.md) |
+| R34 | H5b | robustness | P6 | from_1963 | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R34.md](R34.md) |
+| R35 | H5 | robustness | P10 | h5 | slope of annualised FF5+UMD alpha on z_delegation | 1.96 | 1.96 | [R35.md](R35.md) |
+| R35 | H5b | robustness | P10 | h5b | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R35.md](R35.md) |
 | R36 | H2 | robustness | P19 | publication | beta (pp per year) | 4.69 | 4.98 | [R36.md](R36.md) |
 | R37 | H2 | robustness; descriptive | P19 | within_r6 | records without a primary counterpart (in the row file) | see file | — | [R37.md](R37.md) |
 | R38 | H1 | robustness | P18 | oneway_occ | human_education_years_mean | -0.53 | -0.53 | [R38.md](R38.md) |
