@@ -146,6 +146,16 @@ def test_deviations_none(tmp_path):
     assert _table_rows(text) == []
 
 
+def test_deviations_subsections_only(tmp_path):
+    pap = tmp_path / "pap.md"
+    headings = "\n\n".join(paplog.SUBSECTIONS.values())
+    pap.write_text(EMPTY_PAP + "\n" + headings + "\n", encoding="utf-8")
+    assert paplog.entries(pap) == []
+    text = includes.deviations_appendix(pap, out_dir=tmp_path).read_text(encoding="utf-8")
+    assert "None at freeze, and none since." in text
+    assert _table_rows(text) == []
+
+
 def test_disclosures_verbatim(out):
     text = includes.disclosures_appendix(PAP, POST, out_dir=out).read_text(encoding="utf-8")
     pap = PAP.read_text(encoding="utf-8")
@@ -188,6 +198,7 @@ def test_robustness_appendix_row_order(out):
     assert pos == sorted(pos)
     assert "\\begin{landscape}" in text and "\\end{landscape}" in text
     assert "](R01.md)" not in text and "](#app-rob-r01)" in text
+    assert "](../" not in text and "| confirmatory_h5.md |" in text
     assert not re.search(r"^# ", text, re.M)
 
 

@@ -175,10 +175,10 @@ Each line puts a row's estimate beside the primary's, both formatted as in the r
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_aioe vs z_usage | 0.810 | 0.809 | [R11.md](#app-rob-r11) |
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_aioe vs z_delegation | 0.762 | 0.763 | [R11.md](#app-rob-r11) |
 | R11 | RQ2 | robustness | D4 | rq2 | spearman z_aioe vs z_augmentation | 0.817 | 0.825 | [R11.md](#app-rob-r11) |
-| R12 | H5 | co-primary reporting | D5 | confirmatory script | H5 b, R12 (ranks) | -1.065 | 1.958 | [confirmatory_h5.md](../confirmatory_h5.md) |
-| R12 | H5b | co-primary reporting | D5 | confirmatory script | H5b b, R12 (ranks) | -2.386 | 3.461 | [confirmatory_h5.md](../confirmatory_h5.md) |
-| R13 | H5 | co-primary reporting; co-condition | D5 | confirmatory script | H5 b, R13 (drop Softw) | 1.655 | 1.958 | [confirmatory_h5.md](../confirmatory_h5.md) |
-| R13 | H5b | co-primary reporting; co-condition | D5 | confirmatory script | H5b b, R13 (drop Softw) | 3.634 | 3.461 | [confirmatory_h5.md](../confirmatory_h5.md) |
+| R12 | H5 | co-primary reporting | D5 | confirmatory script | H5 b, R12 (ranks) | -1.065 | 1.958 | confirmatory_h5.md |
+| R12 | H5b | co-primary reporting | D5 | confirmatory script | H5b b, R12 (ranks) | -2.386 | 3.461 | confirmatory_h5.md |
+| R13 | H5 | co-primary reporting; co-condition | D5 | confirmatory script | H5 b, R13 (drop Softw) | 1.655 | 1.958 | confirmatory_h5.md |
+| R13 | H5b | co-primary reporting; co-condition | D5 | confirmatory script | H5b b, R13 (drop Softw) | 3.634 | 3.461 | confirmatory_h5.md |
 | R14 | H5b | robustness | D6 | market | slope of annualised FF5+UMD alpha on z_delegation, controlling for z_aioe | 3.46 | 3.46 | [R14.md](#app-rob-r14) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_eloundou vs z_usage | 0.768 | 0.768 | [R14.md](#app-rob-r14) |
 | R14 | RQ2 | robustness | D6 | rq2 | spearman z_eloundou vs z_delegation | 0.716 | 0.716 | [R14.md](#app-rob-r14) |

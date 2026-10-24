@@ -255,7 +255,7 @@ def deviations_appendix(pap: Path = PAP_MD, *, out_dir: Path = APPENDIX) -> Path
     """A summary table of every §11 entry, §11's body verbatim, then §10 verbatim."""
     text = Path(pap).read_text(encoding="utf-8")
     body = "\n".join(paplog.section_11_lines(text)[1:]).strip("\n")
-    has_entries = any(ln.startswith("### ") for ln in body.split("\n"))
+    has_entries = bool(paplog.entries(pap))
     parts = [_appendix_header(pap), "", "## Summary of the PAP §11 entries", ""]
     if has_entries:
         parts += [
@@ -320,6 +320,8 @@ def _robustness_text(name: str, src: str) -> list[str]:
             lambda m: f"](#{_row_anchor(m[1])})",
             line,
         )
+        # a link out of the robustness directory has no target in the paper: keep its text only
+        line = re.sub(r"\[([^\]]*)\]\(\.\./[^)]*\)", r"\1", line)
         out.append(line)
     return out
 
