@@ -1,3 +1,108 @@
-<!-- STUB -->
-
 # Pre-registration and methods {#sec-methods}
+
+## The protocol
+
+The analysis follows a pre-analysis plan signed and frozen on {{< var pap.date >}} as the annotated git tag {{< var pap.tag >}}, on commit {{< var pap.commit >}}; its signature, decision register and code binding are in @sec-app-pap. For every confirmatory hypothesis the plan fixes the outcome, regressors, sample, estimator, inference and decision rule, and it labels every other analysis as secondary, robustness or exploratory. A confirmatory result is reported whatever it is, a non-rejection as prominently as a rejection, with a confidence interval and a two-sided p-value. Where a hypothesis states a direction (H1, H2, H3), the decision requires both significance and the stated sign.
+
+Two protocols govern the first read of outcomes. Under P-H5, the first read of industry returns dated on or after the seal date, {{< var design.seal_date >}}, is a single run of `aideleg.confirm_h5`, whose git blob hash the plan records. Before loading anything, the script verifies its binding to the tag, an unchanged source tree and the hashes of the frozen return files and exposure vector. Immediately before the first post-seal read it creates an attempt marker, so that a later failure is recorded as an attempt rather than retried, and it refuses to run while the marker exists. Its output and the marker are committed unedited, alone in one commit, and every other post-seal read happens in later commits. P-RQ1 is the weaker counterpart for H1–H4: their estimators were written after the tag, so the specification was fixed in the plan but the code only at its first run on real outcomes, a single logged commit whose output is committed unedited; any later change to that code is a deviation. The demotion rule completes the protocol: a deviation adopted after a confirmatory result has been seen demotes the hypothesis it touches to exploratory, and the pre-registered specification is still reported as primary beside it. The record of both runs is in @sec-app-disclosures.
+
+The plan's own disclosures (PAP §0.4), reproduced in @sec-app-disclosures, record what was seen before the freeze. Aggregate factor rows from the sealed period were once displayed, unused and uninformative about the slope; an audit figure on renormalisation was retracted. The researchers saw RQ2 descriptives and design diagnostics, including the ranking and skew of the Design B scores and their correlations with the benchmarks, but no delegation measure had been related to the H1–H4 regressors and no post-seal return had been read. The power analysis printed pre-seal slopes and their frozen means, and centring the market null on that mean was recommended after the uncentred in-sample rejection rates had been seen. General knowledge of markets after the seal is why Design A is exploratory. The event rule's exceptions were chosen with the source list in view, and the confirmatory script had been tested on synthetic data only. @sec-app-disclosures also lists every fact recorded in the working ledgers after the freeze.
+
+Every later change to the plan is an entry of PAP §11, and @sec-app-deviations lists every entry, with its date and its "Results seen" field: additions of data under D20, clarifications, and deviations. Three are deviations. The first is a data-integrity correction to the secondary H6 talk measure: two saved annual-report documents had been truncated in transfer, were fetched again whole and the measure rerun, with values before and after recorded; filed under a controller ruling, it was later ratified by Ajai, as a §11 clarification records. The second makes the default phrase list of an H6 helper equal its documented list, so that robustness downloads cannot enter the primary H6 numerator; the primary outputs were verified unchanged. The third adds labelled post-result influence diagnostics for H1, H2 and H6 that change no confirmatory or committed estimate. All three followed confirmatory results; none alters a confirmatory specification, and the H6 analyses they touch are exploratory by design.
+
+## RQ1: behaviour
+
+RQ1's family-wise level, {{< var design.alpha.rq1_total >}}, is split under D22: H2 is tested alone at {{< var design.alpha.rq1_h2 >}}, and {H1, H3, H4} by Holm's step-down procedure [@holm1979simple] at family-wise {{< var design.alpha.rq1_family >}}. The level each hypothesis was tested at depends on the order of the family p-values and is printed in @tbl-rq1-confirmatory-table. The primary delegation measure is the task automation share, AEI's directive and feedback-loop patterns renormalised over classified conversations (D1).
+
+**H1 and H3.** Both use the r6 Claude.ai cross-section averaged over its two months (D13), on (task, occupation) rows within O\*NET Intermediate Work Activity fixed effects (D14). H1 is
+
+$$
+y_{io} = \beta_e\,\mathrm{educ}_i + \beta_w \log w_o + \mu_{f(i)} + \varepsilon_{io},
+$$
+
+the task's automation share on its mean years of education and the log OEWS median wage of the occupation; H3 is $v_{io} = \gamma\,\mathrm{err}_o + \mu_{f(i)} + \varepsilon_{io}$, the validation share on an indicator of legal, health-practitioner and regulated-finance occupations (D15). Both are weighted least squares, each task's usage split across its occupations and families, on {{< var rq1.h1.n_rows >}} rows ({{< var rq1.h1.n_tasks >}} tasks, {{< var rq1.h1.n_occ >}} occupations) for H1 and {{< var rq1.h3.n_rows >}} rows ({{< var rq1.h3.n_tasks >}} tasks, {{< var rq1.h3.n_occ >}} occupations) for H3. Standard errors are clustered by occupation and by task [@cameron2011robust],
+
+$$
+\hat V = \hat V_{\mathrm{occ}} + \hat V_{\mathrm{task}} - \hat V_{\mathrm{occ}\cap\mathrm{task}},
+$$
+
+with small-sample corrections and t inference on one fewer degree of freedom than the smaller cluster count. The non-PSD rule is fixed in advance: a covariance block of the tested coefficients with a negative eigenvalue is rebuilt with its negative eigenvalues set to zero, a tested coefficient whose variance is then zero takes the larger of its two one-way cluster standard errors, and each use is reported (@sec-app-deviations). H1 is conjunctive, so its p-value is the intersection–union maximum of the two coefficient p-values (D17), and it is supported only if Holm rejects and both coefficients are negative; H3 needs a Holm rejection and positive γ. The spec's one-way occupation clustering is row R38 (@sec-robustness).
+
+**Effective estimands (P13).** The outcome and education are constant within a task; only the wage varies across a task's occupation rows. β_e is thus the usage-weighted, within-family association between a task's automation share and its education requirement. β_w compares tasks through their allocation-weighted mean log wage; the within-task wage spread enters the estimator's denominator but not its numerator, which attenuates β_w by the between-task share of the within-family wage variance, {{< var rq1.h1.attenuation >}}. γ is attenuated likewise, by {{< var rq1.h3.attenuation >}}. H1 and H3 describe how tasks differ, weighted by the occupations they are allocated to; they do not compare workers.
+
+**H2.** Under D22, H2 is tested as "measured within-task automation rises across releases", because neither the unstated classifier nor the platform scope is held fixed. It uses the balanced panel of tasks published in all four releases r2 to r5 (D2), {{< var rq1.h2.n_tasks >}} tasks and {{< var rq1.h2.n_rows >}} rows, with task fixed effects, fixed weights and a linear trend in years since the r2 window midpoint:
+
+$$
+y_{it} = \alpha_i + \beta\,\tau_t + \varepsilon_{it}.
+$$
+
+The trend is identified only from four release cross-sections, and a task-clustered p ignores shocks common to a release, such as a classifier change. H2 is therefore supported only if the task-clustered p is at or below {{< var design.alpha.rq1_h2 >}}, β is positive, and a restricted wild cluster bootstrap over releases also gives p at or below that level. The bootstrap uses Webb's six-point weights [@webb2023reworking; @cameron2008bootstrap] and enumerates all {{< var rq1.h2.n_wild_draws >}} weight vectors, so it involves no random draws. With four clusters this co-condition is demanding and may be conservative: only a trend large relative to release-to-release variation meets it. A randomisation over the {{< var rq1.h2.n_release_orderings >}} orderings of release labels is descriptive only, and release fixed effects relative to r2 are plotted in @fig-rq1-h2-release-effects.
+
+**H4.** H4 is an r6 country cross-section of {{< var rq1.h4.n >}} countries (D16), each variable averaged over the two months before logs are taken:
+
+$$
+y_c = a + b_{\mathrm{AUI}} \log \mathrm{AUI}_c + b_{\mathrm{inc}} \log \mathrm{inc}_c + b_{\mathrm{mix}} M_c + e_c,
+\qquad M_c = \sum_g \bar s_{cg}\, \bar a_g,
+$$
+
+where y is the overall automation share, AUI the Anthropic Usage Index, inc GDP per working-age person, and M weights each Generalised Work Activity's global automation share by its share of the country's usage. Estimation is unweighted least squares with HC3 covariance. H4 states no direction, so its p-value is the joint Wald test that b_AUI and b_inc are both zero (D17); it is supported if Holm rejects.
+
+## RQ2: the bridge
+
+RQ2 is descriptive. Across the {{< var design.n_industries >}} Fama–French industries it reports Spearman correlations between the AEI usage, delegation and augmentation indices (@sec-data) and the theoretical benchmarks, AIOE [@felten2021occupational] and the ratings of @eloundou2024gpts, with the human-rated β as headline and the model-rated β beside it (D8). Each carries a percentile interval from an industry bootstrap of {{< var rq2.n_draws >}} draws with the project seed, {{< var design.seed >}}, for Design B and, labelled look-ahead, for Design A_pooled. No test is attached (@sec-rq2).
+
+## RQ3: markets
+
+**Primary specification.** H5 and H5b use the Design B exposure vector, formed from release r2 alone, published on {{< var design.formation >}}. Each industry's annualised alpha is the intercept of a daily regression of excess value-weighted returns on the five Fama–French factors and momentum [@fama2015five; @carhart1997persistence; @french2026datalibrary] over the window from {{< var design.window.start >}} to {{< var design.window.end >}} ({{< var design.window.months >}} months). The unweighted cross-sectional regressions are
+
+$$
+\hat\alpha_j = a + b\, z^{\mathrm{del}}_j + e_j
+\qquad\text{and}\qquad
+\hat\alpha_j = a + b\, z^{\mathrm{del}}_j + \delta\, z^{\mathrm{aioe}}_j + e_j,
+$$
+
+with b in pp of annualised alpha per SD of delegation exposure. Design B is out of sample in its AEI data but not strictly real-time: the {{< var vintage.oews.primary >}} OEWS weights were released on {{< var design.s1.oews_release >}}, after formation, and the O\*NET {{< var vintage.onet.primary >}} task links also postdate it (PAP §10, S1). Row R32 uses the {{< var vintage.oews.r32 >}} weights, public at formation.
+
+**Why randomisation inference is not primary.** The spec named randomisation inference over permutations of exposure. Run as specified on {{< var power.n_windows >}} overlapping pre-seal windows, where later exposure can bear no relation to alphas, it rejected at nominal {{< var design.alpha.h5_first >}} in {{< var rq3.secondary.size_pct.ri_h5 >}} % of windows for H5 and {{< var rq3.secondary.size_pct.ri_h5b >}} % for H5b; the Freedman–Lane scheme for H5b [@freedman1983nonstochastic; @winkler2014permutation] rejected in {{< var rq3.secondary.size_pct.fl_pivotal_h5b >}} % scored by the pivotal t and {{< var rq3.secondary.size_pct.fl_coef_h5b >}} % scored by the coefficient. Industries with similar exposure co-move, so alpha noise is correlated along the exposure vector, and permutation, treating industries as exchangeable, understates the null spread of the slope; a wild bootstrap of the residuals would share the problem. Randomisation inference with {{< var rq3.secondary.n_permutations >}} permutations is kept as secondary, printed with its documented size, and never used for a decision.
+
+**The historical-null test (D10) and its null (D21).** For variant v at Holm level L,
+
+$$
+T_v = \frac{\hat b_v - b^{\circ}_v}{s_v},
+\qquad
+c_{v,L} = \max\!\left(t_{\nu}^{(L)},\; q_{v}^{(L)}\right),
+$$
+
+where s is the standard deviation of the same slope, from the same code and frozen exposure vector, over the {{< var power.n_windows >}} overlapping windows of {{< var design.null_years >}}; ν = {{< var power.t_df >}}, allowing for the overlap; and the critical is the larger of the two-sided t critical and the empirical quantile q of the centred historical distribution. With the frozen values the t critical binds at both steps, {{< var power.crit_0025 >}} at {{< var design.alpha.h5_first >}} and {{< var power.crit_005 >}} at {{< var design.alpha.h5_second >}}; s is {{< var power.s.h5 >}} pp for H5 and {{< var power.s.h5b >}} pp for H5b. Under D21 the null value b° is b̄, the frozen mean historical slope for the same vector ({{< var power.bbar.h5 >}} pp for H5, {{< var power.bbar.h5b >}} pp for H5b), because the zero null was oversized on the historical windows. A rejection says the slope departs from the {{< var design.null_years >}} pattern for this vector, a narrower claim than the approved wording; the zero null is reported as secondary. Because b̄ is not zero, the b̄ null makes a positive finding harder to reach and a negative one easier than the zero null does. This is a property of the test's geometry, stated so that a reader can weigh a result in either direction; it is not an interpretation of the sign of b̄. Holm over {H5, H5b} tests the smaller p at {{< var design.alpha.h5_first >}} and the other at {{< var design.alpha.h5_second >}} only after a first rejection (@tbl-rq3-confirmatory).
+
+**The R13 co-condition.** R12 (ranks) and R13 (dropping {{< var audit.exposure.b.z_del_max_industry >}}) are co-primary because the Design B scores are skewed ({{< var audit.exposure.b.z_del_skewness >}}, with {{< var audit.exposure.b.z_del_max_industry >}} at {{< var audit.exposure.b.z_del_max >}} SD). The claim that delegation exposure is priced requires the hypothesis and its R13 variant both to reject, under the same null and Holm level, R13 with its own scale and critical. Otherwise the fixed wording is that the result is not robust to dropping {{< var audit.exposure.b.z_del_max_industry >}}, which does not attribute the result to one industry: R13's larger scale leaves it less power, with minimum detectable effects of {{< var power.mde.h5_r13 >}} pp (H5) and {{< var power.mde.h5b_r13 >}} pp (H5b).
+
+**Intervals, wording and power.** Each result carries two intervals, the estimate plus or minus each Holm-level critical times s. A non-rejection is worded exactly as the script prints it (P14): the null, the interval, and that the test had {{< var power.power_pct >}} % power only against departures of at least the MDE, which uses the test's own scale and first-step critical:
+
+$$
+\mathrm{MDE}_v = \left(c_{v,L^{\ast}} + t_{\nu}^{[\pi]}\right) s_v,
+$$
+
+with L\* = {{< var design.alpha.h5_first >}} and the t quantile at power π, so that the MDE is {{< var power.mde_over_s >}} times s: {{< var power.mde.h5 >}} pp for H5 and {{< var power.mde.h5b >}} pp for H5b. Under D11, if the H5 MDE exceeds {{< var design.plausibility_pp >}} pp per SD, RQ3 is reported as "what the market evidence can and cannot yet say" and the paper is led by RQ1–RQ2. As P9 records, the threshold is not in the spec: it was committed in the plan file before the power analysis first ran and became binding only when Ajai confirmed it after the MDE was known, so it is a threshold confirmed with the MDE in view. With a primary MDE of {{< var d11.primary_mde >}} pp the rule fires (@sec-markets).
+
+**Design A.** The spec formed Design A from the earliest release, but r1 ({{< var design.release.r1 >}}) has no task-level collaboration split, so correction S3 uses r2 ({{< var design.release.r2 >}}), which makes the spec's Design A, `A_r2`, numerically identical to Design B. `A_pooled`, built from r2 to r6, is an addition that uses releases published during and after the return window and is labelled look-ahead. Every Design A analysis, with returns from {{< var design.seal_date >}}, is exploratory, as are the event studies, terciles and Fama–MacBeth regressions; none carries family-wise error control, and each is labelled in the same sentence wherever it appears (@sec-markets).
+
+## H6: talk and use
+
+H6 is exploratory (D18). An industry's talk index is the share of its filers in the EDGAR full index [@sec2026edgar] whose annual reports filed in {{< var h6.talk.year >}} ({{< var h6.talk.filed_start >}} to {{< var h6.talk.filed_end >}}, all public before formation) the SEC's full-text search returns for at least one term of the fixed AI dictionary (D12), with phrase matching as implemented on the retrieval date and filers assigned to industries by current SIC code. Divergence is the Spearman correlation of talk with Design B usage exposure, with an industry-bootstrap interval; the gap, the standardised residual of talk on usage exposure, enters the market regression under recomputed historical-null inference. Every H6 p-value is nominal and outside any testing family (@sec-markets).
+
+## Robustness reporting rules
+
+The rules of PAP §8.1 bind every robustness row (@sec-robustness, @sec-app-robustness-tables). Every row is reported in full. No row changes a confirmatory decision, except R13 as the pre-registered co-condition above. Results are never summarised by counting rows by significance, and no row carries error control across rows; R21, which substitutes other indices for delegation exposure, is labelled so. Market rows recompute s, b̄ and q for their exposure vector or sample by the same pre-seal procedure; RQ1 rows use the inference of the hypothesis they vary. Every market robustness read followed the single confirmatory run.
+
+## Departures from the spec
+
+PAP §10.2 lists the plan's departures from the design spec, reproduced verbatim and in order in @sec-app-deviations beside the corrections of fact S1 to S5 of PAP §10.1:
+
+- the historical-null test (D10) replaces randomisation inference as primary for H5 and H5b, because of its documented size; randomisation inference is secondary;
+- the wild cluster bootstrap is not used for H5 and H5b, which have no cluster structure, but is used across releases for H2 (D22);
+- the industry crosswalk splits equally (D23) rather than by employment; the spec's version is R33;
+- H1 standard errors are clustered by occupation and task rather than occupation alone; the spec's version is R38;
+- H5 and H5b are tested against the frozen historical slope b̄ rather than zero (D21), a narrower claim than the approved wording, which Ajai approved;
+- H2 is reworded as "measured within-task automation rises" and tested outside the RQ1 Holm family with the release-level co-condition (D22), on r2 to r5 (D2);
+- the spec's model-launch dates are fixed by an objective rule over a named source (D19).
