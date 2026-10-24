@@ -25,6 +25,6 @@
 | 51 | Production | 1.07 | 19.49 | 44.76 | 21.25 | 5.24 | 9.27 | 64.24 | 35.76 |
 | 53 | Transportation and Material Moving | 0.34 | 38.83 | 12.48 | 27.43 | 9.93 | 11.32 | 51.32 | 48.68 |
 
-: Collaboration patterns by occupation major group, r6 claude_ai (descriptive; conversations matched to O*NET tasks) {#tbl-rq1-major}
+: Collaboration patterns by occupation major group, r6 claude_ai (descriptive; conversations matched to O\*NET tasks) {#tbl-rq1-major}
 
 Source: `docs/results/rq1/anatomy.md`, committed unedited; the numbers are as printed there.

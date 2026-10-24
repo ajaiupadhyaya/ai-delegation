@@ -135,6 +135,7 @@ One row per entry of PAP §11, in document order: additions under D20 (`A-`), cl
 | C-80 | clarification | 2026-10-24 | RQ1 and H5 confirmatory results, all Plan 3 results, and every Plan 4 row R1–R38 seen |
 | C-81 | clarification | 2026-10-24 | RQ1 and H5 confirmatory results, all Plan 3 results, every Plan 4 row R1–R38, the D-3 diagnostics and the Task 16 red-team findings seen |
 | C-82 | clarification | 2026-10-24 | yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, the D-3 diagnostics and the Task 16 and Task 31 red-team findings |
+| C-83 | clarification | 2026-10-24 | yes: all confirmatory, Plan 3 and Plan 4 results and both red teams seen |
 | D-1 | deviation | 2026-10-23 | RQ1 and H5 confirmatory results seen; event-study, tercile, Fama–MacBeth, H6 talk/gap and H6 secondary results seen |
 | D-2 | deviation | 2026-10-23 | RQ1 and H5 confirmatory results, all Plan 3 results, and Plan 4 rows R1–R28 seen; R29/R30 run, uncommitted |
 | D-3 | deviation | 2026-10-24 | yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, and the Task 16 red-team findings |
@@ -617,7 +618,7 @@ primary result (§0.5).
 - Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
 - Fixed by: Plan 2 Task 10 (plans committed at a7fb9bd)
 - Results seen: no
-- Rule: (a) Task unit and cluster: the H1/H3 task unit and cluster is the panel node_id (the O*NET Task ID for r6), not the statement text. Two r6 IDs sharing one statement stay separate tasks and clusters: one such pair with positive weight (nodes 976 and 14630), about 0.02% of r6 task usage. (b) Zero-weight drop: 1,611 of the 2,823 r6 task nodes are dropped as `zero_weight`, because r6 task pct is published rounded to 0.01 and those nodes show 0.00; this follows from D13, as the usage-weighted mean is undefined at zero usage. (c) r6 automation measure: the H1–H4 automation outcome in r6 is AEI's published automation bucket. 41 r6 global task-month cells publish all five patterns but no bucket; they are null and skipped (0.033% of usage). Where both exist, the bucket and the renormalised pattern sum differ by ≤ 0.034 pp. (d) H3 sample: the H3 sample does not require wage, education or an OEWS code (1,689 vs H1's 1,684 rows); this reading follows the H3 missing-values row ("H3 applies the same rule to its own variables"), and C-12 is the related entry.
+- Rule: (a) Task unit and cluster: the H1/H3 task unit and cluster is the panel node_id (the O\*NET Task ID for r6), not the statement text. Two r6 IDs sharing one statement stay separate tasks and clusters: one such pair with positive weight (nodes 976 and 14630), about 0.02% of r6 task usage. (b) Zero-weight drop: 1,611 of the 2,823 r6 task nodes are dropped as `zero_weight`, because r6 task pct is published rounded to 0.01 and those nodes show 0.00; this follows from D13, as the usage-weighted mean is undefined at zero usage. (c) r6 automation measure: the H1–H4 automation outcome in r6 is AEI's published automation bucket. 41 r6 global task-month cells publish all five patterns but no bucket; they are null and skipped (0.033% of usage). Where both exist, the bucket and the renormalised pattern sum differ by ≤ 0.034 pp. (d) H3 sample: the H3 sample does not require wage, education or an OEWS code (1,689 vs H1's 1,684 rows); this reading follows the H3 missing-values row ("H3 applies the same rule to its own variables"), and C-12 is the related entry.
 
 ### C-31. Clarification: Disclosure: a unit-test artefact in docs/results/rq1 before the P-RQ1 run (2026-10-22)
 - Type: clarification (pre-result); the PAP is silent or ambiguous here and no PAP rule changes
@@ -873,17 +874,17 @@ primary result (§0.5).
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R2 row run. Before this entry the implementation computed max |Δ z_delegation| against the primary under this rule (0.607) and under the alternative below (0.415); no H5, H5b or RQ2 estimate was computed under either
 - Rule: R2's wage bill (TOT_EMP × A_MEAN, C-66) replaces OEWS employment in both weights of the industry aggregation: the occupation shares within each OEWS NAICS code, and the code weight (crosswalk weight × code total) that combines codes into an FF49 industry. w_oj is therefore o's share of FF49 industry j's crosswalk-weighted wage bill, as in the primary it is o's share of j's employment (§2.1). The benchmarks are re-aggregated with the same weights (C-65), and emp_covered_share is wage-bill weighted. U_o keeps national employment shares (C-66). Not used: wage-bill shares within codes combined with employment code weights, which is no industry's wage-bill share.
 
-### C-73. Clarification: R14 maps AIOE's 19-1020 by its O*NET successor (2026-10-23)
+### C-73. Clarification: R14 maps AIOE's 19-1020 by its O\*NET successor (2026-10-23)
 - Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
 - Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R14 row run
-- Rule: AIOE's 19-1020 (from O*NET-SOC 2010 19-1020.01 Biologists) is not a SOC 2010 detailed code and is absent from the BLS SOC 2010→2018 crosswalk; it is the only AIOE code the BLS file lacks. It is mapped by its O*NET-SOC 2010→2019 successor 19-1029 (Biological Scientists, All Other; May 2024 employment 59,710, 0.04% of detailed employment), where it is averaged with AIOE's own 19-1029 (0.752 and 1.010 give 0.881), exactly as in the primary mapping. Every other AIOE code uses the BLS crosswalk.
+- Rule: AIOE's 19-1020 (from O\*NET-SOC 2010 19-1020.01 Biologists) is not a SOC 2010 detailed code and is absent from the BLS SOC 2010→2018 crosswalk; it is the only AIOE code the BLS file lacks. It is mapped by its O\*NET-SOC 2010→2019 successor 19-1029 (Biological Scientists, All Other; May 2024 employment 59,710, 0.04% of detailed employment), where it is averaged with AIOE's own 19-1029 (0.752 and 1.010 give 0.881), exactly as in the primary mapping. Every other AIOE code uses the BLS crosswalk.
 
-### C-74. Clarification: R32's O*NET part is identical to the primary (2026-10-23)
+### C-74. Clarification: R32's O\*NET part is identical to the primary (2026-10-23)
 - Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
 - Fixed by: Plan 4 Task 6 (plans committed at a7fb9bd)
 - Results seen: RQ1 and H5 confirmatory results and all Plan 3 results seen; no R32 row run
-- Rule: The O*NET 29.2 Task Statements file (db_29_2_text, retrieved 2026-10-23) is byte-identical to the 29.3 file used by the primary (SHA-256 fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a, 2,759,559 bytes; latest task Date 08/2024). R32's task index therefore equals the primary's, and R32 differs from the primary only through the OEWS May 2023 weights (oesm23in4, oesm23nat). It is still run and reported as specified (§8.1) with this note. That 29.3 left task statements unchanged is inferred from the byte identity and the task dates, not from O*NET's release notes.
+- Rule: The O\*NET 29.2 Task Statements file (db_29_2_text, retrieved 2026-10-23) is byte-identical to the 29.3 file used by the primary (SHA-256 fecdcda81a4b8a28e750a6c75ed8bf2d0a9b71186e5be37eec8dc6cef7985d1a, 2,759,559 bytes; latest task Date 08/2024). R32's task index therefore equals the primary's, and R32 differs from the primary only through the OEWS May 2023 weights (oesm23in4, oesm23nat). It is still run and reported as specified (§8.1) with this note. That 29.3 left task statements unchanged is inferred from the byte identity and the task dates, not from O\*NET's release notes.
 
 ### C-75. Clarification: R35 interval (2026-10-23)
 - Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
@@ -932,6 +933,12 @@ primary result (§0.5).
 - Fixed by: Plan 4 Task 31 review (plans committed at a7fb9bd)
 - Results seen: yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, the D-3 diagnostics and the Task 16 and Task 31 red-team findings
 - Rule: The C-80 rule (a regenerated CSV reproduces the committed one when every non-numeric cell is identical and every numeric cell agrees within relative 1e-9, absolute 1e-12 near zero; a .md must match byte for byte) also applies to docs/results/diagnostics/*.csv. A re-run of the D-3 diagnostics differs only in the last float digit of h2_influence.csv's usage_share_pct (an unordered group_by sum, as in C-80); no printed number moves. No estimate, specification or committed output changes.
+
+### C-83. Clarification: Record corrections: C-81's unit wording; the Plan 4 file amended after the confirmatory runs (2026-10-24)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: Plan 4 Task 34 review (plans committed at a7fb9bd; amended at 358c021)
+- Results seen: yes: all confirmatory, Plan 3 and Plan 4 results and both red teams seen
+- Rule: (1) C-81 says the new RQ1 unit label states the PAP's unit exactly; it corrects it: PAP §4.1's 'per log point' read literally is per 0.01 of the natural log, while the coefficients are per unit of the natural log (a hundred log points), which is what the generated tables now say. No estimate changes. (2) The C-entries cite 'plans committed at a7fb9bd'. The Plan 4 file was amended once more at 358c021 (Plan 3's final fix wave, after both confirmatory runs and before any Plan 4 robustness read); that amendment changed interfaces, test fixtures and guard notes only (hits_from_saved strict/saved_ranges, guard fixture bytes, the R9 placebo name, R4/R8 bootstrap-draw notes, zero_assigned_lines reuse) and no default, specification or row.
 
 ### Deviations after the freeze
 

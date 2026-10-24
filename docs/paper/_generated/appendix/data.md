@@ -144,7 +144,7 @@ Each `make` target, what it depends on and what it runs, in the order of the Mak
 
 | target | depends on | runs |
 |----|------|------|
-| `all` | `lint`, `confirmatory-check`, `panel`, `exposure`, `benchmarks`, `audit`, `power-block`, `results-rq1`, `results-rq2`, `rq3`, `h6`, `robustness`, `diagnostics`, `paper-includes`, `paper`, `brief`, `test` | its prerequisites only |
+| `all` | `lint`, `confirmatory-check`, `panel`, `exposure`, `benchmarks`, `audit-check`, `power-block`, `results-rq1`, `results-rq2`, `rq3`, `h6`, `robustness`, `diagnostics`, `paper-includes`, `paper`, `brief`, `test` | its prerequisites only |
 | `test` | nothing | `uv run pytest -v` |
 | `lint` | nothing | `uv run ruff check` |
 | `data` | nothing | `uv run python -m aideleg.acquire` |
@@ -156,6 +156,7 @@ Each `make` target, what it depends on and what it runs, in the order of the Mak
 | `benchmarks` | `data/derived/benchmark_ff49.parquet` | its prerequisites only |
 | `data/derived/benchmark_ff49.parquet` | `src/aideleg/benchmarks.py`, `src/aideleg/exposure.py`, `src/aideleg/config.py`, `src/aideleg/acquire/sources.py`, `src/aideleg/market/french.py`, `$(wildcard src/aideleg/bls/*.py)`, `$(wildcard src/aideleg/crosswalk/*.py)`, `data/raw/MANIFEST.json`, `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.benchmarks` |
 | `audit` | `data/derived/aei_panel.parquet`, `data/derived/exposure_ff49.parquet`, `data/derived/benchmark_ff49.parquet` | `uv run python -m aideleg.audit` |
+| `audit-check` | `data/derived/aei_panel.parquet`, `data/derived/exposure_ff49.parquet`, `data/derived/benchmark_ff49.parquet` | `uv run python scripts/audit_check.py` |
 | `power-unfrozen` | nothing | `uv run python -c "import sys; from aideleg.market.seal import pap_frozen; sys.exit('pap-v1 exists: the power analysis is frozen, not rerun' if pap_frozen() else 0)"` |
 | `power` | `power-unfrozen`, `data/derived/exposure_ff49.parquet` | `uv run python -m aideleg.power` |
 | `power-block` | `data/derived/exposure_ff49.parquet` | `uv run python scripts/power_block.py` |
