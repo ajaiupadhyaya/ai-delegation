@@ -1,0 +1,7 @@
+Text.
+
+```{python}
+print(b)
+```
+
+Inline `{r} b` too.

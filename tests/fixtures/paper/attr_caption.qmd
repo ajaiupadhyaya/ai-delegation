@@ -1,0 +1,1 @@
+![Plot](p.png){fig-cap="Slope 0.76" width=50%}

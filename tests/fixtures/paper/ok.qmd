@@ -1,12 +1,15 @@
 ---
-title: "Fixture 2026"
+title: "Fixture"
+format:
+  pdf:
+    fontsize: 11pt
 ---
 
 H5b in FF49 for r6 (§8.2) {{< var rq3.h5.b >}} [@fama2015]
-and `1p_api` with ![a plot](figures/fig_2.png) and O*NET.
+and `1p_api` with ![a plot](figures/fig_2.png){width=50%} and O*NET; R² and t₂₁.
 
 ```python
-x = 1
+x = y
 ```
 
 <!-- note 12 -->

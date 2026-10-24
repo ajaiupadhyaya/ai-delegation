@@ -1,0 +1,18 @@
+# Results {#sec-r}
+
+{{< include _generated/tables/x.md >}}
+Then a bare claim follows.
+
+::: {#fig-a}
+{{< include _generated/figures/a.md >}}
+:::
+
+::: {#fig-b}
+![B](b.png){width=50%}
+:::
+
+| a | b |
+|---|---|
+| {{< var x.y >}} | c |
+
+: A typed caption with {{< var x.y >}} {#tbl-t}

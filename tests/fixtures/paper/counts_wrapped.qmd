@@ -1,0 +1,5 @@
+Of the rows, 12
+of 36 reject.
+
+H5 is significant
+in R7.

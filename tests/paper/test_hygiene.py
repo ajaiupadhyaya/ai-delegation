@@ -67,6 +67,39 @@ def test_numeral_fixtures_flagged(name, line):
     assert [ln for ln, _ in hits] == [line], hits
 
 
+@pytest.mark.parametrize(
+    ("name", "lines"),
+    [
+        ("yaml_title.qmd", [2]),
+        ("raw_block.qmd", [3]),
+        ("exec_chunk.qmd", [3, 7]),
+        ("at_number.qmd", [1]),
+        ("unicode_numerals.qmd", [1]),
+        ("star_ident.qmd", [1]),
+        ("attr_caption.qmd", [1]),
+    ],
+)
+def test_review_bypass_fixtures_flagged(name, lines):
+    """Review fixes: rendered YAML values, raw/executable code, `@0.5`, non-ASCII numerals,
+    `*` outside O*NET-style tokens and a rendered attribute value are all flagged."""
+    hits = hygiene.numerals(FIX / name)
+    assert sorted({ln for ln, _ in hits}) == lines, hits
+
+
+def test_raw_block_allowlist_and_exponents():
+    assert hygiene.forbidden_code("```{=latex}\n\\appendix\n```\n") == []
+    assert hygiene.forbidden_code("```{=latex}\n\\vspace{1em}\n```\n") == [(1, "```{=latex}")]
+    assert hygiene.numerals_in_text("R² and x⁻¹ and t₂₁ and (a+b)²") == []
+    assert hygiene.numerals_in_text("a ² b") == [(1, "a ² b")]
+
+
+def test_attribute_blocks_stripped_generally():
+    assert hygiene.strip_allowed("# A {.unnumbered}") == "# A "
+    assert hygiene.strip_allowed('![x](p.png){width=50% fig-align="center"}') == "![x]"
+    assert "{{< var" not in hygiene.strip_allowed("{{< var a.b >}} {#tbl-x}")
+    assert hygiene.numerals_in_text("Text {5} here") == [(1, "Text {5} here")]
+
+
 def test_numeral_fixture_ok_passes():
     assert hygiene.numerals(FIX / "ok.qmd") == []
 
@@ -110,6 +143,13 @@ def test_wording_allowed_only_inside_wording():
     assert hygiene.wording_hits("because") == []
 
 
+def test_wording_wrapped_across_lines_flagged():
+    hits = hygiene.wording_hits(_text(FIX / "wording_wrapped.qmd"))
+    assert [(ln, pat) for ln, pat, _ in hits] == [(3, r"\blabor market\b")]
+    wrapped = WORDING.replace("the labour market", "the labour\n  market")
+    assert hygiene.wording_hits(f"Intro.\n\n{wrapped}\n") == []
+
+
 @pytest.mark.parametrize("path", SOURCES, ids=_rel)
 def test_wording_rules(path):
     hits = hygiene.wording_hits(_text(path))
@@ -136,6 +176,14 @@ def test_robustness_fixtures_flagged(name):
     assert hygiene.robustness_hits(_text(FIX / name))
 
 
+def test_robustness_wrapped_across_lines_flagged():
+    hits = hygiene.robustness_hits(_text(FIX / "counts_wrapped.qmd"))
+    assert sorted({(ln, pat) for ln, pat, _ in hits}) == [
+        (1, hygiene.ROBUSTNESS_BANNED[0]),
+        (4, hygiene.ROBUSTNESS_BANNED[2]),
+    ]
+
+
 def test_robustness_section_no_counts():
     assert hygiene.robustness_hits(_text(FIX / "ok_rows.qmd")) == []
     path = PAPER / "sections" / "08-robustness.qmd"
@@ -150,6 +198,7 @@ def test_cited_keys_skip_crossrefs_code_and_email():
     text = (
         "See [@fama2015five; @holm1979simple], @tbl-a, @fig-b and @sec-c.\n"
         "Mail ajaiupad@gmail.com; `@notakey`.\n<!-- @hidden -->\nAs @newey1987simple:"
+        " and by @0.5 pp."
     )
     assert hygiene.cited_keys(text) == {"fama2015five", "holm1979simple", "newey1987simple"}
 
@@ -173,6 +222,17 @@ def test_paragraph_rule_on_text():
         "{{< include _generated/tables/x.md >}}\n\nA bare claim.\n\n::: {.note}\n:::\n"
     )
     assert hygiene.uncited_paragraphs(text) == ["A bare claim."]
+
+
+def test_paragraph_rule_review_cases():
+    """An include followed by prose is checked; a fenced div holding only an include or a
+    figure is skipped; a typed pipe table or `:` caption is flagged even with a var in it."""
+    bare = hygiene.uncited_paragraphs(_text(FIX / "paragraphs.qmd"))
+    assert bare == [
+        "Then a bare claim follows.",
+        "| a | b |\n|---|---|\n| {{< var x.y >}} | c |",
+        ": A typed caption with {{< var x.y >}} {#tbl-t}",
+    ]
 
 
 @pytest.mark.parametrize("path", RESULTS_SECTIONS, ids=_rel)
