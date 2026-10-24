@@ -6,7 +6,15 @@ The title of this section was fixed before any post-seal return was read, by the
 
 @tbl-rq3-confirmatory reproduces the record of the single confirmatory run (@sec-methods), which used all {{< var rq3.provenance.n >}} FF49 industries (dropped for a missing return: {{< var rq3.provenance.dropped >}}) and {{< var rq3.provenance.n_days >}} factor days from {{< var design.window.start >}} to {{< var design.window.end >}}. The primary null is D21's b = b̄, the mean slope of the same exposure vector over {{< var power.n_windows >}} overlapping pre-seal windows ({{< var design.null_years >}}); the statistic is (b̂ − b̄)/s, referred to a t distribution with {{< var power.t_df >}} degrees of freedom. For H5, b̂ = {{< var rq3.h5.b_pp2 >}} pp per SD against b̄ = {{< var rq3.h5.bbar >}} and s = {{< var rq3.h5.s >}}, so T = {{< var rq3.h5.t >}} and p = {{< var rq3.h5.p >}}. For H5b, which holds the AIOE benchmark [@felten2021occupational] in the regression, b̂ = {{< var rq3.h5b.b_pp2 >}} against b̄ = {{< var rq3.h5b.bbar >}} and s = {{< var rq3.h5b.s >}}, so T = {{< var rq3.h5b.t >}} and p = {{< var rq3.h5b.p >}}. Neither p reaches the first-step level, so Holm's procedure [@holm1979simple] stops there: H5 is {{< var rq3.h5.decision_text >}}, and H5b is {{< var rq3.h5b.decision_text >}}.
 
+```{=latex}
+\begingroup\scriptsize\raggedright
+```
+
 {{< include _generated/tables/rq3-confirmatory.md >}}
+
+```{=latex}
+\endgroup
+```
 
 Every number in @tbl-rq3-confirmatory carries the S1 timing caveat (PAP §10). Design B is out of sample in its AEI data only; it is not strictly real-time. Its OEWS {{< var vintage.oews.primary >}} weights were released on {{< var design.s1.oews_release >}}, after the formation date of {{< var design.formation >}} and inside the return window, and its O\*NET {{< var vintage.onet.primary >}} task links also postdate formation, although their task text is byte-identical to that of O\*NET {{< var vintage.onet.r32 >}} (PAP §11, C-74). R32, the strict real-time row, rebuilds the exposure on the OEWS {{< var vintage.oews.r32 >}} weights that were public at formation. It gives b̂ = {{< var rob.r32.h5.estimate >}} for H5 (interval [{{< var rob.r32.h5.ci_lo >}}, {{< var rob.r32.h5.ci_hi >}}], p = {{< var rob.r32.h5.p >}}) and {{< var rob.r32.h5b.estimate >}} for H5b ([{{< var rob.r32.h5b.ci_lo >}}, {{< var rob.r32.h5b.ci_hi >}}], p = {{< var rob.r32.h5b.p >}}). R1, built on the later OEWS {{< var vintage.oews.r1 >}} weights, is look-ahead; it gives {{< var rob.r01.h5.estimate >}} for H5 and {{< var rob.r01.h5b.estimate >}} for H5b (@sec-robustness).
 
@@ -46,15 +54,19 @@ Exploratory: the event studies use the D19 rule. The events are ChatGPT, which t
 
 Exploratory: @tbl-rq3-event-slopes and @fig-rq3-event-slopes (@sec-app-supplementary) report every event, horizon and design. For ChatGPT, the `A_r2` slope is {{< var rq3.event.chatgpt.k5.a_r2.z_delegation.z_delegation.b >}} pp of CAR per SD at the shorter horizon (CI [{{< var rq3.event.chatgpt.k5.a_r2.z_delegation.z_delegation.ci_lo >}}, {{< var rq3.event.chatgpt.k5.a_r2.z_delegation.z_delegation.ci_hi >}}], nominal p = {{< var rq3.event.chatgpt.k5.a_r2.z_delegation.z_delegation.p >}}) and {{< var rq3.event.chatgpt.k20.a_r2.z_delegation.z_delegation.b >}} at the longer one ([{{< var rq3.event.chatgpt.k20.a_r2.z_delegation.z_delegation.ci_lo >}}, {{< var rq3.event.chatgpt.k20.a_r2.z_delegation.z_delegation.ci_hi >}}], nominal p = {{< var rq3.event.chatgpt.k20.a_r2.z_delegation.z_delegation.p >}}). The p-values are nominal and single-test, and may be oversized because abnormal returns are correlated across industries on a common date.
 
-{{< include _generated/figures/rq3-event-slopes.md >}}
-
 Exploratory: the tercile portfolios go long the highest-exposure third of FF49 industries and short the lowest, with membership fixed at formation, monthly capitalisation weights and equal-weighted legs beside them (PAP §8.3, D19). They report CAPM, FF3 and FF5+UMD alphas [@fama1993common] with Newey–West errors [@newey1987simple; @newey1994automatic], stationary-bootstrap intervals [@politis1994stationary], the probabilistic Sharpe ratio, PSR [@bailey2012sharpe], and the deflated Sharpe ratio, DSR [@bailey2014deflated]. They are measurement devices that express the cross-sectional slope as a return spread, not strategies; the costed versions show the spread's fragility, not a tradable return (@tbl-rq3-terciles-b-cap-costs; @sec-app-supplementary).
 
 Exploratory: for Design B (secondary) with cap-weighted legs, the annualised mean high-minus-low return is {{< var rq3.terciles.b.cap.mean.estimate >}} pp (bootstrap CI [{{< var rq3.terciles.b.cap.mean.ci_lo >}}, {{< var rq3.terciles.b.cap.mean.ci_hi >}}], nominal p = {{< var rq3.terciles.b.cap.mean.p >}}). The FF3 alpha is {{< var rq3.terciles.b.cap.alpha_ff3.estimate >}} pp and the FF5+UMD alpha {{< var rq3.terciles.b.cap.alpha_ff5_umd.estimate >}} pp ([{{< var rq3.terciles.b.cap.alpha_ff5_umd.ci_lo >}}, {{< var rq3.terciles.b.cap.alpha_ff5_umd.ci_hi >}}], p = {{< var rq3.terciles.b.cap.alpha_ff5_umd.p >}}). That spread across factor models rests on {{< var design.window.months >}} monthly returns and is model-fragile (@tbl-rq3-terciles-b-cap; @sec-app-supplementary). The PSR is {{< var rq3.terciles.b.cap.psr.estimate >}} and the DSR {{< var rq3.terciles.b.cap.dsr.estimate >}}; with equal-weighted legs they are {{< var rq3.terciles.b.ew.psr.estimate >}} and {{< var rq3.terciles.b.ew.dsr.estimate >}}. For `A_r2` with cap-weighted legs they are {{< var rq3.terciles.a_r2.cap.psr.estimate >}} and {{< var rq3.terciles.a_r2.cap.dsr.estimate >}}; for `A_pooled`, look-ahead, {{< var rq3.terciles.a_pooled.cap.psr.estimate >}} and {{< var rq3.terciles.a_pooled.cap.dsr.estimate >}} (@tbl-rq3-terciles-dsr). The DSR treats every variant as an independent trial, which overstates the number of independent trials: B is nested in `A_r2`, and `A_r2` and `A_pooled` hold nearly the same portfolios (@fig-rq3-tercile-cumulative).
 
+```{=latex}
+\begingroup\scriptsize\raggedright
+```
+
 {{< include _generated/tables/rq3-terciles-dsr.md >}}
 
-{{< include _generated/figures/rq3-tercile-cumulative.md >}}
+```{=latex}
+\endgroup
+```
 
 Exploratory: Fama–MacBeth regressions [@fama1973risk] of monthly industry excess returns on exposure, log size, log book-to-market and momentum give a mean exposure slope of {{< var rq3.fama_macbeth.b.z.mean >}} pp per month per SD for Design B over {{< var rq3.fama_macbeth.b.z.n_months >}} months (CI [{{< var rq3.fama_macbeth.b.z.ci_lo >}}, {{< var rq3.fama_macbeth.b.z.ci_hi >}}], nominal p = {{< var rq3.fama_macbeth.b.z.p >}}; @tbl-rq3-fama-macbeth-b; @sec-app-supplementary). For `A_r2` over {{< var rq3.fama_macbeth.a_r2.z.n_months >}} months it is {{< var rq3.fama_macbeth.a_r2.z.mean >}} ([{{< var rq3.fama_macbeth.a_r2.z.ci_lo >}}, {{< var rq3.fama_macbeth.a_r2.z.ci_hi >}}], p = {{< var rq3.fama_macbeth.a_r2.z.p >}}; @tbl-rq3-fama-macbeth-a-r2). For `A_pooled`, look-ahead, it is {{< var rq3.fama_macbeth.a_pooled.z.mean >}} ([{{< var rq3.fama_macbeth.a_pooled.z.ci_lo >}}, {{< var rq3.fama_macbeth.a_pooled.z.ci_hi >}}], p = {{< var rq3.fama_macbeth.a_pooled.z.p >}}; @tbl-rq3-fama-macbeth-a-pooled).
 
@@ -63,8 +75,6 @@ Exploratory: the comparison with Eisfeldt, Schubert and Zhang [@eisfeldt2023gene
 ## Talk versus use (H6, exploratory)
 
 Exploratory: H6 (PAP §6, D18) belongs to no testing family. The talk index T of an FF49 industry is the share of its filers whose 10-K filings match at least one primary AI term in the SEC EDGAR full-text search [@sec2026edgar]. The gap uses filings dated {{< var h6.talk.filed_start >}} to {{< var h6.talk.filed_end >}}, public before formation. Pooled across all filers, the share rises from {{< var h6.talk.pooled_all.y2019 >}} in the first filing year of the series to {{< var h6.talk.pooled_all.y2024 >}} in {{< var h6.talk.year >}} and {{< var h6.talk.pooled_all.y2025 >}} in the last (@tbl-h6-talk-by-year, @fig-h6-talk-by-year; @sec-app-supplementary). Over the same years the share of filers with no FF49 industry rises from {{< var h6.talk.unmapped_share_pct.y2019 >}}% to {{< var h6.talk.unmapped_share_pct.y2025 >}}%, so part of that trend is composition; the mapped-only series runs from {{< var h6.talk.pooled_mapped.y2019 >}} to {{< var h6.talk.pooled_mapped.y2025 >}}.
-
-{{< include _generated/figures/h6-talk-by-year.md >}}
 
 Exploratory: across industries, the Spearman correlation of T with Design B `z_usage` (conversations matched to O\*NET tasks, weighted to industries) is {{< var h6.spearman.rho >}}, with an industry-bootstrap CI of [{{< var h6.spearman.ci.lo >}}, {{< var h6.spearman.ci.hi >}}] (@tbl-h6-divergence, @fig-h6-talk-vs-usage; @sec-app-supplementary). Its p, from the t-approximation with n minus two degrees of freedom, is {{< var diag.h6.none.p >}}. That p is nominal and exploratory, a post-result diagnostic (PAP §11 D-3; @sec-app-deviations), in no testing family. Two inputs are fixed at retrieval, not in {{< var h6.talk.year >}}. The FF49 industry is each filer's current SIC from the EDGAR submissions file, retrieved at {{< var h6.vintage.submissions_retrieved_utc >}} and applied to every filing year (PAP §11, C-40). The numerator uses the full-text search's phrase matching as the SEC implemented it on the retrieval date (PAP §6).
 

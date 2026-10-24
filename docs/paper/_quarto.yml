@@ -33,14 +33,14 @@ format:
     toc-depth: 2
     colorlinks: true
     # Task 21: the wide robustness and data tables are set landscape; figures are scaled to the
-    # text width and at most 0.55 of the text height (integration pass); long identifiers may break
+    # text width and at most 0.42 of the text height (integration pass); long identifiers may break
     # after an underscore; subscript and superscript digits missing from Pagella are typeset
     include-in-header:
       text: |
         \usepackage{pdflscape}
         \makeatletter
         \renewcommand*\pandocbounded[1]{\sbox\pandoc@box{#1}%
-          \Gscale@div\@tempa{0.55\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+          \Gscale@div\@tempa{0.42\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
           \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
           \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi
           \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}\else\usebox{\pandoc@box}\fi}

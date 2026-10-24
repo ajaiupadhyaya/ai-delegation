@@ -2,7 +2,15 @@
 
 This section reports RQ1 in the order the pre-registration fixes (@sec-methods): first a descriptive anatomy of how conversations divide between the automation and augmentation patterns, then the four confirmatory hypotheses. AEI data are conversations matched to O\*NET tasks, so every number below describes how those conversations are distributed across tasks, occupations and countries; none describes the people who hold the occupations. RQ1's family-wise α of {{< var design.alpha.rq1_total >}} is split as registered: H2 is tested on its own at {{< var design.alpha.rq1_h2 >}}, and {H1, H3, H4} by Holm at family-wise {{< var design.alpha.rq1_family >}}. @tbl-rq1-confirmatory-table gathers every confirmatory coefficient with its unit, standard error, family p-value, Holm level and decision, and @fig-rq1-coefficients draws the same estimates with their confidence intervals. Each hypothesis is reported below with its decision first, then its estimate, interval and p-value, whatever the decision.
 
+```{=latex}
+\begingroup\scriptsize\raggedright
+```
+
 {{< include _generated/tables/rq1-confirmatory-table.md >}}
+
+```{=latex}
+\endgroup
+```
 
 {{< include _generated/figures/rq1-coefficients.md >}}
 
@@ -14,15 +22,9 @@ This section reports RQ1 in the order the pre-registration fixes (@sec-methods):
 
 By wage, usage and employment are distributed very differently (@fig-rq1-composition-wage-decile, @tbl-rq1-wage-decile; @sec-app-supplementary). The top decile of the OEWS median wage holds {{< var rq1.anatomy.wage_decile.d10.usage_share >}} per cent of conversations matched to OEWS occupations against {{< var rq1.anatomy.wage_decile.d10.emp_share >}} per cent of employment. The bottom decile holds {{< var rq1.anatomy.wage_decile.d1.usage_share >}} per cent against {{< var rq1.anatomy.wage_decile.d1.emp_share >}} per cent. The automation share does not move monotonically with the decile: it is {{< var rq1.anatomy.wage_decile.d1.automation_pct >}} per cent in the bottom decile, {{< var rq1.anatomy.wage_decile.d8.automation_pct >}} per cent in the eighth and {{< var rq1.anatomy.wage_decile.d10.automation_pct >}} per cent in the top decile. This raw gradient pools all task families. H1 asks the narrower, within-family question, so the two need not agree.
 
-{{< include _generated/figures/rq1-composition-wage-decile.md >}}
-
 By the education a task requires (@fig-rq1-composition-education, @tbl-rq1-education; @sec-app-supplementary), usage sits mostly in the two lowest bins, which hold {{< var rq1.anatomy.education.lt12.usage_share >}} and {{< var rq1.anatomy.education.12_14.usage_share >}} per cent of usage. The highest bin holds {{< var rq1.anatomy.education.ge18.usage_share >}} per cent. The automation share is {{< var rq1.anatomy.education.lt12.automation_pct >}} per cent in the lowest bin, {{< var rq1.anatomy.education.14_16.automation_pct >}} per cent in the middle bin and {{< var rq1.anatomy.education.16_18.automation_pct >}} per cent in the second-highest bin, so the descriptive education profile has no single direction either. Tasks published without an education value carry {{< var rq1.anatomy.education.zero_published_usage.usage_share >}} per cent of usage: they are the tasks published with zero usage.
 
-{{< include _generated/figures/rq1-composition-education.md >}}
-
 Usage is also concentrated across tasks (@fig-rq1-lorenz, @tbl-rq1-concentration; @sec-app-supplementary). In r6 `claude_ai`, the largest {{< var rq1.anatomy.concentration.claude_ai.r6.n_tasks_50pct >}} tasks hold half of the usage over {{< var rq1.anatomy.concentration.claude_ai.r6.n_tasks >}} published matched tasks; in r6 `1p_api` the figure is {{< var rq1.anatomy.concentration.1p_api.r6.n_tasks_50pct >}} tasks over {{< var rq1.anatomy.concentration.1p_api.r6.n_tasks >}}. The as-published Gini coefficients and top-share columns are not comparable across releases. r6 publishes usage to coarser precision and keeps its zero-usage tasks in the count. @tbl-rq1-concentration-harmonised therefore puts every release on r6's rounding and drops zero-usage tasks. Even there the suppression regimes differ by release (PAP §5), so differences between releases are not read as changes in the conversations themselves.
-
-{{< include _generated/figures/rq1-lorenz.md >}}
 
 ## H1: education, wages and the automation share
 
@@ -50,15 +52,9 @@ H3 is {{< var rq1.h3.decision_text >}} at the pre-registered level: the null tha
 
 H4 is {{< var rq1.h4.decision_text >}}: Holm over {H1, H3, H4} at family-wise {{< var design.alpha.rq1_family >}} rejects H4 at its first step, at level {{< var rq1.holm.h4 >}}, with a joint HC3 Wald p {{< var rq1.h4.p_wald >}} (@tbl-rq1-confirmatory-table). The sample is {{< var rq1.h4.n >}} countries in r6 `claude_ai`. b₁ is {{< var rq1.h4.b1 >}} pp of automation per unit of log AUI (interval [{{< var rq1.h4.log_aui.ci_low >}}, {{< var rq1.h4.log_aui.ci_high >}}], p = {{< var rq1.h4.log_aui.p >}}). b₂ is {{< var rq1.h4.b2 >}} pp of automation per unit of log GDP per working-age person (interval [{{< var rq1.h4.log_income.ci_low >}}, {{< var rq1.h4.log_income.ci_high >}}], p = {{< var rq1.h4.log_income.p >}}). Both log coefficients are per unit of the log, not per log point. H4's direction was left open, and the negative signs are a description, not a registered prediction. Conditional on the task-mix control, countries with a higher usage index and higher income per working-age person have a lower share of classified conversations in the automation patterns. The two regressors share the working-age population in their denominators and are strongly correlated across countries. b₁ and b₂ are therefore only weakly separable one at a time, although the joint Wald test on which H4 is decided is not affected. The task-mix control's coefficient is {{< var rq1.h4.mix.estimate >}} pp per pp ([{{< var rq1.h4.mix.ci_low >}}, {{< var rq1.h4.mix.ci_high >}}]); it is a control and is not tested. Under the pre-registered robustness row R28 for US states, the coefficients are {{< var rob.r28.us_states.log_aui.estimate >}} for log AUI (p = {{< var rob.r28.us_states.log_aui.p >}}) and {{< var rob.r28.us_states.log_income.estimate >}} for log income (p = {{< var rob.r28.us_states.log_income.p >}}). The other R28 rows are in @sec-app-robustness-tables.
 
-The shift-share maps split each geography's gap from the global automation share into a task-mix part and a within-task part. They are descriptive, with no test attached (@fig-rq1-map-country-mix, @fig-rq1-map-country-within). Across countries, the within-task part spans a wider range than the mix part. In the within-task map, Western European countries, Canada and Australia sit below the global share, and several countries in sub-Saharan Africa and South Asia sit above it. Grey marks a country that is not published, and hatching marks one not published in both months; neither is ever shown as zero. @fig-rq1-map-state-mix and @fig-rq1-map-state-within draw the same split for US states. The states are not part of the H4 sample, and their regression is the R28 row above.
-
-{{< include _generated/figures/rq1-map-country-mix.md >}}
+The shift-share maps split each geography's gap from the global automation share into a task-mix part and a within-task part. They are descriptive, with no test attached (@fig-rq1-map-country-within; @fig-rq1-map-country-mix in @sec-app-supplementary). Across countries, the within-task part spans a wider range than the mix part. In the within-task map, Western European countries, Canada and Australia sit below the global share, and several countries in sub-Saharan Africa and South Asia sit above it. Grey marks a country that is not published, and hatching marks one not published in both months; neither is ever shown as zero. @fig-rq1-map-state-mix and @fig-rq1-map-state-within (@sec-app-supplementary) draw the same split for US states. The states are not part of the H4 sample, and their regression is the R28 row above.
 
 {{< include _generated/figures/rq1-map-country-within.md >}}
-
-{{< include _generated/figures/rq1-map-state-mix.md >}}
-
-{{< include _generated/figures/rq1-map-state-within.md >}}
 
 ## The RQ1 decisions together
 

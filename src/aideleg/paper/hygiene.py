@@ -83,12 +83,15 @@ RENDERED_ATTRS = (
     "caption",
     "alt",
 )
-# Raw blocks allowed by exact (stripped) content: paper.qmd's appendix switch, and the landscape
-# wrapper of Appendix F (the same one the generated Appendix D uses).
+# Raw blocks allowed by exact (stripped) content: paper.qmd's appendix switch, the landscape
+# wrapper of Appendix F (`includes.LANDSCAPE`, as in Appendix D) and the small-type group
+# around the body's headline tables (Appendix D's `\scriptsize`, without the landscape).
 RAW_ALLOWED = {
     ("latex", "\\appendix"),
     ("latex", "\\begin{landscape}\\scriptsize\\raggedright"),
     ("latex", "\\end{landscape}"),
+    ("latex", "\\begingroup\\scriptsize\\raggedright"),
+    ("latex", "\\endgroup"),
 }
 EXPONENT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉"
 

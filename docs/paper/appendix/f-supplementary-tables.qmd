@@ -1,12 +1,14 @@
-# Supplementary tables {#sec-app-supplementary}
+# Supplementary tables and figures {#sec-app-supplementary}
 
-This appendix prints the generated tables that the body cites but does not set in the text, so that the body keeps only its headline tables. They are grouped by the section that discusses them (@sec-data, @sec-rq1, @sec-rq2, @sec-markets, @sec-limitations) and, within each group, follow the order in which that section first cites them. Each table is printed unedited from its source file, under the label the body cites.
+This appendix prints the generated tables and figures that the body cites but does not set in the text, so that the body keeps only its headline tables and the figures that carry a headline or confirmatory result. They are grouped by the section that discusses them (@sec-data, @sec-rq1, @sec-rq2, @sec-markets, @sec-limitations) and, within each group, follow the order in which that section first cites them. Each table and figure is printed unedited from its source file, under the label the body cites; the figures follow the tables, in the same grouping.
 
 ```{=latex}
 \begin{landscape}\scriptsize\raggedright
 ```
 
 ## Data and measurement
+
+{{< include _generated/tables/releases.md >}}
 
 {{< include _generated/tables/regimes.md >}}
 
@@ -109,3 +111,25 @@ This appendix prints the generated tables that the body cites but does not set i
 ```{=latex}
 \end{landscape}
 ```
+
+## Supplementary figures
+
+{{< include _generated/figures/rq1-composition-wage-decile.md >}}
+
+{{< include _generated/figures/rq1-composition-education.md >}}
+
+{{< include _generated/figures/rq1-lorenz.md >}}
+
+{{< include _generated/figures/rq1-map-country-mix.md >}}
+
+{{< include _generated/figures/rq1-map-state-mix.md >}}
+
+{{< include _generated/figures/rq1-map-state-within.md >}}
+
+{{< include _generated/figures/rq2-bound-widths.md >}}
+
+{{< include _generated/figures/rq3-event-slopes.md >}}
+
+{{< include _generated/figures/rq3-tercile-cumulative.md >}}
+
+{{< include _generated/figures/h6-talk-by-year.md >}}
