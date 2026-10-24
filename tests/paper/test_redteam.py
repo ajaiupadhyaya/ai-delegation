@@ -102,6 +102,36 @@ def test_render_log_lists_every_row():
     assert text.count(hl.WORDING) == 1
 
 
+def test_scan_headlines_lists_unregistered_vars_once(tmp_path):
+    reg = tmp_path / "headlines.csv"
+    reg.write_text(",".join(hl.HEADLINE_COLUMNS) + "\nrq1.H1.beta_e,q,f,l,s,declared\n")
+    a, b = tmp_path / "a.qmd", tmp_path / "b.qmd"
+    a.write_text("x {{< var rq1.h1.beta_e >}} {{< var pap.tag >}} {{<var meta.wording>}}\n")
+    b.write_text("{{< var pap.tag >}} {{< meta title >}} {{< var design.n_industries >}}\n")
+    assert hl.scan_headlines((str(a), str(b)), reg) == [
+        "pap.tag",
+        "meta.wording",
+        "design.n_industries",
+    ]
+
+
+def test_committed_registry_covers_the_headline_sections():
+    assert hl.scan_headlines() == []
+
+
+def test_locate_variable_reads_what_the_variable_reads():
+    from aideleg.paper import variables
+
+    for r in _rows(variables.MAP):
+        key = r["key"]
+        if not key.startswith(("design.", "pap.", "power.s.", "rq1.h4.log_aui", "rq3.h5.b")):
+            continue
+        source_file, locator = hl.locate_variable(r)
+        assert (ROOT / source_file).is_file(), key
+        raw, _ = variables.resolve(r)
+        assert hl.resolve({"source_file": source_file, "source_locator": locator}) == str(raw)
+
+
 # --- the committed registry and log ---------------------------------------------------------
 
 

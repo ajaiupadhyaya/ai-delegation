@@ -20,6 +20,10 @@ Locator grammar (`source_locator`; each kind must select exactly one value, else
   and the value is the group; used to read the MDE out of the fixed P14 wording.
 - `md-regex:<regex>` -- the regex (exactly one capture group, compiled with `re.MULTILINE`) must
   match the text of `source_file` exactly once; the value is the group.
+- `config:`, `power_frozen:` or `pap:<dotted.path>` -- the built-in trees of
+  `aideleg.paper.variables` (project constants, the frozen power values, the `pap-v1` tag), read by
+  the same resolver the paper's variables use. Here `source_file` names the module or document
+  that defines the constant; it is checked to exist but not read.
 
 `source_file` is relative to the repository root (an absolute path is used as given).
 
@@ -66,6 +70,29 @@ CHALLENGES = {
     "C11": "Uncertainty. CI and p are present. The MDE sits beside each market null.",
     "C12": "Alternative explanations. Classifier and platform drift (H2), suppression and the R7 "
     "bounds (H1/H3), task mix (H4), tech beta (R7 row) and collinearity (H5b).",
+}
+
+
+HEADLINES = ROOT / "docs/redteam/headlines.csv"
+# Task 31: the parts of the paper whose variables are headline numbers
+HEADLINE_SOURCES = (
+    "docs/paper/sections/00-abstract.qmd",
+    "docs/paper/brief_body.qmd",
+    "docs/paper/sections/01-introduction.qmd",
+    "docs/paper/sections/10-conclusion.qmd",
+)
+_VAR = re.compile(r"\{\{<\s*var\s+([^\s>]+)\s*>\}\}")
+_BUILTIN_KINDS = ("config", "power_frozen", "pap")
+# the file that defines each built-in constant (`source_file` of a built-in headline row)
+_BUILTIN_FILES = {
+    "config.releases": "src/aideleg/config.py",
+    "config.seal_date": "src/aideleg/config.py",
+    "config.seed": "src/aideleg/config.py",
+    "config.window": "src/aideleg/confirm_h5.py",
+    "config.n_industries": "src/aideleg/h6/edgar.py",
+    "config.plausibility_pp": "src/aideleg/power.py",
+    "power_frozen": "src/aideleg/confirm_h5.py",
+    "pap": "docs/pap/pre-analysis-plan.md",
 }
 
 
@@ -143,6 +170,10 @@ def resolve(row: dict) -> str:
         return _confirmatory(path, spec)
     if kind == "md-regex":
         return _one_group(spec, path.read_text(encoding="utf-8"), path.name)
+    if kind in _BUILTIN_KINDS:
+        from aideleg.paper import variables  # variables imports this module
+
+        return str(variables._builtin(kind, spec))
     raise ValueError(f"unknown locator kind {kind!r}")
 
 
@@ -189,3 +220,43 @@ def render_log(challenges: pl.DataFrame) -> str:
             ]
             parts.append("| " + " | ".join(_cell(c) for c in cells) + " |")
     return "\n".join(parts) + "\n"
+
+
+def scan_headlines(
+    sources: tuple[str, ...] = HEADLINE_SOURCES, registry: Path = HEADLINES
+) -> list[str]:
+    """Every `{{< var key >}}` used in `sources` (in order of first use) that is not already,
+    case-insensitively, a key of `registry`."""
+    with open(registry, newline="", encoding="utf-8") as f:
+        known = {r["key"].lower() for r in csv.DictReader(f)}
+    used: dict[str, None] = {}
+    for src in sources:
+        for key in _VAR.findall(_path(src).read_text(encoding="utf-8")):
+            used.setdefault(key, None)
+    return [k for k in used if k.lower() not in known]
+
+
+def locate_variable(map_row: dict) -> tuple[str, str]:
+    """`(source_file, source_locator)` for a row of `docs/paper/variables_map.csv`, in this
+    module's locator grammar, so that `resolve` reads the raw value `variables.resolve` reads."""
+    source, loc = map_row["source"], map_row["locator"]
+    if source == "confirmatory_md":
+        return confirmatory_md.PATH.relative_to(ROOT).as_posix(), f"confirmatory_md:{loc}"
+    if source in _BUILTIN_KINDS:
+        head = source if source != "config" else f"config.{loc.split('.', 1)[0]}"
+        if head not in _BUILTIN_FILES:
+            raise ValueError(f"{source}:{loc}: no defining file known")
+        return _BUILTIN_FILES[head], f"{source}:{loc}"
+    suffix = Path(source).suffix
+    if suffix == ".csv":
+        from aideleg.paper import variables
+
+        col, pairs = variables._csv_spec(loc)
+        if not pairs:
+            raise ValueError(f"{source}: a headline csv locator needs a filter")
+        return source, "csv:" + ",".join(f"{c}={v}" for c, v in pairs) + f":{col}"
+    if suffix == ".json":
+        return source, f"json:{loc}"
+    if suffix == ".md" and loc.startswith("regex="):
+        return source, "md-regex:" + loc[len("regex=") :]
+    raise ValueError(f"{source}: {loc!r} has no headline locator")
