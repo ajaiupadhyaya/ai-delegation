@@ -117,11 +117,12 @@ def test_units_and_blank_controls_in_the_markdown(json_path, report):
     out, _, _ = report
     assert rq1.UNITS == {
         "human_education_years_mean": "pp of automation per year of education",
-        "log_wage": "pp of automation per log point of wage",
+        "log_wage": "pp of automation per unit of log wage (= 100 log points)",
         "trend": "pp per year",
         "error_cost": "pp of validation share",
-        "log_aui": "pp of automation per log point",
-        "log_income": "pp of automation per log point",
+        "log_aui": "pp of automation per unit of log AUI (= 100 log points)",
+        "log_income": "pp of automation per unit of log GDP per working-age person "
+        "(= 100 log points)",
         "mix": "pp per pp",
     }
     md = (out / "confirmatory_table.md").read_text(encoding="utf-8")

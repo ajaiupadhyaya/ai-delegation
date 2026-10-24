@@ -13,11 +13,11 @@ RQ1's α = 0.05 is split (D22): H2 is tested on its own at α = 0.0125, and {H1,
 | hypothesis | coefficient | tested | unit | estimate | SE | 95% CI | p | df | family p | level | status | P13 attenuation |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | H1 | human_education_years_mean | yes | pp of automation per year of education | -0.5348 | 0.5849 | [-1.6848, 0.6152] | 0.3611 | 387 | 0.3611 | 0.01875 | not_rejected | — |
-| H1 | log_wage | yes | pp of automation per log point of wage | 4.3952 | 2.1993 | [0.0711, 8.7192] | 0.0464 | 387 | 0.3611 | 0.01875 | not_rejected | 0.9978 |
+| H1 | log_wage | yes | pp of automation per unit of log wage (= 100 log points) | 4.3952 | 2.1993 | [0.0711, 8.7192] | 0.0464 | 387 | 0.3611 | 0.01875 | not_rejected | 0.9978 |
 | H2 | trend | yes | pp per year | 4.9792 | 1.1586 | [2.7063, 7.2520] | 1.85e-05 | 1314 | 1.85e-05 | 0.0125 | not_rejected | — |
 | H3 | error_cost | yes | pp of validation share | -0.1763 | 0.4689 | [-1.0983, 0.7456] | 0.7071 | 390 | 0.7071 | 0.0375 | not_rejected | 1.0000 |
-| H4 | log_aui | yes | pp of automation per log point | -1.1920 | 0.4041 | [-1.9840, -0.4000] | 0.0032 | normal | 4.83e-24 | 0.0125 | supported | — |
-| H4 | log_income | yes | pp of automation per log point | -0.9208 | 0.3533 | [-1.6133, -0.2283] | 0.0092 | normal | 4.83e-24 | 0.0125 | supported | — |
+| H4 | log_aui | yes | pp of automation per unit of log AUI (= 100 log points) | -1.1920 | 0.4041 | [-1.9840, -0.4000] | 0.0032 | normal | 4.83e-24 | 0.0125 | supported | — |
+| H4 | log_income | yes | pp of automation per unit of log GDP per working-age person (= 100 log points) | -0.9208 | 0.3533 | [-1.6133, -0.2283] | 0.0092 | normal | 4.83e-24 | 0.0125 | supported | — |
 | H4 | mix | control | pp per pp | 1.1684 | 0.4210 | [0.3432, 1.9935] | 0.0055 | normal | — | — | — | — |
 
 ## Notes

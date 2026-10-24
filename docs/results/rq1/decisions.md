@@ -17,7 +17,7 @@ Each decision text below is copied verbatim from the run's JSON. A hypothesis th
 H1 is not rejected (H0: β_e = 0 or β_w = 0). human_education_years_mean = -0.535 (95% CI [-1.685, 0.615], p = 0.3611); log_wage = 4.395 (95% CI [0.071, 8.719], p = 0.0464)
 
 - Outcome: `automation_pct`; tested: human_education_years_mean, log_wage.
-- Units: human_education_years_mean: pp of automation per year of education; log_wage: pp of automation per log point of wage.
+- Units: human_education_years_mean: pp of automation per year of education; log_wage: pp of automation per unit of log wage (= 100 log points).
 - Status: `not_rejected`; its p was compared with level 0.01875.
 - β_w (log_wage) = 4.3952, beside its P13 attenuation factor 0.9978 (PAP §4.1).
 
@@ -54,7 +54,7 @@ H3 is not rejected (H0: γ = 0). error_cost = -0.176 (95% CI [-1.098, 0.746], p 
 H4 is supported: Holm over {H1, H3, H4} at family-wise 0.0375 rejects at step 1 (level 0.01250, p = 0.0000). log_aui = -1.192 (95% CI [-1.984, -0.400], p = 0.0032); log_income = -0.921 (95% CI [-1.613, -0.228], p = 0.0092)
 
 - Outcome: `automation_pct`; tested: log_aui, log_income.
-- Units: log_aui: pp of automation per log point; log_income: pp of automation per log point; mix: pp per pp.
+- Units: log_aui: pp of automation per unit of log AUI (= 100 log points); log_income: pp of automation per unit of log GDP per working-age person (= 100 log points); mix: pp per pp.
 - Status: `supported`; its p was compared with level 0.0125.
 - Joint HC3 Wald F = 91.4545 with (2, 109) df; p = 4.83e-24.
 

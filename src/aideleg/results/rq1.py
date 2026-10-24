@@ -45,14 +45,17 @@ H2_STATEMENT = "measured within-task automation rises across releases"
 TABLE_COLUMNS = ("hypothesis", "coefficient", "tested", "unit", "estimate", "se", "ci_low",
                  "ci_high", "p", "df", "p_family", "holm_level", "status", "p13_attenuation")
 # the unit of each coefficient's estimate. H1, H2 and H3 are the PAP's own (§4); the PAP states
-# none for H4, so its two log regressors are read per log point and the mix control per pp.
+# none for H4. A coefficient on a natural log is per unit of the log (= 100 log points); PAP
+# §4.1 says "per log point", which this label states exactly (PAP §11 C-81, presentation only).
 UNITS = {
     "human_education_years_mean": "pp of automation per year of education",
-    "log_wage": "pp of automation per log point of wage",
+    "log_wage": "pp of automation per unit of log wage (= 100 log points)",
     "trend": "pp per year",
     "error_cost": "pp of validation share",
-    "log_aui": "pp of automation per log point",
-    "log_income": "pp of automation per log point",
+    "log_aui": "pp of automation per unit of log AUI (= 100 log points)",
+    "log_income": (
+        "pp of automation per unit of log GDP per working-age person (= 100 log points)"
+    ),
     "mix": "pp per pp",
 }
 # the coefficients the P13 attenuation factor sits beside (PAP §4.1)
