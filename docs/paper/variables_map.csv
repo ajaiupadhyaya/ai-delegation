@@ -2954,3 +2954,91 @@ rq3.h5b.ci_005.lo_pp2,confirmatory_md,decision.H5b.ci_005.0,pp2
 rq3.h5b.ci_005.hi_pp2,confirmatory_md,decision.H5b.ci_005.1,pp2
 rq3.h5b.ci_0025.lo_pp2,confirmatory_md,decision.H5b.ci_0025.0,pp2
 rq3.h5b.ci_0025.hi_pp2,confirmatory_md,decision.H5b.ci_0025.1,pp2
+design.alpha.rq1_total,docs/results/rq1/confirmatory_table.md,regex=^RQ1's α = (\d\.\d+) is split,p
+design.alpha.rq1_h2,docs/results/rq1/confirmatory_table.md,"regex=^RQ1's α = \d\.\d+ is split \(D22\): H2 is tested on its own at α = (\d\.\d+), and",p
+design.alpha.rq1_family,docs/results/rq1/confirmatory_table.md,"regex=^RQ1's .* by Holm at family-wise α = (\d\.\d+), so",p
+rq1.holm.h1,docs/results/rq1/confirmatory_table.md,regex=^\| H1 \| log_wage \|(?: [^|]+ \|){8} (\d\.\d+) \|,p
+rq1.holm.h2,docs/results/rq1/confirmatory_table.md,regex=^\| H2 \| trend \|(?: [^|]+ \|){8} (\d\.\d+) \|,p
+rq1.holm.h3,docs/results/rq1/confirmatory_table.md,regex=^\| H3 \| error_cost \|(?: [^|]+ \|){8} (\d\.\d+) \|,p
+rq1.holm.h4,docs/results/rq1/confirmatory_table.md,regex=^\| H4 \| log_aui \|(?: [^|]+ \|){8} (\d\.\d+) \|,p
+design.alpha.h5_first,docs/pap/power.md,regex=\(Holm step (0\.\d+)\) and t_21,p
+design.alpha.h5_second,docs/pap/power.md,"regex=\(Holm step 0\.\d+\) and t_21,0\.975 = \d+\.\d+ \(step (0\.\d+)\)",p
+power.mde_over_s,docs/pap/power.md,"regex=MDE_t = \(t_21,0\.9875 \+ t_21,0\.80\) x s = (\d+\.\d+) x s\.",coef
+design.null_years,docs/pap/power.md,regex=the alphas come from (\d{4}-\d{4}) windows,text
+design.window.months,docs/pap/power.md,regex=noise a (\d+)-month confirmatory window,int
+rq3.secondary.size_pct.ri_h5,docs/results/confirmatory_h5.md,regex=^- Documented size at nominal .*?(\d+\.\d+)% \(H5\),pct
+rq3.secondary.size_pct.ri_h5b,docs/results/confirmatory_h5.md,"regex=^- Documented size at nominal .*?(\d+\.\d+)% \(H5b, z_aioe in place\)",pct
+rq3.secondary.size_pct.fl_pivotal_h5b,docs/results/confirmatory_h5.md,"regex=^- Documented size at nominal .*?(\d+\.\d+)% \(Freedman-Lane, pivotal t\)",pct
+rq3.secondary.size_pct.fl_coef_h5b,docs/results/confirmatory_h5.md,"regex=^- Documented size at nominal .*?(\d+\.\d+)% \(Freedman-Lane, coefficient\)",pct
+rq3.secondary.n_permutations,docs/results/confirmatory_h5.md,"regex=^- (\d+,\d+) permutations each",text
+design.s1.oews_release,docs/pap/pre-analysis-plan.md,"regex=the OEWS May 2024 weights, released (\d{4}-\d{2}-\d{2}) \(USDL",date
+design.formation,config,releases.r2,date
+vintage.oews.primary,docs/audit/tables/oews_coverage.md,regex=^# OEWS (May \d{4}) employment coverage$,text
+vintage.oews.r1,docs/results/robustness/R01.md,regex=^- OEWS (May \d{4}) weights \(industry matrix,text
+vintage.oews.r32,docs/results/robustness/R32.md,regex=with OEWS (May \d{4}) weights \(oesm23,text
+vintage.onet.primary,docs/audit/tables/task_matching.md,regex=from the O\*NET (\d+\.\d+) task file,text
+vintage.onet.r32,docs/results/robustness/R32.md,regex=^- The O\*NET (\d+\.\d+) Task Statements file,text
+vintage.onet_soc,docs/audit/tables/task_matching.md,regex=resolved to O\*NET-SOC (\d{4}) occupations,text
+audit.exposure.b.z_del_max,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| (-?\d+\.\d+) \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.b.z_del_max_industry,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| (\w+) \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,text
+audit.exposure.b.z_del_2nd,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.b.z_del_min,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.b.z_del_skewness,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \|$,coef
+audit.exposure.b.z_usage_skewness,docs/audit/tables/exposure_coverage.md,regex=^\| B \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \|$,coef
+audit.exposure.a_pooled.z_del_max,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| (-?\d+\.\d+) \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.a_pooled.z_del_max_industry,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| (\w+) \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,text
+audit.exposure.a_pooled.z_del_2nd,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.a_pooled.z_del_min,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+audit.exposure.a_pooled.z_del_skewness,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \|$,coef
+audit.exposure.a_pooled.z_usage_skewness,docs/audit/tables/exposure_coverage.md,regex=^\| A_pooled \| \d+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| -?\d+\.\d+ \| \w+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \|$,coef
+rq3.influence.softw.h5.dfbetas,docs/results/rq3/influence.md,regex=^\| H5 \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+rq3.influence.softw.h5.cooks_d,docs/results/rq3/influence.md,regex=^\| H5 \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \|$,coef
+rq3.influence.softw.h5.leverage,docs/results/rq3/influence.md,regex=^\| H5 \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \|$,coef
+rq3.influence.softw.h5b.dfbetas,docs/results/rq3/influence.md,regex=^\| H5b \| (-?\d+\.\d+) \| -?\d+\.\d+ \| -?\d+\.\d+ \|$,coef
+rq3.influence.softw.h5b.cooks_d,docs/results/rq3/influence.md,regex=^\| H5b \| -?\d+\.\d+ \| (-?\d+\.\d+) \| -?\d+\.\d+ \|$,coef
+rq3.influence.softw.h5b.leverage,docs/results/rq3/influence.md,regex=^\| H5b \| -?\d+\.\d+ \| -?\d+\.\d+ \| (-?\d+\.\d+) \|$,coef
+diag.h1.leave_out_top_1.dropped,docs/results/diagnostics/h1_influence.csv,column=dropped;filter=part:leave_out_top_1,text
+diag.h1.leave_out_top_3.dropped,docs/results/diagnostics/h1_influence.csv,column=dropped;filter=part:leave_out_top_3,text
+diag.h1.leave_out_soc_major_15.dropped,docs/results/diagnostics/h1_influence.csv,"column=dropped;filter=part:leave_out_soc_major,dropped:15",text
+rq1.h2.release_effect.r3.estimate,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r3.estimate,coef
+rq1.h2.release_effect.r3.ci_low,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r3.ci_low,coef
+rq1.h2.release_effect.r3.ci_high,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r3.ci_high,coef
+rq1.h2.release_effect.r3.p,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r3.p,p
+rq1.h2.release_effect.r4.estimate,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r4.estimate,coef
+rq1.h2.release_effect.r4.ci_low,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r4.ci_low,coef
+rq1.h2.release_effect.r4.ci_high,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r4.ci_high,coef
+rq1.h2.release_effect.r4.p,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r4.p,p
+rq1.h2.release_effect.r5.estimate,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r5.estimate,coef
+rq1.h2.release_effect.r5.ci_low,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r5.ci_low,coef
+rq1.h2.release_effect.r5.ci_high,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r5.ci_high,coef
+rq1.h2.release_effect.r5.p,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.release_effects.r5.p,p
+rq1.h2.p_release_label,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.p_release_label,p
+rq1.h2.n_release_orderings,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.n_release_orderings,int
+rq1.h2.n_wild_draws,docs/results/rq1/confirmatory_rq1.json,results.H2.diagnostics.n_wild_draws,int
+rq1.h2.n_tasks,docs/results/rq1/confirmatory_rq1.json,results.H2.sample.n_tasks,int
+rq1.h2.n_rows,docs/results/rq1/confirmatory_rq1.json,results.H2.sample.n_rows,int
+rq1.h1.n_rows,docs/results/rq1/confirmatory_rq1.json,results.H1.sample.n_rows,int
+rq1.h1.n_tasks,docs/results/rq1/confirmatory_rq1.json,results.H1.sample.n_tasks,int
+rq1.h1.n_occ,docs/results/rq1/confirmatory_rq1.json,results.H1.sample.n_occ,int
+rq1.h3.n_rows,docs/results/rq1/confirmatory_rq1.json,results.H3.sample.n_rows,int
+rq1.h3.n_tasks,docs/results/rq1/confirmatory_rq1.json,results.H3.sample.n_tasks,int
+rq1.h3.n_occ,docs/results/rq1/confirmatory_rq1.json,results.H3.sample.n_occ,int
+rq1.h4.n,docs/results/rq1/confirmatory_rq1.json,results.H4.sample.n,int
+h6.talk.filed_start,docs/results/h6/gap.md,regex=^- T_j = talk of FF49 industry j in 10-Ks filed (\d{4}-\d{2}-\d{2}) →,date
+h6.talk.filed_end,docs/results/h6/gap.md,"regex=^- T_j = talk of FF49 industry j in 10-Ks filed \d{4}-\d{2}-\d{2} → (\d{4}-\d{2}-\d{2}),",date
+h6.talk.year,docs/results/h6/gap.md,regex=^\| rank \| industry \| talk filers (\d{4}) \|,text
+h6.talk.pooled_all.y2019,docs/results/h6/talk_index.md,regex=^\| 2019 \| \d+ \| \d+ \| (\d\.\d+) \|,rho
+h6.talk.pooled_mapped.y2019,docs/results/h6/talk_index.md,regex=^\| 2019 \| \d+ \| \d+ \| \d\.\d+ \| (\d\.\d+) \|,rho
+h6.talk.unmapped_share_pct.y2019,docs/results/h6/talk_index.md,regex=^\| 2019 \|(?: [^|]+ \|){5} (\d+\.\d+)% \|,pct
+h6.talk.pooled_all.y2024,docs/results/h6/talk_index.md,regex=^\| 2024 \| \d+ \| \d+ \| (\d\.\d+) \|,rho
+h6.talk.pooled_mapped.y2024,docs/results/h6/talk_index.md,regex=^\| 2024 \| \d+ \| \d+ \| \d\.\d+ \| (\d\.\d+) \|,rho
+h6.talk.unmapped_share_pct.y2024,docs/results/h6/talk_index.md,regex=^\| 2024 \|(?: [^|]+ \|){5} (\d+\.\d+)% \|,pct
+h6.talk.pooled_all.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \| \d+ \| \d+ \| (\d\.\d+) \|,rho
+h6.talk.pooled_mapped.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \| \d+ \| \d+ \| \d\.\d+ \| (\d\.\d+) \|,rho
+h6.talk.unmapped_share_pct.y2025,docs/results/h6/talk_index.md,regex=^\| 2025 \|(?: [^|]+ \|){5} (\d+\.\d+)% \|,pct
+h6.vintage.submissions_retrieved_utc,data/raw/MANIFEST.json,sec_submissions_bulk.retrieved_utc,text
+rq3.eisfeldt.step1.b,docs/results/rq3/eisfeldt_replication.md,regex=^The `z_aioe` slope is negative: b = (-?\d+\.\d+) pp per 1 SD,coef
+rq3.eisfeldt.step1.ci_lo,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[(-?\d+\.\d+),",coef
+rq3.eisfeldt.step1.ci_hi,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = -?\d+\.\d+ pp per 1 SD \(95% CI \[-?\d+\.\d+, (-?\d+\.\d+)\]",coef
+rq3.eisfeldt.step1.p,docs/results/rq3/eisfeldt_replication.md,"regex=^The `z_aioe` slope is negative: b = .*?, p = (\d\.\d+), n =",p
+meta.wording,docs/results/rq1/README.md,regex=^(AEI data are conversations matched to O\*NET tasks\. Nothing here says .*)$,text

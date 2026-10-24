@@ -1,6 +1,24 @@
 {
   "audit": {
     "employment_covered_pct": "92.61",
+    "exposure": {
+      "a_pooled": {
+        "z_del_2nd": "2.855",
+        "z_del_max": "4.320",
+        "z_del_max_industry": "Softw",
+        "z_del_min": "-0.891",
+        "z_del_skewness": "2.312",
+        "z_usage_skewness": "2.212"
+      },
+      "b": {
+        "z_del_2nd": "1.977",
+        "z_del_max": "4.739",
+        "z_del_max_industry": "Softw",
+        "z_del_min": "-0.834",
+        "z_del_skewness": "2.571",
+        "z_usage_skewness": "2.284"
+      }
+    },
     "oews_without_aei_emp_pct": "7.39",
     "unmatched_usage_pct": "0.66",
     "zero_assigned_pct": {
@@ -16,7 +34,16 @@
     "zero_assigned_pct": "12.14"
   },
   "design": {
+    "alpha": {
+      "h5_first": "0.025",
+      "h5_second": "0.05",
+      "rq1_family": "0.0375",
+      "rq1_h2": "0.0125",
+      "rq1_total": "0.05"
+    },
+    "formation": "2025-03-27",
     "n_industries": "49",
+    "null_years": "1990-2022",
     "plausibility_pp": "5",
     "release": {
       "r1": "2025-02-10",
@@ -26,10 +53,14 @@
       "r5": "2026-03-24",
       "r6": "2026-06-26"
     },
+    "s1": {
+      "oews_release": "2025-04-02"
+    },
     "seal_date": "2022-11-30",
     "seed": "20261021",
     "window": {
       "end": "2026-08-31",
+      "months": "17",
       "start": "2025-04-01"
     }
   },
@@ -54,6 +85,7 @@
       "leave_out_soc_major_15": {
         "beta_e": "-0.01",
         "beta_w": "0.34",
+        "dropped": "15",
         "dropped_weight_pct": "25.81",
         "p_e": "0.978",
         "p_h1": "0.978",
@@ -214,6 +246,7 @@
       "leave_out_top_1": {
         "beta_e": "-0.49",
         "beta_w": "1.50",
+        "dropped": "15-1299",
         "dropped_weight_pct": "8.49",
         "p_e": "0.366",
         "p_h1": "0.367",
@@ -222,6 +255,7 @@
       "leave_out_top_3": {
         "beta_e": "-1.06",
         "beta_w": "2.75",
+        "dropped": "15-1299, 25-4022, 27-3043",
         "dropped_weight_pct": "17.10",
         "p_e": "0.050",
         "p_h1": "0.096",
@@ -548,10 +582,34 @@
         "lo": "0.050"
       },
       "rho": "0.361"
+    },
+    "talk": {
+      "filed_end": "2024-12-31",
+      "filed_start": "2024-01-01",
+      "pooled_all": {
+        "y2019": "0.082",
+        "y2024": "0.375",
+        "y2025": "0.516"
+      },
+      "pooled_mapped": {
+        "y2019": "0.093",
+        "y2024": "0.429",
+        "y2025": "0.591"
+      },
+      "unmapped_share_pct": {
+        "y2019": "11.92",
+        "y2024": "14.44",
+        "y2025": "15.81"
+      },
+      "year": "2024"
+    },
+    "vintage": {
+      "submissions_retrieved_utc": "2026-10-23T01:19:58Z"
     }
   },
   "meta": {
-    "date": "2026-10-24"
+    "date": "2026-10-24",
+    "wording": "AEI data are conversations matched to O*NET tasks. Nothing here says anything about job risk, displacement or reassurance about the labour market."
   },
   "pap": {
     "commit": "6a16b1ad052977650b90c8062ceeeab9ac6572e1",
@@ -578,6 +636,7 @@
       "h5b_r12": "9.76",
       "h5b_r13": "12.15"
     },
+    "mde_over_s": "3.2729",
     "n_windows": "378",
     "power_pct": "80",
     "s": {
@@ -3879,14 +3938,42 @@
         "p": "0.046",
         "se": "2.20"
       },
+      "n_occ": "388",
+      "n_rows": "1684",
+      "n_tasks": "1142",
       "p": "0.361"
     },
     "h2": {
       "beta": "4.98",
       "decision": "not_rejected",
       "decision_text": "not supported",
+      "n_release_orderings": "24",
+      "n_rows": "5260",
+      "n_tasks": "1315",
+      "n_wild_draws": "1296",
       "p_cluster": "< 0.001",
+      "p_release_label": "0.708",
       "p_wild": "0.927",
+      "release_effect": {
+        "r3": {
+          "ci_high": "9.93",
+          "ci_low": "6.96",
+          "estimate": "8.45",
+          "p": "< 0.001"
+        },
+        "r4": {
+          "ci_high": "7.32",
+          "ci_low": "3.21",
+          "estimate": "5.27",
+          "p": "< 0.001"
+        },
+        "r5": {
+          "ci_high": "7.23",
+          "ci_low": "3.20",
+          "estimate": "5.22",
+          "p": "< 0.001"
+        }
+      },
       "trend": {
         "ci_high": "7.25",
         "ci_low": "2.71",
@@ -3906,7 +3993,10 @@
         "p": "0.707",
         "se": "0.47"
       },
-      "gamma": "-0.18"
+      "gamma": "-0.18",
+      "n_occ": "391",
+      "n_rows": "1689",
+      "n_tasks": "1147"
     },
     "h4": {
       "b1": "-1.19",
@@ -3934,7 +4024,14 @@
         "p": "0.006",
         "se": "0.42"
       },
+      "n": "113",
       "p_wald": "< 0.001"
+    },
+    "holm": {
+      "h1": "0.01875",
+      "h2": "0.0125",
+      "h3": "0.0375",
+      "h4": "0.0125"
     }
   },
   "rq2": {
@@ -4097,6 +4194,14 @@
     "n_draws": "10000"
   },
   "rq3": {
+    "eisfeldt": {
+      "step1": {
+        "b": "-0.135",
+        "ci_hi": "0.647",
+        "ci_lo": "-0.917",
+        "p": "0.7357"
+      }
+    },
     "event": {
       "chatgpt": {
         "k20": {
@@ -4977,6 +5082,20 @@
       "t_bbar": "0.691",
       "t_zero": "0.979"
     },
+    "influence": {
+      "softw": {
+        "h5": {
+          "cooks_d": "0.0116",
+          "dfbetas": "0.1475",
+          "leverage": "0.4788"
+        },
+        "h5b": {
+          "cooks_d": "0.0017",
+          "dfbetas": "-0.0621",
+          "leverage": "0.5185"
+        }
+      }
+    },
     "provenance": {
       "commit": "6a16b1ad052977650b90c8062ceeeab9ac6572e1",
       "dropped": "none",
@@ -4990,8 +5109,15 @@
       "hc3_h5_se": "1.629",
       "hc3_h5b_b": "3.461",
       "hc3_h5b_se": "1.638",
+      "n_permutations": "10,000",
       "ri_h5": "0.3287",
-      "ri_h5b": "0.0942"
+      "ri_h5b": "0.0942",
+      "size_pct": {
+        "fl_coef_h5b": "6.1",
+        "fl_pivotal_h5b": "5.6",
+        "ri_h5": "13.8",
+        "ri_h5b": "14.8"
+      }
     },
     "terciles": {
       "a_pooled": {
@@ -5223,5 +5349,17 @@
         }
       }
     }
+  },
+  "vintage": {
+    "oews": {
+      "primary": "May 2024",
+      "r1": "May 2025",
+      "r32": "May 2023"
+    },
+    "onet": {
+      "primary": "29.3",
+      "r32": "29.2"
+    },
+    "onet_soc": "2019"
   }
 }
