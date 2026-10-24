@@ -291,7 +291,7 @@ The seed is set in `src/aideleg/config.py`. Draws are consumed in these places, 
 - `data/raw`, as listed in the MANIFEST: 3603241615 bytes (3.60 GB) in 400 records (zip archives are also extracted next to themselves, which adds to this).
 - Largest single raw file: `sec_submissions_bulk`, 1570500398 bytes (1.57 GB).
 - The 47946 10-K documents listed in `data/raw/sec/docs/INDEX.jsonl` (gzip, on disk): 9732096262 bytes (9.73 GB), in addition to the MANIFEST total.
-- runtime: pending the fresh-clone check (Task 33)
+- Runtime of `make all`: 86m 18s (5178 s) (quoted from `docs/replication/check.md`)
 <!-- END GENERATED: storage -->
 
 #### Computational Details
