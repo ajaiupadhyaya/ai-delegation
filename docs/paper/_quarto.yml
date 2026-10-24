@@ -17,6 +17,8 @@ format:
     fontsize: 11pt
     geometry: margin=1in
     linestretch: 1.15
+    # figures sit where they are first cited (controller ruling, integration pass)
+    fig-pos: 'H'
     # TeX Gyre Pagella, loaded by file name: it sits in the TeX Live tree but is
     # not registered with fontconfig, so the family name does not resolve.
     mainfont: texgyrepagella-regular.otf
@@ -30,11 +32,19 @@ format:
     # the appendices quote PAP §11 verbatim, one level-3 heading per entry: keep them out of the TOC
     toc-depth: 2
     colorlinks: true
-    # Task 21: the wide robustness and data tables are set landscape; long identifiers may break
+    # Task 21: the wide robustness and data tables are set landscape; figures are scaled to the
+    # text width and at most 0.55 of the text height (integration pass); long identifiers may break
     # after an underscore; subscript and superscript digits missing from Pagella are typeset
     include-in-header:
       text: |
         \usepackage{pdflscape}
+        \makeatletter
+        \renewcommand*\pandocbounded[1]{\sbox\pandoc@box{#1}%
+          \Gscale@div\@tempa{0.55\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+          \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+          \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi
+          \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}\else\usebox{\pandoc@box}\fi}
+        \makeatother
         \renewcommand{\_}{\textunderscore\allowbreak}
         \usepackage{newunicodechar}
         \newunicodechar{₀}{\textsubscript{0}}

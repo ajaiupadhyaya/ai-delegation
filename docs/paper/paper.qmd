@@ -55,4 +55,6 @@ author: "Ajai Upadhyaya"
 
 {{< include appendix/e-data-replication.qmd >}}
 
+{{< include appendix/f-supplementary-tables.qmd >}}
+
 :::

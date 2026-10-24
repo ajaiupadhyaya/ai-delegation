@@ -1,0 +1,111 @@
+# Supplementary tables {#sec-app-supplementary}
+
+This appendix prints the generated tables that the body cites but does not set in the text, so that the body keeps only its headline tables. They are grouped by the section that discusses them (@sec-data, @sec-rq1, @sec-rq2, @sec-markets, @sec-limitations) and, within each group, follow the order in which that section first cites them. Each table is printed unedited from its source file, under the label the body cites.
+
+```{=latex}
+\begin{landscape}\scriptsize\raggedright
+```
+
+## Data and measurement
+
+{{< include _generated/tables/regimes.md >}}
+
+{{< include _generated/tables/audit-exposure-coverage.md >}}
+
+## Behaviour (RQ1)
+
+{{< include _generated/tables/rq1-major.md >}}
+
+{{< include _generated/tables/rq1-wage-decile.md >}}
+
+{{< include _generated/tables/rq1-education.md >}}
+
+{{< include _generated/tables/rq1-concentration.md >}}
+
+{{< include _generated/tables/rq1-concentration-harmonised.md >}}
+
+{{< include _generated/tables/diag-h1-influence.md >}}
+
+{{< include _generated/tables/diag-h2-influence.md >}}
+
+## Bridge (RQ2)
+
+{{< include _generated/tables/rq2-top-bottom-usage.md >}}
+
+{{< include _generated/tables/rq2-top-bottom-delegation.md >}}
+
+{{< include _generated/tables/rq2-top-bottom-augmentation.md >}}
+
+{{< include _generated/tables/rq2-rank-gaps-eloundou.md >}}
+
+{{< include _generated/tables/rq2-rank-gaps-eloundou-gpt4.md >}}
+
+{{< include _generated/tables/rq2-rank-gaps-aioe.md >}}
+
+{{< include _generated/tables/rq2-bounds-industries.md >}}
+
+{{< include _generated/tables/rq2-could-vs-does-a-pooled.md >}}
+
+## Market evidence (RQ3 and H6)
+
+{{< include _generated/tables/rq3-influence-softw.md >}}
+
+{{< include _generated/tables/rq3-influence-top.md >}}
+
+{{< include _generated/tables/rq3-event-dates.md >}}
+
+{{< include _generated/tables/rq3-event-days.md >}}
+
+{{< include _generated/tables/rq3-event-slopes.md >}}
+
+{{< include _generated/tables/rq3-terciles-b-cap.md >}}
+
+{{< include _generated/tables/rq3-terciles-b-cap-costs.md >}}
+
+{{< include _generated/tables/rq3-terciles-b-ew.md >}}
+
+{{< include _generated/tables/rq3-terciles-b-ew-costs.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-r2-cap.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-r2-cap-costs.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-r2-ew.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-r2-ew-costs.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-pooled-cap.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-pooled-cap-costs.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-pooled-ew.md >}}
+
+{{< include _generated/tables/rq3-terciles-a-pooled-ew-costs.md >}}
+
+{{< include _generated/tables/rq3-fama-macbeth-b.md >}}
+
+{{< include _generated/tables/rq3-fama-macbeth-a-r2.md >}}
+
+{{< include _generated/tables/rq3-fama-macbeth-a-pooled.md >}}
+
+{{< include _generated/tables/rq3-eisfeldt-step1.md >}}
+
+{{< include _generated/tables/rq3-eisfeldt-step2.md >}}
+
+{{< include _generated/tables/h6-talk-by-year.md >}}
+
+{{< include _generated/tables/h6-divergence.md >}}
+
+{{< include _generated/tables/diag-h6-influence.md >}}
+
+{{< include _generated/tables/h6-gap-ranking.md >}}
+
+{{< include _generated/tables/h6-gap-returns.md >}}
+
+## Limitations
+
+{{< include _generated/tables/rq2-bounds-occupations.md >}}
+
+```{=latex}
+\end{landscape}
+```

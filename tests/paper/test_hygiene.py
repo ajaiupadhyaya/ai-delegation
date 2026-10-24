@@ -89,6 +89,11 @@ def test_review_bypass_fixtures_flagged(name, lines):
 def test_raw_block_allowlist_and_exponents():
     assert hygiene.forbidden_code("```{=latex}\n\\appendix\n```\n") == []
     assert hygiene.forbidden_code("```{=latex}\n\\vspace{1em}\n```\n") == [(1, "```{=latex}")]
+    wrap = "```{=latex}\n\\begin{landscape}\\scriptsize\\raggedright\n```\n"
+    assert hygiene.forbidden_code(wrap + "```{=latex}\n\\end{landscape}\n```\n") == []
+    assert hygiene.forbidden_code("```{=latex}\n\\begin{landscape}\\Large\n```\n") == [
+        (1, "```{=latex}")
+    ]
     assert hygiene.numerals_in_text("R² and x⁻¹ and t₂₁ and (a+b)²") == []
     assert hygiene.numerals_in_text("a ² b") == [(1, "a ² b")]
 

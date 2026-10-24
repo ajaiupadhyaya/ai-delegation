@@ -83,8 +83,13 @@ RENDERED_ATTRS = (
     "caption",
     "alt",
 )
-# Raw blocks allowed by exact (stripped) content: paper.qmd's appendix switch.
-RAW_ALLOWED = {("latex", "\\appendix")}
+# Raw blocks allowed by exact (stripped) content: paper.qmd's appendix switch, and the landscape
+# wrapper of Appendix F (the same one the generated Appendix D uses).
+RAW_ALLOWED = {
+    ("latex", "\\appendix"),
+    ("latex", "\\begin{landscape}\\scriptsize\\raggedright"),
+    ("latex", "\\end{landscape}"),
+}
 EXPONENT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉"
 
 _FRONT = re.compile(r"\A---[ \t]*\n.*?\n---[ \t]*(\n|\Z)", re.S)
