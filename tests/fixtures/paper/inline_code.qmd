@@ -1,0 +1,1 @@
+The H5 slope is `0.76` per SD.

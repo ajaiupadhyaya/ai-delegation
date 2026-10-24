@@ -38,4 +38,5 @@ testpaths = ["tests"]
 markers = [
     "data: needs built data under data/ (e.g. `make panel`)",
     "slow: renders the full paper (Quarto + XeLaTeX)",
+    "final: the final-gate checks (Task 34); skipped unless selected with `-m final`",
 ]

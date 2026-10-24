@@ -1,0 +1,12 @@
+---
+title: "Fixture 2026"
+---
+
+H5b in FF49 for r6 (§8.2) {{< var rq3.h5.b >}} [@fama2015]
+and `1p_api` with ![a plot](figures/fig_2.png) and O*NET.
+
+```python
+x = 1
+```
+
+<!-- note 12 -->

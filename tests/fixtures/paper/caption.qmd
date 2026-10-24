@@ -1,0 +1,3 @@
+Industry results are in @tbl-x.
+
+: Results for 49 industries {#tbl-x}

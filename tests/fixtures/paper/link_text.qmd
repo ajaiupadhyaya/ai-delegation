@@ -1,0 +1,3 @@
+See H5 [@fama2015five].
+
+The gap is [7.43 pp](x.md) in @sec-rq3.
