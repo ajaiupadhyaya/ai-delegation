@@ -112,10 +112,11 @@ and challenge C11 ("The MDE sits beside each market null").
 under the formatting rule. The "p = 0.0000" of the committed decision texts is never quoted.
 Rows: `rq1.H2.p_cluster C10`, `rq1.H4.p_wald C10` (holds, with this note).
 
-**W-14. H4 regressor collinearity.** H4 prose names the correlation between log AUI and log
-GDP per working-age person (0.916 in the referee's evidence; both share the working-age
-population denominator). b₁ and b₂ are therefore weakly separable one by one, even though
-their joint Wald test is not.
+**W-14. H4 regressor collinearity.** H4 prose states, without a number, that log AUI and log
+GDP per working-age person are strongly correlated across countries (both share the
+working-age population denominator), so b₁ and b₂ are weakly separable one by one, even though
+their joint Wald test is not. No correlation value is quoted: no generated file reports one
+(the referee's 0.916 came from a scratch run).
 Rows: `rq1.H4.b1 C12`, `rq1.H4.b2 C12`, `rq1.H4.p_wald C12` (holds, with this note).
 
 **W-15. R24 r5 is named.** Beside the H1 decision the prose names R24 r5 as the one robustness
@@ -123,9 +124,9 @@ row under which p_H1 falls below H1's Holm level with both coefficients negative
 pre-registered robustness row that changes no decision (PAP §8.1).
 Rows: `rq1.H1.p C8`, `rq1.H1.decision C8` (holds, with this note).
 
-**W-16. R12 and R7 are named for H5/H5b.** Beside b̂ of H5 and H5b the prose names R12 (ranks)
-and R7 (dropping Hardw, Softw and Chips) as the rows that move the estimate most. For H5b it
-also names R6 (FF30). All are reported as robustness and change no decision.
+**W-16. The rows that move H5/H5b most are named.** Beside b̂ of H5 the prose names R7 (dropping
+Hardw, Softw and Chips), R12 (ranks) and R5 (equal-weighted returns); beside b̂ of H5b it names
+R12, R7 and R6 (FF30). All are reported as robustness and change no decision.
 Rows: `rq3.h5.b C8`, `rq3.h5b.b C8` (holds, with this note).
 
 **W-17. RQ1 units.** RQ1 log-regressor coefficients are written per unit of the log
