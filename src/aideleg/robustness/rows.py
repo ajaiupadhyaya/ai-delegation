@@ -2425,7 +2425,7 @@ def run_R30(*, out_dir: Path | None = None) -> tuple[Path, Path]:
         "[default] Only T_j (10-Ks filed in 2024) is computed for each list (PAP §11 C-62).",
         "The responses for the added terms were retrieved for this row through Plan 3's "
         "full-text-search client (exact totals, bisection of capped ranges, one MANIFEST "
-        "record per response) and are logged as a §11 set addition of `sec_fts/`.",
+        "record per response) and are logged as the §11 set addition A-47 of `sec_fts/`.",
         *counts,
         *_H6_NOTES,
         *upstream.zero_assigned_lines(["B"], upstream.zero_assigned()),

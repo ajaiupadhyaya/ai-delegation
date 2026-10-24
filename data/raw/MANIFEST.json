@@ -2071,6 +2071,142 @@
     "bytes": 29947,
     "sha256": "e3988aac23186f131fe2caea306cbb083ba08e17372a8c85821bd06d18ff6f94"
   },
+  "sec_fts/2024-01-01_2024-12-31/automation/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T23:35:45Z",
+    "bytes": 58929,
+    "sha256": "dad688db05f2d1b93e371be743339c407e831393ce27ed3bde0d229928c4cf75"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T23:35:46Z",
+    "bytes": 58393,
+    "sha256": "f6ea2cd79ba1aebd64209100070b133121ffe64d4d422722de3a37afee23ed6d"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T23:35:47Z",
+    "bytes": 58026,
+    "sha256": "655f7ccabd4a7d2136180744124cacbc569ebae818e2b4000d1a2f41a0ecfec3"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T23:35:48Z",
+    "bytes": 58163,
+    "sha256": "19233e820d36ede00d901c8fc71bc83c63e7cc84a7e658b4dd271af89097b277"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T23:35:49Z",
+    "bytes": 58310,
+    "sha256": "35a2a035219f8bfedd7d5baa831589298d002813fe1935c0c9dc8df229f3e780"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=500",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00500.json",
+    "retrieved_utc": "2026-10-23T23:35:50Z",
+    "bytes": 58274,
+    "sha256": "6ff9b0f5cbaf04f2353ac4e9be86f97e558b5de87c194798be3b1e8e313a68b5"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00600": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=600",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00600.json",
+    "retrieved_utc": "2026-10-23T23:35:50Z",
+    "bytes": 58310,
+    "sha256": "9d32801a60657173f3bd5fe22d3aad1ab4d4014804f51c06d429ef921643c213"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00700": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00700",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=700",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00700.json",
+    "retrieved_utc": "2026-10-23T23:35:52Z",
+    "bytes": 58440,
+    "sha256": "ecd8363273cbec8a89ef5628c9b841f16f55aec7a1dfacf84cbc9cda6ad3599d"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00800": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00800",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=800",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00800.json",
+    "retrieved_utc": "2026-10-23T23:35:53Z",
+    "bytes": 58339,
+    "sha256": "7e759327bcb21db8619dee9797842c88ae816b4f6a18f74f85061293130a856a"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/00900": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/00900",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=900",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_00900.json",
+    "retrieved_utc": "2026-10-23T23:35:54Z",
+    "bytes": 58715,
+    "sha256": "3abe3b2a91200d23368ca26a25540d80abbd69790873e4993b40d369589b6294"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1000",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01000.json",
+    "retrieved_utc": "2026-10-23T23:35:54Z",
+    "bytes": 58436,
+    "sha256": "fe7d32a996bee830db64b3d511824a9efcadc833a730a93d4d98b2a3e3687d99"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1100",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01100.json",
+    "retrieved_utc": "2026-10-23T23:35:55Z",
+    "bytes": 58675,
+    "sha256": "c853f511571e88b2b94af4a800148eaff6abe402a7e426d163563c2dd494d227"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1200",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01200.json",
+    "retrieved_utc": "2026-10-23T23:35:56Z",
+    "bytes": 59043,
+    "sha256": "c516f9efbd5fd7bc7092cdb6acd26d76005fab672eb651ca3c4e93e4d7d1d897"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1300",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01300.json",
+    "retrieved_utc": "2026-10-23T23:35:57Z",
+    "bytes": 59464,
+    "sha256": "50461684f2f9ab763d1b8475282bdf46f8922b66e3535f0a6f82eb904a3b9ac6"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1400",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01400.json",
+    "retrieved_utc": "2026-10-23T23:35:58Z",
+    "bytes": 58815,
+    "sha256": "63d7896f82046138f28749979bbaf8e71647eda672e8cae1b1c18de445e3a63d"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01500": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01500",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1500",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01500.json",
+    "retrieved_utc": "2026-10-23T23:35:59Z",
+    "bytes": 61140,
+    "sha256": "7485e5d821093376d71fdeb93a0226303ab74c021e8778b501326f7d13830ecb"
+  },
+  "sec_fts/2024-01-01_2024-12-31/automation/01600": {
+    "key": "sec_fts/2024-01-01_2024-12-31/automation/01600",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22automation%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=1600",
+    "dest": "sec/fts/2024/automation/2024-01-01_2024-12-31_01600.json",
+    "retrieved_utc": "2026-10-23T23:36:00Z",
+    "bytes": 5634,
+    "sha256": "aaafaf22c226fd1b7ff2384f77ae72011050aab739fa3f11f801dbe7119e429c"
+  },
   "sec_fts/2024-01-01_2024-12-31/chatgpt/00000": {
     "key": "sec_fts/2024-01-01_2024-12-31/chatgpt/00000",
     "url": "https://efts.sec.gov/LATEST/search-index?q=%22ChatGPT%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
@@ -2358,6 +2494,46 @@
     "retrieved_utc": "2026-10-23T01:45:52Z",
     "bytes": 7560,
     "sha256": "db0f6c7ad2863e75d039b6fc6c8f841bde3722c56c7c2a2051c9ef9895bd1ce0"
+  },
+  "sec_fts/2024-01-01_2024-12-31/robotics/00000": {
+    "key": "sec_fts/2024-01-01_2024-12-31/robotics/00000",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22robotics%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=0",
+    "dest": "sec/fts/2024/robotics/2024-01-01_2024-12-31_00000.json",
+    "retrieved_utc": "2026-10-23T23:36:01Z",
+    "bytes": 60662,
+    "sha256": "dd9f3e73674fb1292b71f3739d22ec4a8a2c1aff14f014718b5dd62282e13722"
+  },
+  "sec_fts/2024-01-01_2024-12-31/robotics/00100": {
+    "key": "sec_fts/2024-01-01_2024-12-31/robotics/00100",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22robotics%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=100",
+    "dest": "sec/fts/2024/robotics/2024-01-01_2024-12-31_00100.json",
+    "retrieved_utc": "2026-10-23T23:36:02Z",
+    "bytes": 58757,
+    "sha256": "0b9b9da45ffd0dfd973023e52ba004b973b321db21c5399f371ae121bf94adb3"
+  },
+  "sec_fts/2024-01-01_2024-12-31/robotics/00200": {
+    "key": "sec_fts/2024-01-01_2024-12-31/robotics/00200",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22robotics%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=200",
+    "dest": "sec/fts/2024/robotics/2024-01-01_2024-12-31_00200.json",
+    "retrieved_utc": "2026-10-23T23:36:03Z",
+    "bytes": 58394,
+    "sha256": "dac58be9da9d8d6d715e1b8376cc441933e69d1af22a605a1536dda7436ba2df"
+  },
+  "sec_fts/2024-01-01_2024-12-31/robotics/00300": {
+    "key": "sec_fts/2024-01-01_2024-12-31/robotics/00300",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22robotics%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=300",
+    "dest": "sec/fts/2024/robotics/2024-01-01_2024-12-31_00300.json",
+    "retrieved_utc": "2026-10-23T23:36:04Z",
+    "bytes": 58619,
+    "sha256": "8d5357559e7d7724489f8cc339b9404c2053184d5a509f3be7ff9aa0a7eda0d8"
+  },
+  "sec_fts/2024-01-01_2024-12-31/robotics/00400": {
+    "key": "sec_fts/2024-01-01_2024-12-31/robotics/00400",
+    "url": "https://efts.sec.gov/LATEST/search-index?q=%22robotics%22&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K%2C10-K405%2C10-KT&from=400",
+    "dest": "sec/fts/2024/robotics/2024-01-01_2024-12-31_00400.json",
+    "retrieved_utc": "2026-10-23T23:36:05Z",
+    "bytes": 17478,
+    "sha256": "9b34a8cf6cd4a6f4bca69b875757db24e2886e58e43a39129d483cd28600547c"
   },
   "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00000": {
     "key": "sec_fts/2025-01-01_2025-12-31/artificial_intelligence/00000",

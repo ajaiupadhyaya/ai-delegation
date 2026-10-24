@@ -1762,6 +1762,12 @@ primary result (§0.5).
 - URL: https://data.sec.gov/api/xbrl/frames/dei/EntityPublicFloat/USD/CY2024Q2I.json
 - Retrieved (UTC): 2026-10-23T15:27:45Z; bytes: 578973; SHA-256: `d5ef310add8635a1f18c0362fcf6c10c11e830cad9549e615c8a59c622996c75`
 
+### A-47. Addition (set): `sec_fts/` (2026-10-23)
+- Type: addition under D20 (pre-specified in §9.4; not a deviation)
+- Used by: R29, R30
+- Records: 22; retrieved (UTC) from 2026-10-23T23:35:45Z to 2026-10-23T23:36:05Z
+- Set digest: `8081d937c805cf51313b3cf4a6dc17e1a73ecc4e8f26575c491ef31be62ae2af`
+
 ### Clarifications (pre-result)
 
 ### C-1. Clarification: H1/H3 occupation cluster (2026-10-22)
