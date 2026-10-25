@@ -7,7 +7,12 @@ import requests
 
 from aideleg.acquire import fetch, http
 
-UA = "Ajai Upadhyaya research ajaiupad@gmail.com"
+UA = "Test Person research test@example.org"
+
+
+@pytest.fixture(autouse=True)
+def _contact(monkeypatch):
+    monkeypatch.setenv(http.CONTACT_ENV, UA)
 
 
 class FakeResponse:
@@ -116,6 +121,13 @@ def test_bls_and_sec_get_contact_user_agent():
     assert http.session_for("https://www.bls.gov/x").headers["User-Agent"] == UA
     assert http.session_for("https://data.sec.gov/x").headers["User-Agent"] == UA
     assert http.session_for("https://example.org/x").headers["User-Agent"] != UA
+
+
+def test_contact_user_agent_required(monkeypatch):
+    monkeypatch.delenv(http.CONTACT_ENV)
+    with pytest.raises(RuntimeError, match=http.CONTACT_ENV):
+        http.session_for("https://www.sec.gov/x")
+    assert "User-Agent" in http.session_for("https://example.org/x").headers
 
 
 def test_sec_session_throttles_to_ten_per_second(monkeypatch):

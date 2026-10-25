@@ -233,7 +233,7 @@ def test_robustness_section_no_counts():
 def test_cited_keys_skip_crossrefs_code_and_email():
     text = (
         "See [@fama2015five; @holm1979simple], @tbl-a, @fig-b and @sec-c.\n"
-        "Mail ajaiupad@gmail.com; `@notakey`.\n<!-- @hidden -->\nAs @newey1987simple:"
+        "Mail test@example.org; `@notakey`.\n<!-- @hidden -->\nAs @newey1987simple:"
         " and by @0.5 pp."
     )
     assert hygiene.cited_keys(text) == {"fama2015five", "holm1979simple", "newey1987simple"}

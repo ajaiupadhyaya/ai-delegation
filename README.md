@@ -367,7 +367,9 @@ All code is in the Python package `src/aideleg/`; `make` targets drive it.
    `pap-v1`) and run `uv sync --frozen`. A `git clone` is the preferred starting point: the
    protocol guards read git. They check that each confirmatory file is tracked and unmodified at
    HEAD, that it matches its pinned blob, and which commit recorded it.
-2. **Get the raw data.** Either run `make data`, which downloads every file and reports any
+2. **Get the raw data.** Either run `make data` (first set `AIDELEG_CONTACT` to your name and
+   email, e.g. `export AIDELEG_CONTACT="Jane Doe research <your email>"`: the SEC and BLS
+   require a contact User-Agent, which is sent only to them), which downloads every file and reports any
    whose SHA-256 differs from the MANIFEST, or restore the frozen raw archive (see Archive
    deposit) with
    `uv run python -m aideleg.acquire --from-dir DIR`, which copies each file from `DIR/<dest>`,
