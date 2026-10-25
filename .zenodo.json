@@ -1,9 +1,20 @@
 {
-  "title": "Delegating to the Machine: replication package",
+  "title": "Delegating to the Machine: replication package (code, pre-analysis plan, results and paper)",
   "upload_type": "software",
-  "creators": [{"name": "Upadhyaya, Ajai"}],
-  "description": "Code, pre-analysis plan, results and paper for Delegating to the Machine. The raw data are not in the git repository; the redistributable raw files are uploaded to this record as data-public, built by `uv run python -m aideleg.acquire --build-deposit OUT`. The French Data Library and AIOE files, whose sources state no licence, are deposited in a separate restricted record, available on request for replication. See README.md.",
+  "creators": [
+    {
+      "name": "Upadhyaya, Ajai"
+    }
+  ],
+  "description": "Code, pre-analysis plan (frozen as git tag pap-v1), results, robustness and red-team records, and the paper and brief for Delegating to the Machine: How People Hand Work to AI, and Whether Equity Markets Priced It. The raw data are not in this record: they are deposited as two separate Zenodo datasets (a public part, and a restricted part holding the Kenneth R. French Data Library and AIOE files, whose sources state no licence, available on request), built by `uv run python -m aideleg.acquire --build-deposit OUT`. Code is MIT-licensed; text, results and figures are CC BY 4.0 (LICENSE-text.md). See README.md.",
   "license": "MIT",
   "access_right": "open",
-  "keywords": ["Anthropic Economic Index", "task delegation", "pre-registration", "industry returns", "replication package"]
+  "keywords": [
+    "Anthropic Economic Index",
+    "task delegation",
+    "pre-registration",
+    "industry returns",
+    "replication package"
+  ],
+  "version": "1.0.0"
 }
