@@ -83,8 +83,9 @@ To restore the archive, unpack both records' raw parts into one directory `DIR` 
 DOIs:
 - Code, pre-analysis plan, results and paper (this repository, release v1.0.0):
   <https://doi.org/10.5281/zenodo.23631273> (all versions: <https://doi.org/10.5281/zenodo.23631272>).
-- Raw data, public part: added when the record is published.
-- Raw data, restricted part: added when the record is published.
+- Raw data, public part: <https://doi.org/10.5281/zenodo.23632464> (`public.zip`).
+- Raw data, restricted part (access on request): <https://doi.org/10.5281/zenodo.23632457>
+  (`restricted.zip`).
 
 ### Summary of Availability
 
