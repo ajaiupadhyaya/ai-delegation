@@ -204,7 +204,8 @@ decision (`rq3.h5.decision_text`, `rq3.h5b.decision_text`), the null H0: b = b̄
 least" each MDE (`power.power_pct`, `rq3.h5.mde`, `rq3.h5b.mde`) "pp per SD". It points to the
 market section for the verbatim wording. The exception is the abstract word cap only: P14
 elements are kept, and the P14 sentences appear verbatim (`rq3.h5.wording`, `rq3.h5b.wording`)
-in §7, the brief and the body (§1, §10).
+in §7, the brief and the body (§1, §10). Accepted at the Plan 4 stop, under the decisions Ajai
+delegated (PAP §11 C-84).
 Rows: `claim:00-abstract:1 C10`, `rq3.h5.decision_text C10`, `rq3.h5b.decision_text C10`,
 `rq3.h5b.decision_text C11`.
 

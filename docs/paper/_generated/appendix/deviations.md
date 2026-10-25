@@ -136,6 +136,7 @@ One row per entry of PAP §11, in document order: additions under D20 (`A-`), cl
 | C-81 | clarification | 2026-10-24 | RQ1 and H5 confirmatory results, all Plan 3 results, every Plan 4 row R1–R38, the D-3 diagnostics and the Task 16 red-team findings seen |
 | C-82 | clarification | 2026-10-24 | yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, the D-3 diagnostics and the Task 16 and Task 31 red-team findings |
 | C-83 | clarification | 2026-10-24 | yes: all confirmatory, Plan 3 and Plan 4 results and both red teams seen |
+| C-84 | clarification | 2026-10-25 | yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows and diagnostics, and both red-team rounds |
 | D-1 | deviation | 2026-10-23 | RQ1 and H5 confirmatory results seen; event-study, tercile, Fama–MacBeth, H6 talk/gap and H6 secondary results seen |
 | D-2 | deviation | 2026-10-23 | RQ1 and H5 confirmatory results, all Plan 3 results, and Plan 4 rows R1–R28 seen; R29/R30 run, uncommitted |
 | D-3 | deviation | 2026-10-24 | yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows, and the Task 16 red-team findings |
@@ -939,6 +940,12 @@ primary result (§0.5).
 - Fixed by: Plan 4 Task 34 review (plans committed at a7fb9bd; amended at 358c021)
 - Results seen: yes: all confirmatory, Plan 3 and Plan 4 results and both red teams seen
 - Rule: (1) C-81 says the new RQ1 unit label states the PAP's unit exactly; it corrects it: PAP §4.1's 'per log point' read literally is per 0.01 of the natural log, while the coefficients are per unit of the natural log (a hundred log points), which is what the generated tables now say. No estimate changes. (2) The C-entries cite 'plans committed at a7fb9bd'. The Plan 4 file was amended once more at 358c021 (Plan 3's final fix wave, after both confirmatory runs and before any Plan 4 robustness read); that amendment changed interfaces, test fixtures and guard notes only (hits_from_saved strict/saved_ranges, guard fixture bytes, the R9 placebo name, R4/R8 bootstrap-draw notes, zero_assigned_lines reuse) and no default, specification or row.
+
+### C-84. Clarification: Decisions Ajai delegated at the Plan 4 stop (2026-10-25)
+- Type: clarification (post-result); results had been seen; the PAP is silent or ambiguous here and no PAP rule or confirmatory code changes
+- Fixed by: No file other than this section changes for (1)-(3). Recorded at the Plan 4 stop after commit bf9e2a7.
+- Results seen: yes: RQ1 and H5 confirmatory results, all Plan 3 results, all Plan 4 robustness rows and diagnostics, and both red-team rounds
+- Rule: Ajai, in chat, 2026-10-24, delegating the open decisions: 'I believe in you to make the best possible decisions for these questions given the context of this project and my behavior'. The controller decided, and nothing here changes an estimate, a sample, a test or a decision: (1) W-24 is accepted: the abstract, capped at 200 words, states both market non-rejections in one sentence carrying every P14 element (the null b = b-bar, the interval and the MDE power clause) and points to section 7, while the brief and the body quote the P14 wording verbatim; (2) the practice of filing post-result changes that alter no estimate (labels, wording, tolerances, record corrections) as clarifications rather than deviations is ratified, with every such entry marked post-result and its results-seen field stated, and any change to an estimate, sample or inference still a deviation needing approval; (3) D-3's leave-out of the top 3 occupations by weight, one step beyond the H1 leave-outs Ajai listed, is ratified as part of D-3: it is labelled post-result and exploratory and changes no committed estimate.
 
 ### Deviations after the freeze
 

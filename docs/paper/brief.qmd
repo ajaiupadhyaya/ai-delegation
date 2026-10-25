@@ -15,3 +15,5 @@ format:
 {{< var meta.date >}}
 
 {{< include brief_body.qmd >}}
+
+*Prepared with Claude (Anthropic) under the author's direction; see the paper's Statements.*
