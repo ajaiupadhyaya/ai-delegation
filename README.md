@@ -80,6 +80,9 @@ The frozen raw archive is deposited at Zenodo in two records, built from `data/r
 To restore the archive, unpack both records' raw parts into one directory `DIR` and run
 `uv run python -m aideleg.acquire --from-dir DIR`.
 
+The paper is posted as an SSRN preprint (abstract ID 7667658):
+<https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7667658>.
+
 DOIs:
 - Code, pre-analysis plan, results and paper (this repository, release v1.0.0):
   <https://doi.org/10.5281/zenodo.23631273> (all versions: <https://doi.org/10.5281/zenodo.23631272>).
