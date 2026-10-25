@@ -6,6 +6,8 @@ authors:
   - family-names: Upadhyaya
     given-names: Ajai
 license: MIT
+doi: 10.5281/zenodo.23631272
+repository-code: "https://github.com/ajaiupadhyaya/ai-delegation"
 date-released: 2026-10-24
 keywords:
   - Anthropic Economic Index

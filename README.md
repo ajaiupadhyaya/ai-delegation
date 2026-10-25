@@ -78,8 +78,13 @@ The frozen raw archive is deposited at Zenodo in two records, built from `data/r
   whose pages state no licence (below). They are shared on request for replication only.
 
 To restore the archive, unpack both records' raw parts into one directory `DIR` and run
-`uv run python -m aideleg.acquire --from-dir DIR`. The DOIs are added here when the records are
-published.
+`uv run python -m aideleg.acquire --from-dir DIR`.
+
+DOIs:
+- Code, pre-analysis plan, results and paper (this repository, release v1.0.0):
+  <https://doi.org/10.5281/zenodo.23631273> (all versions: <https://doi.org/10.5281/zenodo.23631272>).
+- Raw data, public part: added when the record is published.
+- Raw data, restricted part: added when the record is published.
 
 ### Summary of Availability
 
